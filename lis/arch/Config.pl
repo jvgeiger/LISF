@@ -349,7 +349,7 @@ elsif($use_gribapi == 2) {
          $lib = "/lib/";
       }
       else {
-         $lib = "/lib64/";
+         $lib = "/lib/";
       }
       $inc_jasper=$sys_jasper_path.$inc;
       $lib_jasper=$sys_jasper_path.$lib;
@@ -688,7 +688,7 @@ elsif($sys_arch eq "linux_gfortran") {
    $cflags = "-c ".$sys_opt." -DGFORTRAN -DLINUX";
    $fflags77= "-c ".$sys_opt." ".$sys_par." ".$sys_endian." -DHIDE_SHR_MSG -DNO_SHR_VMATH -DGFORTRAN -DLINUX ".$sys_par_d." -I\$(MOD_ESMF)";
    $fflags ="-c -ffree-line-length-0 ".$sys_opt." ".$sys_par." ".$sys_endian." -DHIDE_SHR_MSG -DNO_SHR_VMATH -DGFORTRAN -DLINUX ".$sys_par_d." -I\$(MOD_ESMF)";
-   $ldflags= " -L\$(LIB_ESMF) -lesmf -lstdc++ -lz";
+   $ldflags= " -L\$(LIB_ESMF) -lesmf -lrt -lstdc++ -lz";
 }
 elsif($sys_arch eq "Darwin_gfortran") {
    $cflags = "-c ".$sys_opt." -DGFORTRAN";

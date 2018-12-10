@@ -106,6 +106,7 @@ subroutine read_AMSREsm(n, name)
 !EOP
   real               :: sb_rqc(NASA_AMSREsmobs%mo)
 
+#if 0
 #if (defined USE_HDF4)
   !declare the hdf-eos library functions 
   integer              :: gdopen,gdattach,gddefboxreg,gdrdfld
@@ -286,6 +287,7 @@ subroutine read_AMSREsm(n, name)
   if (ret <0)then
      write(LDT_logunit,*)"Failed to close file: ",file_id
   end if
+#endif
 #endif
   
 end subroutine read_AMSREsm
