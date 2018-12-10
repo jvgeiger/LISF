@@ -55,7 +55,8 @@ FILES     := $(subst $(space),:,$(strip $(FILES)))
 LIS_MAKEDEP_FLAGS ?= --verbose status
 DEPGEN := ./makedep.py
 DEPGEN_FLAGS := $(LIS_MAKEDEP_FLAGS)
-DEPGEN_FLAGS += --exclude-fmod-files esmf,netcdf,grib_api,hdf5,mpi
+#DEPGEN_FLAGS += --exclude-fmod-files esmf,netcdf,grib_api,hdf5,mpi
+DEPGEN_FLAGS += --exclude-fmod-files esmf,netcdf,grib_api,hdf5
 DEPGEN_FLAGS += --exclude-finc-files mpif.h,netcdf.inc,CXMLDEF.FOR,mkl_vml.f90
 
 include ./configure.lis

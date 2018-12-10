@@ -91,6 +91,10 @@ subroutine LIS_lsmrouting_plugin
    external jules50_getrunoffs_mm
 #endif
 
+#if ( defined SM_JULES_5_2 )
+   external jules52_getrunoffs_mm
+#endif
+
 #if ( defined ROUTE_HYMAP_ROUTER )
 #if ( defined SM_LSM_TEMPLATE )
    call registerlsmroutinggetrunoff(trim(LIS_templateLSMId)//"+"//&
@@ -151,6 +155,12 @@ subroutine LIS_lsmrouting_plugin
    call registerlsmroutinggetrunoff(trim(LIS_jules50Id)//"+"//&
                                     trim(LIS_HYMAProuterId)//char(0), &
                                     jules50_getrunoffs_mm)
+#endif
+
+#if ( defined SM_JULES_5_2 )
+   call registerlsmroutinggetrunoff(trim(LIS_jules52Id)//"+"//&
+                                    trim(LIS_HYMAProuterId)//char(0), &
+                                    jules52_getrunoffs_mm)
 #endif
 #endif
 
