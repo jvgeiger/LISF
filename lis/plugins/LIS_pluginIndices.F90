@@ -86,6 +86,7 @@ module LIS_pluginIndices
    character*50, public,  parameter :: LIS_geowrsi2Id  = "GeoWRSI.2"
    character*50, public,  parameter :: LIS_rdhm356lsmId = "RDHM.3.5.6"
    character*50, public,  parameter :: LIS_summa1Id     = "SUMMA.1.0"
+   character*50, public,  parameter :: LIS_summa2Id     = "SUMMA.2.0"
 
 !-------------------------------------------------------------------------
 ! Lake models

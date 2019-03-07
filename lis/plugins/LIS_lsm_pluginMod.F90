@@ -218,6 +218,10 @@ subroutine LIS_lsm_plugin
    use summa1_lsmMod,  only : summa1_lsm_ini
 #endif
 
+#if ( defined SM_SUMMA_2_0 )
+   use summa2_lsmMod,  only : summa2_lsm_ini
+#endif
+
 #if ( defined SM_LSM_TEMPLATE )
    external template_main
    external template_setup
@@ -464,6 +468,17 @@ subroutine LIS_lsm_plugin
    external summa1_writerst
    external summa1_finalize
 #endif
+
+#if ( defined SM_SUMMA_2_0 )
+   external summa2_setup
+   external summa2_main
+   external summa2_readrst
+   external summa2_dynsetup
+   external summa2_f2t
+   external summa2_writerst
+   external summa2_finalize
+#endif
+
 
 #if ( defined SM_LSM_TEMPLATE )
    call registerlsminit(trim(LIS_templateLSMId)//char(0),template_lsm_ini)
@@ -799,6 +814,18 @@ subroutine LIS_lsm_plugin
    call registerlsmfinalize(trim(LIS_summa1Id)//char(0),summa1_finalize)
    call registerlsmf2t(trim(LIS_summa1Id)//"+"//&
         trim(LIS_retroId)//char(0),summa1_f2t)
+#endif
+
+#if ( defined SM_SUMMA_2_0 )
+   call registerlsminit(trim(LIS_summa2Id)//char(0),summa2_lsm_ini)
+   call registerlsmsetup(trim(LIS_summa2Id)//char(0),summa2_setup)
+   call registerlsmrun(trim(LIS_summa2Id)//char(0),summa2_main)
+   call registerlsmrestart(trim(LIS_summa2Id)//char(0),summa2_readrst)
+   call registerlsmdynsetup(trim(LIS_summa2Id)//char(0),summa2_dynsetup)
+   call registerlsmwrst(trim(LIS_summa2Id)//char(0),summa2_writerst)
+   call registerlsmfinalize(trim(LIS_summa2Id)//char(0),summa2_finalize)
+   call registerlsmf2t(trim(LIS_summa2Id)//"+"//&
+        trim(LIS_retroId)//char(0),summa2_f2t)
 #endif
 
 end subroutine LIS_lsm_plugin
