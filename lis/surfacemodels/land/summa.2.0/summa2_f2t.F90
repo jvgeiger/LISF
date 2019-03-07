@@ -219,7 +219,7 @@ subroutine summa2_f2t(n)
 
       if ( (LIS_FORC_Wind_E%selectOpt.eq.1) .and. &
          (LIS_FORC_Wind_N%selectOpt.eq.1) ) then
-         if ( uwind(tid) == LIS_rc%udef .or. vwind(tid) == LIS_rc%udef ) then
+         if ( uwind(tid) /= LIS_rc%udef .and. vwind(tid) /= LIS_rc%udef ) then
             summa1_struc(n)%forcStruct%gru(wgid)%hru(wtid)%var(iLookFORCE%windspd)=sqrt(uwind(tid)**2+vwind(tid)**2)
          else
             summa1_struc(n)%forcStruct%gru(wgid)%hru(wtid)%var(iLookFORCE%windspd)=LIS_rc%udef
