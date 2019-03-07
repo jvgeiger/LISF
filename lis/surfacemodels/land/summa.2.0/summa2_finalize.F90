@@ -15,7 +15,7 @@
 subroutine summa2_finalize()
 ! !USES:
   use LIS_coreMod,  only : LIS_rc
-  use summa2_lsmMod, only : summa2_parent_struc, summa1_struc
+  use summa2_lsmMod, only : summa1_struc
 
 ! !ARGUMENTS: 
 
@@ -37,7 +37,6 @@ subroutine summa2_finalize()
   do n = 1, LIS_rc%nnest
      !deallocate(summa1_struc(n)%summa1)
   enddo
-  deallocate(summa2_parent_struc)
   deallocate(summa1_struc)
 
 end subroutine summa2_finalize

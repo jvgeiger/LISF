@@ -13,7 +13,7 @@ module summa2_lsmMod
    use nrtype
    use summa2_module
    use summa_type
-   use summa_util, only : stop_program
+   use summa_util, only : stop_program, handle_err
    use summa_init, only : summa_initialize
 !
 ! !DESCRIPTION:
@@ -74,18 +74,26 @@ subroutine summa2_lsm_ini()
    integer(i4b)        :: err=0                      ! error code
    character(len=1024) :: message=''                 ! error message
 
-   call summa2_readcrd()
    do n = 1, LIS_rc%nnest
       allocate(summa1_struc(n), stat=err)
       if (err/=0) then
          call stop_program(1, 'problem allocating master summa structure')
       endif
+   enddo
+
+   call summa2_readcrd()
+
+   do n = 1, LIS_rc%nnest
+      summa1_struc(n)%nGRU = LIS_rc%ngrid(n)
+      summa1_struc(n)%nHRU = LIS_rc%ngrid(n)
+
       call summa_initialize(summa1_struc(n), err, message)
+      call handle_err(err, message)
 
       !allocate(summa1_struc(n)%summa2(LIS_rc%npatch(n,LIS_rc%lsm_index)))
       summa1_struc(n)%numout = 0
 
-      !call LIS_update_timestep(LIS_rc, n, summa1_struc(n)%ts)
+      call LIS_update_timestep(LIS_rc, n, real(summa1_struc(n)%ts))
 
       LIS_sfmodel_struc(n)%nsm_layers = 1
       LIS_sfmodel_struc(n)%nst_layers = 1

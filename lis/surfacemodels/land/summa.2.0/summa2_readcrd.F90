@@ -53,8 +53,8 @@ subroutine summa2_readcrd()
    enddo
 
    write(LIS_logunit,*)'[INFO] Running SUMMA 2.0 LSM Option:'
-   !do n=1,LIS_rc%nnest
-   !   summa1_struc(n)%summa2open=0
-   !enddo
+   do n=1,LIS_rc%nnest
+      summa1_struc(n)%summa1open=0
+   enddo
 
 end subroutine summa2_readcrd
