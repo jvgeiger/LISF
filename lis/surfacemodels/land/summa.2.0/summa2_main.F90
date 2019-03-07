@@ -17,7 +17,7 @@ subroutine summa2_main(n)
    use nrtype,         only : i4b
    use summa2_lsmMod
    use summa_util,     only : handle_err
-   use summa_forcing,  only : summa_readForcing
+   !use summa_forcing,  only : summa_readForcing
    use summa_modelRun, only : summa_runPhysics
 
    implicit none
@@ -39,8 +39,8 @@ subroutine summa2_main(n)
    character(len=1024) :: message='' ! error message
 
    ! This will be replaced with f2t
-   call summa_readForcing(LIS_rc%tscount(n), summa1_struc(n), err, message)
-   call handle_err(err, message)
+   !call summa_readForcing(LIS_rc%tscount(n), summa1_struc(n), err, message)
+   !call handle_err(err, message)
 
    ! Use  LIS_rc%tscount(n) in place of modelTimeStep.
    ! modelTimeStep is an integer(i4b), 1 through end of run.
