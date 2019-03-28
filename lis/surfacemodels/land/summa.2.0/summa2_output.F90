@@ -67,6 +67,7 @@ subroutine summa2_output(n, summa1_struc)
    open(unit=666,file='jim'//sjim_count//'.bin',access='direct',&
       recl=LIS_rc%gnc(1)*LIS_rc%gnr(1)*4)
    call LIS_writevar_bin(666, n, datarray, 1)
+   close(666)
 !</debug -- jim testing>
    do iGRU=1,nGRU
       do iHRU=1,gru_struc(iGRU)%hruCount
