@@ -128,6 +128,21 @@ realclean:
 
 # Additional prerequisite rules not found by makedep.py.
 # NONE
+# KLUGE: do not merge
+mDecisions.o : module_sf_noahmplsm.o
+
+module_sf_noahlsm.o: module_sf_noahlsm.F
+	$(FC) -cpp $(FFLAGS) -O0 -autodouble -noerror_limit -FR -auto -fltconsistency $(HEADER_DIRS) $<
+module_sf_noahmplsm.o: module_sf_noahmplsm.F
+	$(FC) -cpp $(FFLAGS) -O0 -autodouble -noerror_limit -FR -auto -fltconsistency $(HEADER_DIRS) $<
+module_sf_noahutl.o: module_sf_noahutl.F
+	$(FC) -cpp $(FFLAGS) -O0 -autodouble -noerror_limit -FR -auto -fltconsistency $(HEADER_DIRS) $<
+module_sf_sfclay.o: module_sf_sfclay.F
+	$(FC) -cpp $(FFLAGS) -O0 -autodouble -noerror_limit -FR -auto -fltconsistency $(HEADER_DIRS) $<
+module_sf_myjsfc.o: module_sf_myjsfc.F
+	$(FC) -cpp $(FFLAGS) -O0 -autodouble -noerror_limit -FR -auto -fltconsistency $(HEADER_DIRS) $<
+module_model_constants.o: module_model_constants.F
+	$(FC) -cpp $(FFLAGS) -O0 -autodouble -noerror_limit -FR -auto -fltconsistency $(HEADER_DIRS) $<
 
 %.o: %.F
 	$(FC77) -cpp $(FFLAGS77) $(HEADER_DIRS) $<

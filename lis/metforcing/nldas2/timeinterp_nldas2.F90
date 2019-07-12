@@ -197,6 +197,20 @@ subroutine timeinterp_nldas2(n,findex)
      do m=1,mfactor
         t = m + (k-1)*mfactor
         index1 = LIS_domain(n)%tile(t)%index
+#if 1
+        ! KLUGE: do not merge
+        ! The NLDAS2 forcing data processed by NCAR for summa.exe
+        ! does not use zterp.  So perform linear temporal interpolation
+        ! to shortwave to be consistent.
+        ! This should either be removed or turned into a run-time
+        ! configuration option.
+        kk = LIS_get_iteration_index(n, k, index1, mfactor)
+        if((nldas2_struc(n)%metdata1(kk,3,index1).ne.LIS_rc%udef).and.&
+            (nldas2_struc(n)%metdata2(kk,3,index1).ne.LIS_rc%udef)) then
+           swd(t) =nldas2_struc(n)%metdata1(kk,3,index1)*wt1+ &
+                   nldas2_struc(n)%metdata2(kk,3,index1)*wt2
+         endif
+#else
         zdoy=LIS_rc%doy
         ! compute and apply zenith angle weights
         call zterp(1,LIS_domain(n)%grid(index1)%lat,&
@@ -219,6 +233,7 @@ subroutine timeinterp_nldas2(n,findex)
                       nldas2_struc(n)%metdata2(kk,3,index1)*swt2
           endif
         endif
+#endif
         
         if (swd(t).gt.LIS_CONST_SOLAR) then
           write(unit=LIS_logunit,fmt=*)'[WARN] sw radiation too high!!'

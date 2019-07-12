@@ -226,8 +226,10 @@ def find_module_file(desired_mod):
    for d in get_cli_search_dirs():
       f90s = os.path.join(d, '*.f90')
       F90s = os.path.join(d, '*.F90')
+      Fs = os.path.join(d, '*.F') # KLUGE: do not merge
       check_files  = glob.glob(f90s)
       check_files += glob.glob(F90s)
+      check_files += glob.glob(Fs) # KLUGE: do not merge
       for cf in check_files:
          if contains_module_definition(cf, desired_mod):
             return cf
@@ -543,6 +545,8 @@ for full_filename in files:
 
    try:
       suffix = suffix_check(base_filename)
+      if suffix == 'fortran77':
+         suffix = 'fortran90' # KLUGE: do not merge
    except Exception as e:
       print(e)
    else:
