@@ -46,8 +46,11 @@ subroutine summa2_main(n)
    ! modelTimeStep is an integer(i4b), 1 through end of run.
    ! It is used only to determine whether SUMMA is at the start of the run
    ! (modelTimeStep == 1).
-   call summa_runPhysics(LIS_rc%tscount(n), summa1_struc(n), err, message)
-   call handle_err(err, message)
+   ! ! run the summa physics for one time step
+   if ( summa1_struc(n)%nGRU > 0 ) then
+      call summa_runPhysics(LIS_rc%tscount(n), summa1_struc(n), err, message)
+      call handle_err(err, message)
+   endif
 
    ! TODO: write output
    call summa2_output(n, summa1_struc(n))

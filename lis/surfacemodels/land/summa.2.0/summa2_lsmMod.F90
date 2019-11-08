@@ -87,13 +87,33 @@ subroutine summa2_lsm_ini()
       summa1_struc(n)%nGRU = LIS_rc%ngrid(n)
       summa1_struc(n)%nHRU = LIS_rc%ngrid(n)
 
-      call summa_initialize(summa1_struc(n), err, message)
-      call handle_err(err, message)
+   do n = 1, LIS_rc%nnest
+      ! Does not work with sub-grid tiling
+      summa1_struc(n)%nGRU = LIS_rc%npatch(n,LIS_rc%lsm_index)
+      summa1_struc(n)%nHRU = LIS_rc%npatch(n,LIS_rc%lsm_index)
+
+!     write(*,*)'summa1_struc(n)%nGRU=',summa1_struc(n)%nGRU
+!     write(*,*)'summa1_struc(n)%nHRU=',summa1_struc(n)%nHRU
+
+      if ( summa1_struc(n)%nGRU > 0 ) then
+         call summa_initialize(summa1_struc(n), err, message)
+         call handle_err(err, message)
+      endif
 
       !allocate(summa1_struc(n)%summa2(LIS_rc%npatch(n,LIS_rc%lsm_index)))
       summa1_struc(n)%numout = 0
 
       call LIS_update_timestep(LIS_rc, n, real(summa1_struc(n)%ts))
+
+      call LIS_registerAlarm("summa2 model alarm",&
+                              real(summa1_struc(n)%ts), &
+                              real(summa1_struc(n)%ts))
+
+      !FIXME
+      call LIS_registerAlarm("summa2 restart alarm", &
+                              real(summa1_struc(n)%ts),&
+                              3600.0)
+                              !summa1_struc(n)%rstInterval)
 
       LIS_sfmodel_struc(n)%nsm_layers = 1
       LIS_sfmodel_struc(n)%nst_layers = 1

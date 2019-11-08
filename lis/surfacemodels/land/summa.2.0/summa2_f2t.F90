@@ -62,6 +62,7 @@ subroutine summa2_f2t(n)
    real(dp)                :: ref_seconds
 
 
+   if ( summa1_struc(n)%nGRU > 0 ) then
    if(LIS_FORC_Tair%selectOpt.eq.1) then
       call ESMF_StateGet(LIS_FORC_State(n),trim(LIS_FORC_Tair%varname(1)),&
          tmpField,rc=status)
@@ -236,11 +237,15 @@ subroutine summa2_f2t(n)
          summa1_struc(n)%forcStruct%gru(wgid)%hru(wtid)%var(iLookFORCE%pptrate)=0.0
       endif
 
+! Added on 10/17/2019   !!! Double check later for convective precipitation
+#if 0
+! KLUGE: temporarily disable convective rainfall
       if(LIS_FORC_CRainf%selectOpt.eq.1) then 
          if(cpcp(tid).ne.LIS_rc%udef) then 
             summa1_struc(n)%forcStruct%gru(wgid)%hru(wtid)%var(iLookFORCE%pptrate)=summa1_struc(n)%forcStruct%gru(wgid)%hru(wtid)%var(iLookFORCE%pptrate)+cpcp(tid)
          endif
       endif
+#endif
 
       if(LIS_FORC_Snowf%selectOpt.eq.1) then 
          if(snowf(tid).ne.LIS_rc%udef) then
@@ -256,5 +261,6 @@ subroutine summa2_f2t(n)
       yearLength = 366
    else 
       yearLength = 365
+   endif
    endif
 end subroutine summa2_f2t
