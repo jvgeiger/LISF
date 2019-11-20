@@ -122,6 +122,8 @@ subroutine read_nldas2a(n, kk, findex, order, month, name,ferror)
   inquire (file=name, exist=file_exists)
   if (file_exists) then      
 
+     if (LIS_masterproc) PRINT*,"->READING<- ", TRIM(name)
+
      call grib_open_file(ftn,trim(name),'r',iret)
      if(iret.ne.0) then 
         write(LIS_logunit,*) &
@@ -250,6 +252,7 @@ subroutine read_nldas2a(n, kk, findex, order, month, name,ferror)
               endif
            end do
         enddo
+        PRINT'(2i5,4f13.4)',kk,iv,maxval(nldas2_struc(n)%metdata1(kk,iv,:)),minval(nldas2_struc(n)%metdata1(kk,iv,:)), maxval(nldas2_struc(n)%metdata2(kk,iv,:)),minval(nldas2_struc(n)%metdata2(kk,iv,:))
      enddo
 
      deallocate(lb)

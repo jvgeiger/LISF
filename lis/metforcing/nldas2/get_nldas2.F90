@@ -25,6 +25,8 @@ subroutine get_nldas2(n,findex)
   use LIS_logMod,         only : LIS_logunit, LIS_endrun
   use nldas2_forcingMod,  only : nldas2_struc
 
+  USE LIS_perform_regridMod, ONLY : initialize_esmfRegrid, run_esmfRegrid
+
   implicit none
 ! !ARGUMENTS: 
   integer, intent(in) :: n
@@ -75,9 +77,21 @@ subroutine get_nldas2(n,findex)
   real    :: gmt1,gmt2,ts1,ts2
   integer :: movetime     ! 1=move time 2 data into time 1  
   integer :: kk           ! Forecast member index
+  logical, save :: firstTime = .TRUE.
 
 !=== End Variable Definition =============================================
   try=-999
+
+      !IF (.FALSE.) THEN
+      IF (.TRUE.) THEN
+        IF (firstTime) THEN
+           CALL initialize_esmfRegrid(n)
+           firstTime = .FALSE.
+        ENDIF
+
+        CALL run_esmfRegrid(n, findex)
+        RETURN
+      ENDIF
   
 !====Check to see if b-file needs to be opened
   readbfile = 0
