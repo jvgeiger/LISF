@@ -11,6 +11,8 @@
 ! \label{summa2_readcrd}
 !
 ! !REVISION HISTORY:
+!  June 2018: James Geiger; Initial implementation 
+! 8 Oct 2019: Zhuo Wang, modified 
 !
 ! !INTERFACE:    
 subroutine summa2_readcrd()
@@ -36,6 +38,8 @@ subroutine summa2_readcrd()
    character*10  :: time
    real    :: ts_tmp
 
+   write(LIS_logunit,*)"[INFO] Start reading LIS configuration file for SUMMA.2.0"
+
    call ESMF_ConfigFindLabel(LIS_config,"SUMMA.2.0 model timestep:",rc=rc)
    do n=1,LIS_rc%nnest
       call ESMF_ConfigGetAttribute(LIS_config,time,rc=rc)
@@ -57,4 +61,26 @@ subroutine summa2_readcrd()
       summa1_struc(n)%summa1open=0
    enddo
 
+   call ESMF_ConfigFindLabel(LIS_config, &
+        "SUMMA.2.0 restart output interval:", rc = rc)
+   do n=1,LIS_rc%nnest
+       call ESMF_ConfigGetAttribute(LIS_config, Time, rc = rc)
+       call LIS_verify(rc, &
+            "SUMMA.2.0 restart output interval: not defined")
+       call LIS_parseTimeString(time, summa1_struc(n)%rstInterval)
+   enddo
+!------------------------------------------------------------------------------------------
+   ! set default restart format to netcdf
+
+   call ESMF_ConfigFindLabel(LIS_config, "SUMMA.2.0 restart file format:", rc=rc)
+   do n=1,LIS_rc%nnest
+      call ESMF_ConfigGetAttribute(LIS_config, summa1_struc(n)%rformat, rc=rc)
+      call LIS_verify(rc, "SUMMA.2.0 restart file format: not defined")
+   enddo
+
+   call ESMF_ConfigFindLabel(LIS_config, "SUMMA.2.0 restart file:", rc=rc)
+   do n=1,LIS_rc%nnest
+      call ESMF_ConfigGetAttribute(LIS_config, summa1_struc(n)%rfile, rc=rc)
+      call LIS_verify(rc, "SUMMA.2.0 restart file: not defined")
+   enddo
 end subroutine summa2_readcrd

@@ -41,7 +41,9 @@ subroutine summa2_readrst()
    character(len=1024) :: message=''                 ! error message
 
    do n = 1, LIS_rc%nnest
-      call summa_readRestart(summa1_struc(n), err, message)
-      call handle_err(err, message)
+      if ( summa1_struc(n)%nGRU > 0 ) then
+         call summa_readRestart(summa1_struc(n), err, message)
+         call handle_err(err, message)
+      endif
    enddo
 end subroutine summa2_readrst

@@ -187,7 +187,6 @@ subroutine summa2_f2t(n)
 
    diffTime = currentTime - referenceTime
    call ESMF_TimeIntervalGet(diffTime, s=iref_seconds)
-   !call ESMF_TimeIntervalGet(diffTime, s_i8=iref_seconds)
    ref_seconds = iref_seconds
 
    do t=1,LIS_rc%npatch(n,LIS_rc%lsm_index)
@@ -237,7 +236,6 @@ subroutine summa2_f2t(n)
          summa1_struc(n)%forcStruct%gru(wgid)%hru(wtid)%var(iLookFORCE%pptrate)=0.0
       endif
 
-! Added on 10/17/2019   !!! Double check later for convective precipitation
 #if 0
 ! KLUGE: temporarily disable convective rainfall
       if(LIS_FORC_CRainf%selectOpt.eq.1) then 

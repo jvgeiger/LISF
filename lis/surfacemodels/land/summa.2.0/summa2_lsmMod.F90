@@ -7,6 +7,10 @@
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 !BOP
 !
+! !REVISION HISTORY:
+!  June 2018: James Geiger 
+! 10 Oct 2019: Zhuo Wang, added support for summa2
+
 ! !MODULE: summa2_lsmMod
 module summa2_lsmMod
 ! !USES:        
@@ -15,13 +19,19 @@ module summa2_lsmMod
    use summa_type
    use summa_util, only : stop_program, handle_err
    use summa_init, only : summa_initialize
+
+   use LIS_coreMod,     only : LIS_rc, LIS_config
 !
 ! !DESCRIPTION:
 !  Module for 1-D land model driver variable initialization
 !  
 ! \begin{description}
+! \item[ts]
+!   NoahMP401 model time step in second
 !  \item[count]
 !    variable to keep track of the number of timesteps before an output
+!! \item[rstInterval]
+!!   restart writing interval
 !  \item[numout]
 !    number of output times 
 !  \item[outInterval]
@@ -42,12 +52,15 @@ module summa2_lsmMod
 !-----------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !-----------------------------------------------------------------------------
-   public :: summa1_struc
+  public :: summa1_struc
 !EOP
 
-   type(summa1_type_dec), allocatable :: summa1_struc(:)
+   character*256      :: rfile
+   character*256      :: rformat
 
-   SAVE
+ type(summa1_type_dec), allocatable :: summa1_struc(:)
+
+!  SAVE
 
 contains
 
@@ -59,12 +72,12 @@ contains
 ! !INTERFACE:
 subroutine summa2_lsm_ini()
 ! !USES:
-   use LIS_surfaceModelDataMod, only : LIS_sfmodel_struc
    use LIS_coreMod,             only : LIS_rc
+   use LIS_logMod,              only : LIS_verify
    use LIS_timeMgrMod,          only : LIS_clock, LIS_calendar, &
                                        LIS_update_timestep, LIS_registerAlarm
-   use LIS_logMod,              only : LIS_verify
-   
+   use LIS_surfaceModelDataMod, only : LIS_sfmodel_struc
+
 ! !DESCRIPTION:        
 !
 !EOP
@@ -84,23 +97,15 @@ subroutine summa2_lsm_ini()
    call summa2_readcrd()
 
    do n = 1, LIS_rc%nnest
-      summa1_struc(n)%nGRU = LIS_rc%ngrid(n)
-      summa1_struc(n)%nHRU = LIS_rc%ngrid(n)
-
-   do n = 1, LIS_rc%nnest
-      ! Does not work with sub-grid tiling
       summa1_struc(n)%nGRU = LIS_rc%npatch(n,LIS_rc%lsm_index)
       summa1_struc(n)%nHRU = LIS_rc%npatch(n,LIS_rc%lsm_index)
 
-!     write(*,*)'summa1_struc(n)%nGRU=',summa1_struc(n)%nGRU
-!     write(*,*)'summa1_struc(n)%nHRU=',summa1_struc(n)%nHRU
-
       if ( summa1_struc(n)%nGRU > 0 ) then
+         
          call summa_initialize(summa1_struc(n), err, message)
          call handle_err(err, message)
-      endif
+      endif   !! "summa1_struc(n)%nGRU > 0" should be stopped here
 
-      !allocate(summa1_struc(n)%summa2(LIS_rc%npatch(n,LIS_rc%lsm_index)))
       summa1_struc(n)%numout = 0
 
       call LIS_update_timestep(LIS_rc, n, real(summa1_struc(n)%ts))
@@ -112,15 +117,15 @@ subroutine summa2_lsm_ini()
       !FIXME
       call LIS_registerAlarm("summa2 restart alarm", &
                               real(summa1_struc(n)%ts),&
-                              3600.0)
-                              !summa1_struc(n)%rstInterval)
+                              summa1_struc(n)%rstInterval)
 
       LIS_sfmodel_struc(n)%nsm_layers = 1
       LIS_sfmodel_struc(n)%nst_layers = 1
       allocate(LIS_sfmodel_struc(n)%lyrthk(1))
       LIS_sfmodel_struc(n)%lyrthk(1) = 1
       LIS_sfmodel_struc(n)%ts = summa1_struc(n)%ts
+
    enddo
-end subroutine summa2_lsm_ini
+ end subroutine summa2_lsm_ini
 end module summa2_lsmMod
 
