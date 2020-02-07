@@ -9,8 +9,11 @@ module LIS_create_gridMod
    private
    public  :: create_regular_grid
    
+!EOP
+!------------------------------------------------------------------------------
 contains
-
+!------------------------------------------------------------------------------
+!BOP
    function create_regular_grid(vm, grid_desc, grid_name, Nx, Ny, staggerloc) result(new_grid)
       type(ESMF_VM) :: vm
       integer, intent(in) :: Nx, Ny
@@ -49,6 +52,19 @@ contains
                                           indexflag      = ESMF_INDEX_GLOBAL, &
                                           regDecomp      = (/NX, NY /), &
                                           name           = TRIM(grid_name), rc=rc)
+
+!      new_grid = ESMF_GridCreate( name           = TRIM(grid_name),     &
+!                                  regDecomp      = (/NX, NY /),         &
+!                                  minIndex       = (/1,1/),             &
+!                                  maxIndex       = numGridPoints,       &
+!                                  indexflag      = ESMF_INDEX_GLOBAL,   &
+!                                  gridMemLBound  = (/1,1/),             &
+!                                  gridEdgeLWidth = (/0,0/),             &
+!                                  gridEdgeUWidth = (/0,0/),             &
+!                                  coordDep1      = (/1,2/),             &
+!                                  coordDep2      = (/1,2/),             &
+!                                  rc=rc)
+
       call LIS_verify(rc, 'ESMF_GridCreateNoPeriDim failed')
 
       staggerloc_ = ESMF_STAGGERLOC_CENTER
@@ -85,7 +101,63 @@ contains
       if (LIS_masterproc) print *, "Done creating the ESMF Grid: ", TRIM(grid_name)
 
    end function create_regular_grid
+!EOC
+!------------------------------------------------------------------------------
+!BOP
 
+   function create_irregular_grid(vm, grid_desc, grid_name, Nx, Ny, staggerloc) result(new_grid)
+      type(ESMF_VM) :: vm
+      integer, intent(in) :: Nx, Ny
+      character(len=*) :: grid_name
+      real,    intent(in) :: grid_desc(:)
+      type(ESMF_STAGGERLOC), optional :: staggerloc
+
+      type(ESMF_Grid)                 :: new_grid
+      integer                         :: i, j, i1, i2, j1, j2
+      integer                         :: numGridPoints(2), tlb(2), tub(2)
+      integer                         ::  rc, STATUS
+      real(ESMF_KIND_R8)              ::  dx, dy
+      real(ESMF_KIND_R8), pointer     :: coordX(:,:)
+      real(ESMF_KIND_R8), pointer     :: coordY(:,:)
+      type(ESMF_STAGGERLOC)           :: staggerloc_
+
+      real, parameter                 :: D2R = 4.0*ATAN(1.0) / 180.
+
+      integer                         :: minIndex(2)
+      integer, allocatable            :: IMS(:), JMS(:)
+      integer                         :: IM_WORLD, JM_WORLD
+
+!EOp
+!------------------------------------------------------------------------------
+!BOC
+      IM_WORLD = int(grid_desc( 2))   ! Along longitudes
+      JM_WORLD = int(grid_desc( 3))   ! Along latitudes
+
+      allocate( IMS(0:NX-1), stat=STATUS )
+      allocate( JMS(0:NY-1), stat=STATUS )
+
+     call decomposeDim ( IM_WORLD,ims, NX )
+     call decomposeDim ( JM_WORLD,jms, NY )
+
+      minIndex=(/1,1/)
+
+      new_grid = ESMF_GridCreate( name            = TRIM(grid_name),     &
+                                  minIndex        = minIndex,            &
+                                  countsPerDEDim1 = ims,                 &
+                                  countsPerDEDim2 = jms,                 &
+                                  indexflag       = ESMF_INDEX_GLOBAL,   &
+                                  gridMemLBound   = (/1,1/),             &
+                                  gridEdgeLWidth  = (/0,0/),             &
+                                  gridEdgeUWidth  = (/0,0/),             &
+                                  coordDep1       = (/1,2/),             &
+                                  coordDep2       = (/1,2/),             &
+                                  rc=rc)
+      call LIS_verify(rc, 'ESMF_GridCreate failed')
+
+   end function create_irregular_grid
+!EOC
+!------------------------------------------------------------------------------
+!BOP
       subroutine decomposeDim ( dim_world,dim,NDEs )
       implicit   none
       integer    dim_world, NDEs

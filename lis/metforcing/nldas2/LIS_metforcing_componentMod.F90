@@ -17,7 +17,7 @@
       ! ESMF Framework module
       use ESMF
       use LIS_coreMod,              only : LIS_rc, LIS_vm, LIS_masterproc, LIS_localPet
-      use LIS_logMod,               only : LIS_verify
+      use LIS_logMod,               only : LIS_verify, LIS_logunit
       use LIS_FORC_AttributesMod
       use nldas2_forcingMod,        only : nldas2_struc
       use LIS_field_bundleMod
@@ -255,6 +255,8 @@
            CALL get_nldas2_file_name(file_name, 'A')
 
            if (LIS_masterproc) print *, "ForcingFile: "//TRIM(file_name)
+
+           write(unit=LIS_logunit,fmt=*)'[INFO] ESMF-Regrid: getting file.. ',trim(file_name)
 
            ! Read the grib file and populate the bundle
            CALL read_nldas2a_grib_file(file_name, met_forcing_bundle(n), n, lbnd(n,:), ubnd(n,:))

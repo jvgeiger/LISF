@@ -186,12 +186,15 @@
              return
           endif
 
-          !IF ( LIS_masterproc) print*,"---<> Opened file: ", TRIM(file_name)
+          IF ( LIS_masterproc) print*,"---<> Opened file: ", TRIM(file_name)
 
           call grib_count_in_file(ftn,num_infile_vars,iret)
           call LIS_verify(iret, 'error in grib_count_in_file in read_nldas2_grib_file')
 
-          allocate(var1D(nldas2_struc(n)%ncold*nldas2_struc(n)%nrold))
+          allocate(var1D(nldas2_struc(n)%ncold*nldas2_struc(n)%nrold), stat=iret)
+          call LIS_verify(iret, 'Cannot allocate var1D')
+
+          IF ( LIS_masterproc) print*,"---<> Loop over the variables in the file "
 
           do k=1,num_infile_vars
              call grib_new_from_file(ftn, igrib, iret)
@@ -248,12 +251,18 @@
              ENDIF
    
              IF (var_name .NE. "") THEN
-                allocate(ptr2Dglob(nldas2_struc(n)%ncold, nldas2_struc(n)%nrold))
-                allocate(ptr2Dloc(tlb(1):tub(1), tlb(2):tub(2)))
+
+                !write(unit=LIS_logunit,fmt=*)'[INFO] dealing with .. ',trim(var_name)
+
+                allocate(ptr2Dglob(nldas2_struc(n)%ncold, nldas2_struc(n)%nrold), stat=iret)
+                call LIS_verify(iret, 'Cannot allocate ptr2Dglob for '//TRIM(var_name))
+                allocate(ptr2Dloc(tlb(1):tub(1), tlb(2):tub(2)), stat=iret)
+                call LIS_verify(iret, 'Cannot allocate ptr2Dloc for '//TRIM(var_name))
                 ptr2Dglob = reshape(var1D, (/ nldas2_struc(n)%ncold, nldas2_struc(n)%nrold /) )
                 ptr2Dloc(:,:) = ptr2Dglob(tlb(1):tub(1), tlb(2):tub(2))
-                !IF ( LIS_masterproc)  print*,"FORCING-"//TRIM(var_name)//": ",minval(ptr2Dloc),maxval(ptr2Dloc)
+                IF ( LIS_masterproc)  print*,"FORCING-"//TRIM(var_name)//": ",minval(ptr2Dloc),maxval(ptr2Dloc)
                 call updateTracerToBundle(field_bundle, ptr2Dloc, TRIM(var_name))
+                DEALLOCATE(ptr2Dglob, ptr2Dloc)
              ENDIF
           enddo
 
