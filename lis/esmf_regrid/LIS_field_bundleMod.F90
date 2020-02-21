@@ -19,7 +19,7 @@
       private
       public  :: addTracerToBundle
       public  :: updateTracerToBundle
-      public  :: getTracerFromBundle
+      public  :: getPointerFromBundle
       public  :: ESMF_recordBundle
       public  :: copy_esmfBundle
 
@@ -39,15 +39,15 @@
          module procedure updateTracerToBundle_ByName2D_r8
       end interface
 
-      interface getTracerFromBundle
-         module procedure getTracerFromBundle_ByIndex3D_r4
-         module procedure getTracerFromBundle_ByIndex3D_r8
-         module procedure getTracerFromBundle_ByName3D_r4
-         module procedure getTracerFromBundle_ByName3D_r8
-         module procedure getTracerFromBundle_ByIndex2D_r4
-         module procedure getTracerFromBundle_ByIndex2D_r8
-         module procedure getTracerFromBundle_ByName2D_r4
-         module procedure getTracerFromBundle_ByName2D_r8
+      interface getPointerFromBundle
+         module procedure getPointerFromBundle_ByIndex3D_r4
+         module procedure getPointerFromBundle_ByIndex3D_r8
+         module procedure getPointerFromBundle_ByName3D_r4
+         module procedure getPointerFromBundle_ByName3D_r8
+         module procedure getPointerFromBundle_ByIndex2D_r4
+         module procedure getPointerFromBundle_ByIndex2D_r8
+         module procedure getPointerFromBundle_ByName2D_r4
+         module procedure getPointerFromBundle_ByName2D_r8
       end interface
 
       type ESMF_recordBundle
@@ -375,7 +375,7 @@
 !
 ! !INTERFACE:
 !
-      subroutine getTracerFromBundle_ByName3D_r8(bundle, PTR, fieldName)
+      subroutine getPointerFromBundle_ByName3D_r8(bundle, PTR, fieldName)
 !
 ! !INPUT PARAMETERS:
       character(len=*), intent(in) :: fieldName
@@ -393,7 +393,7 @@
       integer :: rc, status
       type(ESMF_FIELD)           :: field
       type(ESMF_ARRAY)           :: array
-      character(len=MAXSTR) :: IAm='getTracerFromBundle_ByName3D_r8'
+      character(len=MAXSTR) :: IAm='getPointerFromBundle_ByName3D_r8'
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -409,14 +409,14 @@
 
       return
 
-      end subroutine getTracerFromBundle_ByName3D_r8
+      end subroutine getPointerFromBundle_ByName3D_r8
 !EOC
 !------------------------------------------------------------------------------
 !BOP
 !
 ! !INTERFACE:
 !
-      subroutine getTracerFromBundle_ByName3D_r4(bundle, PTR, fieldName)
+      subroutine getPointerFromBundle_ByName3D_r4(bundle, PTR, fieldName)
 !
 ! !INPUT PARAMETERS:
       character(len=*), intent(in) :: fieldName
@@ -434,7 +434,7 @@
       integer :: rc, status
       type(ESMF_FIELD)           :: field
       type(ESMF_ARRAY)           :: array
-      character(len=MAXSTR) :: IAm='getTracerFromBundle_ByName3D_r4'
+      character(len=MAXSTR) :: IAm='getPointerFromBundle_ByName3D_r4'
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -450,14 +450,14 @@
 
       return
 
-      end subroutine getTracerFromBundle_ByName3D_r4
+      end subroutine getPointerFromBundle_ByName3D_r4
 !!EOC
 !------------------------------------------------------------------------------
 !BOP
 !
 ! !INTERFACE:
 !
-      subroutine getTracerFromBundle_ByIndex3D_r8(bundle, PTR, index)
+      subroutine getPointerFromBundle_ByIndex3D_r8(bundle, PTR, index)
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: index
@@ -475,7 +475,7 @@
       integer :: rc, status
       type(ESMF_FIELD)           :: field
       type(ESMF_ARRAY)           :: array
-      character(len=MAXSTR) :: IAm='getTracerFromBundle_ByIndex3D_r8'
+      character(len=MAXSTR) :: IAm='getPointerFromBundle_ByIndex3D_r8'
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -491,14 +491,14 @@
 
       return
 
-      end subroutine getTracerFromBundle_ByIndex3D_r8
+      end subroutine getPointerFromBundle_ByIndex3D_r8
 !EOC
 !------------------------------------------------------------------------------
 !BOP
 !
 ! !INTERFACE:
 !
-      subroutine getTracerFromBundle_ByIndex3D_r4(bundle, PTR, index)
+      subroutine getPointerFromBundle_ByIndex3D_r4(bundle, PTR, index)
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: index
@@ -516,7 +516,7 @@
       integer :: rc, status
       type(ESMF_FIELD)           :: field
       type(ESMF_ARRAY)           :: array
-      character(len=MAXSTR) :: IAm='getTracerFromBundle_ByIndex3D_r4'
+      character(len=MAXSTR) :: IAm='getPointerFromBundle_ByIndex3D_r4'
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -532,7 +532,7 @@
 
       return
 
-      end subroutine getTracerFromBundle_ByIndex3D_r4
+      end subroutine getPointerFromBundle_ByIndex3D_r4
 !EOC
 !------------------------------------------------------------------------------
 !BOP
@@ -769,7 +769,7 @@
 !
 ! !INTERFACE:
 !
-      subroutine getTracerFromBundle_ByName2D_r8(bundle, PTR, fieldName)
+      subroutine getPointerFromBundle_ByName2D_r8(bundle, PTR, fieldName)
 !
 ! !INPUT PARAMETERS:
       character(len=*), intent(in) :: fieldName
@@ -787,7 +787,7 @@
       integer :: rc, status
       type(ESMF_FIELD)           :: field
       type(ESMF_ARRAY)           :: array
-      character(len=MAXSTR) :: IAm='getTracerFromBundle_ByName2D_r8'
+      character(len=MAXSTR) :: IAm='getPointerFromBundle_ByName2D_r8'
 !
 !EOP
 !---------------------------------------------------------------------------
@@ -803,14 +803,14 @@
 
       return
 
-      end subroutine getTracerFromBundle_ByName2D_r8
+      end subroutine getPointerFromBundle_ByName2D_r8
 !EOC
 !------------------------------------------------------------------------------
 !BOP
 !
 ! !INTERFACE:
 !
-      subroutine getTracerFromBundle_ByName2D_r4(bundle, PTR, fieldName)
+      subroutine getPointerFromBundle_ByName2D_r4(bundle, PTR, fieldName)
 !
 ! !INPUT PARAMETERS:
       character(len=*), intent(in) :: fieldName
@@ -828,7 +828,7 @@
       integer :: rc, status
       type(ESMF_FIELD)           :: field
       type(ESMF_ARRAY)           :: array
-      character(len=MAXSTR) :: IAm='getTracerFromBundle_ByName2D_r4'
+      character(len=MAXSTR) :: IAm='getPointerFromBundle_ByName2D_r4'
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -844,14 +844,14 @@
 
       return
 
-      end subroutine getTracerFromBundle_ByName2D_r4
+      end subroutine getPointerFromBundle_ByName2D_r4
 !!EOC
 !------------------------------------------------------------------------------
 !BOP
 !
 ! !INTERFACE:
 !
-      subroutine getTracerFromBundle_ByIndex2D_r8(bundle, PTR, index)
+      subroutine getPointerFromBundle_ByIndex2D_r8(bundle, PTR, index)
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: index
@@ -869,7 +869,7 @@
       integer :: rc, status
       type(ESMF_FIELD)           :: field
       type(ESMF_ARRAY)           :: array
-      character(len=MAXSTR) :: IAm='getTracerFromBundle_ByIndex2D_r8'
+      character(len=MAXSTR) :: IAm='getPointerFromBundle_ByIndex2D_r8'
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -885,14 +885,14 @@
 
       return
 
-      end subroutine getTracerFromBundle_ByIndex2D_r8
+      end subroutine getPointerFromBundle_ByIndex2D_r8
 !EOC
 !------------------------------------------------------------------------------
 !BOP
 !
 ! !INTERFACE:
 !
-      subroutine getTracerFromBundle_ByIndex2D_r4(bundle, PTR, index)
+      subroutine getPointerFromBundle_ByIndex2D_r4(bundle, PTR, index)
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: index
@@ -910,7 +910,7 @@
       integer :: rc, status
       type(ESMF_FIELD)           :: field
       type(ESMF_ARRAY)           :: array
-      character(len=MAXSTR) :: IAm='getTracerFromBundle_ByIndex2D_r4'
+      character(len=MAXSTR) :: IAm='getPointerFromBundle_ByIndex2D_r4'
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -926,7 +926,7 @@
 
       return
 
-      end subroutine getTracerFromBundle_ByIndex2D_r4
+      end subroutine getPointerFromBundle_ByIndex2D_r4
 !EOC
 !------------------------------------------------------------------------------
 

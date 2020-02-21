@@ -66,6 +66,8 @@ module nldas2_forcingMod
 ! 14 Mar 2014: David Mocko: Added CAPE and PET forcing from NLDAS-2
 ! 
 ! !USES: 
+      use ESMF
+
   implicit none
 
   PRIVATE
@@ -78,7 +80,10 @@ module nldas2_forcingMod
 ! !PUBLIC TYPES:
 !-----------------------------------------------------------------------------
   public :: nldas2_struc
+  public :: num_nldas2_fields
+  public :: list_nldas2_fields
 !EOP
+
 
   type, public ::  nldas2_type_dec 
      real          :: ts
@@ -117,9 +122,22 @@ module nldas2_forcingMod
      real, allocatable :: metdata1(:,:,:) 
      real, allocatable :: metdata2(:,:,:) 
 
+     ! For ESMF regridding
+     type(ESMF_FieldBundle)       :: forcing_bundle
+     type(ESMF_RouteHandle)       :: routehandle
+     type(ESMF_DynamicMask)       :: dynamicMask
+     type(ESMF_TypeKind_Flag)     :: type_kind = ESMF_TYPEKIND_R4
+     type(ESMF_STAGGERLOC)        :: staggerloc
+     type(ESMF_RegridMethod_Flag) :: regridMethod
+     real                         :: undefined_value ! for missing value
+     
   end type nldas2_type_dec
 
+  integer            :: num_nldas2_fields       ! number of available fields
+  character(len=100) :: list_nldas2_fields(30)  ! list of name of fields
+
   type(nldas2_type_dec), allocatable :: nldas2_struc(:)
+  character(len=30), parameter :: nldas2_bundle_bname = "nldas2_bundle_"
 !EOP
 contains
   
@@ -131,12 +149,17 @@ contains
 ! !INTERFACE:
   subroutine init_NLDAS2(findex)
 ! !USES: 
-    use LIS_coreMod,    only : LIS_rc, LIS_domain
+    use LIS_coreMod,    only : LIS_rc, LIS_domain, LIS_vm, LIS_masterproc
     use LIS_timeMgrMod, only : LIS_update_timestep
-    use LIS_logMod,     only : LIS_logunit,LIS_endrun
+    use LIS_logMod,     only : LIS_logunit,LIS_endrun, LIS_verify
     use LIS_spatialDownscalingMod, only : LIS_init_pcpclimo_native
     use map_utils,      only : proj_latlon
     use LIS_forecastMod
+
+      use LIS_FORC_AttributesMod
+      use LIS_field_bundleMod
+      use LIS_create_gridMod,       only : create_regular_grid
+      use LIS_ESMF_Regrid_Utils,    only : createESMF_RouteHandle
 
     implicit none
 
@@ -162,7 +185,17 @@ contains
 !  \end{description}
 !EOP
     
-    integer :: n
+    integer          :: n
+    integer          :: ic, rc
+    type(ESMF_Grid)  :: model_grid, nldas2_grid
+    type(ESMF_FIELD) :: model_field, nldas2_field
+    real             :: dummy_array(1,1) = 0.0
+    character(len=2) :: num_st
+    real             :: forcing_gridDesc(10)
+    real             :: model_gridDesc(10)
+
+    character(len=100)         :: name_tracer
+    integer                    :: fieldcount
     
     allocate(nldas2_struc(LIS_rc%nnest))
     call readcrd_nldas2()
@@ -178,7 +211,59 @@ contains
     nldas2_struc(:)%ncold = 464
     nldas2_struc(:)%nrold = 224
 
+    !----------------------------------------------------------------
+    ! Determine the number of available fields that will be regridded
+    !----------------------------------------------------------------
+    ic = 0
+    if (LIS_FORC_Tair%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_Tair%varname(1))
+     endif
+    if (LIS_FORC_Qair%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_Qair%varname(1))
+     endif
+    if (LIS_FORC_LWdown%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_LWdown%varname(1))
+     endif
+    if (LIS_FORC_SWdown%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_SWdown%varname(1))
+     endif
+    if (LIS_FORC_Wind_E%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_Wind_E%varname(1))
+     endif
+    if (LIS_FORC_Wind_N%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_Wind_N%varname(1))
+     endif
+    if (LIS_FORC_Psurf%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_Psurf%varname(1))
+     endif
+    if (LIS_FORC_Rainf%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_Rainf%varname(1))
+     endif
+    if (LIS_FORC_CRainf%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_CRainf%varname(1))
+     endif
+    if (LIS_FORC_PET%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_PET%varname(1))
+     endif
+    if (LIS_FORC_CAPE%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_nldas2_fields(ic) = TRIM(LIS_FORC_CAPE%varname(1))
+     endif
+   
+     num_nldas2_fields = ic
+
     do n=1,LIS_rc%nnest
+
 
        ! Forecast mode:
        if(LIS_rc%forecastMode.eq.1) then
@@ -331,7 +416,120 @@ contains
                nint(nldas2_struc(n)%gridDesc(3)))
           
        endif
+
+       ! Initialize ESMF objects
+       !------------------------
+       IF (LIS_rc%do_esmfRegridding) THEN
+          ! Create the bundles
+          write(num_st, '(i2.2)') n
+
+          !nldas2_struc(n)%type_kind       = ESMF_TYPEKIND_R4
+          nldas2_struc(n)%undefined_value = 9999.0
+
+          nldas2_struc(n)%regridMethod = ESMF_REGRIDMETHOD_BILINEAR ! ESMF_REGRIDMETHOD_NEAREST_STOD
+          nldas2_struc(n)%staggerloc = ESMF_STAGGERLOC_CENTER
+          LIS_domain(n)%staggerloc   = ESMF_STAGGERLOC_CENTER
+
+          ! ---> Bundle for nldas2
+          nldas2_struc(n)%forcing_bundle = ESMF_FieldBundleCreate(name = nldas2_bundle_bname//num_st, rc=rc)
+          call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for nldas2 Forcing Data')
+
+          ! ---> Bundle for the model
+          LIS_domain(n)%nldas2_bundle = ESMF_FieldBundleCreate(name = nldas2_bundle_bname//num_st, rc=rc)
+          call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for model Data')
+
+          ! Create the grid
+          ! ---> ESMF grid for nldas2
+          forcing_gridDesc(2) = nldas2_struc(n)%gridDesc(2) ! num points along x
+          forcing_gridDesc(3) = nldas2_struc(n)%gridDesc(3) ! num points along y
+          forcing_gridDesc(4) = nldas2_struc(n)%gridDesc(4) ! lower lat
+          forcing_gridDesc(5) = nldas2_struc(n)%gridDesc(5) ! lower lon
+          forcing_gridDesc(7) = nldas2_struc(n)%gridDesc(7) ! upper lat
+          forcing_gridDesc(8) = nldas2_struc(n)%gridDesc(8) ! upper lon
+          forcing_gridDesc(9) = nldas2_struc(n)%gridDesc(9) ! x-grid size
+          forcing_gridDesc(10)= nldas2_struc(n)%gridDesc(10) ! y-grid size
+
+          nldas2_grid =  create_regular_grid(LIS_vm, forcing_gridDesc, "nldas2 Grid", &
+                                      LIS_rc%npesx, LIS_rc%npesy, staggerloc = nldas2_struc(n)%staggerloc)
+          call LIS_verify(rc, '<--KNJR--> Done creating nldas2 grid')
+
+          ! ---> ESMF grid for nldas2
+          model_gridDesc(2) = LIS_rc%gnc(n)         ! LIS_rc%gridDesc(n,2) ! Global num points along x
+          model_gridDesc(3) = LIS_rc%gnr(n)         ! LIS_rc%gridDesc(n,3) ! Global num points along y
+          model_gridDesc(4) = LIS_rc%gridDesc(n,34) ! lower lat
+          model_gridDesc(5) = LIS_rc%gridDesc(n,35) ! lower lon
+          model_gridDesc(7) = LIS_rc%gridDesc(n,37) ! 7) ! upper lat
+          model_gridDesc(8) = LIS_rc%gridDesc(n,38) ! 8) ! upper lon
+          model_gridDesc(9) = LIS_rc%gridDesc(n,39) ! x-grid size
+          model_gridDesc(10)= LIS_rc%gridDesc(n,40) ! y-grid size
+
+          model_grid =  create_regular_grid(LIS_vm, model_gridDesc, "model Grid", &
+                                      LIS_rc%npesx, LIS_rc%npesy, staggerloc = LIS_domain(n)%staggerloc)
+          call LIS_verify(rc, '<--KNJR--> Done creating model grid')
+          
+          ! Add fields to the bundle
+          DO ic = 1, num_nldas2_fields
+             if (LIS_masterproc) PRINT*,"****Adding: ", ic, TRIM(list_nldas2_fields(ic))
+             call addTracerToBundle(nldas2_struc(n)%forcing_bundle, nldas2_grid, &
+                       TRIM(list_nldas2_fields(ic)), nldas2_struc(n)%type_kind, dummy_array)
+
+             call addTracerToBundle(LIS_domain(n)%nldas2_bundle, model_grid, &
+                       TRIM(list_nldas2_fields(ic)), nldas2_struc(n)%type_kind, dummy_array)
+          ENDDO
+
+             if (LIS_masterproc) PRINT*,"****Get nldas2 field for: ", TRIM(list_nldas2_fields(1))
+          call ESMF_FieldBundleGet(nldas2_struc(n)%forcing_bundle, fieldIndex = 1, &
+                                  field = nldas2_field, rc=rc)
+          call LIS_verify(rc, 'ESMF_FieldBundleGet failed for nldas2 field')
+
+             if (LIS_masterproc) PRINT*,"****Get model field for: ", TRIM(list_nldas2_fields(1))
+          call ESMF_FieldBundleGet(LIS_domain(n)%nldas2_bundle, fieldIndex = 1, &
+                                  field = model_field, rc=rc)
+          call LIS_verify(rc, 'ESMF_FieldBundleGet failed for model field')
+
+             if (LIS_masterproc) PRINT*,"****Create routehandle: "
+          call createESMF_RouteHandle(nldas2_field, model_field,  nldas2_struc(n)%regridMethod, &
+                                     nldas2_struc(n)%undefined_value, nldas2_struc(n)%routehandle, &
+                                     nldas2_struc(n)%dynamicMask, rc)
+          call LIS_verify(rc, 'createESMF_RouteHandle failed')
+       ENDIF
     enddo
 
+!       IF (LIS_rc%do_esmfRegridding) THEN
+!          do n = 1, LIS_rc%nnest
+!             if (LIS_masterproc) then
+!                call ESMF_FieldBundleGet(nldas2_struc(n)%forcing_bundle, fieldCount=fieldcount, rc=rc)
+!                call LIS_verify(rc, 'ESMF_FieldBundleGet failed for forcing bundle')
+!                print *, "---> Number of fields in nldas2 data Bundle =", fieldcount
+!
+!                DO ic = 1, fieldcount
+!                   call ESMF_FieldBundleGet(nldas2_struc(n)%forcing_bundle, &
+!                                            fieldIndex = ic, &
+!                                            field      = nldas2_field, rc=rc)
+!                   call LIS_verify(rc, 'ESMF_FieldBundleGet failed for forcing bundle')
+!
+!                   call ESMF_FieldGet(nldas2_field, name = name_tracer, rc=rc)
+!                   call LIS_verify(rc, 'ESMF_FieldGet failed to get the tracer name')
+!                   print *, "    *",ic,TRIM(name_tracer)
+!                ENDDO
+!
+!                call ESMF_FieldBundleGet(LIS_domain(n)%nldas2_bundle, fieldCount=fieldcount, rc=rc)
+!                call LIS_verify(rc, 'ESMF_FieldBundleGet failed for forcing bundle')
+!                print*
+!                print *, "---> Number of fields in model data Bundle =", fieldcount
+!
+!                DO ic = 1, fieldcount
+!                   call ESMF_FieldBundleGet(LIS_domain(n)%nldas2_bundle, &
+!                                            fieldIndex = ic, &
+!                                            field      = model_field, rc=rc)
+!                   call LIS_verify(rc, 'ESMF_FieldBundleGet failed for forcing bundle')
+!
+!                   call ESMF_FieldGet(model_field, name = name_tracer, rc=rc)
+!                   call LIS_verify(rc, 'ESMF_FieldGet failed to get the tracer name')
+!                   print *, "    *",ic,TRIM(name_tracer)
+!                ENDDO
+!             endif
+!          enddo
+!       ENDIF
   end subroutine init_NLDAS2
 end module nldas2_forcingMod

@@ -172,6 +172,9 @@ module LIS_coreMod
      real                       :: stlat, stlon, truelat1
      real                       :: truelat2, truelon, orient
      real                       :: dx,dy,nlatcircles
+
+     type(ESMF_FieldBundle)     :: nldas2_bundle
+     type(ESMF_STAGGERLOC)      :: staggerloc 
   end type lis_domain_type
 
   type, public :: lis_domain_sf_type
@@ -340,6 +343,9 @@ contains
     !endif
 
     LIS_rc%endtime = 0
+
+    ! Do we do ESMF regridding?
+    LIS_rc%do_esmfRegridding = .TRUE.
 
     if ( present(nx) .and. present(ny) ) then
        LIS_rc%npesx = nx

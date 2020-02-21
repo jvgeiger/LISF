@@ -617,6 +617,7 @@ module LIS_PRIV_rcMod
   type lisrcdec
      character*50           :: runmode 
      integer                :: nnest 
+     logical                :: do_esmfRegridding
     
      integer                :: max_model_types 
      integer                :: nsf_model_types

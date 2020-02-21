@@ -25,7 +25,6 @@
          module procedure runESMF_RegriddingBundle
       end interface
 
-      REAL, PARAMETER :: UNDEF_VALUE = 9999.000 !1.0e15
       character(len=ESMF_MAXSTR), parameter :: Iam = 'ESMF Regridding Utility:'
 !EOP
 !-------------------------------------------------------------------------
@@ -110,9 +109,10 @@
 !EOC
 !-------------------------------------------------------------------------
 !BOP    
-    subroutine createESMF_RouteHandleField(srcField, dstField, regridMethod, routehandle, &
-                                           dynamicMask, rc)
+    subroutine createESMF_RouteHandleField(srcField, dstField, regridMethod, undefined_value, &
+                                           routehandle, dynamicMask, rc)
 
+      REAL,                         intent(in)    :: undefined_value 
       type(ESMF_RegridMethod_Flag), intent(in)    :: regridMethod
       type(ESMF_Field),             intent(inOut) :: srcField
       type(ESMF_Field),             intent(inOut) :: dstField
@@ -143,7 +143,7 @@
 
       call ESMF_DynamicMaskSetR4R8R4(dynamicMask, &
                                      simpleDynMaskProc, &
-                                     dynamicSrcMaskValue=UNDEF_VALUE, rc=rc)
+                                     dynamicSrcMaskValue=undefined_value, rc=rc)
 
     end subroutine createESMF_RouteHandleField
 !EOC
