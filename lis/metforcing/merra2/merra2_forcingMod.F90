@@ -56,6 +56,8 @@ module merra2_forcingMod
 !  \end{description}
 !
 ! !USES:
+      USE ESMF
+
   implicit none
 
   PRIVATE
@@ -68,6 +70,8 @@ module merra2_forcingMod
 ! !PUBLIC TYPES:
 !-----------------------------------------------------------------------------
   public :: merra2_struc
+  public :: num_merra2_fields
+  public :: list_merra2_fields
 
 !EOP
   type, public ::  merra2_type_dec
@@ -122,9 +126,23 @@ module merra2_forcingMod
      real, allocatable       :: merraxrange(:,:,:,:)
      real, allocatable       :: merracdf(:,:,:,:)
      integer, allocatable    :: rseed(:,:)
+
+     ! For ESMF regridding
+     type(ESMF_FieldBundle)       :: forcing_bundle
+     type(ESMF_RouteHandle)       :: routehandle
+     type(ESMF_DynamicMask)       :: dynamicMask
+     type(ESMF_TypeKind_Flag)     :: type_kind = ESMF_TYPEKIND_R4
+     type(ESMF_STAGGERLOC)        :: staggerloc
+     type(ESMF_RegridMethod_Flag) :: regridMethod
+     real                         :: undefined_value ! for missing value
+
   end type merra2_type_dec
 
   type(merra2_type_dec), allocatable :: merra2_struc(:)
+
+  integer            :: num_merra2_fields       ! number of available fields
+  character(len=100) :: list_merra2_fields(30)  ! list of name of fields
+  character(len=30), parameter :: merra2_bundle_bname = "merra2_bundle_"
 
 contains
 
@@ -145,6 +163,11 @@ contains
     use LIS_logMod
     use LIS_spatialDownscalingMod, only : LIS_init_pcpclimo_native
     use LIS_forecastMod
+
+      use LIS_FORC_AttributesMod
+      use LIS_field_bundleMod
+      use LIS_create_gridMod,       only : create_regular_grid
+      use LIS_ESMF_Regrid_Utils,    only : createESMF_RouteHandle
 
     implicit none
 ! !AGRUMENTS:
@@ -171,6 +194,17 @@ contains
     real :: upgmt
     integer :: n
 
+    integer          :: ic, rc
+    type(ESMF_Grid)  :: model_grid, merra2_grid
+    type(ESMF_FIELD) :: model_field, merra2_field
+    real             :: dummy_array(1,1) = 0.0
+    character(len=2) :: num_st
+    real             :: forcing_gridDesc(10)
+    real             :: model_gridDesc(10)
+
+    character(len=100)         :: name_tracer
+    integer                    :: fieldcount
+
     allocate(merra2_struc(LIS_rc%nnest))
 
     do n=1,LIS_rc%nnest
@@ -187,6 +221,69 @@ contains
        merra2_struc(n)%ts = 3600  !check
        call LIS_update_timestep(LIS_rc, n, merra2_struc(n)%ts)
     enddo
+
+    !----------------------------------------------------------------
+    ! Determine the number of available fields that will be regridded
+    !----------------------------------------------------------------
+    ic = 0
+    if (LIS_FORC_Tair%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Tair%varname(1))
+     endif
+    if (LIS_FORC_Qair%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Qair%varname(1))
+     endif
+    if (LIS_FORC_SWdown%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_SWdown%varname(1))
+     endif
+    if (LIS_FORC_LWdown%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_LWdown%varname(1))
+     endif
+    if (LIS_FORC_Wind_E%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Wind_E%varname(1))
+     endif
+    if (LIS_FORC_Wind_N%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Wind_N%varname(1))
+     endif
+    if (LIS_FORC_Psurf%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Psurf%varname(1))
+     endif
+    if (LIS_FORC_Rainf%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Rainf%varname(1))
+     endif
+    if (LIS_FORC_CRainf%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_CRainf%varname(1))
+     endif
+    if (LIS_FORC_Snowf%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Snowf%varname(1))
+     endif
+    if (LIS_FORC_Pardr%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Pardr%varname(1))
+     endif
+    if (LIS_FORC_Pardf%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Pardf%varname(1))
+     endif
+    if (LIS_FORC_Swnet%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Swnet%varname(1))
+     endif
+    if (LIS_FORC_Forc_Hgt%selectOpt .eq. 1) then
+       ic = ic + 1
+       list_merra2_fields(ic) = TRIM(LIS_FORC_Forc_Hgt%varname(1))
+     endif
+
+     num_merra2_fields = ic
 
     gridDesci = 0
 
@@ -337,6 +434,83 @@ contains
                merra2_struc(n)%ncold,&
                merra2_struc(n)%nrold)
        endif
+
+       ! Initialize ESMF objects
+       !------------------------
+       IF (LIS_rc%do_esmfRegridding) THEN
+          ! Create the bundles
+          write(num_st, '(i2.2)') n
+
+          !merra2_struc(n)%type_kind       = ESMF_TYPEKIND_R4
+          merra2_struc(n)%undefined_value = 9999.0
+
+          merra2_struc(n)%regridMethod = ESMF_REGRIDMETHOD_BILINEAR ! ESMF_REGRIDMETHOD_NEAREST_STOD
+          merra2_struc(n)%staggerloc = ESMF_STAGGERLOC_CENTER
+          LIS_domain(n)%staggerloc   = ESMF_STAGGERLOC_CENTER
+
+          ! ---> Bundle for merra2
+          merra2_struc(n)%forcing_bundle = ESMF_FieldBundleCreate(name = merra2_bundle_bname//num_st, rc=rc)
+          call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for merra2 Forcing Data')
+
+          ! ---> Bundle for the model
+          LIS_domain(n)%merra2_bundle = ESMF_FieldBundleCreate(name = merra2_bundle_bname//num_st, rc=rc)
+          call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for model Data')
+
+          ! Create the grid
+          ! ---> ESMF grid for merra2
+          forcing_gridDesc(2) = gridDesci(n, 2) ! num points along x
+          forcing_gridDesc(3) = gridDesci(n, 3) ! num points along y
+          forcing_gridDesc(4) = gridDesci(n, 4) ! lower lat
+          forcing_gridDesc(5) = gridDesci(n, 5) ! lower lon
+          forcing_gridDesc(7) = gridDesci(n, 7) ! upper lat
+          forcing_gridDesc(8) = gridDesci(n, 8) ! upper lon
+          forcing_gridDesc(9) = gridDesci(n, 9) ! x-grid size
+          forcing_gridDesc(10)= gridDesci(n, 10) ! y-grid size
+
+          merra2_grid =  create_regular_grid(LIS_vm, forcing_gridDesc, "merra2 Grid", &
+                                      LIS_rc%npesx, LIS_rc%npesy, staggerloc = merra2_struc(n)%staggerloc)
+          call LIS_verify(rc, '<--KNJR--> Done creating merra2 grid')
+
+          ! ---> ESMF grid for merra2
+          model_gridDesc(2) = LIS_rc%gnc(n)         ! LIS_rc%gridDesc(n,2) ! Global num points along x
+          model_gridDesc(3) = LIS_rc%gnr(n)         ! LIS_rc%gridDesc(n,3) ! Global num points along y
+          model_gridDesc(4) = LIS_rc%gridDesc(n,34) ! lower lat
+          model_gridDesc(5) = LIS_rc%gridDesc(n,35) ! lower lon
+          model_gridDesc(7) = LIS_rc%gridDesc(n,37) ! 7) ! upper lat
+          model_gridDesc(8) = LIS_rc%gridDesc(n,38) ! 8) ! upper lon
+          model_gridDesc(9) = LIS_rc%gridDesc(n,39) ! x-grid size
+          model_gridDesc(10)= LIS_rc%gridDesc(n,40) ! y-grid size
+
+          model_grid =  create_regular_grid(LIS_vm, model_gridDesc, "model Grid", &
+                                      LIS_rc%npesx, LIS_rc%npesy, staggerloc = LIS_domain(n)%staggerloc)
+          call LIS_verify(rc, '<--KNJR--> Done creating model grid')
+
+          ! Add fields to the bundle
+          DO ic = 1, num_merra2_fields
+             if (LIS_masterproc) PRINT*,"****Adding: ", ic, TRIM(list_merra2_fields(ic))
+             call addTracerToBundle(merra2_struc(n)%forcing_bundle, merra2_grid, &
+                       TRIM(list_merra2_fields(ic)), merra2_struc(n)%type_kind, dummy_array)
+
+             call addTracerToBundle(LIS_domain(n)%merra2_bundle, model_grid, &
+                       TRIM(list_merra2_fields(ic)), merra2_struc(n)%type_kind, dummy_array)
+          ENDDO
+
+             if (LIS_masterproc) PRINT*,"****Get merra2 field for: ", TRIM(list_merra2_fields(1))
+          call ESMF_FieldBundleGet(merra2_struc(n)%forcing_bundle, fieldIndex = 1, &
+                                  field = merra2_field, rc=rc)
+          call LIS_verify(rc, 'ESMF_FieldBundleGet failed for merra2 field')
+
+             if (LIS_masterproc) PRINT*,"****Get model field for: ", TRIM(list_merra2_fields(1))
+          call ESMF_FieldBundleGet(LIS_domain(n)%merra2_bundle, fieldIndex = 1, &
+                                  field = model_field, rc=rc)
+          call LIS_verify(rc, 'ESMF_FieldBundleGet failed for model field')
+
+             if (LIS_masterproc) PRINT*,"****Create routehandle: "
+          call createESMF_RouteHandle(merra2_field, model_field,  merra2_struc(n)%regridMethod, &
+                                     merra2_struc(n)%undefined_value, merra2_struc(n)%routehandle, &
+                                     merra2_struc(n)%dynamicMask, rc)
+          call LIS_verify(rc, 'createESMF_RouteHandle failed')
+       ENDIF
     enddo   ! End nest loop
 
   end subroutine init_merra2

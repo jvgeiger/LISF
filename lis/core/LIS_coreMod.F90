@@ -174,6 +174,7 @@ module LIS_coreMod
      real                       :: dx,dy,nlatcircles
 
      type(ESMF_FieldBundle)     :: nldas2_bundle
+     type(ESMF_FieldBundle)     :: merra2_bundle
      type(ESMF_STAGGERLOC)      :: staggerloc 
   end type lis_domain_type
 
