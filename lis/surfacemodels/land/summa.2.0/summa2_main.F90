@@ -51,6 +51,6 @@ subroutine summa2_main(n)
       call handle_err(err, message)
    endif
 
-   call summa2_output(n, summa1_struc(n))
+   call summa2_output(n)
 
 end subroutine summa2_main

@@ -457,10 +457,12 @@ module LIS_histDataMod
   public :: LIS_MOC_CANOPICE
   public :: LIS_MOC_CANOPLIQ
   public :: LIS_MOC_CANOPWAT
+  public :: LIS_MOC_SFCMELTPOND
   public :: LIS_MOC_AQUIFERSTORAGE
   public :: LIS_MOC_SOILCOMPRESS
   public :: LIS_MOC_SOILLIQ
   public :: LIS_MOC_SOILICE
+  public :: LIS_MOC_TOTALSOILWAT
   public :: LIS_MOC_CANOPAIRNETFLUX
   public :: LIS_MOC_CANOPNETFLUX
   public :: LIS_MOC_GROUNDNETFLUX
@@ -468,7 +470,7 @@ module LIS_histDataMod
   public :: LIS_MOC_GROUNDADVECT
   public :: LIS_MOC_SUBCANOP
   public :: LIS_MOC_THROUGHRAIN
-  public :: LIS_MOC_SNOWUPLOADING
+  public :: LIS_MOC_CANOPYSNOWUNLOADING
   public :: LIS_MOC_CANOP_LIQDRAINAGE
   public :: LIS_MOC_CANOP_MELT_FREEZE
   public :: LIS_MOC_RAIN_MELT
@@ -478,6 +480,12 @@ module LIS_histDataMod
   public :: LIS_MOC_AQUIFER_TRANSPIRE
   public :: LIS_MOC_AQUIFER_BASEFLOW
   public :: LIS_MOC_QSTOT
+  public :: LIS_MOC_ROUTEDRUNOFF
+  public :: LIS_MOC_SNOWDRAINAGE
+  public :: LIS_MOC_INFILTRATION
+  public :: LIS_MOC_MLAYERTEMP
+  public :: LIS_MOC_MLAYERMOIST
+  public :: LIS_MOC_MLAYERVOLFRACWAT
   ! end SUMMA
   
   integer :: LIS_MOC_JULES_STHZW = -9999
@@ -911,10 +919,12 @@ module LIS_histDataMod
     integer :: LIS_MOC_CANOPICE = -9999 
     integer :: LIS_MOC_CANOPLIQ = -9999
     integer :: LIS_MOC_CANOPWAT = -9999
+    integer :: LIS_MOC_SFCMELTPOND = -9999
     integer :: LIS_MOC_AQUIFERSTORAGE = -9999
     integer :: LIS_MOC_SOILCOMPRESS = -9999
     integer :: LIS_MOC_SOILLIQ = -9999
     integer :: LIS_MOC_SOILICE = -9999
+    integer :: LIS_MOC_TOTALSOILWAT = -9999
     integer :: LIS_MOC_CANOPAIRNETFLUX = -9999
     integer :: LIS_MOC_CANOPNETFLUX = -9999
     integer :: LIS_MOC_GROUNDNETFLUX = -9999
@@ -922,7 +932,7 @@ module LIS_histDataMod
     integer :: LIS_MOC_GROUNDADVECT = -9999
     integer :: LIS_MOC_SUBCANOP = -9999
     integer :: LIS_MOC_THROUGHRAIN = -9999
-    integer :: LIS_MOC_SNOWUPLOADING = -9999
+    integer :: LIS_MOC_CANOPYSNOWUNLOADING = -9999
     integer :: LIS_MOC_CANOP_LIQDRAINAGE = -9999
     integer :: LIS_MOC_CANOP_MELT_FREEZE = -9999
     integer :: LIS_MOC_RAIN_MELT = -9999
@@ -932,6 +942,12 @@ module LIS_histDataMod
     integer :: LIS_MOC_AQUIFER_TRANSPIRE = -9999
     integer :: LIS_MOC_AQUIFER_BASEFLOW = -9999
     integer :: LIS_MOC_QSTOT = -9999
+    integer :: LIS_MOC_ROUTEDRUNOFF = -9999
+    integer :: LIS_MOC_SNOWDRAINAGE = -9999
+    integer :: LIS_MOC_INFILTRATION = -9999
+    integer :: LIS_MOC_MLAYERTEMP = -9999
+    integer :: LIS_MOC_MLAYERMOIST = -9999
+    integer :: LIS_MOC_MLAYERVOLFRACWAT = -9999
 !   <- end SUMMA -> 
 
 
@@ -1900,6 +1916,8 @@ contains
             model_patch=.true.)
     endif
 
+    ! Note: LIS_MOC_SOILMOIST is the multi-layer soil moisture
+    !       LIS_MOC_TOTALSOILWAT is the sum of soim moisture (only one layer)
     call ESMF_ConfigFindLabel(modelSpecConfig,"SoilMoist:",rc=rc)
     call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
          "SoilMoist",&
@@ -1931,7 +1949,46 @@ contains
              model_patch=.true.)
        endif
     endif
+!------------------------------------------------------------------------
+    ! temperature of each layer (nsoil+nsnow) (K)
+    call ESMF_ConfigFindLabel(modelSpecConfig,"mLayerTemp:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "mLayerTemp",&
+         "mLayerTemp",&
+         "temperature of each layer",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_MLAYERTEMP,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"K"/),1,(/"-"/),1,112,0,&
+            model_patch=.true.)
+    endif
 
+    ! matric head of water in the soil
+    call ESMF_ConfigFindLabel(modelSpecConfig,"mLayerMatricHead:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "mLayerMatricHead",&
+         "mLayerMatricHead",&
+         "matric head of water in the soil",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_MLAYERMOIST,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m"/),1,(/"-"/),1,grib_depthlvl,0,&
+            model_patch=.true.)
+    endif
+
+    ! volumetric fraction of total water in each layer of nsoil+nsnow
+    call ESMF_ConfigFindLabel(modelSpecConfig,"mLayerVolFracWat:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "mLayerVolFracWat",&
+         "mLayerVolFracWat",&
+         "volumetric fraction of total water in each layer of nsoil+nsnow",rc)
+    if ( rc == 1 ) then
+        call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_MLAYERVOLFRACWAT,&
+             LIS_histData(n)%head_lsm_list,&
+             n,2,ntiles,(/"-    ","m3/m3"/),1,(/"-"/),1,grib_depthlvl,0,&
+             model_patch=.true.)
+    endif
+ !------------------------------------------------------------------------
     call ESMF_ConfigFindLabel(modelSpecConfig,"SmLiqFrac:",rc=rc)
     call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
          "SmLiqFrac",&
@@ -5280,6 +5337,18 @@ contains
               model_patch=.true.)
      endif
 
+     call ESMF_ConfigFindLabel(modelSpecConfig,"SfcMeltPond:",rc=rc)
+     call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+          "SfcMeltPond",&
+          "SfcMeltPond",&
+          "ponded water caused by melt of the snow without a layer",rc)
+     if ( rc == 1 ) then
+         call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_SFCMELTPOND,&
+              LIS_histData(n)%head_lsm_list,&
+              n,1,ntiles,(/"kg/m2"/),1,(/"-"/),1,1,1,&
+              model_patch=.true.)
+     endif
+
      call ESMF_ConfigFindLabel(modelSpecConfig,"AquiferStorage:",rc=rc)
      call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
           "AquiferStorage",&
@@ -5288,7 +5357,8 @@ contains
      if ( rc == 1 ) then
          call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_AQUIFERSTORAGE,&
               LIS_histData(n)%head_lsm_list,&
-              n,1,ntiles,(/"m"/),1,(/"-"/),1,1,1,&
+              n,1,ntiles,(/"mm"/),1,(/"-"/),1,1,1,&
+!             n,1,ntiles,(/"m"/),1,(/"-"/),1,1,1,&
               model_patch=.true.)
      endif
 
@@ -5323,6 +5393,18 @@ contains
           "total mass of ice in the soil (instant)",rc)
      if ( rc == 1 ) then
          call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_SOILICE,&
+              LIS_histData(n)%head_lsm_list,&
+              n,1,ntiles,(/"kg/m2"/),1,(/"-"/),1,1,1,&
+              model_patch=.true.)
+     endif
+
+     call ESMF_ConfigFindLabel(modelSpecConfig,"TotalSoilWat:",rc=rc)
+         call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+              "TotalSoilWat",&
+              "TotalSoilWat",&
+              "total mass of water in the soil (instant)",rc)
+     if ( rc == 1 ) then
+         call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_TOTALSOILWAT,&
               LIS_histData(n)%head_lsm_list,&
               n,1,ntiles,(/"kg/m2"/),1,(/"-"/),1,1,1,&
               model_patch=.true.)
@@ -5412,13 +5494,13 @@ contains
               model_patch=.true.)
      endif
 
-     call ESMF_ConfigFindLabel(modelSpecConfig,"Snowupload:",rc=rc)
+     call ESMF_ConfigFindLabel(modelSpecConfig,"CanopySnowUnloading:",rc=rc)
      call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
-          "SNowupload",&
-          "canopy_snow_uploading",&
+          "CanopySnowUnloading",&
+          "canopy_snow_unloading",&
           "unloading of snow from the vegetation canopy (mean)",rc)
      if ( rc == 1 ) then
-         call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_SNOWUPLOADING,&
+         call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_CANOPYSNOWUNLOADING,&
               LIS_histData(n)%head_lsm_list,&
               n,1,ntiles,(/"kg/m2s"/),1,(/"-"/),1,1,1,&
               model_patch=.true.)
@@ -5492,7 +5574,7 @@ contains
      if ( rc == 1 ) then
           call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_AQUIFER_RECHARGE,&
                LIS_histData(n)%head_lsm_list,&
-               n,1,ntiles,(/"m/s"/),1,(/"-"/),1,1,1,&
+               n,1,ntiles,(/"kg/m2s"/),1,(/"-"/),1,1,1,&
                model_patch=.true.)
      endif
 
@@ -5504,7 +5586,7 @@ contains
      if ( rc == 1 ) then
          call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_AQUIFER_TRANSPIRE,&
               LIS_histData(n)%head_lsm_list,&
-              n,1,ntiles,(/"m/s"/),1,(/"-"/),1,1,1,&
+              n,1,ntiles,(/"kg/m2s"/),1,(/"-"/),1,1,1,&
               model_patch=.true.)
      endif
 
@@ -5516,7 +5598,7 @@ contains
      if ( rc == 1 ) then
           call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_AQUIFER_BASEFLOW,&
                LIS_histData(n)%head_lsm_list,&
-               n,1,ntiles,(/"m/s"/),1,(/"-"/),1,1,1,&
+               n,1,ntiles,(/"kg/m2s"/),1,(/"-"/),1,1,1,&
                model_patch=.true.)
      endif
 
@@ -5526,11 +5608,50 @@ contains
           "total_runoff",&
           "total runoff (mean)",rc)
      if ( rc == 1 ) then
-         call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_QSTOT,&
+         call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_QSTOT, &
               LIS_histData(n)%head_lsm_list,&
               n,1,ntiles,(/"kg/m2s"/),1,(/"OUT"/),1,1,1,&
               model_patch=.true.)
      endif
+
+     call ESMF_ConfigFindLabel(modelSpecConfig,"RoutedRunoff:",rc=rc)
+     call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+          "RoutedRunoff",&
+          "average_RoutedRunoff",&
+          "average routed runoff",rc)
+     if ( rc == 1 ) then
+         call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_ROUTEDRUNOFF, &
+              LIS_histData(n)%head_lsm_list,&
+              n,1,ntiles,(/"kg/m2s"/),1,(/"OUT"/),1,1,1,&
+              model_patch=.true.)
+     endif
+
+     call ESMF_ConfigFindLabel(modelSpecConfig,"SnowDrainage:",rc=rc)
+     call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+          "SnowDrainage",&
+          "Snow_Drainage",&
+          "drainage from the bottom of the snow profile",rc)
+     if ( rc == 1 ) then
+          call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_SNOWDRAINAGE, &
+               LIS_histData(n)%head_lsm_list,&
+               n,1,ntiles,(/"kg/m2s"/),1,(/"OUT"/),1,1,1,&
+               model_patch=.true.)
+     endif
+
+
+     call ESMF_ConfigFindLabel(modelSpecConfig,"Infiltration:",rc=rc)
+     call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+          "Infiltration", &
+          "Infiltration", &
+          "infiltration of water into the soil profile",rc)
+     if ( rc == 1 ) then
+         call register_dataEntry(LIS_MOC_LSM_COUNT, LIS_MOC_INFILTRATION, &
+              LIS_histData(n)%head_lsm_list,&
+              n,1,ntiles,(/"kg/m2s"/),1,(/"IN"/),1,1,1,&
+              model_patch=.true.)
+     endif
+
+
     !<- end of SUMMA addition -> 
 
     
