@@ -124,6 +124,13 @@ subroutine summa2_dump_restart(n, ftn, wformat)
    use globalData,     only : gru_struc  ! gru-hru mapping structures
    use var_lookup,     only : iLookPROG  ! named variables for local state variables
    use var_lookup,     only : iLookINDEX
+   use var_lookup,     only : iLookTYPE
+   use var_lookup,     only : iLookDIAG
+
+   use var_lookup,     only : iLookID
+
+   USE globalData,only:maxLayers                               ! maximum number of layers
+!  USE globalData,only:maxSnowLayers                           ! maximum number of snow layers
 
    implicit none
   
@@ -190,12 +197,16 @@ subroutine summa2_dump_restart(n, ftn, wformat)
 
     integer :: l, t
     integer :: dimID(10)
-    real    :: tmptilen(LIS_rc%npatch(n, LIS_rc%lsm_index))
-    real    :: tmptilen_1d(LIS_rc%npatch(n, LIS_rc%lsm_index))
-    integer :: nSnowData(LIS_rc%npatch(n, LIS_rc%lsm_index)) 
-    integer :: nSoilData(LIS_rc%npatch(n, LIS_rc%lsm_index))
+
+    real, allocatable        :: tmptilen(:)
+    real, allocatable        :: tmptilen_1d(:)
+    integer(i4b),allocatable :: tmpint_1d(:)
+    integer(i4b),allocatable :: nSnowData(:)
+    integer(i4b),allocatable :: nSoilData(:)
+
 
     ! state variables for vegetation
+    integer :: hruId_ID
     integer :: dt_init_ID             ! length of initial time step at start of next data interval (s)
     integer :: CanopyIce_ID           ! mass of ice on the vegetation canopy (kg m-2)
     integer :: CanopyLiq_ID           ! mass of liquid water on the vegetation canopy (kg m-2)
@@ -228,7 +239,19 @@ subroutine summa2_dump_restart(n, ftn, wformat)
     integer :: nSoil_max               ! number of soil layers
     integer :: nSnow_max               ! number of snow layers
 
+    integer(i4b) :: nSnow         ! number of snow layers
+    integer(i4b) :: nSoil         ! number of soil layers
+    integer(i4b) :: nLayers
+!   integer(i4b) :: maxSnow       ! maximum number of snow layers
+!   integer(i4b) :: maxSoil       ! maximum number of soil layers
+
     integer :: nlayer_real             ! rean snow number + nsoil = real snow number + 8
+
+    integer(i4b) :: cHRU          ! count of HRUs
+    integer(i4b) :: iHRU          ! index of HRUs
+    integer(i4b) :: iGRU          ! index of GRUs
+    integer(i4b) :: nHRUrun, nGRU, num
+    integer(8)   :: hruId0,hruId1
 
     integer :: spectral
     integer :: midSoil
@@ -240,28 +263,44 @@ subroutine summa2_dump_restart(n, ftn, wformat)
 !--------------------------------------------------------------------------------------------------
     ! write the header of the restart file
 
-    nSnowData = summa1_struc(n)%indxStruct%gru(:)%hru(1)%var(iLookINDEX%nSnow)%dat(1)
-    nSoilData = summa1_struc(n)%indxStruct%gru(:)%hru(1)%var(iLookINDEX%nSoil)%dat(1)
+    hruId0 = 104
+    hruId1 = 35882
 
-    nSnow_max = 0 
-    nSoil_max = 0
+    nGRU = LIS_rc%ntiles(n)
+    nHRUrun = sum(gru_struc%hruCount)
 
-    do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-      if(nSnowData(t) .gt. nSnow_max) then
-         nSnow_max = nSnowData(t)
-      endif
+    allocate(tmptilen(nHRUrun))
+    allocate(tmptilen_1d(nHRUrun))
+    allocate(tmpint_1d(nHRUrun))
+    allocate(nSnowData(nHRUrun))
+    allocate(nSoilData(nHRUrun))
 
-      if(nSoilData(t) .gt. nSoil_max) then
-         nSoil_max = nSoilData(t)
-      endif 
+    num=0
+    do iGRU=1,nGRU
+     do iHRU=1,gru_struc(iGRU)%hruCount
+
+      cHRU = gru_struc(iGRU)%hruInfo(iHRU)%hru_ix
+
+      ! actual number of layers
+      nSnow = gru_struc(iGRU)%hruInfo(iHRU)%nSnow
+      nSoil = gru_struc(iGRU)%hruInfo(iHRU)%nSoil
+      nLayers = nSoil + nSnow
+
+      num=num+1
+
+      nSnowData(iGRU) = summa1_struc(n)%indxStruct%gru(iGRU)%hru(iHRU)%var(iLookINDEX%nSnow)%dat(1)
+      nSoilData(iGRU) = summa1_struc(n)%indxStruct%gru(iGRU)%hru(iHRU)%var(iLookINDEX%nSoil)%dat(1)
+
+     enddo
     enddo
 
-    if(nSnow_max .gt. 0) then
-      nSnow_max=5
-    endif
-
     call LIS_writeGlobalHeader_restart(ftn, n, LIS_rc%lsm_index, "SUMMA2",              &
-                           dim1=2, dim2=8, dim3=13, dim4=9, dim5=14, dim6=5, dim7=6, dimID=dimID, output_format="netcdf")
+!          dim1=2, dim2=8, dim3=13, dim4=9, dim5=14, dim6=5, dim7=6, dimID=dimID, output_format="netcdf")
+           dim1=2, dim2=3, dim3=8, dim4=4, dim5=9, dim6=5, dim7=6, dimID=dimID, output_format="netcdf")
+
+    call LIS_writeHeader_restart(ftn, n, dimID, hruId_ID, "hruId", &
+                                 "id defining hydrologic response unit", &
+                                 "-",vlevels=1, valid_min=-99999.0, valid_max=99999.0)
 
     call LIS_writeHeader_restart(ftn, n, dimID, dt_init_ID, "dt_init", &
                                  "length of initial time step at start of next data interval", &
@@ -309,13 +348,15 @@ subroutine summa2_dump_restart(n, ftn, wformat)
 
     call LIS_writeHeader_restart(ftn, n, dimID, mLayerMatricHead_ID, "mLayerMatricHead", &
                                  "matric head of water in the soil", &
-                                 "m", vlevels=8, &
+!                                "m", vlevels=8, &
+                                 "m", vlevels=3, &
                                  valid_min=-99999.0, valid_max=99999.0, var_flag = "dim2")
      
     call LIS_writeHeader_restart(ftn, n, dimID, AquiferStorage_ID, "scalarAquiferStorage", &
                                  "relative aquifer storage -- above bottom of the soil profile", &
+!                                "mm", vlevels=1, valid_min=-99999.0, valid_max=99999.0)
                                  "m", vlevels=1, valid_min=-99999.0, valid_max=99999.0)
-     
+
     call LIS_writeHeader_restart(ftn, n, dimID, SurfaceTemp_ID, "scalarSurfaceTemp", &
                                  "surface temperature", &
                                  "K", vlevels=1, valid_min=-99999.0, valid_max=99999.0)
@@ -323,54 +364,74 @@ subroutine summa2_dump_restart(n, ftn, wformat)
     ! write the header for state variable with multiple layers
       call LIS_writeHeader_restart(ftn, n, dimID, mLayerTemp_ID, "mLayerTemp", &
                                    "temperature of each layer", &
-                                   "K", vlevels=13, &
+!                                  "K", vlevels=13, &
+                                   "K", vlevels=8, &
                                    valid_min=-99999.0, valid_max=99999.0, var_flag = "dim3")
      
        call LIS_writeHeader_restart(ftn, n, dimID, mLayerVolFracIce_ID, "mLayerVolFracIce", &
                                     "volumetric fraction of ice in each layer", &
-                                    "-", vlevels=13, &
+!                                   "-", vlevels=13, &
+                                    "-", vlevels=8, &
                                     valid_min=-99999.0, valid_max=99999.0, var_flag = "dim3")
      
        call LIS_writeHeader_restart(ftn, n, dimID, mLayerVolFracLiq_ID, "mLayerVolFracLiq", &
                                     "volumetric fraction of liquid water in each layer", &
-                                    "-", vlevels=13, &
+!                                   "-", vlevels=13, &
+                                    "-", vlevels=8, &
                                     valid_min=-99999.0, valid_max=99999.0, var_flag = "dim3")
      
        call LIS_writeHeader_restart(ftn, n, dimID, mLayerVolFracWat_ID, "mLayerVolFracWat", &
                                     "volumetric fraction of total water in each layer", &
-                                    "-", vlevels=13, &
+!                                   "-", vlevels=13, &
+                                    "-", vlevels=8, &
                                     valid_min=-99999.0, valid_max=99999.0, var_flag = "dim3")
      
        call LIS_writeHeader_restart(ftn, n, dimID, mLayerDepth_ID, "mLayerDepth", &
                                     "depth of each layer", &
-                                    "m", vlevels=13, &
+!                                   "m", vlevels=13, &
+                                    "m", vlevels=8,  &
                                     valid_min=-99999.0, valid_max=99999.0, var_flag = "dim3")
      
        call LIS_writeHeader_restart(ftn, n, dimID, mLayerHeight_ID, "mLayerHeight", &
                                     "height of the layer mid-point (top of soil = 0)", &
-                                    "m", vlevels=13, &
+!                                   "m", vlevels=13, &
+                                    "m", vlevels=8, &
                                     valid_min=-99999.0, valid_max=99999.0, var_flag = "dim3")
      
        call LIS_writeHeader_restart(ftn, n, dimID, iLayerHeight_ID, "iLayerHeight", &
                                     "height of the layer interface (top of soil = 0)", &
-                                    "m", vlevels=14, &
+!                                   "m", vlevels=14, &
+                                    "m", vlevels=9, &
                                     valid_min=-99999.0, valid_max=99999.0, var_flag = "dim5")
 
-   call LIS_writeHeader_restart(ftn, n, dimID, nSNow_ID, "nSnow", &
-                                  "number of snow layers", &
-                                  "-", vlevels=1, valid_min=-99999.0, valid_max=99999.0) 
+       call LIS_writeHeader_restart(ftn, n, dimID, nSNow_ID, "nSnow", &
+                                    "number of snow layers", &
+                                    "-", vlevels=1, valid_min=-99999.0, valid_max=99999.0) 
 
-   call LIS_writeHeader_restart(ftn, n, dimID, nSoil_ID, "nSoil", &
-                                  "number of soil layers", &
-                                  "-", vlevels=1, valid_min=-99999.0, valid_max=99999.0) 
+        call LIS_writeHeader_restart(ftn, n, dimID, nSoil_ID, "nSoil", &
+                                    "number of soil layers", &
+                                    "-", vlevels=1, valid_min=-99999.0, valid_max=99999.0) 
 
     ! close header of restart file
     call LIS_closeHeader_restart(ftn, n, LIS_rc%lsm_index, dimID, summa1_struc(n)%rstInterval)
 
 
     ! write state variables into restart file
-    tmptilen_1d = 0
+    tmpint_1d = 0
+    num=0
+    ! loop through GRUs and HRUs
+    do iGRU=1,nGRU
+     do iHRU=1,gru_struc(iGRU)%hruCount
+      num=num+1
+!     tmpint_1d(iGRU) = summa1_struc(n)%typeStruct%gru(iGRU)%hru(iHRU)%var(iLookTYPE%hruId)
+      tmpint_1d(iGRU) = summa1_struc(n)%idStruct%gru(iGRU)%hru(iHRU)%var(iLookID%hruId)
+     enddo ! iHRU
+    enddo  ! iGRU
 
+    call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmpint_1d, &
+                              varid=hruId_ID, dim=1, wformat=wformat)
+
+    tmptilen_1d = 0
     tmptilen_1d =  summa1_struc(n)%progStruct%gru(:)%hru(1)%var(iLookPROG%dt_init)%dat(1)
     call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen_1d, &
                               varid=dt_init_ID, dim=1, wformat=wformat)
@@ -430,17 +491,16 @@ subroutine summa2_dump_restart(n, ftn, wformat)
     call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen_1d, &
                               varid=SurfaceTemp_ID, dim=1, wformat=wformat)
 
-    tmptilen_1d = 0
-    tmptilen_1d = nSnowData
-!   write(*,*)'nSnow=',tmptilen_1d(1:5)
-    call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen_1d, &
+    tmpint_1d = 0
+    tmpint_1d = nSnowData
+    call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmpint_1d, &
                               varid=nSnow_ID, dim=1, wformat=wformat)
 
-    tmptilen_1d = 0
-    tmptilen_1d = nSoilData
-    call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen_1d, &
+    tmpint_1d = 0
+    tmpint_1d = nSoilData
+    call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmpint_1d, &
                               varid=nSoil_ID, dim=1, wformat=wformat)
-
+!----------------------------------------------
     ! diffuse snow albedo for individual spectral bands
     do l=1, 2 ! spectral
       tmptilen = 0
@@ -452,36 +512,51 @@ subroutine summa2_dump_restart(n, ftn, wformat)
     enddo
 !----------------------------------------------
     ! temperature of each layer
-      do l=1, 13 
+!     do l=1, 13 
+      do l=1, 8
         tmptilen = 0
         do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
          nlayer_real = nSnowData(t) + nSoilData(t)
          if(l .le. nlayer_real) then
           tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerTemp)%dat(l)
+
+!         if(summa1_struc(n)%typeStruct%gru(t)%hru(1)%var(iLookTYPE%hruId) .eq. hruId1) then
+!           write(*,*)'hruId=35882, l=',l,' mLayerTemp=',summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerTemp)%dat(l)
+!         endif
          endif
         enddo
         call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen, varid=mLayerTemp_ID, dim=l, wformat=wformat)
       enddo
 !----------------------------------------------
     ! volumetric fraction of ice in each layer
-       do l=1, 13 
+!      do l=1, 13 
+       do l=1, 8
          tmptilen = 0
          do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
           nlayer_real = nSnowData(t) + nSoilData(t)
           if(l .le. nlayer_real) then
            tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerVolFracIce)%dat(l)
+
+!          if(summa1_struc(n)%typeStruct%gru(t)%hru(1)%var(iLookTYPE%hruId) .eq. hruId1 ) then
+!            write(*,*)'hruId=35882, l=',l,' mLayerVolFracIce=',summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerVolFracIce)%dat(l)
+!          endif
           endif
          enddo
          call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen, varid=mLayerVolFracIce_ID, dim=l, wformat=wformat)
         enddo
 !----------------------------------------------
     ! volumetric fraction of liquid water in each layer
-       do l=1, 13 ! midToto  (In original coldState.nc)
+!      do l=1, 13 ! midToto  (In original coldState.nc)
+       do l=1, 8
          tmptilen = 0
          do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
            nlayer_real = nSnowData(t) + nSoilData(t)
            if(l .le. nlayer_real) then
              tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerVolFracLiq)%dat(l)
+
+!            if(summa1_struc(n)%typeStruct%gru(t)%hru(1)%var(iLookTYPE%hruId) .eq. hruId1 ) then
+!             write(*,*)'hruId=35882, l=',l,' mLayerVolFracLiq=',summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerVolFracLiq)%dat(l)
+!            endif
            endif
          enddo
          call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen, &
@@ -489,12 +564,17 @@ subroutine summa2_dump_restart(n, ftn, wformat)
        enddo
 !----------------------------------------------
     ! volumetric fraction of total water in each layer
-      do l=1, 13 ! midToto  (In original coldState.nc)
+!     do l=1, 13 ! midToto  (In original coldState.nc)
+      do l=1, 8
         tmptilen = 0
         do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
           nlayer_real = nSnowData(t) + nSoilData(t)
           if(l .le. nlayer_real) then
            tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerVolFracWat)%dat(l)
+
+!          if(summa1_struc(n)%typeStruct%gru(t)%hru(1)%var(iLookTYPE%hruId) .eq. hruId1 ) then
+!            write(*,*)'hruId=35882, l=',l,' mLayerVolFracWat=',summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerVolFracWat)%dat(l)
+!          endif
           endif
         enddo
         call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen, &
@@ -502,7 +582,8 @@ subroutine summa2_dump_restart(n, ftn, wformat)
        enddo
 !----------------------------------------------
     ! matric head of water in the soil
-    do l=1, 8 ! midSoil
+!   do l=1, 8 ! midSoil
+    do l=1, 3 ! midSoil
       tmptilen = 0
       do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
        tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerMatricHead)%dat(l)
@@ -512,12 +593,16 @@ subroutine summa2_dump_restart(n, ftn, wformat)
     enddo
 !----------------------------------------------
     ! depth of each layer
-       do l=1, 13
+!      do l=1, 13
+       do l=1, 8
          tmptilen = 0
          do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
           nlayer_real = nSnowData(t) + nSoilData(t)
           if(l .le. nlayer_real) then
            tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerDepth)%dat(l)
+!          if(summa1_struc(n)%typeStruct%gru(t)%hru(1)%var(iLookTYPE%hruId) .eq. hruId1 ) then
+!             write(*,*)'Inside writerst, hruId=35882, nlayer_real=',nlayer_real,' l=',l,' mLayerDepth=',tmptilen(t)
+!          endif
           endif
          enddo
          call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen, &
@@ -525,12 +610,16 @@ subroutine summa2_dump_restart(n, ftn, wformat)
        enddo
 !----------------------------------------------
     ! height at the mid-point of each layer
-       do l=1, 13
+!      do l=1, 13
+       do l=1, 8
          tmptilen = 0
          do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
           nlayer_real = nSnowData(t) + nSoilData(t)
           if(l .le. nlayer_real) then
             tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%mLayerHeight)%dat(l)
+!           if(summa1_struc(n)%typeStruct%gru(t)%hru(1)%var(iLookTYPE%hruId) .eq. hruId1 ) then
+!              write(*,*)'Inside writerst, hruId=35882, nlayer_real=',nlayer_real,' l=',l,' mLayerHeight=',tmptilen(t)
+!           endif
           endif
          enddo
          call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen, &
@@ -539,17 +628,27 @@ subroutine summa2_dump_restart(n, ftn, wformat)
 !     endif
 !----------------------------------------------
     ! height of the layer interface; top of soil = 0 
-      do l=1, 14  ! ifcToto (In original coldState.nc)
+    ! Note: l=0, nlayer_real
+!     do l=0, 13
+      do l=0, 8
         tmptilen = 0
         do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
          nlayer_real = nSnowData(t) + nSoilData(t)
          if(l .le. nlayer_real) then
-           tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%iLayerHeight)%dat(l-1)
+           tmptilen(t) = summa1_struc(n)%progStruct%gru(t)%hru(1)%var(iLookPROG%iLayerHeight)%dat(l)
+!          if(summa1_struc(n)%typeStruct%gru(t)%hru(1)%var(iLookTYPE%hruId) .eq. hruId1 ) then
+!           write(*,*)'Inside writerst, hruId=35882, nlayer_real=',nlayer_real,' l=',l,' iLayerHeight=',tmptilen(t)
+!          endif
          endif
         enddo
         call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, tmptilen, &
-                                  varid=iLayerHeight_ID, dim=l, wformat=wformat)
+                                  varid=iLayerHeight_ID, dim=l+1, wformat=wformat)
       enddo
 !----------------------------------------------
+  deallocate(tmptilen)
+  deallocate(tmptilen_1d)
+  deallocate(tmpint_1d)
+  deallocate(nSnowData)
+  deallocate(nSoilData)
 
 end subroutine summa2_dump_restart 
