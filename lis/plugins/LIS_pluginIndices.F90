@@ -129,6 +129,7 @@ module LIS_pluginIndices
    character*50, public,  parameter :: LIS_princetonId       = "PRINCETON"
    character*50, public,  parameter :: LIS_nldas1Id          = "NLDAS1"
    character*50, public,  parameter :: LIS_nldas2Id          = "NLDAS2"
+   character*50, public,  parameter :: LIS_metsimId          = "MetSim"
 
    character*50, public,  parameter :: LIS_gldasId           = "GLDAS"
    character*50, public,  parameter :: LIS_gfsId             = "GFS"

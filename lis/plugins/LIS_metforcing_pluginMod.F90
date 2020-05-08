@@ -234,6 +234,10 @@ subroutine LIS_metforcing_plugin
    use nldas2_forcingMod
 #endif
 
+#if ( defined MF_MetSim )
+    use metsim_forcingMod
+#endif
+
 #if ( defined MF_NARR )
    use narr_forcingMod
 #endif
@@ -567,6 +571,13 @@ subroutine LIS_metforcing_plugin
    external timeinterp_nldas2
    external finalize_nldas2
    external reset_nldas2
+#endif
+
+#if ( defined MF_MetSim )
+   external get_metsim
+   external timeinterp_metsim
+   external finalize_metsim
+   external reset_metsim
 #endif
 
 #if ( defined MF_NARR )
@@ -1085,6 +1096,17 @@ subroutine LIS_metforcing_plugin
                                   timeinterp_nldas2)
    call registerfinalmetforc(trim(LIS_nldas2Id)//char(0),finalize_nldas2)
    call registerresetmetforc(trim(LIS_nldas2Id)//char(0),reset_nldas2)
+#endif
+
+
+#if ( defined MF_MetSim )
+! - MetSim Forcing:
+   call registerinitmetforc(trim(LIS_metsimId)//char(0),init_MetSim)
+   call registerretrievemetforc(trim(LIS_metsimId)//char(0),get_metsim)
+   call registertimeinterpmetforc(trim(LIS_metsimId)//char(0), &
+                                  timeinterp_metsim)
+   call registerfinalmetforc(trim(LIS_metsimId)//char(0),finalize_metsim)
+   call registerresetmetforc(trim(LIS_metsimId)//char(0),reset_metsim)
 #endif
 
 #if ( defined MF_NARR )
