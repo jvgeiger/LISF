@@ -27,7 +27,7 @@ subroutine timeinterp_metsim(n, findex)
   use LIS_timeMgrMod,      only : LIS_time2date, LIS_tick
   use LIS_logMod,          only : LIS_logunit, LIS_verify, LIS_endrun
   use metsim_forcingMod,   only : metsim_struc
-! use LIS_forecastMod,     only : LIS_get_iteration_index
+  use LIS_forecastMod,     only : LIS_get_iteration_index
 
   implicit none
 ! !ARGUMENTS: 

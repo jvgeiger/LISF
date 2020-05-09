@@ -46,6 +46,9 @@ module metsim_forcingMod
 !  \item[w112,w122,w212,w222]
 !    Arrays containing the weights of the input grid 
 !    for each grid point in LIS, for conservative interpolation.
+!  \item[n113]
+!    Arrays containing the neighbor information of the input grid 
+!    for each grid point in LIS, for nearest neighbor interpolation.
 !  \item[findtime1, findtime2]
 !   boolean flags to indicate which time is to be read for 
 !   temporal interpolation.
@@ -102,7 +105,7 @@ module metsim_forcingMod
      integer, allocatable   :: n113(:)
      integer                :: findtime1, findtime2
 
-     integer           :: nIter, st_iterid,en_iterid
+     integer           :: nIter, st_iterid,en_iterid  ! Forecast parameters  ??
 
      real, allocatable :: metdata1(:,:,:) 
      real, allocatable :: metdata2(:,:,:) 
@@ -110,7 +113,6 @@ module metsim_forcingMod
   end type metsim_type_dec
 
   type(metsim_type_dec), allocatable :: metsim_struc(:) 
-!EOP
 
 contains
   
@@ -151,6 +153,10 @@ contains
 !    computes the neighbor, weights for bilinear interpolation
 !   \item[conserv\_interp\_input](\ref{conserv_interp_input}) \newline
 !    computes the neighbor, weights for conservative interpolation
+!  \item[ncold]
+!    Number of columns (along the east west dimension) for the input data
+!  \item[nrold]
+!    Number of rows (along the north south dimension) for the input data
 !  \end{description}
 !EOP
     real     :: gridDesci(50)
@@ -185,15 +191,16 @@ contains
        allocate(metsim_struc(n)%metdata2(1,LIS_rc%met_nf(findex),&
             LIS_rc%ngrid(n)))
 
-      !metsim_struc(n)%st_iterid = 1
-      !metsim_struc(n)%en_iterId = 1
-      !metsim_struc(n)%nIter = 1
+       metsim_struc(n)%st_iterid = 1
+       metsim_struc(n)%en_iterId = 1
+       metsim_struc(n)%nIter = 1
+
 
        metsim_struc(n)%metdata1 = 0
        metsim_struc(n)%metdata2 = 0
 
        ! Added based on NLDAS2 data
-      !metsim_struc(n)%gridDesc = 0
+      !metsim_struc(n)%gridDesci = 0
       !metsim_struc(n)%findtime1 = 0
       !metsim_struc(n)%findtime2 = 0
 
@@ -201,20 +208,33 @@ contains
       gridDesci(2) = metsim_struc(n)%ncold
       gridDesci(3) = metsim_struc(n)%nrold
       !Define driver data domains
-      metsim_struc(n)%gridDesc(4) = 25.0625      ! min(lat)
-      metsim_struc(n)%gridDesc(5) = -124.9375    ! min(lon)
-      metsim_struc(n)%gridDesc(6) = 128
-      metsim_struc(n)%gridDesc(7) = 52.9375      ! max(lat) 
-      metsim_struc(n)%gridDesc(8) = -67.0625     ! max(lon) 
-      metsim_struc(n)%gridDesc(9) = 0.125        ! dlat
-      metsim_struc(n)%gridDesc(10) = 0.125       ! dlon
+      gridDesci(4) = 25.0625      ! min(lat)
+      gridDesci(5) = -124.9375    ! min(lon)
+      gridDesci(6) = 128
+      gridDesci(7) = 52.9375      ! max(lat) 
+      gridDesci(8) = -67.0625     ! max(lon) 
+      gridDesci(9) = 0.125        ! dlat
+      gridDesci(10) = 0.125       ! dlon
 
       !???? For merra-land and merra, gridDesci(n,20) = 0
-      metsim_struc(n)%gridDesc(20) = 64
+      gridDesci(20) = 64
+
+!     ! Check for grid and interp option selected:
+!     if( gridDesci(9)  == LIS_rc%gridDesc(n,9) .and. &
+!         gridDesci(10) == LIS_rc%gridDesc(n,10).and. &
+!         LIS_rc%gridDesc(n,1) == proj_latlon .and. &
+!         LIS_rc%met_interp(findex) .ne. "neighbor" ) then
+!       write(LIS_logunit,*) "[ERR] The MetSim grid was selected for the"
+!       write(LIS_logunit,*) "[ERR] LIS run domain; however, 'bilinear', 'budget-bilinear',"
+!       write(LIS_logunit,*) "[ERR] or some other unknown option was selected to spatially"
+!       write(LIS_logunit,*) "[ERR] downscale the grid, which will cause errors during runtime."
+!       write(LIS_logunit,*) "[ERR] Program stopping ..."
+!       call LIS_endrun()
+!     endif
 
       metsim_struc(n)%mi = metsim_struc(n)%ncold*metsim_struc(n)%nrold
 
-      ! Setting up weights for Interpolation
+      ! Setting up weights for spatial Interpolation
       if(trim(LIS_rc%met_interp(findex)) .eq. "bilinear") then
          allocate(metsim_struc(n)%n111(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
          allocate(metsim_struc(n)%n121(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
@@ -264,10 +284,10 @@ contains
         elseif(trim(LIS_rc%met_interp(findex)) .eq. "neighbor") then 
           allocate(metsim_struc(n)%n113(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
         
-          call neighbor_interp_input(n,metsim_struc(n)%gridDesc(:),&
+          call neighbor_interp_input(n,gridDesci,&
                metsim_struc(n)%n113)
        else
-         write(LIS_logunit,*) 'Interpolation option '// &
+         write(LIS_logunit,*) '[ERR] Interpolation option '// &
                trim(LIS_rc%met_interp(findex))//&
                ' for MetSim forcing is not supported'
          call LIS_endrun

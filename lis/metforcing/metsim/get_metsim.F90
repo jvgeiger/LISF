@@ -106,7 +106,7 @@ subroutine get_metsim(n,findex)
   endif
     
   !=== Establish fmodeltime1
-  if (metsim_struc(n)%findtime1. eq. 1) then  !need to get new time1 from the past
+  if (metsim_struc(n)%findtime1 .eq. 1) then  !need to get new time1 from the past
      order=1   !Get data for glbdata1
      ferror=0
      try=0

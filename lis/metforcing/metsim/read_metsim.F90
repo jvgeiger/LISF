@@ -26,11 +26,10 @@
 subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
 
 ! !USES:
-  use LIS_coreMod,          only : LIS_rc,LIS_domain, LIS_localPet, &
-                                   LIS_masterproc
+  use LIS_coreMod
+  use LIS_logMod,           only : LIS_logunit, LIS_endrun, LIS_verify, LIS_warning
   use LIS_metforcingMod,    only : LIS_forc
   use LIS_timeMgrMod,       only : LIS_tick
-  use LIS_logMod,           only : LIS_logunit, LIS_endrun, LIS_verify, LIS_warning
   use metsim_forcingMod,    only : metsim_struc
   use LIS_forecastMod
 #if (defined USE_NETCDF3 || defined USE_NETCDF4)
@@ -139,6 +138,8 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
 ! netcdf variables
   integer :: ncid, varid, status
 
+  integer :: tempId,spechumId,shortwaveId,longwaveId,windId,airPresId,precId
+
   integer :: mo
   real*8  :: timenow
   real    :: gmt
@@ -152,7 +153,7 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
   integer :: iret, c
   real    :: gridDesco(50)         ! Input,output grid info arrays
 
-! integer :: kk                    ! forecast index
+  integer :: kk                    ! forecast index
   integer :: num_met               ! number of fields
 
   real,allocatable :: temp(:,:)
@@ -165,11 +166,11 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
 ! real,allocatable :: datain(:,:)  ! input data (longitude,latitude)
   real,allocatable :: temp2metsim(:,:,:)
 ! real,allocatable :: templdas(:,:,:)
-! real,allocatable :: f(:)         ! 1D in fields
-! real,allocatable :: go(:)        ! 1D out fields
-! real,allocatable :: tg(:,:)      ! Interpolated 2D data field
-! logical*1,allocatable :: lb(:)   ! input bitmap
-! logical*1,allocatable :: lo(:)   ! output bitmaps
+  real,allocatable :: f(:)         ! 1D in fields
+  real,allocatable :: go(:)        ! 1D out fields
+  real,allocatable :: tg(:,:)      ! Interpolated 2D data field
+  logical*1,allocatable :: lb(:)   ! input bitmap
+  logical*1,allocatable :: lo(:)   ! output bitmaps
 ! ______________________________
 
 #if (defined USE_NETCDF3 || defined USE_NETCDF4)
@@ -181,11 +182,11 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
    ! Allocate memory
 !  allocate(datain(metsim_struc(n)%ncold,metsim_struc(n)%nrold))
    allocate(temp2metsim(metsim_struc(n)%ncold,metsim_struc(n)%nrold,NF))
-!  allocate(f(metsim_struc(n)%ncold*metsim_struc(n)%nrold))
-!  allocate(go(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
-!  allocate(lb(metsim_struc(n)%ncold*metsim_struc(n)%nrold))
-!  allocate(lo(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
-!  allocate(tg(LIS_rc%lnc(n),LIS_rc%lnr(n)))  
+   allocate(f(metsim_struc(n)%ncold*metsim_struc(n)%nrold))
+   allocate(go(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
+   allocate(lb(metsim_struc(n)%ncold*metsim_struc(n)%nrold))
+   allocate(lo(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
+   allocate(tg(LIS_rc%lnc(n),LIS_rc%lnr(n)))  
 !  allocate(templdas(LIS_rc%lnc(n),LIS_rc%lnr(n),LIS_rc%nf), stat=ios)
  
    temp2metsim = 0.0     ! initialize
@@ -221,7 +222,7 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
 !=== Open MetSim forcing files ===
 
   ! Loop over forecast index:
-  do kk= metsim_struc(n)%st_iterid, metsim_struc(n)%en_iterid
+! do kk= metsim_struc(n)%st_iterid, metsim_struc(n)%en_iterid
 
      ! Modified by KRA to implement forecast mode:
 !    if(LIS_rc%forecastMode.eq.0) then ! hindcast run
@@ -298,9 +299,6 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
        status=nf90_close(ncid)
 
       !----------------------------------------------------------------
-      ! Change data from MetSim grid convention to LIS-domain
-      ! Shift longitudes by 180deg. 
-      !----------------------------------------------------------------
       ! Filter out any unrealistic forcing values.
       ! Transfer MetSim forcing fields to LIS format
       !-----------------------------------------------------------------
@@ -314,16 +312,16 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
             case (2)! spec_humid 
               temp2metsim(i,j,2) = spechum(i,j)
             case (3)! shortwave
-              if (shortwave(i,j) < 0.0001) then
-                shortwave(i,j) = 0.0001
-              endif
+!             if (shortwave(i,j) < 0.0001) then
+!               shortwave(i,j) = 0.0001
+!             endif
               temp2metsim(i,j,3) = shortwave(i,j)
             case (4)! longwave 
               temp2metsim(i,j,4) = longwave(i,j)
             case (5)! wind
-              if (wind(i,j) < 0.0001) then
-                wind(i,j) = 0.0001
-              endif
+!             if (wind(i,j) < 0.0001) then
+!               wind(i,j) = 0.0001
+!             endif
               temp2metsim(i,j,5) = wind(i,j)  !Since absolute wind speed 
                                                    ! let U=WIND and V=0.0
             case (6)! air_pressure 
@@ -342,10 +340,10 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
      !--------------------------------------------------------------
 
      !=== Initialize input & output grid arrays
-!    gridDesco = 0
+     gridDesco = 0
            
      !=== Set input & output grid array values (reanlMetSim to LIS)
-!    gridDesco = LIS_rc%gridDesc(n,:)
+     gridDesco = LIS_rc%gridDesc(n,:)
 
      !=== Define input & output data bitmaps
 !    nmetsim = metsim_struc(n)%ncold*metsim_struc(n)%nrold
@@ -377,38 +375,30 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
 !         if( LIS_rc%gridDesc(n,9) .ne. 1.0 ) then   ???
 !         if( LIS_rc%gridDesc(n,9) .ne. 0.125) then
 
-!          select case( LIS_rc%met_interp(findex) )
+          select case( LIS_rc%met_interp(findex) )
 
-!            case( "bilinear" )
-!              call bilinear_interp(gridDesco,lb,f,lo,go,&
-!                 metsim_struc(n)%mi,mo, & 
-!                 LIS_domain(n)%lat, LIS_domain(n)%lon,&
-!                 metsim_struc(n)%w111,metsim_struc(n)%w121,&
-!                 metsim_struc(n)%w211,metsim_struc(n)%w221,& 
-!                 metsim_struc(n)%n111,metsim_struc(n)%n121,&
-!                 metsim_struc(n)%n211,metsim_struc(n)%n221,&
-!                 LIS_rc%udef, iret)
+             case( "bilinear" )
+               call bilinear_interp(gridDesco,lb,f,lo,go,metsim_struc(n)%mi,mo, &
+                  LIS_domain(n)%lat, LIS_domain(n)%lon,&
+                  metsim_struc(n)%w111,metsim_struc(n)%w121,&
+                  metsim_struc(n)%w211,metsim_struc(n)%w221,& 
+                  metsim_struc(n)%n111,metsim_struc(n)%n121,&
+                  metsim_struc(n)%n211,metsim_struc(n)%n221,&
+                  LIS_rc%udef, iret)
 
-!            case( "budget-bilinear" )
-!              if(v.eq.8) then 
-!                call conserv_interp(gridDesco,lb,f,lo,go,&
-!                    metsim_struc(n)%mi,mo, & 
-!                    LIS_domain(n)%lat, LIS_domain(n)%lon,&
-!                    metsim_struc(n)%w112,metsim_struc(n)%w122,&
-!                    metsim_struc(n)%w212,metsim_struc(n)%w222,& 
-!                    metsim_struc(n)%n112,metsim_struc(n)%n122,&
-!                    metsim_struc(n)%n212,metsim_struc(n)%n222,&
-!                    LIS_rc%udef,iret)
-!              else
-!                call bilinear_interp(gridDesco,lb,f,lo,go,metsim_struc(n)%mi,mo, & 
-!                    LIS_domain(n)%lat, LIS_domain(n)%lon,&
-!                    metsim_struc(n)%w111,metsim_struc(n)%w121,&
-!                    metsim_struc(n)%w211,metsim_struc(n)%w221, & 
-!                    metsim_struc(n)%n111,metsim_struc(n)%n121,&
-!                    metsim_struc(n)%n211,metsim_struc(n)%n221,LIS_rc%udef, iret)
-!              endif
-
-!          end select
+             case( "budget-bilinear" )
+               call conserv_interp(gridDesco,lb,f,lo,go,metsim_struc(n)%mi,mo, & 
+                  LIS_domain(n)%lat, LIS_domain(n)%lon,&
+                  metsim_struc(n)%w112,metsim_struc(n)%w122,&
+                  metsim_struc(n)%w212,metsim_struc(n)%w222,&
+                  metsim_struc(n)%n112,metsim_struc(n)%n122,&
+                  metsim_struc(n)%n212,metsim_struc(n)%n222,&
+                  LIS_rc%udef, iret)
+             case( "neighbor" )
+               call neighbor_interp(gridDesco,lb,f,lo,go,metsim_struc(n)%mi,mo, &
+                 LIS_domain(n)%lat, LIS_domain(n)%lon,&
+                 metsim_struc(n)%n113,LIS_rc%udef, iret)
+           end select
 
 !        else ! forcing and model grids both 0.125 degree
 !           k = 0
@@ -494,11 +484,11 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
   ! Deallocate local interp-based variables:
 ! deallocate(datain)
   deallocate(temp2metsim)
-! deallocate(f)
-! deallocate(go)
-! deallocate(lb)
-! deallocate(lo)
-! deallocate(tg)
+  deallocate(f)
+  deallocate(go)
+  deallocate(lb)
+  deallocate(lo)
+  deallocate(tg)
 ! deallocate(templdas)
 #endif
 
