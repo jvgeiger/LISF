@@ -15,7 +15,7 @@
 !  29 Apr 2020: Zhuo Wang: Added MetSim forcing for LIS-SUMMA
 !
 ! !INTERFACE:
-subroutine read_metsim(n, kk, findex, order, da, hr, filename, ferror)
+subroutine read_metsim(n, kk, findex, order, mo, da, hr, filename, ferror)
 
 ! !USES:
    use LIS_coreMod,          only : LIS_rc, LIS_domain
@@ -34,6 +34,7 @@ subroutine read_metsim(n, kk, findex, order, da, hr, filename, ferror)
    integer, intent(in)    :: kk       ! forecast member index
    integer, intent(in)    :: findex   ! forcing index
    integer, intent(in)    :: order    ! lower(1) or upper(2) time interval bdry
+   integer, intent(in)    :: mo
    integer, intent(in)    :: da
    integer, intent(in)    :: hr
    character(len=100), intent(in) :: filename ! name of input MetSim file
@@ -69,6 +70,8 @@ subroutine read_metsim(n, kk, findex, order, da, hr, filename, ferror)
 !  \item[order]
 !    flag indicating which data to be read (order=1, read the previous
 !    3 hourly instance, order=2, read the next 3 hourly instance)
+!  \item[mo]
+!    current month of the year
 !  \item[da]
 !    current day of the year
 !  \item[hr]
@@ -105,7 +108,7 @@ subroutine read_metsim(n, kk, findex, order, da, hr, filename, ferror)
 
 
    integer :: ncid, varid, status
-   integer :: timestep
+   integer :: timestep, day
 
    integer :: v, c, r, t, iret
    integer :: input_size
@@ -132,8 +135,16 @@ subroutine read_metsim(n, kk, findex, order, da, hr, filename, ferror)
    ! and which file to open.
    !----------------------------------------------------------------
 
+   ! MetSim data do not contain leap days.  If it is 29 Feb, then reset the
+   ! day to 28 and reuse that data.
+   if ( mo == 2 .and. da == 29 ) then
+      day = 28
+   else
+      day = da
+   endif
+
    ! For monthly file
-   timestep = 8*(da - 1) + (1 + hr/3)
+   timestep = 8*(day - 1) + (1 + hr/3)
 
    status = nf90_open(filename, nf90_NoWrite, ncid)
 

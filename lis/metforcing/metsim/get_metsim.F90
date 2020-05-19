@@ -120,7 +120,7 @@ subroutine get_metsim(n,findex)
         do kk= metsim_struc(n)%st_iterid, metsim_struc(n)%en_iterid
            call metsim_filename(n, kk, findex, filename, &
                                 metsim_struc(n)%metsimdir, yr1, mo1, da1)
-           call read_metsim(n,kk,findex,order,da1,hr1,filename,ferror)
+           call read_metsim(n,kk,findex,order,mo1,da1,hr1,filename,ferror)
         enddo
         if ( ferror == 1 ) then !successfully retrieved forcing data
            metsim_struc(n)%metsimtime1=time1
@@ -157,7 +157,7 @@ subroutine get_metsim(n,findex)
         do kk= metsim_struc(n)%st_iterid, metsim_struc(n)%en_iterid
            call metsim_filename(n, kk, findex, filename, &
                                 metsim_struc(n)%metsimdir, yr2, mo2, da2)
-           call read_metsim(n,kk,findex,order,da2,hr2,filename,ferror)
+           call read_metsim(n,kk,findex,order,mo2,da2,hr2,filename,ferror)
         enddo
         if ( ferror == 1 ) then !successfully retrieved forcing data
            write(LIS_logunit,*) '[INFO] reset metsimtime2 to time2'
