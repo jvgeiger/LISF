@@ -149,8 +149,7 @@ subroutine timeinterp_metsim(n, findex)
    endif
 
    ! multi-factor for metforcing ensemble number:
-   !mfactor = LIS_rc%nensem(n)/metsim_struc(n)%nIter
-   mfactor = LIS_rc%nensem(n)
+   mfactor = LIS_rc%nensem(n)/metsim_struc(n)%nIter
 
 ! JVG: Disable zterp for testing
 #if 0
@@ -195,36 +194,8 @@ subroutine timeinterp_metsim(n, findex)
      enddo
   enddo
 
-  ! do block precipitation interpolation
-  call ESMF_FieldGet(pcpField,localDE=0,farrayPtr=pcp,rc=status)
-  call LIS_verify(status)
+  ! time averaged variables
 
-! ! Time Averaged Longwave, Block Interpolation
-!  do k=1,LIS_rc%ntiles(n)/mfactor
-!    do m=1,mfactor
-!      t = m + (k-1)*mfactor
-!      index1 = LIS_domain(n)%tile(t)%index
-!      kk = LIS_get_iteration_index(n, k, index1, mfactor)
- 
-!      tmp(t) = wt1 * metsim_struc(n)%metdata1(kk,1,index1) & 
-!             + wt2 * metsim_struc(n)%metdata2(kk,1,index1)
-!      q2(t)  = wt1 * metsim_struc(n)%metdata1(kk,2,index1) & 
-!             + wt2 *metsim_struc(n)%metdata2(kk,2,index1)
-!      lwd(t) = metsim_struc(n)%metdata1(kk,4,index1)
-!      uwind(t) = wt1 * metsim_struc(n)%metdata1(kk,5,index1) &
-!               + wt2 *metsim_struc(n)%metdata2(kk,5,index1)
-!      vwind(t) = 0.0
-!      psurf(t) = wt1 * metsim_struc(n)%metdata1(kk,6,index1) &     ! ???
-!               + wt2 * metsim_struc(n)%metdata2(kk,6,index1)       ! ???
-!      pcp(t) = metsim_struc(n)%metdata1(kk,7,index1)               ! ???
-!    enddo
-! enddo
-
-  !linearly interpolate everything else
-
-  call ESMF_FieldGet(tmpField,localDE=0,farrayPtr=tmp,rc=status)
-  call LIS_verify(status)
- 
   do k=1,LIS_rc%ntiles(n)/mfactor
      do m=1,mfactor
         t = m + (k-1)*mfactor
@@ -235,9 +206,6 @@ subroutine timeinterp_metsim(n, findex)
         endif
      enddo
   enddo
- 
-  call ESMF_FieldGet(q2Field,localDE=0,farrayPtr=q2,rc=status)
-  call LIS_verify(status)
  
   do k=1,LIS_rc%ntiles(n)/mfactor
      do m=1,mfactor
@@ -250,9 +218,6 @@ subroutine timeinterp_metsim(n, findex)
      enddo
   enddo
  
-  call ESMF_FieldGet(lwdField,localDE=0,farrayPtr=lwd,rc=status)
-  call LIS_verify(status)
- 
   do k=1,LIS_rc%ntiles(n)/mfactor
      do m=1,mfactor
         t = m + (k-1)*mfactor
@@ -264,9 +229,6 @@ subroutine timeinterp_metsim(n, findex)
       enddo
   enddo
  
-  call ESMF_FieldGet(uField,localDE=0,farrayPtr=uwind,rc=status)
-  call LIS_verify(status)
-
   do k=1,LIS_rc%ntiles(n)/mfactor
      do m=1,mfactor
         t = m + (k-1)*mfactor
@@ -278,8 +240,6 @@ subroutine timeinterp_metsim(n, findex)
      enddo
   enddo
 
-  call ESMF_FieldGet(vField,localDE=0,farrayPtr=vwind,rc=status)
-  call LIS_verify(status)
   vwind = 0.0
  
   do k=1,LIS_rc%ntiles(n)/mfactor
@@ -292,9 +252,6 @@ subroutine timeinterp_metsim(n, findex)
         endif
      enddo
   enddo
-
-  call ESMF_FieldGet(psurfField,localDE=0,farrayPtr=psurf,rc=status)
-  call LIS_verify(status)
 
   do k=1,LIS_rc%ntiles(n)/mfactor
      do m=1,mfactor

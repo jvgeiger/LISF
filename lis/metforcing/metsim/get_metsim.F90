@@ -67,6 +67,7 @@ subroutine get_metsim(n,findex)
   real*8  :: time1,time2,dumbtime1,dumbtime2
   real    :: gmt1,gmt2,ts1,ts2
   integer :: movetime      ! 1=move time2 data into time1
+  integer :: kk
 
   !====Assumption will be not to find or move any data
   metsim_struc(n)%findtime1=0
@@ -116,7 +117,9 @@ subroutine get_metsim(n,findex)
            exit
         end if
         try = try+1
-        call read_metsim(order,n, findex, yr1,mo1,da1,hr1,ferror)
+        do kk= metsim_struc(n)%st_iterid, metsim_struc(n)%en_iterid
+           call read_metsim(n,kk,findex,order,yr1,mo1,da1,hr1,ferror)
+        enddo
         if ( ferror == 1 ) then !successfully retrieved forcing data
            metsim_struc(n)%metsimtime1=time1
         else  !ferror still=0, so roll back one day
@@ -149,7 +152,9 @@ subroutine get_metsim(n,findex)
      do
         if ( ferror /= 0 ) exit
         try = try+1
-        call read_metsim(order,n,findex,yr2,mo2,da2,hr2,ferror)
+        do kk= metsim_struc(n)%st_iterid, metsim_struc(n)%en_iterid
+           call read_metsim(n,kk,findex,order,yr2,mo2,da2,hr2,ferror)
+        enddo
         if ( ferror == 1 ) then !successfully retrieved forcing data
            write(LIS_logunit,*) '[INFO] reset metsimtime2 to time2'
            metsim_struc(n)%metsimtime2=time2

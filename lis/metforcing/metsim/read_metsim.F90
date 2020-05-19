@@ -15,7 +15,7 @@
 !  29 Apr 2020: Zhuo Wang: Added MetSim forcing for LIS-SUMMA
 !
 ! !INTERFACE:
-subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
+subroutine read_metsim(n, kk, findex, order, yr, mon, da, hr, ferror)
 
 ! !USES:
    use LIS_coreMod,          only : LIS_rc, LIS_domain
@@ -29,9 +29,10 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
 
    implicit none
 ! !ARGUMENTS:
-   integer, intent(in)    :: order     ! lower(1) or upper(2) time interval bdry
    integer, intent(in)    :: n         ! nest
+   integer, intent(in)    :: kk        ! forecast member index
    integer, intent(in)    :: findex    ! forcing index
+   integer, intent(in)    :: order     ! lower(1) or upper(2) time interval bdry
    integer, intent(in)    :: yr,mon,da,hr     ! data and hour (multiple of 3)
    integer, intent(inout) :: ferror           ! set to zero if there's an error
 !
@@ -186,7 +187,7 @@ subroutine read_metsim( order, n, findex, yr, mon, da, hr, ferror )
          do c=1,LIS_rc%lnc(n)
             t = LIS_domain(n)%gindex(c,r)
             if ( t /= -1 ) then
-               metsim_struc(n)%metdata2(1,v,t) = varfield(c,r)
+               metsim_struc(n)%metdata2(kk,v,t) = varfield(c,r)
             endif
          enddo
       enddo
