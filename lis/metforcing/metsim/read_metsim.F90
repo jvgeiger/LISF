@@ -15,11 +15,12 @@
 !  29 Apr 2020: Zhuo Wang: Added MetSim forcing for LIS-SUMMA
 !
 ! !INTERFACE:
-subroutine read_metsim(n, kk, findex, order, yr, mon, da, hr, ferror)
+subroutine read_metsim(n, kk, findex, order, da, hr, filename, ferror)
 
 ! !USES:
    use LIS_coreMod,          only : LIS_rc, LIS_domain
-   use LIS_logMod,           only : LIS_logunit, LIS_endrun, LIS_verify, LIS_warning
+   use LIS_logMod,           only : LIS_logunit, LIS_endrun, LIS_verify, &
+                                    LIS_warning
    use LIS_metforcingMod,    only : LIS_forc
    use LIS_timeMgrMod,       only : LIS_tick
    use metsim_forcingMod,    only : metsim_struc
@@ -29,12 +30,14 @@ subroutine read_metsim(n, kk, findex, order, yr, mon, da, hr, ferror)
 
    implicit none
 ! !ARGUMENTS:
-   integer, intent(in)    :: n         ! nest
-   integer, intent(in)    :: kk        ! forecast member index
-   integer, intent(in)    :: findex    ! forcing index
-   integer, intent(in)    :: order     ! lower(1) or upper(2) time interval bdry
-   integer, intent(in)    :: yr,mon,da,hr     ! data and hour (multiple of 3)
-   integer, intent(inout) :: ferror           ! set to zero if there's an error
+   integer, intent(in)    :: n        ! nest
+   integer, intent(in)    :: kk       ! forecast member index
+   integer, intent(in)    :: findex   ! forcing index
+   integer, intent(in)    :: order    ! lower(1) or upper(2) time interval bdry
+   integer, intent(in)    :: da
+   integer, intent(in)    :: hr
+   character(len=100), intent(in) :: filename ! name of input MetSim file
+   integer, intent(inout) :: ferror   ! set to zero if there's an error
 !
 ! !DESCRIPTION:
 !  For the given time, reads the parameters from 0.125 degree
@@ -44,7 +47,7 @@ subroutine read_metsim(n, kk, findex, order, yr, mon, da, hr, ferror)
 !  MetSim variables used to force LIS are:
 !  mean values starting at timestep, available every 3 hours \newline
 !
-!  NOTE-1: be aware that MetSim has only total precipitation.
+!  NOTE 1: be aware that MetSim has only total precipitation.
 !  NOTE 2: only one wind component, it is magnitude \newline
 !
 !  MetSim FORCING VARIABLES: \newline
@@ -57,15 +60,15 @@ subroutine read_metsim(n, kk, findex, order, yr, mon, da, hr, ferror)
 !  7. pptrate   Precipitation [kg m-2 s-1] \newline
 !
 !  \begin{description}
+!  \item[n]
+!    index of the nest
+!  \item[kk]
+!    index of the forecast ensemble member
+!  \item[findex]
+!    index of the forcing source
 !  \item[order]
 !    flag indicating which data to be read (order=1, read the previous
 !    3 hourly instance, order=2, read the next 3 hourly instance)
-!  \item[n]
-!    index of the nest
-!  \item[yr]
-!    current year
-!  \item[mon]
-!    current month
 !  \item[da]
 !    current day of the year
 !  \item[hr]
@@ -100,11 +103,8 @@ subroutine read_metsim(n, kk, findex, order, yr, mon, da, hr, ferror)
       'prec        '    /)
    character(len=12) :: varname
 
-   character*100 :: infile
 
    integer :: ncid, varid, status
-   character(len=4) :: cyr
-   character(len=2) :: cmon
    integer :: timestep
 
    integer :: v, c, r, t, iret
@@ -135,22 +135,14 @@ subroutine read_metsim(n, kk, findex, order, yr, mon, da, hr, ferror)
    ! For monthly file
    timestep = 8*(da - 1) + (1 + hr/3)
 
-   write(LIS_logunit,*)'[INFO] Order and month-timestep', &
-      order, timestep, mon, da, hr
-
-   write(cyr, '(i4.4)') yr
-   write(cmon, '(i2.2)') mon
-   infile=trim(metsim_struc(n)%metsimdir)//'/'&
-      //'icar_canesm2_'//cyr//'-'//cmon//'.nc'
-
-   status = nf90_open(infile, nf90_NoWrite, ncid)
+   status = nf90_open(filename, nf90_NoWrite, ncid)
 
    if ( status /= 0 ) then
-      write(LIS_logunit,*)'[ERR] Problem opening file: ',infile,status
+      write(LIS_logunit,*)'[ERR] Problem opening file: ',trim(filename),status
       write(LIS_logunit,*)'[ERR]  Stopping...'
       call LIS_endrun
    else
-      write(LIS_logunit,*)'[INFO] Opened file: ',infile
+      write(LIS_logunit,*)'[INFO] Opened file: ',trim(filename)
    endif
 
    do v = 1, N_MS

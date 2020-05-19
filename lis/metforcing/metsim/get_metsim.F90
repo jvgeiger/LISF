@@ -50,11 +50,10 @@ subroutine get_metsim(n,findex)
 !  \begin{description}
 !  \item[LIS\_tick](\ref{LIS_tick}) \newline
 !    call to advance or retract time
+!  \item[metsim\_filename](\ref{metsim_filename}) \newline
+!    generates the filename for the MetSim data
 !  \item[read\_metsim](\ref{read_metsim}) \newline
 !    call to read the MetSim data and perform spatial interpolation 
-!   \item[read\_metsim\_elev](\ref{read_metsim_elev}) \newline
-!    reads the native elevation of the MetSim data to be used
-!    for topographic adjustments to the forcing
 !  \end{description}
 !EOP
 
@@ -68,6 +67,7 @@ subroutine get_metsim(n,findex)
   real    :: gmt1,gmt2,ts1,ts2
   integer :: movetime      ! 1=move time2 data into time1
   integer :: kk
+  character(len=100) :: filename
 
   !====Assumption will be not to find or move any data
   metsim_struc(n)%findtime1=0
@@ -118,7 +118,9 @@ subroutine get_metsim(n,findex)
         end if
         try = try+1
         do kk= metsim_struc(n)%st_iterid, metsim_struc(n)%en_iterid
-           call read_metsim(n,kk,findex,order,yr1,mo1,da1,hr1,ferror)
+           call metsim_filename(n, kk, findex, filename, &
+                                metsim_struc(n)%metsimdir, yr1, mo1, da1)
+           call read_metsim(n,kk,findex,order,da1,hr1,filename,ferror)
         enddo
         if ( ferror == 1 ) then !successfully retrieved forcing data
            metsim_struc(n)%metsimtime1=time1
@@ -153,7 +155,9 @@ subroutine get_metsim(n,findex)
         if ( ferror /= 0 ) exit
         try = try+1
         do kk= metsim_struc(n)%st_iterid, metsim_struc(n)%en_iterid
-           call read_metsim(n,kk,findex,order,yr2,mo2,da2,hr2,ferror)
+           call metsim_filename(n, kk, findex, filename, &
+                                metsim_struc(n)%metsimdir, yr2, mo2, da2)
+           call read_metsim(n,kk,findex,order,da2,hr2,filename,ferror)
         enddo
         if ( ferror == 1 ) then !successfully retrieved forcing data
            write(LIS_logunit,*) '[INFO] reset metsimtime2 to time2'
@@ -170,4 +174,62 @@ subroutine get_metsim(n,findex)
   endif
   
 end subroutine get_metsim
-   
+
+!BOB
+!  !ROUTINE: metsim_filename
+! \label{metsim_filename}
+!
+!  !REVISION HISTORY:
+!  19 May 2020: James Geiger; Initial specification
+!
+!  !INTERFACE:
+subroutine metsim_filename(n,kk,findex,filename,metsimdir,yr,mo,da)
+!  !USES:
+   use LIS_coreMod, only : LIS_rc
+   use LIS_forecastMod
+
+   implicit none
+!  !ARGUMENTS:
+   integer, intent(in)        :: n
+   integer, intent(in)        :: kk
+   integer, intent(in)        :: findex
+   character(len=100), intent(out) :: filename
+   character(len=100), intent(in)  :: metsimdir
+   integer, intent(in)        :: yr,mo,da
+
+!  !DESCRIPTION:
+!  This routine builds the filename for the MetSim forcing data.
+!
+!  The arguments are:
+!  \begin{description}
+!  \item[n]
+!    index of nest
+!  \item[kk]
+!    index of forecast ensemble member
+!  \item[findex]
+!    index of forcing source
+!  \item[filename]
+!    name of the timestamped MetSim file
+!  \item[metsimdir]
+!    name of the MetSim directory
+!  \item[yr]
+!    year
+!  \item[mo]
+!    month
+!  \item[da]
+!    day
+!  \end{description}
+!
+!EOP
+
+   character(len=4) :: cyr
+   character(len=2) :: cmon
+
+   if ( LIS_rc%forecastMode == 1 ) then
+      call LIS_sample_forecastDate(n, kk, findex, yr, mo, da)
+   endif
+
+   write(cyr, '(i4.4)') yr
+   write(cmon, '(i2.2)') mo
+   filename=trim(metsimdir)//'/'//'icar_canesm2_'//cyr//'-'//cmon//'.nc'
+end subroutine metsim_filename
