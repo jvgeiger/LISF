@@ -186,6 +186,14 @@ subroutine read_metsim(n, kk, findex, order, mo, da, hr, filename, ferror)
          vartemp1d, input_bitmask, LIS_rc%gridDesc(n,:), &
          LIS_rc%lnc(n),LIS_rc%lnr(n),varfield)
 
+      if ( varname == 'temp' ) then
+         varfield = varfield + 273.15 ! convert from Celsius to Kelvin
+      endif
+
+      if ( varname == 'prec' ) then
+         varfield = varfield/(3*60*60) ! convert from mm/3hr to mm/s
+      endif
+
       do r=1,LIS_rc%lnr(n)
          do c=1,LIS_rc%lnc(n)
             t = LIS_domain(n)%gindex(c,r)
