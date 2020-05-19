@@ -22,6 +22,8 @@ module metsim_forcingMod
 !    Number of columns (along the east west dimension) for the input data
 !  \item[nrold]
 !    Number of rows (along the north south dimension) for the input data
+!  \item[nmif]
+!    Number of forcing variables in the MetSim data
 !  \item[fmodeltime1]
 !    The nearest, previous 6 hour instance of the incoming 
 !    data (as a real time). 
@@ -55,14 +57,6 @@ module metsim_forcingMod
 !  \end{description}
 !
 ! !REVISION HISTORY:
-! 26 Jan 2007: Hiroko Beaudoing; Initial Specification adopted from 
-!                                LIS/retberg.F90
-! 16 Feb 2016: Hiroko Beaudoing; Fixed indexes for precip and pressure fields 
-!                                so budget-bilinear interpolation applies to 
-!                                correct individual fields.
-! 15 May 2017: Bailing Li; Added changes for reading in version 2.2 data
-!                          that is in 3D array (4D in version 1 & 2).
-! 22 Oct 2018: Daniel Sarmiento; Added changes to support version 3 data
 ! 29 Apr 2020: Zhuo Wang: Added MetSim forcing for LIS-SUMMA 
 !
 ! !USES: 
@@ -84,6 +78,7 @@ module metsim_forcingMod
   type, public :: metsim_type_dec
      real                   :: ts
      integer                :: ncold, nrold   
+     integer                :: nmif
      character*100          :: metsimdir    ! MetSim Forcing Directory 
      integer                :: mi
      real*8                 :: metsimtime1,metsimtime2
@@ -104,8 +99,7 @@ module metsim_forcingMod
 
      integer, allocatable   :: n113(:)
      integer                :: findtime1, findtime2
-
-     integer           :: nIter, st_iterid,en_iterid  ! Forecast parameters  ??
+     integer                :: nIter, st_iterid, en_iterid ! Forecast parameters
 
      real, allocatable :: metdata1(:,:,:) 
      real, allocatable :: metdata2(:,:,:) 
@@ -122,18 +116,15 @@ contains
 ! \label{init_MetSim}
 !
 ! !REVISION HISTORY: 
-! 26 Jan 2007: Hiroko Kato; Initial Specification
-! 15 May 2017: Bailing Li; Added changes for reading in version 2.2 data
-! 22 Oct 2018: Daniel Sarmiento; Added changes to support version 3 data
 ! 29 Apr 2020: Zhuo Wang: Added MetSim forcing for LIS-SUMMA.
 ! 
 ! !INTERFACE:
   subroutine init_MetSim(findex)
 
 ! !USES: 
-   use LIS_coreMod
-   use LIS_timeMgrMod
-   use LIS_logMod
+   use LIS_coreMod,    only : LIS_rc, LIS_domain
+   use LIS_logMod,     only : LIS_logunit, LIS_endrun
+   use LIS_timeMgrMod, only : LIS_date2time, LIS_update_timestep
    use LIS_forecastMod
 
    implicit none
@@ -162,52 +153,70 @@ contains
     real     :: gridDesci(50)
     integer  :: n 
 
-    ! ??? Added according to merra-land ???
     integer :: updoy,yr1,mo1,da1,hr1,mn1,ss1
     real :: upgmt
 
-    gridDesci = 0.0 
     allocate(metsim_struc(LIS_rc%nnest))
-    call readcrd_metsim()
 
     do n=1, LIS_rc%nnest
        metsim_struc(n)%ts = 3*3600
        call LIS_update_timestep(LIS_rc, n, metsim_struc(n)%ts)
     enddo
 
-    ! ??? 7 forcing variables ??
+    call readcrd_metsim()
+
+    metsim_struc(:)%nmif  = 7
     LIS_rc%met_nf(findex) = 7 
 
-    ! Set MetSim grid dimensions and extent information:
-    ! ???
     metsim_struc(:)%ncold = 464
     metsim_struc(:)%nrold = 224
 
     do n=1,LIS_rc%nnest
+       ! Forecast mode:
+       if(LIS_rc%forecastMode.eq.1) then
+
+          if(mod(LIS_rc%nensem(n),&
+             LIS_forecast_struc(1)%niterations).ne.0) then
+             write(LIS_logunit,*) '[ERR] The number of ensembles must be a multiple'
+             write(LIS_logunit,*) '[ERR] of the number of iterations '
+             write(LIS_logunit,*) '[ERR] nensem = ',LIS_rc%nensem(n)
+             write(LIS_logunit,*) '[ERR] niter = ',LIS_forecast_struc(1)%niterations
+             call LIS_endrun()
+          endif
+
+          metsim_struc(n)%st_iterid = LIS_forecast_struc(1)%st_iterId
+          metsim_struc(n)%en_iterId = LIS_forecast_struc(1)%niterations
+          metsim_struc(n)%nIter = LIS_forecast_struc(1)%niterations
+
+          allocate(metsim_struc(n)%metdata1(LIS_forecast_struc(1)%niterations,&
+             LIS_rc%met_nf(findex),&
+             LIS_rc%ngrid(n)))
+          allocate(metsim_struc(n)%metdata2(LIS_forecast_struc(1)%niterations,&
+             LIS_rc%met_nf(findex),&
+             LIS_rc%ngrid(n)))
 
        ! Regular retrospective or non-forecast mode:
-       allocate(metsim_struc(n)%metdata1(1,LIS_rc%met_nf(findex),&
-            LIS_rc%ngrid(n)))
-       allocate(metsim_struc(n)%metdata2(1,LIS_rc%met_nf(findex),&
-            LIS_rc%ngrid(n)))
+       else
+          metsim_struc(n)%st_iterid = 1
+          metsim_struc(n)%en_iterId = 1
+          metsim_struc(n)%nIter = 1
 
-       metsim_struc(n)%st_iterid = 1
-       metsim_struc(n)%en_iterId = 1
-       metsim_struc(n)%nIter = 1
+          allocate(metsim_struc(n)%metdata1(1, LIS_rc%met_nf(findex),&
+               LIS_rc%ngrid(n)))
+          allocate(metsim_struc(n)%metdata2(1, LIS_rc%met_nf(findex),&
+               LIS_rc%ngrid(n)))
 
+       endif
 
-       metsim_struc(n)%metdata1 = 0
-       metsim_struc(n)%metdata2 = 0
+      metsim_struc(n)%metdata1 = 0
+      metsim_struc(n)%metdata2 = 0
+      metsim_struc(n)%findtime1 = 0
+      metsim_struc(n)%findtime2 = 0
 
-       ! Added based on NLDAS2 data
-      !metsim_struc(n)%gridDesci = 0
-      !metsim_struc(n)%findtime1 = 0
-      !metsim_struc(n)%findtime2 = 0
-
+      gridDesci = 0.0
       gridDesci(1) = 0
       gridDesci(2) = metsim_struc(n)%ncold
       gridDesci(3) = metsim_struc(n)%nrold
-      !Define driver data domains
       gridDesci(4) = 25.0625      ! min(lat)
       gridDesci(5) = -124.9375    ! min(lon)
       gridDesci(6) = 128
@@ -215,22 +224,7 @@ contains
       gridDesci(8) = -67.0625     ! max(lon) 
       gridDesci(9) = 0.125        ! dlat
       gridDesci(10) = 0.125       ! dlon
-
-      !???? For merra-land and merra, gridDesci(n,20) = 0
       gridDesci(20) = 64
-
-!     ! Check for grid and interp option selected:
-!     if( gridDesci(9)  == LIS_rc%gridDesc(n,9) .and. &
-!         gridDesci(10) == LIS_rc%gridDesc(n,10).and. &
-!         LIS_rc%gridDesc(n,1) == proj_latlon .and. &
-!         LIS_rc%met_interp(findex) .ne. "neighbor" ) then
-!       write(LIS_logunit,*) "[ERR] The MetSim grid was selected for the"
-!       write(LIS_logunit,*) "[ERR] LIS run domain; however, 'bilinear', 'budget-bilinear',"
-!       write(LIS_logunit,*) "[ERR] or some other unknown option was selected to spatially"
-!       write(LIS_logunit,*) "[ERR] downscale the grid, which will cause errors during runtime."
-!       write(LIS_logunit,*) "[ERR] Program stopping ..."
-!       call LIS_endrun()
-!     endif
 
       metsim_struc(n)%mi = metsim_struc(n)%ncold*metsim_struc(n)%nrold
 
@@ -251,7 +245,7 @@ contains
               metsim_struc(n)%w111,metsim_struc(n)%w121,&
               metsim_struc(n)%w211,metsim_struc(n)%w221)
 
-       elseif(trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") then
+      elseif(trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") then
          allocate(metsim_struc(n)%n111(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
          allocate(metsim_struc(n)%n121(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
          allocate(metsim_struc(n)%n211(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
@@ -276,22 +270,23 @@ contains
          allocate(metsim_struc(n)%w212(LIS_rc%lnc(n)*LIS_rc%lnr(n),25))
          allocate(metsim_struc(n)%w222(LIS_rc%lnc(n)*LIS_rc%lnr(n),25))
 
-          call conserv_interp_input(n,gridDesci,&
-               metsim_struc(n)%n112,metsim_struc(n)%n122,&
-               metsim_struc(n)%n212,metsim_struc(n)%n222,&
-               metsim_struc(n)%w112,metsim_struc(n)%w122,&
-               metsim_struc(n)%w212,metsim_struc(n)%w222)
-        elseif(trim(LIS_rc%met_interp(findex)) .eq. "neighbor") then 
-          allocate(metsim_struc(n)%n113(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
+         call conserv_interp_input(n,gridDesci,&
+              metsim_struc(n)%n112,metsim_struc(n)%n122,&
+              metsim_struc(n)%n212,metsim_struc(n)%n222,&
+              metsim_struc(n)%w112,metsim_struc(n)%w122,&
+              metsim_struc(n)%w212,metsim_struc(n)%w222)
+
+      elseif(trim(LIS_rc%met_interp(findex)) .eq. "neighbor") then
+         allocate(metsim_struc(n)%n113(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
         
-          call neighbor_interp_input(n,gridDesci,&
-               metsim_struc(n)%n113)
-       else
+         call neighbor_interp_input(n,gridDesci,&
+              metsim_struc(n)%n113)
+      else
          write(LIS_logunit,*) '[ERR] Interpolation option '// &
                trim(LIS_rc%met_interp(findex))//&
                ' for MetSim forcing is not supported'
          call LIS_endrun
-       endif
+      endif
 !-------------------------------------------------------------
     enddo
 

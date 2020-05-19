@@ -149,8 +149,11 @@ subroutine timeinterp_metsim(n, findex)
    endif
 
    ! multi-factor for metforcing ensemble number:
-   mfactor = LIS_rc%nensem(n)/metsim_struc(n)%nIter
+   !mfactor = LIS_rc%nensem(n)/metsim_struc(n)%nIter
+   mfactor = LIS_rc%nensem(n)
 
+! JVG: Disable zterp for testing
+#if 0
    do k=1,LIS_rc%ntiles(n)/mfactor
      do m=1,mfactor
        t = m + (k-1)*mfactor
@@ -178,6 +181,18 @@ subroutine timeinterp_metsim(n, findex)
           swd(t)=metsim_struc(n)%metdata1(kk,3,index1)
        endif
      end do
+  enddo
+#endif
+
+  do k=1,LIS_rc%ntiles(n)/mfactor
+     do m=1,mfactor
+        t = m + (k-1)*mfactor
+        index1 = LIS_domain(n)%tile(t)%index
+        kk = LIS_get_iteration_index(n, k, index1, mfactor)
+        if (metsim_struc(n)%metdata2(kk,3,index1).ne.LIS_rc%udef) then
+           swd(t) = metsim_struc(n)%metdata2(kk,3,index1)
+        endif
+     enddo
   enddo
 
   ! do block precipitation interpolation
@@ -265,6 +280,7 @@ subroutine timeinterp_metsim(n, findex)
 
   call ESMF_FieldGet(vField,localDE=0,farrayPtr=vwind,rc=status)
   call LIS_verify(status)
+  vwind = 0.0
  
   do k=1,LIS_rc%ntiles(n)/mfactor
      do m=1,mfactor
@@ -272,7 +288,7 @@ subroutine timeinterp_metsim(n, findex)
         index1 = LIS_domain(n)%tile(t)%index
         kk = LIS_get_iteration_index(n, k, index1, mfactor)
         if (metsim_struc(n)%metdata2(kk,6,index1).ne.LIS_rc%udef) then
-          vwind(t) = metsim_struc(n)%metdata2(kk,6,index1)
+          psurf(t) = metsim_struc(n)%metdata2(kk,6,index1)
         endif
      enddo
   enddo
@@ -286,7 +302,7 @@ subroutine timeinterp_metsim(n, findex)
         index1 = LIS_domain(n)%tile(t)%index
         kk = LIS_get_iteration_index(n, k, index1, mfactor)
         if (metsim_struc(n)%metdata2(kk,7,index1).ne.LIS_rc%udef) then
-          psurf(t) = metsim_struc(n)%metdata2(kk,7,index1)
+          pcp(t) = metsim_struc(n)%metdata2(kk,7,index1)
         endif
      enddo
   enddo
