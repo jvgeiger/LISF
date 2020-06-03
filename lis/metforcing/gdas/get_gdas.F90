@@ -33,6 +33,8 @@ subroutine get_gdas(n, findex)
   use LIS_timeMgrMod,     only : LIS_tick, LIS_get_nstep
   use LIS_logMod,         only : LIS_logunit, LIS_endrun
   use gdas_forcingMod,    only : gdas_struc
+  use gdas_forcingMod,    only : create_gdasForcing_ESMFbundle
+  use gdas_forcingMod,    only : create_gdas_ESMFroutehandle
 
   implicit none
 ! !ARGUMENTS: 
@@ -228,7 +230,13 @@ subroutine get_gdas(n, findex)
         call read_gdas_elev(n,findex, 1)
      endif
 
-     call gdas_reset_interp_input(n, findex, gridDesci)
+     IF (LIS_rc%do_esmfRegridding) THEN
+        CALL create_gdasForcing_ESMFbundle(n, gridDesci(1:10))
+        CALL create_gdas_ESMFroutehandle(n)
+     ELSE
+        call gdas_reset_interp_input(n, findex, gridDesci)
+     END IF
+
      gdas_struc(n)%gridchange1 = .false.
 
 != T170:
@@ -264,7 +272,13 @@ subroutine get_gdas(n, findex)
         call read_gdas_elev(n,findex, 2)
      endif
 
-     call gdas_reset_interp_input(n, findex, gridDesci)
+     IF (LIS_rc%do_esmfRegridding) THEN
+        CALL create_gdasForcing_ESMFbundle(n, gridDesci(1:10))
+        CALL create_gdas_ESMFroutehandle(n)
+     ELSE
+        call gdas_reset_interp_input(n, findex, gridDesci)
+     END IF
+
      gdas_struc(n)%gridchange2 = .false.
 
 != T254:
@@ -300,7 +314,13 @@ subroutine get_gdas(n, findex)
         call read_gdas_elev(n,findex, 3)
      endif
 
-     call gdas_reset_interp_input(n, findex, gridDesci)
+     IF (LIS_rc%do_esmfRegridding) THEN
+        CALL create_gdasForcing_ESMFbundle(n, gridDesci(1:10))
+        CALL create_gdas_ESMFroutehandle(n)
+     ELSE
+        call gdas_reset_interp_input(n, findex, gridDesci)
+     END IF
+
      gdas_struc(n)%gridchange3 = .false.
 
 != T382:
@@ -336,7 +356,13 @@ subroutine get_gdas(n, findex)
         call read_gdas_elev(n,findex, 4)
      endif
 
-     call gdas_reset_interp_input(n, findex, gridDesci)
+     IF (LIS_rc%do_esmfRegridding) THEN
+        CALL create_gdasForcing_ESMFbundle(n, gridDesci(1:10))
+        CALL create_gdas_ESMFroutehandle(n)
+     ELSE
+        call gdas_reset_interp_input(n, findex, gridDesci)
+     END IF
+
      gdas_struc(n)%gridchange4 = .false.
 
 != T574:
@@ -372,7 +398,13 @@ subroutine get_gdas(n, findex)
         call read_gdas_elev(n,findex, 5)
      endif
 
-     call gdas_reset_interp_input(n, findex, gridDesci)
+     IF (LIS_rc%do_esmfRegridding) THEN
+        CALL create_gdasForcing_ESMFbundle(n, gridDesci(1:10))
+        CALL create_gdas_ESMFroutehandle(n)
+     ELSE
+        call gdas_reset_interp_input(n, findex, gridDesci)
+     END IF
+
      gdas_struc(n)%gridchange5 = .false.
 
 != T1534:
@@ -407,7 +439,13 @@ subroutine get_gdas(n, findex)
         call read_gdas_elev(n,findex, 6)
      endif
 
-     call gdas_reset_interp_input(n, findex, gridDesci)
+     IF (LIS_rc%do_esmfRegridding) THEN
+        CALL create_gdasForcing_ESMFbundle(n, gridDesci(1:10))
+        CALL create_gdas_ESMFroutehandle(n)
+     ELSE
+        call gdas_reset_interp_input(n, findex, gridDesci)
+     END IF
+
      gdas_struc(n)%gridchange6 = .false.
 
   endif

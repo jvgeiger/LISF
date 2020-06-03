@@ -63,6 +63,7 @@ subroutine LIS_readConfig()
   character(100) :: diag_fname
   character(100) :: diag_dir
   integer, external  :: LIS_create_subdirs
+  character(15)  :: regrid_tool
 ! ______________________________________________________________
 
   if ( LIS_masterproc ) then
@@ -236,6 +237,21 @@ subroutine LIS_readConfig()
   call ESMF_ConfigGetAttribute(LIS_config,LIS_rc%zterp_correction, &
        label="Enable new zterp correction (met forcing):",default=.false.,rc=rc)
   
+!--------------------------------------------------------------------
+!---- Check if using ESMF regriding or not
+!--------------------------------------------------------------------
+  call ESMF_ConfigGetAttribute(LIS_config, regrid_tool, &
+                               label = "Regridding Tool:", &
+                               default = "noESMF", rc=rc)
+  call LIS_verify(rc, 'Issue reading the Regridding Tool: value')
+
+  IF (TRIM(regrid_tool) == "withESMF") THEN
+     LIS_rc%do_esmfRegridding = .TRUE.
+  ELSE
+     LIS_rc%do_esmfRegridding = .FALSE.
+  ENDIF
+  write(LIS_logunit,*) '[INFO] Doing ESMF Regridding? ', LIS_rc%do_esmfRegridding
+!--------------------------------------------------------------------
 
   allocate(LIS_rc%nts(LIS_rc%nnest))
 

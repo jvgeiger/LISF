@@ -32,7 +32,7 @@
 subroutine read_gdas( order, n, findex, &
      name00, name03, name06, F06flag, ferror,try )
 ! !USES:  
-  use LIS_coreMod,        only : LIS_rc, LIS_domain
+  use LIS_coreMod,        only : LIS_rc, LIS_domain, LIS_masterproc
   use LIS_timeMgrMod,     only : LIS_get_nstep, LIS_date2time
   use LIS_metforcingMod,  only : LIS_forc
   use gdas_forcingMod,    only : gdas_struc
@@ -389,9 +389,13 @@ subroutine retrieve_gdas_variables(n, findex, fname, dataStrucflag, glbdata, err
            pcp_flag = .false. 
            if(var_index.eq.8.or.var_index.eq.9) pcp_flag = .true. 
            
-           call interp_gdas(n, findex,pcp_flag,ngdas,f,&
-                lb,LIS_rc%gridDesc(n,:), &
-                LIS_rc%lnc(n),LIS_rc%lnr(n),varfield)
+           IF (LIS_rc%do_esmfRegridding) THEN
+              call performESMFregrid_gdas(n, findex, f, var_index, varfield)
+           ELSE
+              call interp_gdas(n, findex,pcp_flag,ngdas,f,&
+                               lb,LIS_rc%gridDesc(n,:), &
+                               LIS_rc%lnc(n),LIS_rc%lnr(n),varfield)
+           ENDIF
            
            do r=1,LIS_rc%lnr(n)
               do c=1,LIS_rc%lnc(n)
@@ -555,3 +559,93 @@ subroutine interp_gdas(n, findex, pcp_flag, ngdas,f,lb,lis_gds,nc,nr, &
 
 end subroutine interp_gdas
 
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INPUT PARAMETERS:
+!
+       subroutine performESMFregrid_gdas(n, findex, input_var, var_index, output_var)
+
+! !USES: 
+      use ESMF
+      use LIS_coreMod
+      use LIS_logMod
+      use LIS_spatialDownscalingMod
+      use gdas_forcingMod, only : gdas_struc, list_gdas_fields
+      use LIS_ESMF_Regrid_Utils, only : runESMF_Regridding
+      use LIS_field_bundleMod,   only : getPointerFromBundle, updateTracerToBundle
+
+      implicit none
+!
+! !INPUT PARAMETERS:
+      integer, intent(in)    :: n
+      integer, intent(in)    :: findex
+      real,    intent(in)    :: input_var(gdas_struc(n)%ncold*gdas_struc(n)%nrold)
+      integer, intent(in)    :: var_index
+!
+! !INPUT/OUTPUT PARAMETERS:
+      real,    intent(inout) :: output_var(LIS_rc%lnc(n), LIS_rc%lnr(n))
+!  
+! !DESCRIPTION: 
+!  This subroutine applies ESMF regridding to spatially interpolates a GDAS field to the 
+!  LIS running domain
+! 
+! !LOCAL VARIABLES:
+      integer                     :: i_min, i_max, j_min, j_max
+      integer                     :: kk, c, r, rc
+      type(ESMF_FIELD)            ::  model_field
+      type(ESMF_FIELD)            :: gdas_field
+      real(ESMF_KIND_R4), pointer :: model_ptr2D(:,:)
+      real(ESMF_KIND_R4), pointer :: gdas_ptr2D(:,:)
+      real(ESMF_KIND_R4), pointer :: ptr2Dglob(:,:)
+!EOP
+!------------------------------------------------------------------------------
+!BOC
+       ! Get the gdas ESMF field from the bundle
+       call getPointerFromBundle(gdas_struc(n)%forcing_bundle, gdas_ptr2D, var_index)
+
+       i_min = lbound(gdas_ptr2D, 1) ! lower bound of the first  dimension
+       i_max = ubound(gdas_ptr2D, 1) ! upper bound of the first  dimension
+       j_min = lbound(gdas_ptr2D, 2) ! lower bound of the second dimension
+       j_max = ubound(gdas_ptr2D, 2) ! upper bound of the second dimension
+
+       ! Allocate 2D global array
+       allocate(ptr2Dglob(gdas_struc(n)%ncold, gdas_struc(n)%nrold), stat=rc)
+       call LIS_verify(rc, 'Cannot allocate ptr2Dglob for '//TRIM(list_gdas_fields(var_index)))
+
+       ! Reshape the 1D global array into a 2D global array
+       ptr2Dglob = reshape(input_var(:), (/ gdas_struc(n)%ncold, gdas_struc(n)%nrold /) )
+
+       ! Extract the 2D local array from the 2D global array
+       gdas_ptr2D(:,:) = ptr2Dglob(i_min:i_max, j_min:j_max)
+
+       ! Perform the ESMF regriddig at the field level
+            !--> Get the ESMF field for gdas
+       call ESMF_FieldBundleGet (gdas_struc(n)%forcing_bundle, fieldIndex=var_index, &
+                                 field=gdas_field, RC=rc)
+       call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
+            !--> Get the ESMF field for model
+       call ESMF_FieldBundleGet (LIS_domain(n)%gdas_bundle, fieldIndex=var_index, &
+                                 field=model_field, RC=rc)
+       call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
+            !--> Do regridding
+       call runESMF_Regridding(gdas_field, model_field, gdas_struc(n)%routehandle, &
+                               gdas_struc(n)%dynamicMask, rc)
+       call LIS_verify(rc, 'runESMF_Regridding failed')
+
+       ! Populate the gdas metdata arrays
+            !--> Get the model  ESMF field from the bundle
+       call getPointerFromBundle(LIS_domain(n)%gdas_bundle, model_ptr2D, var_index)
+
+       i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
+       j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
+
+       do r=1,LIS_rc%lnr(n)
+          do c=1,LIS_rc%lnc(n)
+             output_var(c,r) = model_ptr2D(i_min+c-1,j_min+r-1)
+          end do
+       enddo
+
+       end subroutine performESMFregrid_gdas
+!EOC
+!------------------------------------------------------------------------------

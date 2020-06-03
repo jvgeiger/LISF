@@ -87,6 +87,7 @@ module gdas_forcingMod
 !  \end{description}
 !
 ! !USES:
+      USE ESMF
 
   implicit none
 
@@ -100,6 +101,10 @@ module gdas_forcingMod
 ! !PUBLIC TYPES:
 !-----------------------------------------------------------------------------
   public :: gdas_struc
+  public :: num_gdas_fields
+  public :: list_gdas_fields
+  public :: create_gdasForcing_ESMFbundle
+  public :: create_gdas_ESMFroutehandle
 !EOP
 
   type, public :: gdas_type_dec
@@ -136,10 +141,22 @@ module gdas_forcingMod
      real, allocatable :: metdata1(:,:) 
      real, allocatable :: metdata2(:,:) 
 
+     ! For ESMF regridding
+     type(ESMF_FieldBundle)       :: forcing_bundle
+     type(ESMF_RouteHandle)       :: routehandle
+     type(ESMF_DynamicMask)       :: dynamicMask
+     type(ESMF_TypeKind_Flag)     :: type_kind = ESMF_TYPEKIND_R4
+     type(ESMF_STAGGERLOC)        :: staggerloc
+     type(ESMF_RegridMethod_Flag) :: regridMethod
+     real                         :: undefined_value ! for missing value
 
   end type gdas_type_dec
 
   type(gdas_type_dec), allocatable :: gdas_struc(:)
+
+  integer            :: num_gdas_fields       ! number of available fields
+  character(len=100) :: list_gdas_fields(30)  ! list of name of fields
+  character(len=30), parameter :: gdas_bundle_bname = "gdas_bundle_"
 contains
 
 !BOP
@@ -153,9 +170,12 @@ contains
 ! !INTERFACE:
   subroutine init_GDAS(findex)
 ! !USES:
-    use LIS_coreMod,    only : LIS_rc, LIS_domain
-    use LIS_logMod,     only : LIS_logunit, LIS_endrun
+    use LIS_coreMod !,    only : LIS_rc, LIS_domain
+    use LIS_logMod !,     only : LIS_logunit, LIS_endrun
     use LIS_timeMgrMod, only : LIS_date2time, LIS_update_timestep
+
+      use LIS_FORC_AttributesMod
+      use LIS_field_bundleMod
 
     implicit none
 ! !ARGUMENTS:
@@ -195,6 +215,15 @@ contains
     real :: upgmt
     integer :: n
 
+    integer          :: ic, rc
+    real             :: forcing_gridDesc(10)
+
+    character(len=100)         :: name_tracer
+    integer                    :: fieldcount
+
+    write(LIS_logunit,*) '[INFO] Defines the native resolution '
+    write(LIS_logunit,*) '       of the input forcing for GDAS data'
+
     allocate(gdas_struc(LIS_rc%nnest))
 
     do n=1, LIS_rc%nnest
@@ -209,6 +238,10 @@ contains
 
     gdas_struc(:)%ncold = 192
     gdas_struc(:)%nrold = 94
+
+    IF (LIS_rc%do_esmfRegridding) THEN
+       CALL set_list_gdas_fields()
+    ENDIF
 
     do n=1,LIS_rc%nnest
 
@@ -302,9 +335,243 @@ contains
 
        ! Setting up weights for Interpolation
        call gdas_reset_interp_input(n, findex, gridDesci)
+
+       ! Initialize ESMF objects
+       !------------------------
+       IF (LIS_rc%do_esmfRegridding) THEN
+          !gdas_struc(n)%type_kind       = ESMF_TYPEKIND_R4
+          gdas_struc(n)%undefined_value = 9999.0
+
+          gdas_struc(n)%regridMethod = ESMF_REGRIDMETHOD_BILINEAR ! ESMF_REGRIDMETHOD_NEAREST_STOD
+          gdas_struc(n)%staggerloc   = ESMF_STAGGERLOC_CENTER
+          LIS_domain(n)%staggerloc   = ESMF_STAGGERLOC_CENTER
+
+          call create_gdasModel_ESMFbundle(n)
+
+       ENDIF
+
     enddo
 
   end subroutine init_GDAS
+
+!------------------------------------------------------------------------------
+!BOP
+      subroutine set_list_gdas_fields()
+!
+! !USES:
+      use LIS_FORC_AttributesMod
+!
+! !DESCRIPTION:
+! Determine the number of available fields that will be regridded
+!
+! !LOCAL VARIABLES:
+      integer :: ic
+!EOP
+!------------------------------------------------------------------------------
+!BOC
+      ic = 0
+      if (LIS_FORC_Tair%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_Tair%varname(1))
+      endif
+      if (LIS_FORC_Qair%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_Qair%varname(1))
+      endif
+      if (LIS_FORC_SWdown%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_SWdown%varname(1))
+      endif
+      if (LIS_FORC_LWdown%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_LWdown%varname(1))
+      endif
+      if (LIS_FORC_Wind_E%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_Wind_E%varname(1))
+      endif
+      if (LIS_FORC_Wind_N%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_Wind_N%varname(1))
+      endif
+      if (LIS_FORC_Psurf%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_Psurf%varname(1))
+      endif
+      if (LIS_FORC_Rainf%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_Rainf%varname(1))
+      endif
+      if (LIS_FORC_CRainf%selectOpt .eq. 1) then
+         ic = ic + 1
+         list_gdas_fields(ic) = TRIM(LIS_FORC_CRainf%varname(1))
+      endif
+
+      num_gdas_fields = ic
+
+      end subroutine set_list_gdas_fields
+!EOC
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+      subroutine create_gdasForcing_ESMFbundle(n, forcing_gridDesc)
+!
+! !USES:
+      use ESMF
+      use LIS_coreMod !,    only : LIS_rc, LIS_domain
+      use LIS_logMod !,     only : LIS_logunit, LIS_endrun
+      use LIS_FORC_AttributesMod
+      use LIS_field_bundleMod
+      use LIS_create_gridMod,      only :create_gaussian_grid
+!
+! !INPUT PARAMETERS:
+      integer, intent(in) :: n
+      real,    intent(in) :: forcing_gridDesc(10)
+!
+! !DESCRIPTION:
+! Create the GDAS forcing ESMF grid and bundle.
+! This subroutine might be called several times depending on the integration date.
+! Howver, it will be called once for any period when the GDAS forcing resolution
+! does not change.
+!
+! !LOCAL VARIABLES:
+      character(len=2) :: num_st
+      integer          :: rc, ic
+      type(ESMF_Grid)  :: gdas_grid
+      real             :: dummy_array(1,1) = 0.0
+!EOP
+!------------------------------------------------------------------------------
+!BOC
+      write(LIS_logunit,*) '[INFO] Initialize GDAS ESMF object.'
+      ! Create the bundles
+      write(num_st, '(i2.2)') n
+
+      ! ---> Bundle for gdas
+      gdas_struc(n)%forcing_bundle = ESMF_FieldBundleCreate(name = TRIM(gdas_bundle_bname)//num_st, rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for gdas Forcing Data')
+
+      gdas_grid =  create_gaussian_grid(forcing_gridDesc, "gdas Grid", &
+                                        LIS_rc%npesx, LIS_rc%npesy, &
+                                        staggerloc = gdas_struc(n)%staggerloc, &
+                                        global_domain = .TRUE.)
+      ! Add fields to the bundle
+      DO ic = 1, num_gdas_fields
+         if (LIS_masterproc) PRINT*,"****Adding: ", ic, TRIM(list_gdas_fields(ic))
+         call addTracerToBundle(gdas_struc(n)%forcing_bundle, gdas_grid, &
+                   TRIM(list_gdas_fields(ic)), gdas_struc(n)%type_kind, dummy_array)
+      ENDDO
+
+      end subroutine create_gdasForcing_ESMFbundle
+!EOC
+!------------------------------------------------------------------------------
+!BOP
+      subroutine create_gdasModel_ESMFbundle(n)
+!
+! !USES:
+      use ESMF
+      use LIS_coreMod !,    only : LIS_rc, LIS_domain
+      use LIS_logMod !,     only : LIS_logunit, LIS_endrun
+      use LIS_FORC_AttributesMod
+      use LIS_field_bundleMod
+      use LIS_create_gridMod,       only : create_regular_grid
+!
+! !INPUT PRAMETERS:
+      integer, intent(in) :: n
+!
+! !DESCRIPTION:
+! Create the model ESMF grid and bundle.
+! This subroutine is called once as the model resolution does not change.
+!
+! !LOCAL VARIABLES:
+      character(len=2) :: num_st
+      integer          :: rc, ic
+      real             :: model_gridDesc(10)
+      type(ESMF_Grid)  :: model_grid
+      real             :: dummy_array(1,1) = 0.0
+!EOP
+!------------------------------------------------------------------------------
+!BOC
+      write(LIS_logunit,*) '[INFO] Initialize GDAS and model ESMF objects.'
+
+      ! Create the bundles
+      write(num_st, '(i2.2)') n
+
+      ! ---> Bundle for the model
+      LIS_domain(n)%gdas_bundle = ESMF_FieldBundleCreate(name = TRIM(gdas_bundle_bname)//num_st, rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for model Data')
+
+      ! ---> ESMF grid for for the model
+      model_gridDesc(2) = LIS_rc%gnc(n)         ! LIS_rc%gridDesc(n,2) ! Global num points along x
+      model_gridDesc(3) = LIS_rc%gnr(n)         ! LIS_rc%gridDesc(n,3) ! Global num points along y
+      model_gridDesc(4) = LIS_rc%gridDesc(n,34)  ! lower lat
+      model_gridDesc(5) = LIS_rc%gridDesc(n,35)  ! lower lon
+      model_gridDesc(7) = LIS_rc%gridDesc(n,37)  ! upper lat
+      model_gridDesc(8) = LIS_rc%gridDesc(n,38)  ! upper lon
+      model_gridDesc(9) = LIS_rc%gridDesc(n,39)  ! x-grid size
+      model_gridDesc(10)= LIS_rc%gridDesc(n,40) ! y-grid size
+
+      model_grid =  create_regular_grid(model_gridDesc, "model Grid", &
+                                        LIS_rc%npesx, LIS_rc%npesy, &
+                                        staggerloc = LIS_domain(n)%staggerloc)
+
+      ! Add fields to the bundle
+      DO ic = 1, num_gdas_fields
+         if (LIS_masterproc) PRINT*,"****Adding: ", ic, TRIM(list_gdas_fields(ic))
+         call addTracerToBundle(LIS_domain(n)%gdas_bundle, model_grid, &
+                   TRIM(list_gdas_fields(ic)), gdas_struc(n)%type_kind, dummy_array)
+      ENDDO
+
+      end subroutine create_gdasModel_ESMFbundle
+!EOC
+!------------------------------------------------------------------------------
+!BOP
+      subroutine create_gdas_ESMFroutehandle(n)
+!
+! !USES:
+      use ESMF
+      use LIS_coreMod !,    only : LIS_rc, LIS_domain
+      use LIS_logMod !,     only : LIS_logunit, LIS_endrun
+
+      use LIS_FORC_AttributesMod
+      use LIS_field_bundleMod
+      use LIS_ESMF_Regrid_Utils, only : createESMF_RouteHandle
+!
+! !INPUT PARAMETERS:
+      integer, intent(in) :: n
+! 
+! !DESCRIPTION:
+! Determine the ESMF routehandle needed for thr regridding between 
+! the GDAS forcing and the model.
+!
+! !LOCAL VARIABLES:
+      type(ESMF_FIELD) :: model_field, gdas_field
+      integer          :: ftc(2), ftlb(2), ftub(2)
+      real, pointer    :: farray2dd(:,:)
+      integer          :: rc
+!EOP
+!------------------------------------------------------------------------------
+!BOC
+      write(LIS_logunit,*) '[INFO] Determine the ESMF routehandle.'
+
+      ! Get one field from the GDAS focing bundle
+      call ESMF_FieldBundleGet(gdas_struc(n)%forcing_bundle, TRIM(list_gdas_fields(1)), &
+                              field = gdas_field, rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldBundleGet failed for gdas field'//TRIM(list_gdas_fields(1)))
+
+      ! Get the corresponding field from the model bundle
+      call ESMF_FieldBundleGet(LIS_domain(n)%gdas_bundle, TRIM(list_gdas_fields(1)), & 
+                               field = model_field, rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldBundleGet failed for model field'//TRIM(list_gdas_fields(1)))
+
+      ! Compute the ESMF routehandle
+      call createESMF_RouteHandle(gdas_field, model_field,  gdas_struc(n)%regridMethod, &
+                                  gdas_struc(n)%undefined_value, gdas_struc(n)%routehandle, &
+                                  gdas_struc(n)%dynamicMask, rc)
+      call LIS_verify(rc, 'createESMF_RouteHandle failed')
+
+      end subroutine create_gdas_ESMFroutehandle
+!EOC
+!------------------------------------------------------------------------------
 
 end module gdas_forcingMod
 

@@ -16,7 +16,7 @@
 subroutine read_gdasT1534( order, n, findex, &
      name, ferror,try )
 ! !USES:  
-  use LIS_coreMod,        only : LIS_rc, LIS_domain
+  use LIS_coreMod,        only : LIS_rc, LIS_domain, LIS_masterproc
   use LIS_timeMgrMod,     only : LIS_get_nstep, LIS_date2time
   use LIS_metforcingMod,  only : LIS_forc
   use gdasT1534_forcingMod,    only : gdasT1534_struc
@@ -273,10 +273,14 @@ subroutine retrieve_gdasT1534_variables(n, findex, fname, glbdata, errorcode)
            pcp_flag = .false. 
            if(var_index.eq.8) pcp_flag = .true.
 !           if(var_index.eq.1) pcp_flag = .true.
-           
-           call interp_gdasT1534(n, findex,pcp_flag,ngdasT1534,f,&
-                lb,LIS_rc%gridDesc(n,:), &
-                LIS_rc%lnc(n),LIS_rc%lnr(n),varfield)
+
+           IF (LIS_rc%do_esmfRegridding) THEN
+              call performESMFregrid_gdasT1534(n, findex, f, var_index, varfield)
+           ELSE
+              call interp_gdasT1534(n, findex,pcp_flag,ngdasT1534,f,&
+                   lb,LIS_rc%gridDesc(n,:), &
+                   LIS_rc%lnc(n),LIS_rc%lnr(n),varfield)
+           ENDIF
            
            do r=1,LIS_rc%lnr(n)
               do c=1,LIS_rc%lnc(n)
@@ -286,6 +290,7 @@ subroutine retrieve_gdasT1534_variables(n, findex, fname, glbdata, errorcode)
                  endif
               enddo
            enddo
+           write(LIS_logunit,*) '[<-KNJR->] Finish regridding ', var_index
         endif
 
      enddo
@@ -431,3 +436,115 @@ subroutine interp_gdasT1534(n, findex, pcp_flag, ngdasT1534,f,lb,lis_gds,nc,nr, 
   enddo
 
 end subroutine interp_gdasT1534
+
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INPUT PARAMETERS:
+!
+       subroutine performESMFregrid_gdasT1534(n, findex, input_var, var_index, output_var)
+
+! !USES: 
+      use ESMF
+      use LIS_coreMod
+      use LIS_logMod
+      use LIS_spatialDownscalingMod
+      use gdasT1534_forcingMod, only : gdasT1534_struc, list_gdasT1534_fields
+      use LIS_ESMF_Regrid_Utils, only : runESMF_Regridding
+      use LIS_field_bundleMod,   only : getPointerFromBundle, updateTracerToBundle
+
+      implicit none
+!
+! !INPUT PARAMETERS:
+      integer, intent(in)    :: n
+      integer, intent(in)    :: findex
+      real,    intent(in)    :: input_var(gdasT1534_struc(n)%ncold*gdasT1534_struc(n)%nrold)
+      integer, intent(in)    :: var_index
+!
+! !INPUT/OUTPUT PARAMETERS:
+      real,    intent(inout) :: output_var(LIS_rc%lnc(n), LIS_rc%lnr(n))
+!  
+! !DESCRIPTION: 
+!  This subroutine applies ESMF regridding to spatially interpolates a GDAS field to the 
+!  LIS running domain
+! 
+! !LOCAL VARIABLES:
+      integer                     :: i_min, i_max, j_min, j_max
+      integer                     :: kk, c, r, rc
+      type(ESMF_FIELD)            ::  model_field
+      type(ESMF_FIELD)            :: gdasT1534_field
+      real(ESMF_KIND_R4), pointer :: model_ptr2D(:,:)
+      real(ESMF_KIND_R4), pointer :: gdasT1534_ptr2D(:,:)
+      real(ESMF_KIND_R4), pointer :: ptr2Dglob(:,:)
+!EOP
+!------------------------------------------------------------------------------
+!BOC
+       write(LIS_logunit,*) '  [<-KNJR->] Start regridding '//TRIM(list_gdasT1534_fields(var_index))
+       ! Get the gdasT1534 ESMF field from the bundle
+       call getPointerFromBundle(gdasT1534_struc(n)%forcing_bundle, gdasT1534_ptr2D, var_index)
+
+       IF (var_index > 11) THEN
+          write(LIS_logunit,*) "getPointerFromBundle for "//TRIM(list_gdasT1534_fields(var_index))
+       ENDIF
+       i_min = lbound(gdasT1534_ptr2D, 1) ! lower bound of the first  dimension
+       i_max = ubound(gdasT1534_ptr2D, 1) ! upper bound of the first  dimension
+       j_min = lbound(gdasT1534_ptr2D, 2) ! lower bound of the second dimension
+       j_max = ubound(gdasT1534_ptr2D, 2) ! upper bound of the second dimension
+
+       ! Allocate 2D global array
+       allocate(ptr2Dglob(gdasT1534_struc(n)%ncold, gdasT1534_struc(n)%nrold), stat=rc)
+       call LIS_verify(rc, 'Cannot allocate ptr2Dglob for '//TRIM(list_gdasT1534_fields(var_index)))
+
+       ! Reshape the 1D global array into a 2D global array
+       ptr2Dglob = reshape(input_var(:), (/ gdasT1534_struc(n)%ncold, gdasT1534_struc(n)%nrold /) )
+
+       IF (var_index > 11) THEN
+          write(LIS_logunit,*) i_min,i_max, j_min,j_max," for "//TRIM(list_gdasT1534_fields(var_index))
+       ENDIF
+       ! Extract the 2D local array from the 2D global array
+       gdasT1534_ptr2D(:,:) = ptr2Dglob(i_min:i_max, j_min:j_max)
+
+       IF (var_index > 11) THEN
+          write(LIS_logunit,"(a17,i4,4f11.5)") '  [<-FIELDS->]',var_index,maxval(gdasT1534_ptr2D),maxval(input_var),minval(gdasT1534_ptr2D),minval(input_var)
+       ENDIF
+
+       ! Perform the ESMF regriddig at the field level
+            !--> Get the ESMF field for gdasT1534
+!       write(LIS_logunit,*) '  [<-KNJR->] Get the ESMF field for gdasT1534.'
+       call ESMF_FieldBundleGet (gdasT1534_struc(n)%forcing_bundle, fieldIndex=var_index, &
+                                 field=gdasT1534_field, RC=rc)
+       call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
+            !--> Get the ESMF field for model
+!       write(LIS_logunit,*) '  [<-KNJR->] Get the ESMF field for model.'
+       call ESMF_FieldBundleGet (LIS_domain(n)%gdasT1534_bundle, fieldIndex=var_index, &
+                                 field=model_field, RC=rc)
+       call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
+            !--> Do regridding
+!       write(LIS_logunit,*) '  [<-KNJR->] Do regridding.'
+       call runESMF_Regridding(gdasT1534_field, model_field, gdasT1534_struc(n)%routehandle, &
+                               gdasT1534_struc(n)%dynamicMask, rc)
+       call LIS_verify(rc, 'runESMF_Regridding failed')
+
+       ! Populate the gdasT1534 metdata arrays
+            !--> Get the model  ESMF field from the bundle
+       call getPointerFromBundle(LIS_domain(n)%gdasT1534_bundle, model_ptr2D, var_index)
+
+       i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
+       j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
+
+!       write(LIS_logunit,*) '  [<-KNJR->] Check dims: ',LIS_rc%lnc(n),LIS_rc%lnr(n),&
+!             ubound(model_ptr2D, 1)-lbound(model_ptr2D,1)+1, &
+!             ubound(model_ptr2D, 2)-lbound(model_ptr2D,2)+1
+       do r=1,LIS_rc%lnr(n)
+          do c=1,LIS_rc%lnc(n)
+             output_var(c,r) = model_ptr2D(i_min+c-1,j_min+r-1)
+          end do
+       enddo
+
+       DEALLOCATE(ptr2Dglob)
+
+       write(LIS_logunit,*) var_index, '[<-KNJR->] Done regridding '//TRIM(list_gdasT1534_fields(var_index))
+
+       end subroutine performESMFregrid_gdasT1534
+!EOC
+!------------------------------------------------------------------------------

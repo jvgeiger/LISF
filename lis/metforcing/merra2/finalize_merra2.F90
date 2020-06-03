@@ -29,40 +29,42 @@ subroutine finalize_merra2(findex)
   integer :: findex
   integer :: n
 
-  do n=1,LIS_rc%nnest
-    select case( LIS_rc%met_interp(findex) )
-     case( "bilinear" )
-       deallocate(merra2_struc(n)%n111)
-       deallocate(merra2_struc(n)%n121)
-       deallocate(merra2_struc(n)%n211)
-       deallocate(merra2_struc(n)%n221)
-       deallocate(merra2_struc(n)%w111)
-       deallocate(merra2_struc(n)%w121)
-       deallocate(merra2_struc(n)%w211)
-       deallocate(merra2_struc(n)%w221)
+  IF (.NOT. LIS_rc%do_esmfRegridding) THEN
+     do n=1,LIS_rc%nnest
+       select case( LIS_rc%met_interp(findex) )
+        case( "bilinear" )
+          deallocate(merra2_struc(n)%n111)
+          deallocate(merra2_struc(n)%n121)
+          deallocate(merra2_struc(n)%n211)
+          deallocate(merra2_struc(n)%n221)
+          deallocate(merra2_struc(n)%w111)
+          deallocate(merra2_struc(n)%w121)
+          deallocate(merra2_struc(n)%w211)
+          deallocate(merra2_struc(n)%w221)
 
-     case( "budget-bilinear" )
-       deallocate(merra2_struc(n)%n111)
-       deallocate(merra2_struc(n)%n121)
-       deallocate(merra2_struc(n)%n211)
-       deallocate(merra2_struc(n)%n221)
-       deallocate(merra2_struc(n)%w111)
-       deallocate(merra2_struc(n)%w121)
-       deallocate(merra2_struc(n)%w211)
-       deallocate(merra2_struc(n)%w221)
-       deallocate(merra2_struc(n)%n112)
-       deallocate(merra2_struc(n)%n122)
-       deallocate(merra2_struc(n)%n212)
-       deallocate(merra2_struc(n)%n222)
-       deallocate(merra2_struc(n)%w112)
-       deallocate(merra2_struc(n)%w122)
-       deallocate(merra2_struc(n)%w212)
-       deallocate(merra2_struc(n)%w222)
+        case( "budget-bilinear" )
+          deallocate(merra2_struc(n)%n111)
+          deallocate(merra2_struc(n)%n121)
+          deallocate(merra2_struc(n)%n211)
+          deallocate(merra2_struc(n)%n221)
+          deallocate(merra2_struc(n)%w111)
+          deallocate(merra2_struc(n)%w121)
+          deallocate(merra2_struc(n)%w211)
+          deallocate(merra2_struc(n)%w221)
+          deallocate(merra2_struc(n)%n112)
+          deallocate(merra2_struc(n)%n122)
+          deallocate(merra2_struc(n)%n212)
+          deallocate(merra2_struc(n)%n222)
+          deallocate(merra2_struc(n)%w112)
+          deallocate(merra2_struc(n)%w122)
+          deallocate(merra2_struc(n)%w212)
+          deallocate(merra2_struc(n)%w222)
 
-     case( "neighbor" )
-       deallocate(merra2_struc(n)%n113)
-    end select
- enddo
+        case( "neighbor" )
+          deallocate(merra2_struc(n)%n113)
+       end select
+    enddo
+ ENDIF
  deallocate(merra2_struc)
 
 end subroutine finalize_merra2

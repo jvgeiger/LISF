@@ -34,25 +34,27 @@ subroutine finalize_gdas(findex)
   integer :: n 
   integer :: rc
 
-  do n=1,LIS_rc%nnest
-     deallocate(gdas_struc(n)%n111, stat=rc)
-     deallocate(gdas_struc(n)%n121, stat=rc)
-     deallocate(gdas_struc(n)%n211, stat=rc)
-     deallocate(gdas_struc(n)%n221, stat=rc)
-     deallocate(gdas_struc(n)%w111, stat=rc)
-     deallocate(gdas_struc(n)%w121, stat=rc)
-     deallocate(gdas_struc(n)%w211, stat=rc)
-     deallocate(gdas_struc(n)%w221, stat=rc)
+  IF (.NOT. LIS_rc%do_esmfRegridding) THEN
+     do n=1,LIS_rc%nnest
+        deallocate(gdas_struc(n)%n111, stat=rc)
+        deallocate(gdas_struc(n)%n121, stat=rc)
+        deallocate(gdas_struc(n)%n211, stat=rc)
+        deallocate(gdas_struc(n)%n221, stat=rc)
+        deallocate(gdas_struc(n)%w111, stat=rc)
+        deallocate(gdas_struc(n)%w121, stat=rc)
+        deallocate(gdas_struc(n)%w211, stat=rc)
+        deallocate(gdas_struc(n)%w221, stat=rc)
 
-     deallocate(gdas_struc(n)%n112, stat=rc)
-     deallocate(gdas_struc(n)%n122, stat=rc)
-     deallocate(gdas_struc(n)%n212, stat=rc)
-     deallocate(gdas_struc(n)%n222, stat=rc)
-     deallocate(gdas_struc(n)%w112, stat=rc)
-     deallocate(gdas_struc(n)%w122, stat=rc)
-     deallocate(gdas_struc(n)%w212, stat=rc)
-     deallocate(gdas_struc(n)%w222, stat=rc)
-  enddo
+        deallocate(gdas_struc(n)%n112, stat=rc)
+        deallocate(gdas_struc(n)%n122, stat=rc)
+        deallocate(gdas_struc(n)%n212, stat=rc)
+        deallocate(gdas_struc(n)%n222, stat=rc)
+        deallocate(gdas_struc(n)%w112, stat=rc)
+        deallocate(gdas_struc(n)%w122, stat=rc)
+        deallocate(gdas_struc(n)%w212, stat=rc)
+        deallocate(gdas_struc(n)%w222, stat=rc)
+     enddo
+  ENDIF
 
   deallocate(gdas_struc)
 

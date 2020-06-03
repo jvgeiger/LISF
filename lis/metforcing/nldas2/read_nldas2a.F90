@@ -47,8 +47,6 @@ subroutine read_nldas2a(n, kk, findex, order, month, name,ferror)
   use LIS_logMod,            only : LIS_logunit, LIS_verify, LIS_warning
   use LIS_metforcingMod,     only : LIS_forc
   use nldas2_forcingMod,     only : nldas2_struc, num_nldas2_fields, list_nldas2_fields
-  use LIS_ESMF_Regrid_Utils, only : runESMF_Regridding
-  use LIS_field_bundleMod,   only : getPointerFromBundle, updateTracerToBundle
 #if (defined USE_GRIBAPI)
   use grib_api
 #endif
@@ -104,13 +102,6 @@ subroutine read_nldas2a(n, kk, findex, order, month, name,ferror)
   real, allocatable         :: f(:)
   real, allocatable         :: nldas_forcing(:,:)
   real                      :: varfield(LIS_rc%lnc(n),LIS_rc%lnr(n))
-
-  integer                   :: i_min, i_max, j_min, j_max
-  type(ESMF_FIELD)          ::  model_field
-  type(ESMF_FIELD)          :: nldas2_field
-  real(ESMF_KIND_R4), pointer :: ptr2Dglob(:,:)
-  real(ESMF_KIND_R4), pointer :: model_ptr2D(:,:)
-  real(ESMF_KIND_R4), pointer :: nldas2_ptr2D(:,:)
 
   ferror = 1
   iv = 0
@@ -237,62 +228,7 @@ subroutine read_nldas2a(n, kk, findex, order, month, name,ferror)
      endif
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        ! Loop over all the fields to do the regridding
-        DO iv = 1, num_nldas2_fields
-           ! Get the nldas2 ESMF field from the bundle
-           call getPointerFromBundle(nldas2_struc(n)%forcing_bundle, nldas2_ptr2D, iv)
-
-           i_min = lbound(nldas2_ptr2D, 1) ! lower bound of the first  dimension
-           i_max = ubound(nldas2_ptr2D, 1) ! upper bound of the first  dimension
-           j_min = lbound(nldas2_ptr2D, 2) ! lower bound of the second dimension
-           j_max = ubound(nldas2_ptr2D, 2) ! upper bound of the second dimension
-
-           ! Allocate 2D global array
-           allocate(ptr2Dglob(nldas2_struc(n)%ncold, nldas2_struc(n)%nrold), stat=iret)
-           call LIS_verify(iret, 'Cannot allocate ptr2Dglob for '//TRIM(list_nldas2_fields(iv)))
-
-           ! Reshape the 1D global array into a 2D global array
-           ptr2Dglob = reshape(nldas_forcing(:,iv), (/ nldas2_struc(n)%ncold, nldas2_struc(n)%nrold /) )
-
-           ! Extract the 2D local array from the 2D global array
-           nldas2_ptr2D(:,:) = ptr2Dglob(i_min:i_max, j_min:j_max)
-
-           DEALLOCATE(ptr2Dglob)
-
-           ! Perform the ESMF regriddig at the field level
-                !--> Get the ESMF field for nldas2
-           call ESMF_FieldBundleGet (nldas2_struc(n)%forcing_bundle, fieldIndex=iv, field=nldas2_field, RC=rc)
-           call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
-                !--> Get the ESMF field for model
-           call ESMF_FieldBundleGet (LIS_domain(n)%nldas2_bundle, fieldIndex=iv, field=model_field, RC=rc)
-           call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
-                !--> Do regridding
-           call runESMF_Regridding(nldas2_field, model_field, nldas2_struc(n)%routehandle, &
-                                   nldas2_struc(n)%dynamicMask, rc)
-           call LIS_verify(rc, 'runESMF_Regridding failed')
-
-           ! Populate the nldas2 metdata arrays
-                !--> Get the model  ESMF field from the bundle
-           call getPointerFromBundle(LIS_domain(n)%nldas2_bundle,     model_ptr2D, iv)
-
-           i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
-           j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
-
-           do r=1,LIS_rc%lnr(n)
-              do c=1,LIS_rc%lnc(n)
-                 if (LIS_domain(n)%gindex(c,r).ne.-1) then
-                    if (order.eq.1) then
-                       nldas2_struc(n)%metdata1(kk,iv,LIS_domain(n)%gindex(c,r)) &
-                            = model_ptr2D(i_min+c-1,j_min+r-1)
-                    elseif (order.eq.2) then
-                       nldas2_struc(n)%metdata2(kk,iv,LIS_domain(n)%gindex(c,r))&
-                            = model_ptr2D(i_min+c-1,j_min+r-1)
-                    endif
-                 endif
-              end do
-           enddo
-
-        ENDDO
+        CALL performESMFregrid_nldas2(n, kk, order, nldas_forcing)
      ELSE
         do iv = 1,nvars
            pcp_flag = .false. 
@@ -499,3 +435,102 @@ subroutine interp_nldas2(n,findex, month, pcp_flag, &
 
 end subroutine interp_nldas2
 
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INPUT PARAMETERS:
+!
+       subroutine performESMFregrid_nldas2(n, kk, order, nldas_forcing)
+
+! !USES: 
+      use ESMF
+      use LIS_coreMod
+      use LIS_logMod
+      use LIS_spatialDownscalingMod
+      use nldas2_forcingMod,     only : nldas2_struc, num_nldas2_fields, list_nldas2_fields
+      use LIS_ESMF_Regrid_Utils, only : runESMF_Regridding
+      use LIS_field_bundleMod,   only : getPointerFromBundle, updateTracerToBundle
+
+      implicit none
+!
+! !INPUT PARAMETERS:
+      integer, intent(in)    :: n
+      integer, intent(in)    :: kk
+      integer, intent(in)    :: order
+      real,    intent(in)    :: nldas_forcing(num_nldas2_fields, nldas2_struc(n)%ncold * nldas2_struc(n)%nrold)
+!
+! !DESCRIPTION: 
+!  This subroutine applies ESMF regridding to spatially interpolates a NLDAS2 field to the 
+!  LIS running domain
+! 
+! !LOCAL VARIABLES:
+      integer                     :: i_min, i_max, j_min, j_max
+      integer                     :: c, r, rc, iv
+      type(ESMF_FIELD)            ::  model_field
+      type(ESMF_FIELD)            :: nldas2_field
+      real(ESMF_KIND_R4), pointer :: model_ptr2D(:,:)
+      real(ESMF_KIND_R4), pointer :: nldas2_ptr2D(:,:)
+      real(ESMF_KIND_R4), pointer :: ptr2Dglob(:,:)
+!EOP
+!------------------------------------------------------------------------------
+!BOC
+      ! Loop over all the fields to do the regridding
+      DO iv = 1, num_nldas2_fields
+         ! Get the nldas2 ESMF field from the bundle
+         call getPointerFromBundle(nldas2_struc(n)%forcing_bundle, nldas2_ptr2D, iv)
+
+         i_min = lbound(nldas2_ptr2D, 1) ! lower bound of the first  dimension
+         i_max = ubound(nldas2_ptr2D, 1) ! upper bound of the first  dimension
+         j_min = lbound(nldas2_ptr2D, 2) ! lower bound of the second dimension
+         j_max = ubound(nldas2_ptr2D, 2) ! upper bound of the second dimension
+
+         ! Allocate 2D global array
+         allocate(ptr2Dglob(nldas2_struc(n)%ncold, nldas2_struc(n)%nrold), stat=rc)
+         call LIS_verify(rc, 'Cannot allocate ptr2Dglob for '//TRIM(list_nldas2_fields(iv)))
+
+         ! Reshape the 1D global array into a 2D global array
+         ptr2Dglob = reshape(nldas_forcing(:,iv), (/ nldas2_struc(n)%ncold, nldas2_struc(n)%nrold /) )
+
+         ! Extract the 2D local array from the 2D global array
+         nldas2_ptr2D(:,:) = ptr2Dglob(i_min:i_max, j_min:j_max)
+
+         DEALLOCATE(ptr2Dglob)
+
+         ! Perform the ESMF regriddig at the field level
+              !--> Get the ESMF field for nldas2
+         call ESMF_FieldBundleGet (nldas2_struc(n)%forcing_bundle, fieldIndex=iv, field=nldas2_field, RC=rc)
+         call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
+              !--> Get the ESMF field for model
+         call ESMF_FieldBundleGet (LIS_domain(n)%nldas2_bundle, fieldIndex=iv, field=model_field, RC=rc)
+         call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
+              !--> Do regridding
+         call runESMF_Regridding(nldas2_field, model_field, nldas2_struc(n)%routehandle, &
+                                 nldas2_struc(n)%dynamicMask, rc)
+         call LIS_verify(rc, 'runESMF_Regridding failed')
+
+         ! Populate the nldas2 metdata arrays
+              !--> Get the model  ESMF field from the bundle
+         call getPointerFromBundle(LIS_domain(n)%nldas2_bundle,     model_ptr2D, iv)
+
+         i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
+         j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
+
+         do r=1,LIS_rc%lnr(n)
+            do c=1,LIS_rc%lnc(n)
+               if (LIS_domain(n)%gindex(c,r).ne.-1) then
+                  if (order.eq.1) then
+                     nldas2_struc(n)%metdata1(kk,iv,LIS_domain(n)%gindex(c,r)) &
+                          = model_ptr2D(i_min+c-1,j_min+r-1)
+                  elseif (order.eq.2) then
+                     nldas2_struc(n)%metdata2(kk,iv,LIS_domain(n)%gindex(c,r))&
+                          = model_ptr2D(i_min+c-1,j_min+r-1)
+                  endif
+               endif
+            end do
+         enddo
+
+      ENDDO
+
+      end subroutine performESMFregrid_nldas2
+!EOC
+!------------------------------------------------------------------------------

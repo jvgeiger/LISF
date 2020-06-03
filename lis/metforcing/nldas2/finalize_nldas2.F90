@@ -30,42 +30,45 @@ subroutine finalize_nldas2(findex)
   integer   :: findex
   
   do n=1,LIS_rc%nnest
-    if(trim(LIS_rc%met_interp(findex)).eq."bilinear") then 
+     IF (.NOT. LIS_rc%do_esmfRegridding) THEN
+       if(trim(LIS_rc%met_interp(findex)).eq."bilinear") then 
 
-       deallocate(nldas2_struc(n)%n111)
-       deallocate(nldas2_struc(n)%n121)
-       deallocate(nldas2_struc(n)%n211)
-       deallocate(nldas2_struc(n)%n221)
-       deallocate(nldas2_struc(n)%w111)
-       deallocate(nldas2_struc(n)%w121)
-       deallocate(nldas2_struc(n)%w211)
-       deallocate(nldas2_struc(n)%w221)
-    elseif(trim(LIS_rc%met_interp(findex)).eq."budget-bilinear") then 
+          deallocate(nldas2_struc(n)%n111)
+          deallocate(nldas2_struc(n)%n121)
+          deallocate(nldas2_struc(n)%n211)
+          deallocate(nldas2_struc(n)%n221)
+          deallocate(nldas2_struc(n)%w111)
+          deallocate(nldas2_struc(n)%w121)
+          deallocate(nldas2_struc(n)%w211)
+          deallocate(nldas2_struc(n)%w221)
+       elseif(trim(LIS_rc%met_interp(findex)).eq."budget-bilinear") then 
 
-       deallocate(nldas2_struc(n)%n111)
-       deallocate(nldas2_struc(n)%n121)
-       deallocate(nldas2_struc(n)%n211)
-       deallocate(nldas2_struc(n)%n221)
-       deallocate(nldas2_struc(n)%w111)
-       deallocate(nldas2_struc(n)%w121)
-       deallocate(nldas2_struc(n)%w211)
-       deallocate(nldas2_struc(n)%w221)
+          deallocate(nldas2_struc(n)%n111)
+          deallocate(nldas2_struc(n)%n121)
+          deallocate(nldas2_struc(n)%n211)
+          deallocate(nldas2_struc(n)%n221)
+          deallocate(nldas2_struc(n)%w111)
+          deallocate(nldas2_struc(n)%w121)
+          deallocate(nldas2_struc(n)%w211)
+          deallocate(nldas2_struc(n)%w221)
 
-       deallocate(nldas2_struc(n)%n112)
-       deallocate(nldas2_struc(n)%n122)
-       deallocate(nldas2_struc(n)%n212)
-       deallocate(nldas2_struc(n)%n222)
-       deallocate(nldas2_struc(n)%w112)
-       deallocate(nldas2_struc(n)%w122)
-       deallocate(nldas2_struc(n)%w212)
-       deallocate(nldas2_struc(n)%w222)
-    elseif(trim(LIS_rc%met_interp(findex)).eq."neighbor") then
+          deallocate(nldas2_struc(n)%n112)
+          deallocate(nldas2_struc(n)%n122)
+          deallocate(nldas2_struc(n)%n212)
+          deallocate(nldas2_struc(n)%n222)
+          deallocate(nldas2_struc(n)%w112)
+          deallocate(nldas2_struc(n)%w122)
+          deallocate(nldas2_struc(n)%w212)
+          deallocate(nldas2_struc(n)%w222)
+       elseif(trim(LIS_rc%met_interp(findex)).eq."neighbor") then
 
-       deallocate(nldas2_struc(n)%n113)
-    endif
+          deallocate(nldas2_struc(n)%n113)
+       endif
+    ENDIF
+
     if(LIS_rc%met_ecor(findex).ne."none") then 
        deallocate(nldas2_struc(n)%orig_ediff)
-    endif
+     endif
  enddo
  deallocate(nldas2_struc)
 

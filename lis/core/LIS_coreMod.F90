@@ -175,6 +175,8 @@ module LIS_coreMod
 
      type(ESMF_FieldBundle)     :: nldas2_bundle
      type(ESMF_FieldBundle)     :: merra2_bundle
+     type(ESMF_FieldBundle)     :: gdas_bundle
+     type(ESMF_FieldBundle)     :: gdasT1534_bundle
      type(ESMF_STAGGERLOC)      :: staggerloc 
   end type lis_domain_type
 
@@ -346,7 +348,7 @@ contains
     LIS_rc%endtime = 0
 
     ! Do we do ESMF regridding?
-    LIS_rc%do_esmfRegridding = .TRUE.
+    !LIS_rc%do_esmfRegridding = .TRUE.
 
     if ( present(nx) .and. present(ny) ) then
        LIS_rc%npesx = nx

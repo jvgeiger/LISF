@@ -32,37 +32,39 @@ subroutine finalize_gdasT1534(findex)
   integer :: n 
   integer :: findex
 
-  do n=1,LIS_rc%nnest  
-     if(LIS_rc%met_interp(findex).eq."bilinear") then 
+  IF (.NOT. LIS_rc%do_esmfRegridding) THEN
+     do n=1,LIS_rc%nnest  
+        if(LIS_rc%met_interp(findex).eq."bilinear") then 
 
-        deallocate(gdasT1534_struc(n)%n111)
-        deallocate(gdasT1534_struc(n)%n121)
-        deallocate(gdasT1534_struc(n)%n211)
-        deallocate(gdasT1534_struc(n)%n221)
-        deallocate(gdasT1534_struc(n)%w111)
-        deallocate(gdasT1534_struc(n)%w121)
-        deallocate(gdasT1534_struc(n)%w211)
-        deallocate(gdasT1534_struc(n)%w221)
-     elseif(LIS_rc%met_interp(findex).eq."budget-bilinear") then 
+           deallocate(gdasT1534_struc(n)%n111)
+           deallocate(gdasT1534_struc(n)%n121)
+           deallocate(gdasT1534_struc(n)%n211)
+           deallocate(gdasT1534_struc(n)%n221)
+           deallocate(gdasT1534_struc(n)%w111)
+           deallocate(gdasT1534_struc(n)%w121)
+           deallocate(gdasT1534_struc(n)%w211)
+           deallocate(gdasT1534_struc(n)%w221)
+        elseif(LIS_rc%met_interp(findex).eq."budget-bilinear") then 
 
-        deallocate(gdasT1534_struc(n)%n111)
-        deallocate(gdasT1534_struc(n)%n121)
-        deallocate(gdasT1534_struc(n)%n211)
-        deallocate(gdasT1534_struc(n)%n221)
-        deallocate(gdasT1534_struc(n)%w111)
-        deallocate(gdasT1534_struc(n)%w121)
-        deallocate(gdasT1534_struc(n)%w211)
-        deallocate(gdasT1534_struc(n)%w221)
+           deallocate(gdasT1534_struc(n)%n111)
+           deallocate(gdasT1534_struc(n)%n121)
+           deallocate(gdasT1534_struc(n)%n211)
+           deallocate(gdasT1534_struc(n)%n221)
+           deallocate(gdasT1534_struc(n)%w111)
+           deallocate(gdasT1534_struc(n)%w121)
+           deallocate(gdasT1534_struc(n)%w211)
+           deallocate(gdasT1534_struc(n)%w221)
 
-        deallocate(gdasT1534_struc(n)%n112)
-        deallocate(gdasT1534_struc(n)%n122)
-        deallocate(gdasT1534_struc(n)%n212)
-        deallocate(gdasT1534_struc(n)%n222)
-        deallocate(gdasT1534_struc(n)%w112)
-        deallocate(gdasT1534_struc(n)%w122)
-        deallocate(gdasT1534_struc(n)%w212)
-        deallocate(gdasT1534_struc(n)%w222)
-     endif
-  enddo
+           deallocate(gdasT1534_struc(n)%n112)
+           deallocate(gdasT1534_struc(n)%n122)
+           deallocate(gdasT1534_struc(n)%n212)
+           deallocate(gdasT1534_struc(n)%n222)
+           deallocate(gdasT1534_struc(n)%w112)
+           deallocate(gdasT1534_struc(n)%w122)
+           deallocate(gdasT1534_struc(n)%w212)
+           deallocate(gdasT1534_struc(n)%w222)
+        endif
+     enddo
+  ENDIF
   deallocate(gdasT1534_struc)
 end subroutine finalize_gdasT1534
