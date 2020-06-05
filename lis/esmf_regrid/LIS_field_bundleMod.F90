@@ -157,7 +157,7 @@
       type (ESMF_Grid),           intent(in) :: grid
       type (ESMF_TypeKind_Flag),  intent(in) :: type_kind
       character(len=*),           intent(in) :: fieldName
-      real,                       intent(in) :: dummy_array(:,:,:)
+      real,                       intent(in) :: dummy_array(1,1,1)
 !
 ! !INPUT/OUTPUT PARAMETERS:
       type (ESMF_FieldBundle), intent(inOut) :: bundle
@@ -545,7 +545,7 @@
       type (ESMF_Grid),           intent(in) :: grid
       type (ESMF_TypeKind_Flag),  intent(in) :: type_kind
       character(len=*),           intent(in) :: fieldName
-      real,                       intent(in) :: dummy_array(:,:)
+      real,                       intent(in) :: dummy_array(1,1)
 !
 ! !INPUT/OUTPUT PARAMETERS:
       type (ESMF_FieldBundle), intent(inOut) :: bundle

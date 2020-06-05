@@ -128,7 +128,6 @@
 !EOP
 !-------------------------------------------------------------------------
 !BOC
-
       rc = ESMF_SUCCESS
 
       srcTerm = 0
@@ -144,6 +143,7 @@
       call ESMF_DynamicMaskSetR4R8R4(dynamicMask, &
                                      simpleDynMaskProc, &
                                      dynamicSrcMaskValue=undefined_value, rc=rc)
+      call LIS_verify(rc, 'ESMF_DynamicMaskSetR4R8R4 failed')
 
     end subroutine createESMF_RouteHandleField
 !EOC
