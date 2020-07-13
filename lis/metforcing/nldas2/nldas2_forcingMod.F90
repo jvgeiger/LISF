@@ -129,6 +129,7 @@ module nldas2_forcingMod
      type(ESMF_TypeKind_Flag)     :: type_kind = ESMF_TYPEKIND_R4
      type(ESMF_STAGGERLOC)        :: staggerloc
      type(ESMF_RegridMethod_Flag) :: regridMethod
+     type(ESMF_CoordSys_Flag)     :: coordSys
      real                         :: undefined_value ! for missing value
      
   end type nldas2_type_dec
@@ -199,7 +200,7 @@ contains
     nldas2_struc(:)%nrold = 224
 
     IF (LIS_rc%do_esmfRegridding) THEN
-       CALL set_list_nldas2_fields()
+       CALL set_list_nldas2_fields(findex)
     ENDIF
 
     do n=1,LIS_rc%nnest
@@ -279,11 +280,20 @@ contains
 
        IF (LIS_rc%do_esmfRegridding) THEN
           !nldas2_struc(n)%type_kind       = ESMF_TYPEKIND_R4
-          nldas2_struc(n)%undefined_value = 9999.0
+          nldas2_struc(n)%undefined_value = LIS_rc%udef
 
-          nldas2_struc(n)%regridMethod = ESMF_REGRIDMETHOD_BILINEAR ! ESMF_REGRIDMETHOD_NEAREST_STOD
+          if ((LIS_rc%met_interp(findex)) .eq. "bilinear") then
+             nldas2_struc(n)%regridMethod = ESMF_REGRIDMETHOD_BILINEAR
+          elseif(trim(LIS_rc%met_interp(findex)) .eq. "neighbor") then
+             nldas2_struc(n)%regridMethod = ESMF_REGRIDMETHOD_NEAREST_STOD
+          elseif(trim(LIS_rc%met_interp(findex)) .eq. "conservative") then
+             nldas2_struc(n)%regridMethod =  ESMF_REGRIDMETHOD_CONSERVE
+          endif
+
           nldas2_struc(n)%staggerloc = ESMF_STAGGERLOC_CENTER
           LIS_domain(n)%staggerloc   = ESMF_STAGGERLOC_CENTER
+          nldas2_struc(n)%coordSys   = ESMF_COORDSYS_SPH_DEG
+          LIS_domain(n)%coordSys     = ESMF_COORDSYS_SPH_DEG
 
           forcing_gridDesc(:) = 0
           forcing_gridDesc(2) = nldas2_struc(n)%gridDesc(2) ! num points along x
@@ -386,16 +396,21 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-      subroutine set_list_nldas2_fields()
+      subroutine set_list_nldas2_fields(findex)
 !
 ! !USES:
       use LIS_FORC_AttributesMod
+      use LIS_coreMod,    only : LIS_rc
+!
+! !INPUT PARAMETERS: 
+      integer, intent(in) :: findex
 !
 ! !DESCRIPTION:
 ! Determine the number of available fields that will be regridded
 !
 ! !LOCAL VARIABLES:
       integer :: ic
+      character(len=2) :: num_spc
 !EOP
 !------------------------------------------------------------------------------
 !BOC
@@ -445,8 +460,13 @@ contains
          list_nldas2_fields(ic) = TRIM(LIS_FORC_CAPE%varname(1))
       endif
 
-
       num_nldas2_fields = ic
+
+      num_nldas2_fields = LIS_rc%met_nf(findex)
+      DO ic = 1, num_nldas2_fields
+         write(num_spc, '(i2.2)') ic
+         list_nldas2_fields(ic) = "nldas2_var_"//num_spc
+      ENDDO
 
       end subroutine set_list_nldas2_fields
 !EOC
@@ -460,7 +480,7 @@ contains
       use LIS_logMod !,     only : LIS_logunit, LIS_endrun
       use LIS_FORC_AttributesMod
       use LIS_field_bundleMod
-      use LIS_create_gridMod,      only : create_regular_grid
+      use LIS_create_gridMod !,      only : create_regular_grid
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: n
@@ -477,6 +497,10 @@ contains
       integer          :: rc, ic
       type(ESMF_Grid)  :: nldas2_grid
       real             :: dummy_array(1,1) = 0.0
+      real, pointer    :: lat_points(:)
+      real, pointer    :: lon_points(:)
+      real             :: min_lon, min_lat, dx, dy
+      integer          :: num_lons, num_lats
 !EOP
 !------------------------------------------------------------------------------
 !BOC
@@ -488,9 +512,35 @@ contains
       nldas2_struc(n)%forcing_bundle = ESMF_FieldBundleCreate(name = TRIM(nldas2_bundle_bname)//num_st, rc=rc)
       call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for nldas2 Forcing Data')
 
-      nldas2_grid =   create_regular_grid(forcing_gridDesc, "nldas2 Grid", &
-                                        LIS_rc%npesx, LIS_rc%npesy, &
-                                        staggerloc = nldas2_struc(n)%staggerloc)
+!      nldas2_grid =   create_regular_grid(forcing_gridDesc, "nldas2 Grid", &
+!                                        LIS_rc%npesx, LIS_rc%npesy, &
+!                                        staggerloc = nldas2_struc(n)%staggerloc)
+
+      num_lons = forcing_gridDesc(2)
+      min_lon  = forcing_gridDesc(5)
+      dx       = forcing_gridDesc(9)
+
+      num_lats = forcing_gridDesc(3)
+      min_lat  = forcing_gridDesc(4)
+      dy       = forcing_gridDesc(10)
+
+      ALLOCATE(lon_points(num_lons))
+      do ic = 1, num_lons
+         lon_points(ic) = (ic-1)*dx + min_lon
+      enddo
+
+      ALLOCATE(lat_points(num_lats))
+      do ic = 1, num_lats
+         lat_points(ic) = (ic-1)*dy + min_lat
+      enddo
+
+      nldas2_grid = create_rectilinear_grid(lon_points, lat_points, &
+                               "NLDAS2 Grid", LIS_rc%npesx, LIS_rc%npesy, &
+                                nldas2_struc(n)%coordSys, &
+                                staggerloc = nldas2_struc(n)%staggerloc)
+
+      DEALLOCATE(lon_points, lat_points)
+
       ! Add fields to the bundle
       DO ic = 1, num_nldas2_fields
          if (LIS_masterproc) PRINT*,"--->Adding-Forcing: ", ic, TRIM(list_nldas2_fields(ic))
@@ -510,7 +560,7 @@ contains
       use LIS_logMod !,     only : LIS_logunit, LIS_endrun
       use LIS_FORC_AttributesMod
       use LIS_field_bundleMod
-      use LIS_create_gridMod,       only : create_regular_grid
+      use LIS_create_gridMod !,       only : create_regular_grid
 !
 ! !INPUT PRAMETERS:
       integer, intent(in) :: n
@@ -521,10 +571,12 @@ contains
 !
 ! !LOCAL VARIABLES:
       character(len=2) :: num_st
-      integer          :: rc, ic
+      integer          :: rc, ic, num_lats, num_lons
       real             :: model_gridDesc(10)
       type(ESMF_Grid)  :: model_grid
       real             :: dummy_array(1,1) = 0.0
+      real, pointer    :: lat_points(:)
+      real, pointer    :: lon_points(:)
 !EOP
 !------------------------------------------------------------------------------
 !BOC
@@ -538,20 +590,47 @@ contains
       call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for model Data')
 
       ! ---> ESMF grid for for the model
-      model_gridDesc(:) = 0
-      model_gridDesc(2) = LIS_rc%gnc(n)         ! LIS_rc%gridDesc(n,2) ! Global num points along x
-      model_gridDesc(3) = LIS_rc%gnr(n)         ! LIS_rc%gridDesc(n,3) ! Global num points along y
-      model_gridDesc(4) = LIS_rc%gridDesc(n,34) ! lower lat
-      model_gridDesc(5) = LIS_rc%gridDesc(n,35) ! lower lon
-      model_gridDesc(7) = LIS_rc%gridDesc(n,37) ! 7) ! upper lat
-      model_gridDesc(8) = LIS_rc%gridDesc(n,38) ! 8) ! upper lon
-      model_gridDesc(9) = LIS_rc%gridDesc(n,39) ! x-grid size
-      model_gridDesc(10)= LIS_rc%gridDesc(n,40) ! y-grid size
+!      model_gridDesc(:) = 0
+!      model_gridDesc(2) = LIS_rc%gnc(n)         ! LIS_rc%gridDesc(n,2) ! Global num points along x
+!      model_gridDesc(3) = LIS_rc%gnr(n)         ! LIS_rc%gridDesc(n,3) ! Global num points along y
+!      model_gridDesc(4) = LIS_rc%gridDesc(n,34) ! lower lat
+!      model_gridDesc(5) = LIS_rc%gridDesc(n,35) ! lower lon
+!      model_gridDesc(7) = LIS_rc%gridDesc(n,37) ! 7) ! upper lat
+!      model_gridDesc(8) = LIS_rc%gridDesc(n,38) ! 8) ! upper lon
+!      model_gridDesc(9) = LIS_rc%gridDesc(n,39) ! x-grid size
+!      model_gridDesc(10)= LIS_rc%gridDesc(n,40) ! y-grid size
+!
+!      model_grid =  create_regular_grid(model_gridDesc, "Model Grid", &
+!                                        LIS_rc%npesx, LIS_rc%npesy, &
+!                                        staggerloc = LIS_domain(n)%staggerloc)
 
-      model_grid =  create_regular_grid(model_gridDesc, "Model Grid", &
-                                        LIS_rc%npesx, LIS_rc%npesy, &
-                                        staggerloc = LIS_domain(n)%staggerloc)
+      num_lons = LIS_rc%gnc(n)
+      num_lats = LIS_rc%gnr(n)
 
+      ALLOCATE(lon_points(LIS_rc%gnc(n)))
+      lon_points(:) = LIS_domain(n)%glon(1:num_lons)
+
+!      ! min_lon = LIS_rc%gridDesc(n,35)
+!      ! dx = LIS_rc%gridDesc(n,39)
+!      do ic = 1, LIS_rc%gnc(n)
+!         lon_points(ic) = (ic-1)*LIS_rc%gridDesc(n,39) + LIS_rc%gridDesc(n,35)
+!      enddo
+
+      ALLOCATE(lat_points(LIS_rc%gnr(n)))
+      lat_points(:) = LIS_domain(n)%glat(1:(num_lats-1)*num_lons:num_lons)
+
+!      ! min_lat = LIS_rc%gridDesc(n,34)
+!      ! dy = LIS_rc%gridDesc(n,40)
+!      do ic = 1, LIS_rc%gnr(n)
+!         lat_points(ic) = (ic-1)*LIS_rc%gridDesc(n,40) + LIS_rc%gridDesc(n,34)
+!      enddo
+
+      model_grid = create_rectilinear_grid(lon_points, lat_points, &
+                               "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
+                                LIS_domain(n)%coordSys, &
+                                staggerloc = LIS_domain(n)%staggerloc)
+
+      DEALLOCATE(lon_points, lat_points)
       ! Add fields to the bundle
       DO ic = 1, num_nldas2_fields
          if (LIS_masterproc) PRINT*,"<---Adding-Model: ", ic, TRIM(list_nldas2_fields(ic))
@@ -596,23 +675,10 @@ contains
                               field = nldas2_field, rc=rc)
       call LIS_verify(rc, 'ESMF_FieldBundleGet failed for nldas2 field'//TRIM(list_nldas2_fields(1)))
 
-!    call ESMF_FieldGet(nldas2_field, localDe=0, farrayPtr=farray2dd, &
-!        totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
-!        print"(a14,7i7)", "ForcingGrid: ", LIS_localPet,ftlb,ftub,ftc
-!      call LIS_verify(rc, 'ESMF_FieldGet failed for NLDAS2  field'//TRIM(list_nldas2_fields(1)))
-
-
       ! Get the corresponding field from the model bundle
       call ESMF_FieldBundleGet(LIS_domain(n)%nldas2_bundle, TRIM(list_nldas2_fields(1)), &
                                field = model_field, rc=rc)
       call LIS_verify(rc, 'ESMF_FieldBundleGet failed for model field'//TRIM(list_nldas2_fields(1)))
-
-
-!    call ESMF_FieldGet(model_field, localDe=0, farrayPtr=farray2dd, &
-!        totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
-!        print"(a14,7i7)", "ModelGrid: ", LIS_localPet,ftlb,ftub,ftc
-!      call LIS_verify(rc, 'ESMF_FieldGet failed for model field'//TRIM(list_nldas2_fields(1)))
-
 
       ! Compute the ESMF routehandle
       call createESMF_RouteHandle(nldas2_field, model_field,  nldas2_struc(n)%regridMethod, &

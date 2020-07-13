@@ -148,6 +148,7 @@ module gdas_forcingMod
      type(ESMF_TypeKind_Flag)     :: type_kind = ESMF_TYPEKIND_R4
      type(ESMF_STAGGERLOC)        :: staggerloc
      type(ESMF_RegridMethod_Flag) :: regridMethod
+     type(ESMF_CoordSys_Flag)     :: coordSys
      real                         :: undefined_value ! for missing value
 
   end type gdas_type_dec
@@ -240,7 +241,7 @@ contains
     gdas_struc(:)%nrold = 94
 
     IF (LIS_rc%do_esmfRegridding) THEN
-       CALL set_list_gdas_fields()
+       CALL set_list_gdas_fields(findex)
     ENDIF
 
     do n=1,LIS_rc%nnest
@@ -333,21 +334,33 @@ contains
 
        gdas_struc(n)%dstrucchange1 = .true.
 
-       ! Setting up weights for Interpolation
-       call gdas_reset_interp_input(n, findex, gridDesci)
-
        ! Initialize ESMF objects
        !------------------------
        IF (LIS_rc%do_esmfRegridding) THEN
           !gdas_struc(n)%type_kind       = ESMF_TYPEKIND_R4
-          gdas_struc(n)%undefined_value = 9999.0
+          gdas_struc(n)%undefined_value = LIS_rc%udef
 
-          gdas_struc(n)%regridMethod = ESMF_REGRIDMETHOD_BILINEAR ! ESMF_REGRIDMETHOD_NEAREST_STOD
+          if (trim(LIS_rc%met_interp(findex)) .eq. "bilinear") then
+             gdas_struc(n)%regridMethod = ESMF_REGRIDMETHOD_BILINEAR
+             !gdas_struc(n)%regridMethod = ESMF_REGRIDMETHOD_NEAREST_STOD
+             write(LIS_logunit,*) '[INFO] Using ESMF bilinear spacial interp.'
+          elseif(trim(LIS_rc%met_interp(findex)) .eq. "neighbor") then
+             gdas_struc(n)%regridMethod = ESMF_REGRIDMETHOD_NEAREST_STOD                    
+             write(LIS_logunit,*) '[INFO] Using ESMF near neighbor spacial interp.'
+          elseif(trim(LIS_rc%met_interp(findex)) .eq. "conservative") then
+             gdas_struc(n)%regridMethod =  ESMF_REGRIDMETHOD_CONSERVE
+             write(LIS_logunit,*) '[INFO] Using ESMF conservative spacial interp.'
+          endif
+
           gdas_struc(n)%staggerloc   = ESMF_STAGGERLOC_CENTER
           LIS_domain(n)%staggerloc   = ESMF_STAGGERLOC_CENTER
+          gdas_struc(n)%coordSys     = ESMF_COORDSYS_SPH_DEG
+          LIS_domain(n)%coordSys     = ESMF_COORDSYS_SPH_DEG
 
           call create_gdasModel_ESMFbundle(n)
-
+       ELSE
+          ! Setting up weights for Interpolation
+          call gdas_reset_interp_input(n, findex, gridDesci)
        ENDIF
 
     enddo
@@ -356,62 +369,32 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-      subroutine set_list_gdas_fields()
+      subroutine set_list_gdas_fields(findex)
 !
 ! !USES:
       use LIS_FORC_AttributesMod
+      use LIS_coreMod,    only : LIS_rc
+!
+! !INPUT PARAMETERS: 
+      integer, intent(in) :: findex
 !
 ! !DESCRIPTION:
 ! Determine the number of available fields that will be regridded
 !
 ! !LOCAL VARIABLES:
       integer :: ic
+      character(len=2) :: num_spc
 !EOP
 !------------------------------------------------------------------------------
 !BOC
-      ic = 0
-      if (LIS_FORC_Tair%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_Tair%varname(1))
-      endif
-      if (LIS_FORC_Qair%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_Qair%varname(1))
-      endif
-      if (LIS_FORC_SWdown%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_SWdown%varname(1))
-      endif
-      if (LIS_FORC_LWdown%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_LWdown%varname(1))
-      endif
-      if (LIS_FORC_Wind_E%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_Wind_E%varname(1))
-      endif
-      if (LIS_FORC_Wind_N%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_Wind_N%varname(1))
-      endif
-      if (LIS_FORC_Psurf%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_Psurf%varname(1))
-      endif
-      if (LIS_FORC_Rainf%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_Rainf%varname(1))
-      endif
-      if (LIS_FORC_CRainf%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdas_fields(ic) = TRIM(LIS_FORC_CRainf%varname(1))
-      endif
-
-      num_gdas_fields = ic
+      num_gdas_fields = LIS_rc%met_nf(findex)
+      DO ic = 1, num_gdas_fields
+         write(num_spc, '(i2.2)') ic
+         list_gdas_fields(ic) = "gdas_var_"//num_spc
+      ENDDO
 
       end subroutine set_list_gdas_fields
 !EOC
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
       subroutine create_gdasForcing_ESMFbundle(n, forcing_gridDesc)
@@ -422,7 +405,7 @@ contains
       use LIS_logMod !,     only : LIS_logunit, LIS_endrun
       use LIS_FORC_AttributesMod
       use LIS_field_bundleMod
-      use LIS_create_gridMod,      only :create_gaussian_grid
+      use LIS_create_gridMod !,      only :create_gaussian_grid
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: n
@@ -439,6 +422,13 @@ contains
       integer          :: rc, ic
       type(ESMF_Grid)  :: gdas_grid
       real             :: dummy_array(1,1) = 0.0
+      real, pointer    :: lat_points(:), slat(:), lat_weights(:)
+      real, pointer    :: lon_points(:)
+      real             :: dx, min_lon, min_lat, max_lat
+      integer          :: num_lons, num_lats
+      real, parameter  :: pi=3.14159265358979
+      real, parameter  :: dpr=180.0/pi
+      logical, SAVE    :: first_time = .TRUE.
 !EOP
 !------------------------------------------------------------------------------
 !BOC
@@ -450,13 +440,57 @@ contains
       gdas_struc(n)%forcing_bundle = ESMF_FieldBundleCreate(name = TRIM(gdas_bundle_bname)//num_st, rc=rc)
       call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for gdas Forcing Data')
 
-      gdas_grid =  create_gaussian_grid(forcing_gridDesc, "gdas Grid", &
-                                        LIS_rc%npesx, LIS_rc%npesy, &
-                                        staggerloc = gdas_struc(n)%staggerloc, &
-                                        global_domain = .TRUE.)
+!      gdas_grid =  create_gaussian_grid(forcing_gridDesc, "gdas Grid", &
+!                                        LIS_rc%npesx, LIS_rc%npesy, &
+!                                        staggerloc = gdas_struc(n)%staggerloc, &
+!                                        global_domain = .TRUE.)
+
+      num_lons = forcing_gridDesc(2)
+      min_lat  = forcing_gridDesc(4)
+      min_lon  = forcing_gridDesc(5)
+      max_lat  = forcing_gridDesc(7)
+      dx       = forcing_gridDesc(9)
+
+      ALLOCATE(lon_points(num_lons))
+      do ic = 1, num_lons
+         lon_points(ic) = (ic-1)*dx + min_lon
+         ! values must be between -180 to 180
+         IF (lon_points(ic) > 180.0) lon_points(ic) = lon_points(ic) - 360.0
+      enddo
+
+      ! Determine the global Gaussian latitude grid points
+      num_lats = forcing_gridDesc(3)
+
+      ALLOCATE(lat_points(num_lats))
+      ALLOCATE(slat(num_lats))
+      ALLOCATE(lat_weights(num_lats))
+
+      call gausslat(num_lats, slat, lat_weights)
+      do ic = 1, num_lats
+         lat_points(ic) = dpr*asin(slat(ic))
+         !lat_points(ic) = dpr*asin(slat(num_lats-ic+1))
+      enddo
+
+      !call gaussian_comp_lats(num_lats, lat_points)
+      !imin_lat = gaussian_find_row(numGridPoints(2), lat_points, min_lat)
+      !imax_lat = gaussian_find_row(numGridPoints(2), lat_points, max_lat)
+
+      gdas_grid = create_rectilinear_grid(lon_points, lat_points, &
+                               "GDAS Grid", LIS_rc%npesx, LIS_rc%npesy,  &
+                                gdas_struc(n)%coordSys, &
+                                periodic   = .TRUE., &
+                                staggerloc = gdas_struc(n)%staggerloc)
+
+      IF (first_time) THEN
+         first_time = .FALSE.
+         call ESMF_GridWriteVTK(gdas_grid, gdas_struc(n)%staggerloc, "forcing_gaussian", rc=rc)
+      ENDIF
+
+      DEALLOCATE(lon_points, lat_points)
+      DEALLOCATE(slat, lat_weights)
+
       ! Add fields to the bundle
       DO ic = 1, num_gdas_fields
-         if (LIS_masterproc) PRINT*,"****Adding: ", ic, TRIM(list_gdas_fields(ic))
          call addTracerToBundle(gdas_struc(n)%forcing_bundle, gdas_grid, &
                    TRIM(list_gdas_fields(ic)), gdas_struc(n)%type_kind, dummy_array)
       ENDDO
@@ -473,7 +507,7 @@ contains
       use LIS_logMod !,     only : LIS_logunit, LIS_endrun
       use LIS_FORC_AttributesMod
       use LIS_field_bundleMod
-      use LIS_create_gridMod,       only : create_regular_grid
+      use LIS_create_gridMod !,       only : create_regular_grid
 !
 ! !INPUT PRAMETERS:
       integer, intent(in) :: n
@@ -484,10 +518,12 @@ contains
 !
 ! !LOCAL VARIABLES:
       character(len=2) :: num_st
-      integer          :: rc, ic
+      integer          :: rc, ic, num_lats, num_lons
       real             :: model_gridDesc(10)
       type(ESMF_Grid)  :: model_grid
       real             :: dummy_array(1,1) = 0.0
+      real, pointer    :: lat_points(:)
+      real, pointer    :: lon_points(:)
 !EOP
 !------------------------------------------------------------------------------
 !BOC
@@ -501,22 +537,27 @@ contains
       call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for model Data')
 
       ! ---> ESMF grid for for the model
-      model_gridDesc(2) = LIS_rc%gnc(n)         ! LIS_rc%gridDesc(n,2) ! Global num points along x
-      model_gridDesc(3) = LIS_rc%gnr(n)         ! LIS_rc%gridDesc(n,3) ! Global num points along y
-      model_gridDesc(4) = LIS_rc%gridDesc(n,34)  ! lower lat
-      model_gridDesc(5) = LIS_rc%gridDesc(n,35)  ! lower lon
-      model_gridDesc(7) = LIS_rc%gridDesc(n,37)  ! upper lat
-      model_gridDesc(8) = LIS_rc%gridDesc(n,38)  ! upper lon
-      model_gridDesc(9) = LIS_rc%gridDesc(n,39)  ! x-grid size
-      model_gridDesc(10)= LIS_rc%gridDesc(n,40) ! y-grid size
+      num_lons = LIS_rc%gnc(n)
+      num_lats = LIS_rc%gnr(n)
 
-      model_grid =  create_regular_grid(model_gridDesc, "model Grid", &
-                                        LIS_rc%npesx, LIS_rc%npesy, &
-                                        staggerloc = LIS_domain(n)%staggerloc)
+      ALLOCATE(lon_points(num_lons))
+      lon_points(:) = LIS_domain(n)%glon(1:num_lons)
+
+      ALLOCATE(lat_points(num_lats))
+      lat_points(:) = -9999
+      lat_points(:) = LIS_domain(n)%glat(1:(num_lats-1)*num_lons:num_lons)
+
+      model_grid = create_rectilinear_grid(lon_points, lat_points, &
+                               "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
+                                LIS_domain(n)%coordSys, &
+                                staggerloc = LIS_domain(n)%staggerloc)
+
+      call ESMF_GridWriteVTK(model_grid, LIS_domain(n)%staggerloc, "model_latlon", rc=rc)
+
+      DEALLOCATE(lon_points, lat_points)
 
       ! Add fields to the bundle
       DO ic = 1, num_gdas_fields
-         if (LIS_masterproc) PRINT*,"****Adding: ", ic, TRIM(list_gdas_fields(ic))
          call addTracerToBundle(LIS_domain(n)%gdas_bundle, model_grid, &
                    TRIM(list_gdas_fields(ic)), gdas_struc(n)%type_kind, dummy_array)
       ENDDO
@@ -564,9 +605,12 @@ contains
       call LIS_verify(rc, 'ESMF_FieldBundleGet failed for model field'//TRIM(list_gdas_fields(1)))
 
       ! Compute the ESMF routehandle
-      call createESMF_RouteHandle(gdas_field, model_field,  gdas_struc(n)%regridMethod, &
-                                  gdas_struc(n)%undefined_value, gdas_struc(n)%routehandle, &
-                                  gdas_struc(n)%dynamicMask, rc)
+      call createESMF_RouteHandle(gdas_field, model_field,  &
+                                  gdas_struc(n)%regridMethod, &
+                                  gdas_struc(n)%undefined_value, &
+                                  gdas_struc(n)%routehandle, &
+                                  gdas_struc(n)%dynamicMask, &
+                                  rc)
       call LIS_verify(rc, 'createESMF_RouteHandle failed')
 
       end subroutine create_gdas_ESMFroutehandle

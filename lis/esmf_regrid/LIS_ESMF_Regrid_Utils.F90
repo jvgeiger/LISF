@@ -16,12 +16,14 @@
       public createESMF_RouteHandle
         
       interface createESMF_RouteHandle
-         module procedure createESMF_RouteHandleField
+         module procedure createESMF_RouteHandleField_static
+         module procedure createESMF_RouteHandleField_dynamic
          module procedure createESMF_RouteHandleBundle
       end interface
 
       interface runESMF_Regridding
-         module procedure runESMF_RegriddingField
+         module procedure runESMF_RegriddingField_static
+         module procedure runESMF_RegriddingField_dynamic
          module procedure runESMF_RegriddingBundle
       end interface
 
@@ -109,7 +111,42 @@
 !EOC
 !-------------------------------------------------------------------------
 !BOP    
-    subroutine createESMF_RouteHandleField(srcField, dstField, regridMethod, undefined_value, &
+    subroutine createESMF_RouteHandleField_static(srcField, dstField, regridMethod, &
+                                          undefined_value, routehandle, rc)
+
+      REAL,                         intent(in)    :: undefined_value 
+      type(ESMF_RegridMethod_Flag), intent(in)    :: regridMethod
+      type(ESMF_Field),             intent(inOut) :: srcField
+      type(ESMF_Field),             intent(inOut) :: dstField
+      type(ESMF_RouteHandle),       intent(out)   :: routehandle
+      integer,                      intent(out)   :: rc
+!
+! !DESCRIPTION:
+! Given the source and destination ESMF fields, create the routehandle.
+! We construct our interpolation operator (A matrix which maps source values 
+! to destination values). Here, no actual interpolation will happen,
+! only the interpolation matrices will be constructed.
+!
+!EOP
+!-------------------------------------------------------------------------
+!BOC
+      rc = ESMF_SUCCESS
+
+      call ESMF_FieldRegridStore(srcField          = srcfield, &
+                                 dstField          = dstfield, &
+                                 !srcMaskValues     = (/undefined_value/), &
+                                 !dstMaskValues     = (/undefined_value/), &
+                                 unmappedAction    = ESMF_UNMAPPEDACTION_IGNORE, &
+                                 routeHandle       = routehandle, &
+                                 lineType          = ESMF_LINETYPE_GREAT_CIRCLE, &
+                                 regridmethod      = regridMethod, rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldRegridStore failed in createESMF_RouteHandleField_static')
+
+    end subroutine createESMF_RouteHandleField_static
+!EOC
+!-------------------------------------------------------------------------
+!BOP    
+    subroutine createESMF_RouteHandleField_dynamic(srcField, dstField, regridMethod, undefined_value, &
                                            routehandle, dynamicMask, rc)
 
       REAL,                         intent(in)    :: undefined_value 
@@ -122,6 +159,9 @@
 !
 ! !DESCRIPTION:
 ! Given the source and destination ESMF fields, create the routehandle.
+! We construct our interpolation operator (A matrix which maps source values 
+! to destination values). Here, no actual interpolation will happen,
+! only the interpolation matrices will be constructed.
 
       integer :: srcTerm
 !
@@ -131,21 +171,30 @@
       rc = ESMF_SUCCESS
 
       srcTerm = 0
-      call ESMF_FieldRegridStore(srcField          = srcfield, &
-                                 dstField          = dstfield, &
-                                 srcTermProcessing = srcTerm, &
-                                 srcMaskValues     = [0], &
-                                 unmappedAction    = ESMF_UNMAPPEDACTION_IGNORE, &
-                                 routeHandle       = routehandle, &
-                                 regridmethod      = regridMethod, rc=rc)
+      IF (regridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) THEN
+         call ESMF_FieldRegridStore(srcField, dstField, &
+                   regridmethod      = regridMethod, &
+                   srcTermProcessing = srcTerm, &
+                   srcMaskValues     = [0], &
+                   unmappedAction    = ESMF_UNMAPPEDACTION_IGNORE, &
+                   routehandle       = routehandle, rc = rc)
+      ELSE
+         call ESMF_FieldRegridStore(srcField, dstField, &
+                   regridmethod      = regridMethod, &
+                   lineType          = ESMF_LINETYPE_GREAT_CIRCLE, &
+                   srcTermProcessing = srcTerm, &
+                   srcMaskValues     = [0], &
+                   unmappedAction    = ESMF_UNMAPPEDACTION_IGNORE, &
+                   routehandle       = routehandle, rc = rc)
+      ENDIF
       call LIS_verify(rc, 'ESMF_FieldRegridStore failed')
 
       call ESMF_DynamicMaskSetR4R8R4(dynamicMask, &
-                                     simpleDynMaskProc, &
-                                     dynamicSrcMaskValue=undefined_value, rc=rc)
+                                     dynamicMaskRoutine  = simpleDynMaskProc, &
+                                     dynamicSrcMaskValue = undefined_value, rc=rc)
       call LIS_verify(rc, 'ESMF_DynamicMaskSetR4R8R4 failed')
 
-    end subroutine createESMF_RouteHandleField
+    end subroutine createESMF_RouteHandleField_dynamic
 !EOC
 !-------------------------------------------------------------------------
 !BOP
@@ -171,7 +220,32 @@
 !-------------------------------------------------------------------------
 !BOP
 
-    subroutine runESMF_RegriddingField(srcField, dstField, routehandle, &
+    subroutine runESMF_RegriddingField_static(srcField, dstField, routehandle, &
+                                       rc)
+
+      type(ESMF_RouteHandle), intent(inOut) :: routehandle
+      type(ESMF_Field),       intent(in) :: srcField
+      type(ESMF_Field),       intent(inOut) :: dstField
+      integer,                intent(out)   :: rc
+
+!EOP
+!-------------------------------------------------------------------------
+!BOC
+       call ESMF_FieldRegrid(srcField      = srcField,        &
+                             dstField      = dstField,        &
+                             routehandle   = routehandle,     &
+                             zeroregion    = ESMF_REGION_SELECT, &
+                             !termorderflag = ESMF_TERMORDER_SRCSEQ, &
+                             !checkflag     = .TRUE., &
+                             rc=rc)
+       call LIS_verify(rc, 'ESMF_FieldRegrid failed')
+
+    end subroutine runESMF_RegriddingField_static
+!EOC
+!-------------------------------------------------------------------------
+!BOP
+
+    subroutine runESMF_RegriddingField_dynamic(srcField, dstField, routehandle, &
                                        dynamicMask, rc)
 
       type(ESMF_RouteHandle), intent(inOut) :: routehandle
@@ -192,12 +266,13 @@
                              checkflag   = .TRUE., rc=rc)
        call LIS_verify(rc, 'ESMF_FieldRegrid failed')
 
-    end subroutine runESMF_RegriddingField
+    end subroutine runESMF_RegriddingField_dynamic
 !EOC
 !-------------------------------------------------------------------------
 !BOP
    subroutine simpleDynMaskProc(dynamicMaskList, dynamicSrcMaskValue, &
-      dynamicDstMaskValue, rc)
+                                dynamicDstMaskValue, rc)
+!
       type(ESMF_DynamicMaskElementR4R8R4), pointer        :: dynamicMaskList(:)
       real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
       real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue

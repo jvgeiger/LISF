@@ -132,6 +132,13 @@ subroutine gdas_reset_interp_input(n, findex, gridDesci)
                  gdas_struc(n)%n212,gdas_struc(n)%n222, &
                  gdas_struc(n)%w112,gdas_struc(n)%w122, &
                  gdas_struc(n)%w212,gdas_struc(n)%w222)
+
+      elseif ( gdas_struc(n)%met_interp == "neighbor" ) then
+         allocate(gdas_struc(n)%n111(LIS_rc%lnc(n)*LIS_rc%lnr(n)))
+
+         call neighbor_interp_input (n, gridDesci, &
+                gdas_struc(n)%n111)
+
       endif
    else
       gdas_struc(n)%met_interp = LIS_rc%met_upscale(findex)
