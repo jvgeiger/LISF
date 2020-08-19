@@ -64,8 +64,6 @@ module gdasT1534_forcingMod
 ! !PUBLIC TYPES:
 !-----------------------------------------------------------------------------
   public :: gdasT1534_struc
-  public :: num_gdasT1534_fields
-  public :: list_gdasT1534_fields
 !EOP
 
   type, public :: gdasT1534_type_dec
@@ -96,22 +94,25 @@ module gdasT1534_forcingMod
      real, allocatable :: metdata2(:,:) 
 
      ! For ESMF regridding
-     type(ESMF_FieldBundle)       :: forcing_bundle
-     type(ESMF_RouteHandle)       :: routehandle
-     type(ESMF_DynamicMask)       :: dynamicMask
+     type(ESMF_RouteHandle)       :: routehandle_bilinear
+     type(ESMF_DynamicMask)       :: dynamicMask_bilinear
+     type(ESMF_RegridMethod_Flag) :: regridMethod_bilinear = ESMF_REGRIDMETHOD_BILINEAR
+     type(ESMF_RouteHandle)       :: routehandle_conserve
+     type(ESMF_DynamicMask)       :: dynamicMask_conserve
+     type(ESMF_RegridMethod_Flag) :: regridMethod_conserve = ESMF_REGRIDMETHOD_CONSERVE_2ND
+     type(ESMF_RouteHandle)       :: routehandle_neighbor
+     type(ESMF_DynamicMask)       :: dynamicMask_neighbor
+     type(ESMF_RegridMethod_Flag) :: regridMethod_neighbor = ESMF_REGRIDMETHOD_NEAREST_STOD
      type(ESMF_TypeKind_Flag)     :: type_kind = ESMF_TYPEKIND_R4
-     type(ESMF_STAGGERLOC)        :: staggerloc
-     type(ESMF_RegridMethod_Flag) :: regridMethod
-     type(ESMF_CoordSys_Flag)     :: coordSys
+     type(ESMF_Grid)              :: forcing_grid
+     type(ESMF_Grid)              :: model_grid
+     type(ESMF_Field)             :: forcing_field
+     type(ESMF_Field)             :: model_field
      real                         :: undefined_value ! for missing value
 
   end type gdasT1534_type_dec
   
   type(gdasT1534_type_dec), allocatable :: gdasT1534_struc(:)
-
-  integer            :: num_gdasT1534_fields       ! number of available fields
-  character(len=100) :: list_gdasT1534_fields(30)  ! list of name of fields
-  character(len=30), parameter :: gdasT1534_bundle_bname = "gdasT1534_bundle_"
 
 contains
   
@@ -191,10 +192,6 @@ contains
     gdasT1534_struc(:)%nmif    = 16 
     LIS_rc%met_nf(findex) = 16 !number of met variables in GDAST1534 forcing
 
-    IF (LIS_rc%do_esmfRegridding) THEN
-       CALL set_list_gdasT1534_fields(findex)
-    ENDIF
-    
     do n=1,LIS_rc%nnest
 
        allocate(gdasT1534_struc(n)%metdata1(LIS_rc%met_nf(findex),&
@@ -227,29 +224,11 @@ contains
        gdasT1534_struc(n)%mi = gdasT1534_struc(n)%ncold*gdasT1534_struc(n)%nrold
        
        IF (LIS_rc%do_esmfRegridding) THEN
-          !gdasT1534_struc(n)%type_kind       = ESMF_TYPEKIND_R4
           gdasT1534_struc(n)%undefined_value = LIS_rc%udef
 
-          if (trim(LIS_rc%met_interp(findex)) .eq. "bilinear") then
-             !gdasT1534_struc(n)%regridMethod = ESMF_REGRIDMETHOD_BILINEAR 
-             gdasT1534_struc(n)%regridMethod = ESMF_REGRIDMETHOD_NEAREST_STOD 
-             write(LIS_logunit,*) '[INFO] Using ESMF bilinear spacial interp.'
-          elseif(trim(LIS_rc%met_interp(findex)) .eq. "neighbor") then 
-             gdasT1534_struc(n)%regridMethod = ESMF_REGRIDMETHOD_NEAREST_STOD 
-             write(LIS_logunit,*) '[INFO] Using ESMF near neighbor spacial interp.'
-          elseif(trim(LIS_rc%met_interp(findex)) .eq. "conservative") then 
-             gdasT1534_struc(n)%regridMethod =  ESMF_REGRIDMETHOD_CONSERVE 
-             write(LIS_logunit,*) '[INFO] Using ESMF conservative spacial interp.'
-          endif
-
-          gdasT1534_struc(n)%staggerloc = ESMF_STAGGERLOC_CENTER
-          gdasT1534_struc(n)%coordSys   = ESMF_COORDSYS_SPH_DEG
-          LIS_domain(n)%staggerloc      = ESMF_STAGGERLOC_CENTER
-          LIS_domain(n)%coordSys        = ESMF_COORDSYS_SPH_DEG
-
-          CALL create_gdasT1534Forcing_ESMFbundle(n, gridDesci(1:10))
-          CALL create_gdasT1534Model_ESMFbundle(n)
-          CALL create_gdasT1534_ESMFroutehandle(n)
+          CALL create_gdasT1534Forcing_ESMFobjects(n, gridDesci(1:10))
+          CALL create_gdasT1534Model_ESMFobjects(n)
+          CALL create_gdasT1534_ESMFroutehandle(n, findex)
        ELSE
           !Setting up weights for Interpolation
           if(LIS_rc%met_interp(findex).eq."bilinear") then 
@@ -312,124 +291,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-      subroutine set_list_gdasT1534_fields(findex)
-!
-! !USES:
-      use LIS_FORC_AttributesMod
-      use LIS_logMod !,     only : LIS_logunit, LIS_endrun
-      use LIS_coreMod,    only : LIS_rc
-!
-! !INPUT PARAMETERS: 
-      integer, intent(in) :: findex
-!
-! !DESCRIPTION:
-! Determine the number of available fields that will be regridded
-!
-! !LOCAL VARIABLES:
-      integer :: ic
-      character(len=2) :: num_spc
-!EOP
-!------------------------------------------------------------------------------
-!BOC
-      ic = 0
-      if (LIS_FORC_Tair%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Tair%varname(1))
-      endif
-      if (LIS_FORC_Qair%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Qair%varname(1))
-      endif
-      if (LIS_FORC_SWdown%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_SWdown%varname(1))
-      endif
-      if (LIS_FORC_SWdirect%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_SWdirect%varname(1))
-      endif
-      if (LIS_FORC_SWdiffuse%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_SWdiffuse%varname(1))
-      endif
-      if (LIS_FORC_LWdown%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_LWdown%varname(1))
-      endif
-      if (LIS_FORC_Wind_E%selectOpt .eq. 1) then
-         ic = ic + 1
-          list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Wind_E%varname(1))
-        endif
-      if (LIS_FORC_Wind_N%selectOpt .eq. 1) then
-        ic = ic + 1
-        list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Wind_N%varname(1))
-      endif
-      if (LIS_FORC_Psurf%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Psurf%varname(1))
-      endif
-      if (LIS_FORC_Rainf%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Rainf%varname(1))
-      endif
-      if (LIS_FORC_Snowf%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Snowf%varname(1))
-      endif
-      if (LIS_FORC_CRainf%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_CRainf%varname(1))
-      endif
-      if (LIS_FORC_Forc_Hgt%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Forc_Hgt%varname(1))
-      endif
-      if (LIS_FORC_Ch%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Ch%varname(1))
-      endif
-      if (LIS_FORC_Cm%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Cm%varname(1))
-      endif
-      if (LIS_FORC_Q2sat%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Q2sat%varname(1))
-      endif
-      if (LIS_FORC_Emiss%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Emiss%varname(1))
-      endif
-      if (LIS_FORC_Cosz%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Cosz%varname(1))
-      endif
-      if (LIS_FORC_Alb%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Alb%varname(1))
-      endif
-      if (LIS_FORC_Z0%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_Z0%varname(1))
-      endif
-      if (LIS_FORC_GVF%selectOpt .eq. 1) then
-         ic = ic + 1
-         list_gdasT1534_fields(ic) = TRIM(LIS_FORC_GVF%varname(1))
-      endif
-
-      num_gdasT1534_fields = ic
-
-      num_gdasT1534_fields = LIS_rc%met_nf(findex)
-      DO ic = 1, num_gdasT1534_fields
-         write(num_spc, '(i2.2)') ic
-         list_gdasT1534_fields(ic) = "gdasT1534_var_"//num_spc
-      ENDDO
-
-      end subroutine set_list_gdasT1534_fields
-!EOC
-!------------------------------------------------------------------------------
-!BOP
-      subroutine create_gdasT1534Forcing_ESMFbundle(n, forcing_gridDesc)
+      subroutine create_gdasT1534Forcing_ESMFobjects(n, forcing_gridDesc)
 !
 ! !USES:
       use ESMF
@@ -444,82 +306,87 @@ contains
       real,    intent(in) :: forcing_gridDesc(10)
 !
 ! !DESCRIPTION:
-! Create the GDAS forcing ESMF grid and bundle.
+! Create the GDAS forcing ESMF grid and field.
 ! This subroutine might be called several times depending on the integration date.
 ! Howver, it will be called once for any period when the GDAS forcing resolution
 ! does not change.
 !
 ! !LOCAL VARIABLES:
-      character(len=2) :: num_st
       integer          :: rc, ic
-      type(ESMF_Grid)  :: gdasT1534_grid
-      real             :: dummy_array(1,1) = 0.0
-      real, pointer    :: lat_points(:), slat(:), lat_weights(:)
-      real, pointer    :: lon_points(:)
+      real, pointer    :: lat_centers(:), slat(:), lat_weights(:)
+      real, pointer    :: lon_centers(:)
+      real, pointer    :: lat_corners(:)
+      real, pointer    :: lon_corners(:)
       real             :: dx, min_lon
-      integer          :: num_lons, num_lats
+      integer          :: num_lons, num_lats, m
       real, parameter  :: pi=3.14159265358979
       real, parameter  :: dpr=180.0/pi
+      real(ESMF_KIND_R4), pointer :: PTR4(:,:)
+      type(ESMF_ArraySpec)        :: arrayspec
+      logical                     :: periodic
 !EOP
 !------------------------------------------------------------------------------
 !BOC
       write(LIS_logunit,*) '[INFO] Initialize GDAS T1534 ESMF object.'
-      ! Create the bundles
-      write(num_st, '(i2.2)') n
 
-      ! ---> Bundle for gdasT1534
-      gdasT1534_struc(n)%forcing_bundle = ESMF_FieldBundleCreate(name = TRIM(gdasT1534_bundle_bname)//num_st, rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for gdasT1534 Forcing Data')
-
-!      gdasT1534_grid = create_gaussian_grid(forcing_gridDesc, "gdasT1534 Grid", &
-!                              LIS_rc%npesx, LIS_rc%npesy, &
-!                              staggerloc = gdasT1534_struc(n)%staggerloc, &
-!                              global_domain = .TRUE.)
-
+      periodic = .TRUE.             ! this grid is periodic
       num_lons = forcing_gridDesc(2)
       min_lon  = forcing_gridDesc(5)
       dx       = forcing_gridDesc(9)
 
-      ALLOCATE(lon_points(num_lons))
+      ALLOCATE(lon_centers(num_lons))
       do ic = 1, num_lons
-         lon_points(ic) = (ic-1)*dx + min_lon
+         lon_centers(ic) = (ic-1)*dx + min_lon
          ! values must be between -180 to 180
-         IF (lon_points(ic) > 180.0) lon_points(ic) = lon_points(ic) - 360.0
+         IF (lon_centers(ic) > 180.0) lon_centers(ic) = lon_centers(ic) - 360.0
       enddo
 
       ! Determine the global Gaussian latitude grid points
       num_lats = forcing_gridDesc(3)
 
-      ALLOCATE(lat_points(num_lats))
+      ALLOCATE(lat_centers(num_lats))
       ALLOCATE(slat(num_lats))
       ALLOCATE(lat_weights(num_lats))
 
       call gausslat(num_lats, slat, lat_weights)
       do ic = 1, num_lats
-         lat_points(ic) = dpr*asin(slat(ic))
-         !lat_points(ic) = dpr*asin(slat(num_lats-ic+1))
+         lat_centers(ic) = dpr*asin(slat(ic))
+         !lat_centers(ic) = dpr*asin(slat(num_lats-ic+1))
       enddo
 
-      gdasT1534_grid = create_rectilinear_grid(lon_points, lat_points, &
-                               "GDAS T1534 Grid", LIS_rc%npesx, LIS_rc%npesy,  &
-                                gdasT1534_struc(n)%coordSys, &
-                                staggerloc = gdasT1534_struc(n)%staggerloc)
+      ALLOCATE(lon_corners(num_lons+1))
+      ALLOCATE(lat_corners(num_lats+1))
+      lon_corners = determine_lon_corners(lon_centers, periodic)
+      lat_corners = determine_lat_corners(lat_centers, periodic)
 
-      DEALLOCATE(lon_points, lat_points)
+      gdasT1534_struc(n)%forcing_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                               lon_corners, lat_corners, &
+                               "GDAS T1534 Grid", LIS_rc%npesx, LIS_rc%npesy,  &
+                                ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+
+      DEALLOCATE(lon_centers, lat_centers)
+      DEALLOCATE(lon_corners, lat_corners)
       DEALLOCATE(slat, lat_weights)
 
-      ! Add fields to the bundle
-      DO ic = 1, num_gdasT1534_fields
-         if (LIS_masterproc) PRINT*,"--->Adding-Forcing: ", ic, TRIM(list_gdasT1534_fields(ic))
-         call addTracerToBundle(gdasT1534_struc(n)%forcing_bundle, gdasT1534_grid, &
-                   TRIM(list_gdasT1534_fields(ic)), gdasT1534_struc(n)%type_kind, dummy_array)
-      ENDDO
+      ! Create the forcing field
+      call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4)
 
-      end subroutine create_gdasT1534Forcing_ESMFbundle
+      gdasT1534_struc(n)%forcing_field = ESMF_FieldCreate(gdasT1534_struc(n)%forcing_grid, arrayspec, &
+                              indexflag=ESMF_INDEX_DELOCAL,  &
+                              staggerloc=ESMF_STAGGERLOC_CENTER, &
+                              totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
+                              name = "Merra2 Forcing Field", rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+
+      call ESMF_FieldGet(gdasT1534_struc(n)%forcing_field, farrayPtr=PTR4, rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldGet failed ')
+      PTR4 = 0.0
+
+      end subroutine create_gdasT1534Forcing_ESMFobjects
 !EOC
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_gdasT1534Model_ESMFbundle(n)
+      subroutine create_gdasT1534Model_ESMFobjects(n)
 !
 ! !USES:
       use ESMF
@@ -533,78 +400,66 @@ contains
       integer, intent(in) :: n
 !
 ! !DESCRIPTION:
-! Create the model ESMF grid and bundle.
+! Create the model ESMF grid and field.
 ! This subroutine is called once as the model resolution does not change.
 !
 ! !LOCAL VARIABLES:
-      character(len=2) :: num_st
-      integer          :: rc, ic, num_lats, num_lons
+      integer          :: rc, ic, num_lats, num_lons, m
       real             :: model_gridDesc(10)
-      type(ESMF_Grid)  :: model_grid
-      real             :: dummy_array(1,1) = 0.0
-      real, pointer    :: lat_points(:)
-      real, pointer    :: lon_points(:)
+      real             :: dx
+      real, pointer    :: lat_centers(:)
+      real, pointer    :: lon_centers(:)
+      real, pointer    :: lat_corners(:)
+      real, pointer    :: lon_corners(:)
+      real(ESMF_KIND_R4), pointer :: PTR4(:,:)
+      type(ESMF_ArraySpec)        :: arrayspec
+      logical                     :: periodic
 !EOP
 !------------------------------------------------------------------------------
 !BOC
       write(LIS_logunit,*) '[INFO] Initialize model ESMF objects.'
 
-      ! Create the bundles
-      write(num_st, '(i2.2)') n
-
-      ! ---> Bundle for the model
-      LIS_domain(n)%gdasT1534_bundle = ESMF_FieldBundleCreate(name = TRIM(gdasT1534_bundle_bname)//num_st, rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldBundleCreate failed for model Data')
-
-      ! ---> ESMF grid for for the model
-!      model_gridDesc(:) = 0
-!      model_gridDesc(2) = LIS_rc%gnc(n)         ! LIS_rc%gridDesc(n,2) ! Global num points along x
-!      model_gridDesc(3) = LIS_rc%gnr(n)         ! LIS_rc%gridDesc(n,3) ! Global num points along y
-!      model_gridDesc(4) = LIS_rc%gridDesc(n,34) ! lower lat
-!      model_gridDesc(5) = LIS_rc%gridDesc(n,35) ! lower lon
-!      model_gridDesc(7) = LIS_rc%gridDesc(n,37) ! 7) ! upper lat
-!      model_gridDesc(8) = LIS_rc%gridDesc(n,38) ! 8) ! upper lon
-!      model_gridDesc(9) = LIS_rc%gridDesc(n,39) ! x-grid size
-!      model_gridDesc(10)= LIS_rc%gridDesc(n,40) ! y-grid size
-!
-!     PRINT"(i4,8f10.4)",LIS_localPet, &
-!                         model_gridDesc(2),model_gridDesc(3),model_gridDesc(4), &
-!                         model_gridDesc(5),model_gridDesc(7),model_gridDesc(8), &
-!                         model_gridDesc(9),model_gridDesc(10)
-!
-!      model_grid =  create_gaussian_grid(model_gridDesc, "Model Grid", &
-!                                        LIS_rc%npesx, LIS_rc%npesy, &
-!                                        staggerloc = LIS_domain(n)%staggerloc, &
-!                                        global_domain = .TRUE.)
-
+      periodic = .TRUE.         ! this grid is periodic
       num_lons = LIS_rc%gnc(n)
       num_lats = LIS_rc%gnr(n)
 
-      ALLOCATE(lon_points(num_lons))
-      lon_points(:) = LIS_domain(n)%glon(1:num_lons)
+      ALLOCATE(lon_centers(num_lons))
+      ALLOCATE(lat_centers(num_lats))
+      lon_centers(:) = LIS_domain(n)%glon(1:num_lons)
+      lat_centers(:) = LIS_domain(n)%glat(1:(num_lats-1)*num_lons:num_lons)
 
-      ALLOCATE(lat_points(num_lats))
-      lat_points(:) = LIS_domain(n)%glat(1:(num_lats-1)*num_lons:num_lons)
+      ALLOCATE(lon_corners(num_lons+1))
+      ALLOCATE(lat_corners(num_lats+1))
+      lon_corners = determine_lon_corners(lon_centers, periodic)
+      lat_corners = determine_lat_corners(lat_centers, periodic)
 
-      model_grid = create_rectilinear_grid(lon_points, lat_points, &
+      gdasT1534_struc(n)%model_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                               lon_corners, lat_corners, &
                                "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
-                                LIS_domain(n)%coordSys, &
-                                staggerloc = LIS_domain(n)%staggerloc)
+                                ESMF_COORDSYS_SPH_DEG, periodic = periodic)
 
-      DEALLOCATE(lon_points, lat_points)
+      DEALLOCATE(lon_centers, lat_centers)
+      DEALLOCATE(lon_corners, lat_corners)
 
-      ! Add fields to the bundle
-      DO ic = 1, num_gdasT1534_fields
-         if (LIS_masterproc) PRINT*,"<---Adding-Model: ", ic, TRIM(list_gdasT1534_fields(ic))
-         call addTracerToBundle(LIS_domain(n)%gdasT1534_bundle, model_grid, &
-                   TRIM(list_gdasT1534_fields(ic)), gdasT1534_struc(n)%type_kind, dummy_array)
-      ENDDO
+      ! Create the model field
+      call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4)
 
-      end subroutine create_gdasT1534Model_ESMFbundle
+      gdasT1534_struc(n)%model_field = ESMF_FieldCreate(gdasT1534_struc(n)%model_grid, arrayspec, &
+                              indexflag=ESMF_INDEX_DELOCAL, &
+                              staggerloc=ESMF_STAGGERLOC_CENTER, &
+                              totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
+                              name = "Model Field", rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+
+      call ESMF_FieldGet(gdasT1534_struc(n)%model_field, farrayPtr=PTR4, rc=rc)
+      call LIS_verify(rc, 'ESMF_FieldGet failed ')
+      PTR4 = 0.0
+
+      end subroutine create_gdasT1534Model_ESMFobjects
 !EOC
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_gdasT1534_ESMFroutehandle(n)
+      subroutine create_gdasT1534_ESMFroutehandle(n, findex)
 !
 ! !USES:
       use ESMF
@@ -617,6 +472,7 @@ contains
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
 ! 
 ! !DESCRIPTION:
 ! Determine the ESMF routehandle needed for thr regridding between 
@@ -632,21 +488,42 @@ contains
 !BOC
       write(LIS_logunit,*) '[INFO] Determine the ESMF routehandle.'
 
-      ! Get one field from the GDAS focing bundle
-      call ESMF_FieldBundleGet(gdasT1534_struc(n)%forcing_bundle, TRIM(list_gdasT1534_fields(1)), &
-                              field = gdasT1534_field, rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldBundleGet failed for gdasT1534 field'//TRIM(list_gdasT1534_fields(1)))
+      if (trim(LIS_rc%met_interp(findex)) .eq. "bilinear") THEN
+         call createESMF_RouteHandle(gdasT1534_struc(n)%forcing_field, &
+                         gdasT1534_struc(n)%model_field,  &
+                         gdasT1534_struc(n)%regridMethod_bilinear, &
+                         gdasT1534_struc(n)%undefined_value, &
+                         gdasT1534_struc(n)%routehandle_bilinear, &
+                         gdasT1534_struc(n)%dynamicMask_bilinear, &
+                         lineType=ESMF_LINETYPE_CART)
+         write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
+      else if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         call createESMF_RouteHandle(gdasT1534_struc(n)%forcing_field, &
+                         gdasT1534_struc(n)%model_field,  &
+                         gdasT1534_struc(n)%regridMethod_bilinear, &
+                         gdasT1534_struc(n)%undefined_value, &
+                         gdasT1534_struc(n)%routehandle_bilinear, &
+                         gdasT1534_struc(n)%dynamicMask_bilinear, &
+                         lineType=ESMF_LINETYPE_CART)
+         write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
 
-      ! Get the corresponding field from the model bundle
-      call ESMF_FieldBundleGet(LIS_domain(n)%gdasT1534_bundle, TRIM(list_gdasT1534_fields(1)), &
-                               field = model_field, rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldBundleGet failed for model field'//TRIM(list_gdasT1534_fields(1)))
-
-      ! Compute the ESMF routehandle
-      call createESMF_RouteHandle(gdasT1534_field, model_field,  gdasT1534_struc(n)%regridMethod, &
-                                  gdasT1534_struc(n)%undefined_value, gdasT1534_struc(n)%routehandle, &
-                                  gdasT1534_struc(n)%dynamicMask, rc)
-      call LIS_verify(rc, 'createESMF_RouteHandle failed')
+         call createESMF_RouteHandle(gdasT1534_struc(n)%forcing_field, &
+                         gdasT1534_struc(n)%model_field,  &
+                         gdasT1534_struc(n)%regridMethod_conserve, &
+                         gdasT1534_struc(n)%undefined_value, &
+                         gdasT1534_struc(n)%routehandle_conserve, &
+                         gdasT1534_struc(n)%dynamicMask_conserve, &
+                         lineType=ESMF_LINETYPE_GREAT_CIRCLE)
+         write(LIS_logunit,*) '[INFO] Done with the conservative routehandle.'
+      else if (trim(LIS_rc%met_interp(findex)) .eq. "neighbor") THEN
+         call createESMF_RouteHandle(gdasT1534_struc(n)%forcing_field, &
+                         gdasT1534_struc(n)%model_field,  &
+                         gdasT1534_struc(n)%regridMethod_neighbor, &
+                         gdasT1534_struc(n)%undefined_value, &
+                         gdasT1534_struc(n)%routehandle_neighbor, &
+                         gdasT1534_struc(n)%dynamicMask_neighbor)
+         write(LIS_logunit,*) '[INFO] Done with the nearest neighbor routehandle.'
+      endif
 
       end subroutine create_gdasT1534_ESMFroutehandle
 !EOC

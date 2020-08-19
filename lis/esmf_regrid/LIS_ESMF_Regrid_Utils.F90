@@ -111,15 +111,16 @@
 !EOC
 !-------------------------------------------------------------------------
 !BOP    
-    subroutine createESMF_RouteHandleField_static(srcField, dstField, regridMethod, &
-                                          undefined_value, routehandle, rc)
+    subroutine createESMF_RouteHandleField_static(srcField, dstField, &
+                                     regridMethod, undefined_value, &
+                                     routehandle, lineType)
 
       REAL,                         intent(in)    :: undefined_value 
       type(ESMF_RegridMethod_Flag), intent(in)    :: regridMethod
       type(ESMF_Field),             intent(inOut) :: srcField
       type(ESMF_Field),             intent(inOut) :: dstField
       type(ESMF_RouteHandle),       intent(out)   :: routehandle
-      integer,                      intent(out)   :: rc
+      type(ESMF_LineType_Flag), intent(in), optional :: lineType
 !
 ! !DESCRIPTION:
 ! Given the source and destination ESMF fields, create the routehandle.
@@ -127,10 +128,15 @@
 ! to destination values). Here, no actual interpolation will happen,
 ! only the interpolation matrices will be constructed.
 !
+      integer                  :: rc
+      type(ESMF_LineType_Flag) :: lineType_
 !EOP
 !-------------------------------------------------------------------------
 !BOC
       rc = ESMF_SUCCESS
+
+      lineType_ = ESMF_LINETYPE_CART
+      if (present(lineType)) lineType_ = lineType
 
       call ESMF_FieldRegridStore(srcField          = srcfield, &
                                  dstField          = dstfield, &
@@ -138,7 +144,7 @@
                                  !dstMaskValues     = (/undefined_value/), &
                                  unmappedAction    = ESMF_UNMAPPEDACTION_IGNORE, &
                                  routeHandle       = routehandle, &
-                                 lineType          = ESMF_LINETYPE_GREAT_CIRCLE, &
+                                 lineType          = lineType_, &
                                  regridmethod      = regridMethod, rc=rc)
       call LIS_verify(rc, 'ESMF_FieldRegridStore failed in createESMF_RouteHandleField_static')
 
@@ -146,8 +152,10 @@
 !EOC
 !-------------------------------------------------------------------------
 !BOP    
-    subroutine createESMF_RouteHandleField_dynamic(srcField, dstField, regridMethod, undefined_value, &
-                                           routehandle, dynamicMask, rc)
+    subroutine createESMF_RouteHandleField_dynamic(srcField, dstField, &
+                                           regridMethod, undefined_value, &
+                                           routehandle, dynamicMask, &
+                                           lineType)
 
       REAL,                         intent(in)    :: undefined_value 
       type(ESMF_RegridMethod_Flag), intent(in)    :: regridMethod
@@ -155,7 +163,7 @@
       type(ESMF_Field),             intent(inOut) :: dstField
       type(ESMF_DynamicMask),       intent(inOut) :: dynamicMask
       type(ESMF_RouteHandle),       intent(out)   :: routehandle
-      integer,                      intent(out)   :: rc
+      type(ESMF_LineType_Flag), intent(in), optional :: lineType
 !
 ! !DESCRIPTION:
 ! Given the source and destination ESMF fields, create the routehandle.
@@ -163,7 +171,9 @@
 ! to destination values). Here, no actual interpolation will happen,
 ! only the interpolation matrices will be constructed.
 
-      integer :: srcTerm
+      integer                  :: srcTerm
+      integer                  :: rc
+      type(ESMF_LineType_Flag) :: lineType_
 !
 !EOP
 !-------------------------------------------------------------------------
@@ -179,9 +189,12 @@
                    unmappedAction    = ESMF_UNMAPPEDACTION_IGNORE, &
                    routehandle       = routehandle, rc = rc)
       ELSE
+         lineType_ = ESMF_LINETYPE_CART
+         if (present(lineType)) lineType_ = lineType
+
          call ESMF_FieldRegridStore(srcField, dstField, &
                    regridmethod      = regridMethod, &
-                   lineType          = ESMF_LINETYPE_GREAT_CIRCLE, &
+                   lineType          = lineType_, &
                    srcTermProcessing = srcTerm, &
                    srcMaskValues     = [0], &
                    unmappedAction    = ESMF_UNMAPPEDACTION_IGNORE, &

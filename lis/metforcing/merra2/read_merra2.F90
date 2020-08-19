@@ -208,11 +208,11 @@ subroutine read_merra2(n, order, month, findex,          &
           'failed to close slvfile in read_merra2')
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL performESMFregrid_merra2(n, findex, month,  tair, 1, merraforc)
-        CALL performESMFregrid_merra2(n, findex, month,  qair, 2, merraforc)
-        CALL performESMFregrid_merra2(n, findex, month, uwind, 5, merraforc)
-        CALL performESMFregrid_merra2(n, findex, month, vwind, 6, merraforc)
-        CALL performESMFregrid_merra2(n, findex, month,    ps, 7, merraforc)
+        CALL performESMFregrid_merra2(n, findex, month,  tair, 1, .FALSE., merraforc)
+        CALL performESMFregrid_merra2(n, findex, month,  qair, 2, .FALSE., merraforc)
+        CALL performESMFregrid_merra2(n, findex, month, uwind, 5, .FALSE., merraforc)
+        CALL performESMFregrid_merra2(n, findex, month, vwind, 6, .FALSE., merraforc)
+        CALL performESMFregrid_merra2(n, findex, month,    ps, 7, .FALSE., merraforc)
      ELSE
         call interp_merra2_var(n,findex,month,tair,  1, .false., merraforc)
         call interp_merra2_var(n,findex,month,qair,  2, .false., merraforc)
@@ -251,7 +251,7 @@ subroutine read_merra2(n, order, month, findex,          &
      endif
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL performESMFregrid_merra2(n, findex, month,  prectot, 8, merraforc)
+        CALL performESMFregrid_merra2(n, findex, month,  prectot, 8, .TRUE., merraforc)
      ELSE
         call interp_merra2_var(n,findex,month,prectot,  8, .true.,merraforc)
      ENDIF
@@ -266,7 +266,7 @@ subroutine read_merra2(n, order, month, findex,          &
              'nf90_get_var failed for preccon (flx) in read_merra2')
 
         IF (LIS_rc%do_esmfRegridding) THEN
-           CALL performESMFregrid_merra2(n, findex, month,  preccon, 9, merraforc)
+           CALL performESMFregrid_merra2(n, findex, month,  preccon, 9, .TRUE., merraforc)
         ELSE
            call interp_merra2_var(n,findex,month,preccon,  9, .true.,merraforc)
         ENDIF
@@ -282,7 +282,7 @@ subroutine read_merra2(n, order, month, findex,          &
             'nf90_get_var failed for precsno (flx) in read_merra2')
 
         IF (LIS_rc%do_esmfRegridding) THEN
-           CALL performESMFregrid_merra2(n, findex, month,  precsno, 10, merraforc)
+           CALL performESMFregrid_merra2(n, findex, month,  precsno, 10, .TRUE., merraforc)
         ELSE
            call interp_merra2_var(n,findex,month,precsno,  10, .true.,merraforc)
         ENDIF
@@ -297,7 +297,7 @@ subroutine read_merra2(n, order, month, findex,          &
              'nf90_get_var failed for hlml (flx) in read_merra2')
 
         IF (LIS_rc%do_esmfRegridding) THEN
-           CALL performESMFregrid_merra2(n, findex, month,  hlml, 14, merraforc)
+           CALL performESMFregrid_merra2(n, findex, month,  hlml, 14, .FALSE., merraforc)
         ELSE
            call interp_merra2_var(n,findex,month,hlml,  14, .false.,merraforc)
         ENDIF
@@ -332,8 +332,8 @@ subroutine read_merra2(n, order, month, findex,          &
 !          'nf90_get_var failed for emis in read_merra2')
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL performESMFregrid_merra2(n, findex, month,  swgdn, 3, merraforc)
-        CALL performESMFregrid_merra2(n, findex, month,  lwgab, 4, merraforc)
+        CALL performESMFregrid_merra2(n, findex, month,  swgdn, 3, .FALSE., merraforc)
+        CALL performESMFregrid_merra2(n, findex, month,  lwgab, 4, .FALSE., merraforc)
      ELSE
         call interp_merra2_var(n,findex,month,swgdn, 3, .false.,merraforc)
         call interp_merra2_var(n,findex,month,lwgab, 4, .false.,merraforc)
@@ -380,7 +380,7 @@ subroutine read_merra2(n, order, month, findex,          &
 
          IF (LIS_rc%do_esmfRegridding) THEN
             write(LIS_logunit,*) '[VERIF] ESMFregrid PRECCON:',trim(lfoname)
-            CALL performESMFregrid_merra2(n, findex, month, preccon, 9, merraforc)
+            CALL performESMFregrid_merra2(n, findex, month, preccon, 9, .TRUE., merraforc)
          ELSE
             call interp_merra2_var(n,findex,month,preccon, 9,.true.,merraforc)
          ENDIF
@@ -396,7 +396,7 @@ subroutine read_merra2(n, order, month, findex,          &
              'nf90_get_var failed for precsnocorr (lfo) in read_merra2')
 
          IF (LIS_rc%do_esmfRegridding) THEN
-            CALL performESMFregrid_merra2(n, findex, month, precsno, 10, merraforc)
+            CALL performESMFregrid_merra2(n, findex, month, precsno, 10, .TRUE., merraforc)
          ELSE
             call interp_merra2_var(n,findex,month,precsno, 10,.true.,merraforc)
          ENDIF
@@ -410,7 +410,7 @@ subroutine read_merra2(n, order, month, findex,          &
                'nf90_get_var failed for swland in read_merra2')
           
           IF (LIS_rc%do_esmfRegridding) THEN
-             CALL performESMFregrid_merra2(n, findex, month, swland, 11, merraforc)
+             CALL performESMFregrid_merra2(n, findex, month, swland, 11, .FALSE., merraforc)
           ELSE
              call interp_merra2_var(n,findex,month,swland,11,.false.,merraforc)
           ENDIF
@@ -424,7 +424,7 @@ subroutine read_merra2(n, order, month, findex,          &
                 'nf90_get_var failed for pardr in read_merra2')
            
            IF (LIS_rc%do_esmfRegridding) THEN
-              CALL performESMFregrid_merra2(n, findex, month, pardr, 12, merraforc)
+              CALL performESMFregrid_merra2(n, findex, month, pardr, 12, .FALSE., merraforc)
            ELSE
               call interp_merra2_var(n,findex,month,pardr,12,.false.,merraforc)
            ENDIF
@@ -437,7 +437,7 @@ subroutine read_merra2(n, order, month, findex,          &
            call LIS_verify(nf90_get_var(ftn_lfo,pardfId,pardf), &
                 'nf90_get_var failed for pardf in read_merra2')
            IF (LIS_rc%do_esmfRegridding) THEN
-              CALL performESMFregrid_merra2(n, findex, month, pardf, 13, merraforc)
+              CALL performESMFregrid_merra2(n, findex, month, pardf, 13, .FALSE., merraforc)
            ELSE
               call interp_merra2_var(n,findex,month,pardf,13,.false.,merraforc)
            ENDIF
@@ -1004,7 +1004,8 @@ end subroutine rescaleWithCDFmatching
 !
 ! !INPUT PARAMETERS:
 !
-       subroutine performESMFregrid_merra2(n, findex, month, input_var, var_index, merraforc)
+       subroutine performESMFregrid_merra2(n, findex, month, input_var, &
+                                           var_index, pcp_flag, merraforc)
 
 ! !USES: 
       use ESMF
@@ -1013,7 +1014,8 @@ end subroutine rescaleWithCDFmatching
       use LIS_spatialDownscalingMod
       use merra2_forcingMod, only : merra2_struc
       use LIS_ESMF_Regrid_Utils, only : runESMF_Regridding
-      use LIS_field_bundleMod,   only : getPointerFromBundle, updateTracerToBundle
+      use LIS_field_bundleMod,   only : getPointerFromField
+      use LIS_create_gridMod,    only : getInteriorGrid
 
       implicit none
 !
@@ -1023,6 +1025,7 @@ end subroutine rescaleWithCDFmatching
       integer, intent(in)    :: month
       real,    intent(in)    :: input_var(merra2_struc(n)%ncold, merra2_struc(n)%nrold, 24)
       integer, intent(in)    :: var_index
+      logical, intent(in)    :: pcp_flag
 !
 ! !INPUT/OUTPUT PARAMETERS:
       real,    intent(inout) :: merraforc(merra2_struc(n)%nvars, 24, LIS_rc%lnc(n)*LIS_rc%lnr(n))
@@ -1034,54 +1037,83 @@ end subroutine rescaleWithCDFmatching
 ! !LOCAL VARIABLES:
       integer                     :: i_min, i_max, j_min, j_max
       integer                     :: kk, c, r, rc, irec
-      type(ESMF_FIELD)            ::  model_field
-      type(ESMF_FIELD)            :: merra2_field
       real(ESMF_KIND_R4), pointer :: model_ptr2D(:,:)
-      real(ESMF_KIND_R4), pointer :: merra2_ptr2D(:,:)
+      real(ESMF_KIND_R4), pointer :: forcing_ptr2D(:,:)
+      logical                     :: doConservative
 !EOP
 !------------------------------------------------------------------------------
 !BOC
-       DO irec = 1, 24
-          ! Get the nldas2 ESMF field from the bundle
-          call getPointerFromBundle(merra2_struc(n)%forcing_bundle, merra2_ptr2D, var_index)
+       doConservative = .FALSE.
+       if (pcp_flag .and. &
+              trim(LIS_rc%met_interp(findex)).eq."budget-bilinear") doConservative = .TRUE.
 
-          i_min = lbound(merra2_ptr2D, 1) ! lower bound of the first  dimension
-          i_max = ubound(merra2_ptr2D, 1) ! upper bound of the first  dimension
-          j_min = lbound(merra2_ptr2D, 2) ! lower bound of the second dimension
-          j_max = ubound(merra2_ptr2D, 2) ! upper bound of the second dimension
+       !IF (doConservative) THEN
+       !   call getInteriorGrid(merra2_struc(n)%forcing_gridCS, i_min, i_max, j_min, j_max)
+       !ELSE
+       !   call getInteriorGrid(merra2_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
+       !ENDIF
+
+
+       DO irec = 1, 24
+          ! Get the data from ESMF fields
+          IF (doConservative) THEN
+             call getPointerFromField(merra2_struc(n)%forcing_fieldCS, forcing_ptr2D)
+             call getInteriorGrid(merra2_struc(n)%forcing_gridCS, i_min, i_max, j_min, j_max)
+          ELSE
+             call getPointerFromField(merra2_struc(n)%forcing_field, forcing_ptr2D)
+             call getInteriorGrid(merra2_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
+          ENDIF
+
+          !i_min = lbound(forcing_ptr2D, 1) ! lower bound of the first  dimension
+          !i_max = ubound(forcing_ptr2D, 1) ! upper bound of the first  dimension
+          !j_min = lbound(forcing_ptr2D, 2) ! lower bound of the second dimension
+          !j_max = ubound(forcing_ptr2D, 2) ! upper bound of the second dimension
 
           ! Extract the 2D local array from the 2D global array
-          merra2_ptr2D(:,:) = input_var(i_min:i_max, j_min:j_max, irec)
+          forcing_ptr2D(:,:) = input_var(i_min:i_max, j_min:j_max, irec)
 
-          ! Perform the ESMF regriddig at the field level
-               !--> Get the ESMF field for merra2
-          call ESMF_FieldBundleGet (merra2_struc(n)%forcing_bundle, fieldIndex=var_index, &
-                                    field=merra2_field, RC=rc)
-          call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
-               !--> Get the ESMF field for model
-          call ESMF_FieldBundleGet (LIS_domain(n)%merra2_bundle, fieldIndex=var_index, &
-                                    field=model_field, RC=rc)
-          call LIS_verify(rc, 'ESMF_FieldBundleGet failed')
-               !--> Do regridding
-          call runESMF_Regridding(merra2_field, model_field, merra2_struc(n)%routehandle, &
-                                  merra2_struc(n)%dynamicMask, rc)
+          !--> Do regridding
+
+          if (pcp_flag .and. &
+              trim(LIS_rc%met_interp(findex)).eq."budget-bilinear") then
+             call runESMF_Regridding(merra2_struc(n)%forcing_fieldCS, &
+                          merra2_struc(n)%model_fieldCS, &
+                          merra2_struc(n)%routehandle_conserve, &
+                          merra2_struc(n)%dynamicMask_conserve, rc)
+          elseif(trim(LIS_rc%met_interp(findex)).eq."bilinear".or.&
+                  trim(LIS_rc%met_interp(findex)).eq."budget-bilinear") then
+             call runESMF_Regridding(merra2_struc(n)%forcing_field, &
+                          merra2_struc(n)%model_field, &
+                          merra2_struc(n)%routehandle_bilinear, &
+                          merra2_struc(n)%dynamicMask_bilinear, rc)
+          elseif(trim(LIS_rc%met_interp(findex)).eq."neighbor") then
+             call runESMF_Regridding(merra2_struc(n)%forcing_field, &
+                          merra2_struc(n)%model_field, &
+                          merra2_struc(n)%routehandle_neighbor, &
+                          merra2_struc(n)%dynamicMask_neighbor, rc)
+          endif
           call LIS_verify(rc, 'runESMF_Regridding failed')
 
-          ! Populate the merra2 metdata arrays
-               !--> Get the model  ESMF field from the bundle
-          call getPointerFromBundle(LIS_domain(n)%merra2_bundle, model_ptr2D, var_index)
+          !--> Get data pointer from model ESMF field
+          IF (doConservative) THEN
+             call getPointerFromField(merra2_struc(n)%model_fieldCS, model_ptr2D)
+          ELSE
+             call getPointerFromField(merra2_struc(n)%model_field, model_ptr2D)
+          ENDIF
 
-          i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
-          j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
+          !i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
+          !j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
 
           kk = 0
           do r=1,LIS_rc%lnr(n)
              do c=1,LIS_rc%lnc(n)
                 kk = kk + 1
-                merraforc(var_index, irec, kk) = model_ptr2D(i_min+c-1,j_min+r-1)
+                merraforc(var_index, irec, kk) = model_ptr2D(c,r)
              end do
           enddo
+          !model_ptr2D = 0.0
        ENDDO
+
        end subroutine performESMFregrid_merra2
 !EOC
 !------------------------------------------------------------------------------

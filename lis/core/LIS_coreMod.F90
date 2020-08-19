@@ -172,13 +172,6 @@ module LIS_coreMod
      real                       :: stlat, stlon, truelat1
      real                       :: truelat2, truelon, orient
      real                       :: dx,dy,nlatcircles
-
-     type(ESMF_FieldBundle)     :: nldas2_bundle       ! model bundle for NLDAS2 fields
-     type(ESMF_FieldBundle)     :: merra2_bundle       ! model bundle for MERRA2 fields
-     type(ESMF_FieldBundle)     :: gdas_bundle         ! model bundle for GDAS   fields
-     type(ESMF_FieldBundle)     :: gdasT1534_bundle    ! model bundle for GDA T1534 fields
-     type(ESMF_STAGGERLOC)      :: staggerloc          ! model grid stagger location
-     type(ESMF_CoordSys_Flag)   :: coordSys            ! coordinate system of the grid
   end type lis_domain_type
 
   type, public :: lis_domain_sf_type

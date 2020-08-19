@@ -193,9 +193,14 @@ subroutine read_nldas2b(n, kk, findex, order, name,ferror)
            pcp_flag = .false. 
            if(var_index.eq.8.or.var_index.eq.9) pcp_flag = .true. 
            
+           IF (LIS_rc%do_esmfRegridding) THEN
+              CALL performESMFregrid_nldas2(n, findex, pcp_flag, &
+                            f, varfield)
+           ELSE
            call interp_nldas2(n, findex,LIS_rc%mo, pcp_flag,nldas2,f,&
                 lb,LIS_rc%gridDesc(n,:), &
                 LIS_rc%lnc(n),LIS_rc%lnr(n),varfield)
+           ENDIF
 
            do r=1,LIS_rc%lnr(n)
               do c=1,LIS_rc%lnc(n)

@@ -22,6 +22,7 @@
       public  :: getPointerFromBundle
       public  :: ESMF_recordBundle
       public  :: copy_esmfBundle
+      public  :: getPointerFromField
 
       interface addTracerToBundle
          module procedure addTracerToBundle3D
@@ -49,6 +50,14 @@
          module procedure getPointerFromBundle_ByName2D_r4
          module procedure getPointerFromBundle_ByName2D_r8
       end interface
+
+      interface getPointerFromField
+         module procedure getPointerFromField_r4_3D
+         module procedure getPointerFromField_r8_3D
+         module procedure getPointerFromField_r4_2D
+         module procedure getPointerFromField_r8_2D
+      end interface
+      
 
       type ESMF_recordBundle
           type(ESMF_FieldBundle) :: prevBundle ! for the previous record
@@ -184,15 +193,15 @@
                                     name = TRIM(fieldName), rc=rc)
       call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldCreate failed for '//TRIM(fieldName))
 
-      if (type_kind == ESMF_TYPEKIND_R4) then
-         call ESMF_FieldGet(field, farrayPtr=PTR4, rc=rc)
-         call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed for '//TRIM(fieldName))
-         PTR4 = 0.0
-      elseif (type_kind == ESMF_TYPEKIND_R8) then
-         call ESMF_FieldGet(field, farrayPtr=PTR8, rc=rc)
-         call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed for '//TRIM(fieldName))
-         PTR8 = 0.0d0
-      endif
+!      if (type_kind == ESMF_TYPEKIND_R4) then
+!         call ESMF_FieldGet(field, farrayPtr=PTR4, rc=rc)
+!         call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed for '//TRIM(fieldName))
+!         PTR4 = 0.0
+!      elseif (type_kind == ESMF_TYPEKIND_R8) then
+!         call ESMF_FieldGet(field, farrayPtr=PTR8, rc=rc)
+!         call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed for '//TRIM(fieldName))
+!         PTR8 = 0.0d0
+!      endif
 
       call ESMF_FieldBundleAdd ( bundle, (/field/), rc=rc )
       call LIS_verify(rc, &
@@ -572,15 +581,15 @@
                                     name = TRIM(fieldName), rc=rc)
       call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldCreate failed for '//TRIM(fieldName))
 
-      if (type_kind == ESMF_TYPEKIND_R4) then
-         call ESMF_FieldGet(field, farrayPtr=PTR4, rc=rc)
-         call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed for '//TRIM(fieldName))
-         PTR4 = 0.0
-      elseif (type_kind == ESMF_TYPEKIND_R8) then
-         call ESMF_FieldGet(field, farrayPtr=PTR8, rc=rc)
-         call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed for '//TRIM(fieldName))
-         PTR8 = 0.0d0
-      endif
+!      if (type_kind == ESMF_TYPEKIND_R4) then
+!         call ESMF_FieldGet(field, farrayPtr=PTR4, rc=rc)
+!         call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed for '//TRIM(fieldName))
+!         PTR4 = 0.0
+!      elseif (type_kind == ESMF_TYPEKIND_R8) then
+!         call ESMF_FieldGet(field, farrayPtr=PTR8, rc=rc)
+!         call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed for '//TRIM(fieldName))
+!         PTR8 = 0.0d0
+!      endif
 
       call ESMF_FieldBundleAdd ( bundle, (/field/), rc=rc )
       call LIS_verify(rc, &
@@ -929,5 +938,160 @@
       end subroutine getPointerFromBundle_ByIndex2D_r4
 !EOC
 !------------------------------------------------------------------------------
+      function createEmptyField(field_name, grid, staggerloc) result(field)
+        character(len=*),       intent(IN   ) :: field_name
+        type (ESMF_STAGGERLOC), intent(in   ) :: staggerloc
+        type (ESMF_Grid),       intent(INout) :: grid
+        type (ESMF_Field)                     :: FIELD
+  
+        character(len=ESMF_MAXSTR),parameter  :: IAm=" createEmptyField"
+        integer                               :: rc
+  
+        field = ESMF_FieldEmptyCreate(name=field_name, rc=rc)
+        call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldEmptyCreate failed')
+  
+        call ESMF_FieldEmptySet(field, &
+                  grid       = grid, &
+                  staggerloc = staggerloc, rc = rc)
+        call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldEmptySet failed')
+  
+      end function createEmptyField
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INTERFACE:
+!
+      subroutine getPointerFromField_r8_2D(field, PTR)
+!
+! !OUTPUT PARAMETERS:
+      real(kind=8), pointer :: PTR(:,:)
+!
+! !INPUT/OUTPUT PARAMETERS:
+      type (ESMF_Field), intent(inOut) :: field
+!
+! !DESCRIPTION:
+! Obtains data pointer from a field.
+!
+! !LOCAL VARIABLES:
+      integer :: rc, status
+      type(ESMF_ARRAY)           :: array
+      character(len=MAXSTR) :: IAm='getPointerFromField_r8_2D'
+!
+!EOP
+!---------------------------------------------------------------------------
+!BOC
+      call ESMF_FieldGet  (field, array=array,                 RC=rc)
+      call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed')
+
+      call ESMF_ArrayGet  (array, farrayptr=PTR, RC=rc)
+      call LIS_verify(rc, TRIM(IAm)//': ESMF_ArrayGet failed')
+
+      return
+
+      end subroutine getPointerFromField_r8_2D
+!EOC
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INTERFACE:
+!
+      subroutine getPointerFromField_r4_2D(field, PTR)
+!
+! !OUTPUT PARAMETERS:
+      real(kind=4), pointer :: PTR(:,:)
+!
+! !INPUT/OUTPUT PARAMETERS:
+      type (ESMF_Field), intent(inOut) :: field
+!
+! !DESCRIPTION:
+! Obtains data pointer from a field.
+!
+! !LOCAL VARIABLES:
+      integer :: rc, status
+      type(ESMF_ARRAY)           :: array
+      character(len=MAXSTR) :: IAm='getPointerFromField_r4_2D'
+!
+!EOP
+!---------------------------------------------------------------------------
+!BOC
+      call ESMF_FieldGet  (field, array=array,                 RC=rc)
+      call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed')
+
+      call ESMF_ArrayGet  (array, farrayptr=PTR, RC=rc)
+      call LIS_verify(rc, TRIM(IAm)//': ESMF_ArrayGet failed')
+
+      return
+
+      end subroutine getPointerFromField_r4_2D
+!EOC
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INTERFACE:
+!
+      subroutine getPointerFromField_r8_3D(field, PTR)
+!
+! !OUTPUT PARAMETERS:
+      real(kind=8), pointer :: PTR(:,:,:)
+!
+! !INPUT/OUTPUT PARAMETERS:
+      type (ESMF_Field), intent(inOut) :: field
+!
+! !DESCRIPTION:
+! Obtains data pointer from a field.
+!
+! !LOCAL VARIABLES:
+      integer :: rc, status
+      type(ESMF_ARRAY)           :: array
+      character(len=MAXSTR) :: IAm='getPointerFromField_r8_3D'
+!
+!EOP
+!---------------------------------------------------------------------------
+!BOC
+      call ESMF_FieldGet  (field, array=array,                 RC=rc)
+      call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed')
+
+      call ESMF_ArrayGet  (array, farrayptr=PTR, RC=rc)
+      call LIS_verify(rc, TRIM(IAm)//': ESMF_ArrayGet failed')
+
+      return
+
+      end subroutine getPointerFromField_r8_3D
+!EOC
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INTERFACE:
+!
+      subroutine getPointerFromField_r4_3D(field, PTR)
+!
+! !OUTPUT PARAMETERS:
+      real(kind=4), pointer :: PTR(:,:,:)
+!
+! !INPUT/OUTPUT PARAMETERS:
+      type (ESMF_Field), intent(inOut) :: field
+!
+! !DESCRIPTION:
+! Obtains data pointer from a field.
+!
+! !LOCAL VARIABLES:
+      integer :: rc, status
+      type(ESMF_ARRAY)           :: array
+      character(len=MAXSTR) :: IAm='getPointerFromField_r4_3D'
+!
+!EOP
+!---------------------------------------------------------------------------
+!BOC
+      call ESMF_FieldGet  (field, array=array,                 RC=rc)
+      call LIS_verify(rc, TRIM(IAm)//': ESMF_FieldGet failed')
+
+      call ESMF_ArrayGet  (array, farrayptr=PTR, RC=rc)
+      call LIS_verify(rc, TRIM(IAm)//': ESMF_ArrayGet failed')
+
+      return
+
+      end subroutine getPointerFromField_r4_3D
+!EOC
+!---------------------------------------------------------------------------
 
       end module LIS_field_bundleMod
