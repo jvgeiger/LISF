@@ -97,15 +97,14 @@ subroutine read_metsim(n, kk, findex, order, mo, da, hr, filename, ferror)
    integer, parameter :: N_MS = 7 ! # of MetSim forcing variables
 
    character(len=12), dimension(N_MS), parameter :: metsim_fv = (/  &
-      'temp        ',    &
-      'spec_humid  ',    &
-      'shortwave   ',    &
-      'longwave    ',    &
-      'wind        ',    &
-      'air_pressure',    &
-      'prec        '    /)
+      'airtemp     ',    &
+      'spechum     ',    &
+      'SWRadAtm    ',    &
+      'LWRadAtm    ',    &
+      'windspd     ',    &
+      'airpres     ',    &
+      'pptrate     '    /)
    character(len=12) :: varname
-
 
    integer :: ncid, varid, status
    integer :: timestep, day
@@ -135,6 +134,9 @@ subroutine read_metsim(n, kk, findex, order, mo, da, hr, filename, ferror)
    ! and which file to open.
    !----------------------------------------------------------------
 
+   ! Depending on the source used to create the MetSim datasets, there may or
+   ! may not be leap-days.  For now assume that there are leap-days.
+#if 0
    ! MetSim data do not contain leap days.  If it is 29 Feb, then reset the
    ! day to 28 and reuse that data.
    if ( mo == 2 .and. da == 29 ) then
@@ -142,6 +144,8 @@ subroutine read_metsim(n, kk, findex, order, mo, da, hr, filename, ferror)
    else
       day = da
    endif
+#endif
+   day = da
 
    ! For monthly file
    timestep = 8*(day - 1) + (1 + hr/3)
@@ -165,34 +169,30 @@ subroutine read_metsim(n, kk, findex, order, mo, da, hr, filename, ferror)
          'nf90_get_var failed for '//trim(varname)//' in read_metsim')
 
       ! Filter out any unrealistic forcing values.
-      if ( varname == 'prec' ) then
+      if ( varname == 'pptrate' ) then
          do r=1,metsim_struc(n)%nrold
             do c=1,metsim_struc(n)%ncold
-               if (vartemp(c,r) < 0.0) then
-                  vartemp(c,r) = 0.0
+               if ( .not. isnan(vartemp(c,r)) ) then
+                  if (vartemp(c,r) < 0.0) then
+                     vartemp(c,r) = 0.0
+                  endif
                endif
             enddo
          enddo
+
       endif
 
       vartemp1d = reshape(vartemp, (/input_size/))
-      ! TODO: review missingValue
-      input_bitmask = .false.
-      where ( vartemp1d /= LIS_rc%udef )
-         input_bitmask = .true.
-      endwhere
+      input_bitmask = .true.
+      do c = 1, input_size
+         if ( isnan(vartemp1d(c)) ) then
+            input_bitmask(c) = .false.
+         endif
+      enddo
 
       call interp_metsim(n, findex, input_size, varname, &
          vartemp1d, input_bitmask, LIS_rc%gridDesc(n,:), &
          LIS_rc%lnc(n),LIS_rc%lnr(n),varfield)
-
-      if ( varname == 'temp' ) then
-         varfield = varfield + 273.15 ! convert from Celsius to Kelvin
-      endif
-
-      if ( varname == 'prec' ) then
-         varfield = varfield/(3*60*60) ! convert from mm/3hr to mm/s
-      endif
 
       do r=1,LIS_rc%lnr(n)
          do c=1,LIS_rc%lnc(n)

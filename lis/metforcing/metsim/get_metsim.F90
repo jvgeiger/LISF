@@ -231,5 +231,6 @@ subroutine metsim_filename(n,kk,findex,filename,metsimdir,yr,mo,da)
 
    write(cyr, '(i4.4)') yr
    write(cmon, '(i2.2)') mo
-   filename=trim(metsimdir)//'/'//'icar_canesm2_'//cyr//'-'//cmon//'.nc'
+   !filename=trim(metsimdir)//'/'//'icar_canesm2_'//cyr//'-'//cmon//'.nc'
+   filename=trim(metsimdir)//'/'//'icar_access13_forcing_'//cyr//cmon//'.nc'
 end subroutine metsim_filename
