@@ -130,7 +130,7 @@ subroutine get_metsim(n,findex)
         if ( try > ndays ) then 
            write(LIS_logunit,*) '[ERR] MetSim data gap exceeds 10 days'
            write(LIS_logunit,*) '[ERR] LIS run stopping ...'
-           STOP
+           call LIS_endrun
         end if
      end do
   endif
@@ -168,7 +168,7 @@ subroutine get_metsim(n,findex)
         if ( try > ndays ) then
            write(LIS_logunit,*)'[ERR] MetSim data gap exceeds 10 days'
            write(LIS_logunit,*)'[ERR] Stopping LIS run.'
-           STOP
+           call LIS_endrun
         end if
      end do
   endif
