@@ -1,47 +1,25 @@
-== Compiling LIS/SUMMA
+= Land Information System Framework (LISF)
 
-These are the steps for compiling LIS/SUMMA.  Sorry for the `sed` step.  I must build "-DLIS_SUMMA_2_0" into the Config.pl script.  See make/configure.lis.reference for reference.
-
-NOTE: On discover, please load the included lisf_7_intel_19_1_0_166 module file.
-
-.Steps for compiling LIS/SUMMA
-....
-% cd LISF/lis
-% ./configure
-% sed -i -e 's/-DLIS_JULES/-DLIS_JULES -DLIS_SUMMA_2_0/' make/configure.lis
-% printf "SUMMA.2.0: On\nNoahMP.3.6: Off\nNoahMP-GL.3.9.1.1: Off\ntemplate glacier: Off\nRUC.3.7: Off\nNoahMP.4.0.1: Off\nNoahMP-GL.3.9.1.1: Off\nNoah.3.9: Off\n" >>make/user.cfg
-% ./compile
-....
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
 
 
-.Running the configure script
-....
-% ./configure
-------------------------------------------------------------------------
-Setting up configuration for LIS
-Parallelism (0-serial, 1-dmpar, default=1):
-Optimization level (-3=strict checks with warnings, -2=strict checks, -1=debug, 0,1,2,3, default=2):
-Assume little/big_endian data format (1-little, 2-big, default=2):
-Use GRIBAPI/ECCODES? (0-neither, 1-gribapi, 2-eccodes, default=2):
-Enable AFWA-specific grib configuration settings? (1-yes, 0-no, default=0):
-Use NETCDF? (1-yes, 0-no, default=1):
-NETCDF version (3 or 4, default=4):
-NETCDF use shuffle filter? (1-yes, 0-no, default = 1): 0
-NETCDF use deflate filter? (1-yes, 0-no, default = 1): 0
-NETCDF use deflate level? (1 to 9-yes, 0-no, default = 9): 0
-Use HDF4? (1-yes, 0-no, default=1):
-Use HDF5? (1-yes, 0-no, default=1):
-Use HDFEOS? (1-yes, 0-no, default=1):
-Use MINPACK? (1-yes, 0-no, default=0):
-Use LIS-CRTM? (1-yes, 0-no, default=0):
-Use LIS-CMEM? (1-yes, 0-no, default=0):
-Use LIS-LAPACK? (1-yes, 0-no, default=0): 1
------------------------------------------------------
- configure.lis file generated successfully
------------------------------------------------------
-Settings are written to configure.lis in the make directory.
-If you wish to change settings, please edit that file.
+== Overview
 
-To compile, run the compile script.
-------------------------------------------------------------------------
-....
+Please visit our website: https://lis.gsfc.nasa.gov.
+
+
+== License
+
+The Land Information System Framework (LISF) is released under the terms and conditions of the NASA Open Source Agreement (NOSA) Version 1.3.  See https://lis.gsfc.nasa.gov/sites/default/files/LIS/LIS_public_release_7_1rp1/GSC-17531-1_LISF_NOSA.pdf.
+
+Please see the LICENSES sub-directories, under ldt, lis, and lvt, for the licenses of the third-party components within LISF. 
+
+//== Contributions
+//
+//Add instructions for contributing to LISF.
