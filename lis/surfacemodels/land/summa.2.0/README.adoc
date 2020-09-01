@@ -1,0 +1,74 @@
+== Compiling LIS/SUMMA
+
+These are the steps for compiling LIS/SUMMA.  Sorry for the `sed` step.
+We must build "-DLIS_SUMMA_2_0" into the Config.pl script later on.
+
+NOTE: On Discover, please load the lisf_7_intel_19_1_0_166 module file.
+
+.Steps for preparing the SUMMA code within LISF
+....
+% git clone https://github.com/<your-github-username>/LISF.git
+% cd LISF
+% git remote add upstream https://github.com/NASA-LIS/LISF.git
+% git remote add jvgeiger https://github.com/jvgeiger/LISF.git
+% git fetch jvgeiger feature/summa_integration
+% git checkout -b feature/summa_integration jvgeiger/feature/summa_integration
+
+Next, fork Jim's SUMMA repository: https://github.com/jvgeiger/summa.git
+
+% cd lis/surfacemodels/land/summa.2.0/
+% git clone https://github.com/dmocko/summa.git
+% cd summa
+% git remote add upstream https://github.com/NCAR/summa.git
+% git remote add jvgeiger https://github.com/jvgeiger/summa.git
+% git fetch jvgeiger feature/summa_integration
+% git checkout -b feature/summa_integration jvgeiger/feature/summa_integration
+
+Next, build the summa/build/source/driver/summaversion.inc file (e.g.):
+
+character(len=64), parameter     :: summaVersion = 'v1.0.0'
+character(len=64), parameter     :: buildTime = 'Mon Feb  4 12:18:14 EST 2019'
+character(len=64), parameter     :: gitBranch = 'feature/lisIntegration-0-gadc9434'
+character(len=64), parameter     :: gitHash = 'adc94348e213ac26b502f0a3c038102e9c9b061e'
+....
+
+.Steps for compiling LIS/SUMMA
+....
+% cd LISF/lis
+% ./configure
+% sed -i -e 's/-DLIS_JULES/-DLIS_JULES -DLIS_SUMMA_2_0/' make/configure.lis
+% printf "SUMMA.2.0: On\nNoahMP.3.6: Off\nNoahMP-GL.3.9.1.1: Off\ntemplate glacier: Off\nRUC.3.7: Off\nNoahMP.4.0.1: Off\nNoahMP-GL.3.9.1.1: Off\nNoah.3.9: Off\n" >>make/user.cfg
+% ./compile
+....
+
+.Running the configure script
+....
+% ./configure
+------------------------------------------------------------------------
+Setting up configuration for LIS
+Parallelism (0-serial, 1-dmpar, default=1):
+Optimization level (-3=strict checks with warnings, -2=strict checks, -1=debug, 0,1,2,3, default=2):
+Assume little/big_endian data format (1-little, 2-big, default=2):
+Use GRIBAPI/ECCODES? (0-neither, 1-gribapi, 2-eccodes, default=2):
+Enable AFWA-specific grib configuration settings? (1-yes, 0-no, default=0):
+Use NETCDF? (1-yes, 0-no, default=1):
+NETCDF version (3 or 4, default=4):
+NETCDF use shuffle filter? (1-yes, 0-no, default = 1): 0
+NETCDF use deflate filter? (1-yes, 0-no, default = 1): 0
+NETCDF use deflate level? (1 to 9-yes, 0-no, default = 9): 0
+Use HDF4? (1-yes, 0-no, default=1):
+Use HDF5? (1-yes, 0-no, default=1):
+Use HDFEOS? (1-yes, 0-no, default=1):
+Use MINPACK? (1-yes, 0-no, default=0):
+Use LIS-CRTM? (1-yes, 0-no, default=0):
+Use LIS-CMEM? (1-yes, 0-no, default=0):
+Use LIS-LAPACK? (1-yes, 0-no, default=0): 1
+-----------------------------------------------------
+ configure.lis file generated successfully
+-----------------------------------------------------
+Settings are written to configure.lis in the make directory.
+If you wish to change settings, please edit that file.
+
+To compile, run the compile script.
+------------------------------------------------------------------------
+....
