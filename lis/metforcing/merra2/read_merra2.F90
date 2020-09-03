@@ -1111,7 +1111,7 @@ end subroutine rescaleWithCDFmatching
                 merraforc(var_index, irec, kk) = model_ptr2D(c,r)
              end do
           enddo
-          !model_ptr2D = 0.0
+          model_ptr2D = 0.0
        ENDDO
 
        end subroutine performESMFregrid_merra2

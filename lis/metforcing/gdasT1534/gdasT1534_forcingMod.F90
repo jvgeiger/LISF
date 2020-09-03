@@ -226,8 +226,8 @@ contains
        IF (LIS_rc%do_esmfRegridding) THEN
           gdasT1534_struc(n)%undefined_value = LIS_rc%udef
 
-          CALL create_gdasT1534Forcing_ESMFobjects(n, gridDesci(1:10))
-          CALL create_gdasT1534Model_ESMFobjects(n)
+          CALL create_gdasT1534Forcing_ESMFobjects(n, findex, gridDesci(1:10))
+          CALL create_gdasT1534Model_ESMFobjects(n, findex)
           CALL create_gdasT1534_ESMFroutehandle(n, findex)
        ELSE
           !Setting up weights for Interpolation
@@ -291,7 +291,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_gdasT1534Forcing_ESMFobjects(n, forcing_gridDesc)
+      subroutine create_gdasT1534Forcing_ESMFobjects(n, findex, forcing_gridDesc)
 !
 ! !USES:
       use ESMF
@@ -303,6 +303,7 @@ contains
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
       real,    intent(in) :: forcing_gridDesc(10)
 !
 ! !DESCRIPTION:
@@ -359,10 +360,18 @@ contains
       lon_corners = determine_lon_corners(lon_centers, periodic)
       lat_corners = determine_lat_corners(lat_centers, periodic)
 
-      gdasT1534_struc(n)%forcing_grid = createRectilinearGrid(lon_centers, lat_centers, &
-                               lon_corners, lat_corners, &
-                               "GDAS T1534 Grid", LIS_rc%npesx, LIS_rc%npesy,  &
-                                ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      if ( (trim(LIS_rc%met_interp(findex)) .eq. "bilinear") .OR. &
+           (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") )THEN
+         gdasT1534_struc(n)%forcing_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "GDAS T1534 Grid", LIS_rc%npesx, LIS_rc%npesy,  &
+                                   ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      else if (trim(LIS_rc%met_interp(findex)) .eq. "neighbor") THEN
+         gdasT1534_struc(n)%forcing_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "GDAS T1534 Grid", LIS_rc%npesx, LIS_rc%npesy,  &
+                                   ESMF_COORDSYS_CART, periodic = periodic)
+      endif
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
@@ -386,7 +395,7 @@ contains
 !EOC
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_gdasT1534Model_ESMFobjects(n)
+      subroutine create_gdasT1534Model_ESMFobjects(n, findex)
 !
 ! !USES:
       use ESMF
@@ -398,6 +407,7 @@ contains
 !
 ! !INPUT PRAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
 !
 ! !DESCRIPTION:
 ! Create the model ESMF grid and field.
@@ -433,10 +443,18 @@ contains
       lon_corners = determine_lon_corners(lon_centers, periodic)
       lat_corners = determine_lat_corners(lat_centers, periodic)
 
-      gdasT1534_struc(n)%model_grid = createRectilinearGrid(lon_centers, lat_centers, &
-                               lon_corners, lat_corners, &
-                               "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
-                                ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      if ( (trim(LIS_rc%met_interp(findex)) .eq. "bilinear") .OR. &
+           (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") )THEN
+         gdasT1534_struc(n)%model_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
+                                   ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      else if (trim(LIS_rc%met_interp(findex)) .eq. "neighbor") THEN
+         gdasT1534_struc(n)%model_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
+                                   ESMF_COORDSYS_CART, periodic = periodic)
+      endif
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
@@ -495,7 +513,7 @@ contains
                          gdasT1534_struc(n)%undefined_value, &
                          gdasT1534_struc(n)%routehandle_bilinear, &
                          gdasT1534_struc(n)%dynamicMask_bilinear, &
-                         lineType=ESMF_LINETYPE_CART)
+                         lineType=ESMF_LINETYPE_GREAT_CIRCLE)
          write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
       else if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
          call createESMF_RouteHandle(gdasT1534_struc(n)%forcing_field, &
@@ -504,7 +522,7 @@ contains
                          gdasT1534_struc(n)%undefined_value, &
                          gdasT1534_struc(n)%routehandle_bilinear, &
                          gdasT1534_struc(n)%dynamicMask_bilinear, &
-                         lineType=ESMF_LINETYPE_CART)
+                         lineType=ESMF_LINETYPE_GREAT_CIRCLE)
          write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
 
          call createESMF_RouteHandle(gdasT1534_struc(n)%forcing_field, &
@@ -521,7 +539,8 @@ contains
                          gdasT1534_struc(n)%regridMethod_neighbor, &
                          gdasT1534_struc(n)%undefined_value, &
                          gdasT1534_struc(n)%routehandle_neighbor, &
-                         gdasT1534_struc(n)%dynamicMask_neighbor)
+                         gdasT1534_struc(n)%dynamicMask_neighbor, &
+                         lineType=ESMF_LINETYPE_CART)
          write(LIS_logunit,*) '[INFO] Done with the nearest neighbor routehandle.'
       endif
 

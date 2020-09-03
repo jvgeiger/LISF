@@ -289,8 +289,8 @@ contains
           forcing_gridDesc(9) = nldas2_struc(n)%gridDesc(9) ! x-grid size
           forcing_gridDesc(10)= nldas2_struc(n)%gridDesc(10) ! y-grid size
 
-          CALL create_nldas2_Forcing_ESMFobjects(n, forcing_gridDesc(1:10))
-          CALL create_nldas2_Model_ESMFobjects(n)
+          CALL create_nldas2_Forcing_ESMFobjects(n, findex, forcing_gridDesc(1:10))
+          CALL create_nldas2_Model_ESMFobjects(n, findex)
           CALL create_nldas2_ESMFroutehandle(n, findex)
        ELSE
           ! Setting up weights for spatial interpolation:
@@ -380,7 +380,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_nldas2_Forcing_ESMFobjects(n, forcing_gridDesc)
+      subroutine create_nldas2_Forcing_ESMFobjects(n, findex, forcing_gridDesc)
 !
 ! !USES:
       use ESMF
@@ -392,6 +392,7 @@ contains
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
       real,    intent(in) :: forcing_gridDesc(10)
 !
 ! !DESCRIPTION:
@@ -446,10 +447,12 @@ contains
                                "NLDAS2 Grid", LIS_rc%npesx, LIS_rc%npesy, &
                                 ESMF_COORDSYS_CART, periodic = periodic)
 
-      nldas2_struc(n)%forcing_gridCS = createRectilinearGrid(lon_centers, lat_centers, &
-                               lon_corners, lat_corners, &
-                               "NLDAS2 Grid Conservative", LIS_rc%npesx, LIS_rc%npesy, &
-                                ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         nldas2_struc(n)%forcing_gridCS = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "NLDAS2 Grid Conservative", LIS_rc%npesx, LIS_rc%npesy, &
+                                   ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      endif
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
@@ -464,12 +467,14 @@ contains
                               name = "NLDAS2 Forcing Field", rc=rc)
       call LIS_verify(rc, 'ESMF_FieldCreate failed ')
 
-      nldas2_struc(n)%forcing_fieldCS = ESMF_FieldCreate(nldas2_struc(n)%forcing_gridCS, &
-                              arrayspec,  staggerloc=ESMF_STAGGERLOC_CENTER, &
-                              indexflag=ESMF_INDEX_DELOCAL,  &
-                              totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
-                              name = "NLDAS2 Forcing Field Conservative", rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         nldas2_struc(n)%forcing_fieldCS = ESMF_FieldCreate(nldas2_struc(n)%forcing_gridCS, &
+                                 arrayspec,  staggerloc=ESMF_STAGGERLOC_CENTER, &
+                                 indexflag=ESMF_INDEX_DELOCAL,  &
+                                 totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
+                                 name = "NLDAS2 Forcing Field Conservative", rc=rc)
+         call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+      endif
 
       IF (.FALSE.) THEN
       call ESMF_FieldGet(nldas2_struc(n)%forcing_field, farrayPtr=PTR4, rc=rc)
@@ -481,7 +486,7 @@ contains
 !EOC
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_nldas2_Model_ESMFobjects(n)
+      subroutine create_nldas2_Model_ESMFobjects(n, findex)
 !
 ! !USES:
       use ESMF
@@ -493,6 +498,7 @@ contains
 !
 ! !INPUT PRAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
 !
 ! !DESCRIPTION:
 ! Create the model ESMF grid and field.
@@ -549,10 +555,12 @@ contains
                                "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
                                 ESMF_COORDSYS_CART, periodic = periodic)
 
-      nldas2_struc(n)%model_gridCS = createRectilinearGrid(lon_centers, lat_centers, &
-                               lon_corners, lat_corners, &
-                               "Model Grid Conservative", LIS_rc%npesx, LIS_rc%npesy, &
-                                ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         nldas2_struc(n)%model_gridCS = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "Model Grid Conservative", LIS_rc%npesx, LIS_rc%npesy, &
+                                   ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      endif
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
@@ -567,12 +575,15 @@ contains
                               name = "Model Field", rc=rc)
       call LIS_verify(rc, 'ESMF_FieldCreate failed ')
 
-      nldas2_struc(n)%model_fieldCS = ESMF_FieldCreate(nldas2_struc(n)%model_gridCS, arrayspec, &
-                              indexflag=ESMF_INDEX_DELOCAL,  &
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         nldas2_struc(n)%model_fieldCS = ESMF_FieldCreate(nldas2_struc(n)%model_gridCS, &
+                                 arrayspec, &
+                                 indexflag=ESMF_INDEX_DELOCAL,  &
                                  staggerloc=ESMF_STAGGERLOC_CENTER, &
-                              totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
-                              name = "Model Field Conservative", rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+                                 totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
+                                 name = "Model Field Conservative", rc=rc)
+         call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+      endif
 
       call ESMF_FieldGet(nldas2_struc(n)%model_field, farrayPtr=PTR4, rc=rc)
       call LIS_verify(rc, 'ESMF_FieldGet failed ')

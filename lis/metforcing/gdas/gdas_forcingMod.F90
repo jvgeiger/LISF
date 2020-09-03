@@ -338,7 +338,7 @@ contains
           !gdas_struc(n)%type_kind       = ESMF_TYPEKIND_R4
           gdas_struc(n)%undefined_value = LIS_rc%udef
 
-          call create_gdasModel_ESMFobjects(n)
+          call create_gdasModel_ESMFobjects(n, findex)
        ELSE
           ! Setting up weights for Interpolation
           call gdas_reset_interp_input(n, findex, gridDesci)
@@ -350,7 +350,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_gdasForcing_ESMFobjects(n, forcing_gridDesc)
+      subroutine create_gdasForcing_ESMFobjects(n, findex, forcing_gridDesc)
 !
 ! !USES:
       use ESMF
@@ -362,6 +362,7 @@ contains
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
       real,    intent(in) :: forcing_gridDesc(10)
 !
 ! !DESCRIPTION:
@@ -422,11 +423,20 @@ contains
       lon_corners = determine_lon_corners(lon_centers, periodic)
       lat_corners = determine_lat_corners(lat_centers, periodic)
 
-      gdas_struc(n)%forcing_grid = createRectilinearGrid(lon_centers, lat_centers, &
-                               lon_corners, lat_corners, &
-                               "GDAS Grid", LIS_rc%npesx, LIS_rc%npesy,  &
-                                ESMF_COORDSYS_SPH_DEG, &
-                                periodic   = periodic)
+      if ( (trim(LIS_rc%met_interp(findex)) .eq. "bilinear") .OR. &
+           (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") )THEN
+         gdas_struc(n)%forcing_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "GDAS Grid", LIS_rc%npesx, LIS_rc%npesy,  &
+                                   ESMF_COORDSYS_SPH_DEG, &
+                                   periodic   = periodic)
+      else if (trim(LIS_rc%met_interp(findex)) .eq. "neighbor") THEN
+         gdas_struc(n)%forcing_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "GDAS Grid", LIS_rc%npesx, LIS_rc%npesy,  &
+                                   ESMF_COORDSYS_CART, &
+                                   periodic   = periodic)
+      endif
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
@@ -450,7 +460,7 @@ contains
 !EOC
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_gdasModel_ESMFobjects(n)
+      subroutine create_gdasModel_ESMFobjects(n, findex)
 !
 ! !USES:
       use ESMF
@@ -462,6 +472,7 @@ contains
 !
 ! !INPUT PRAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
 !
 ! !DESCRIPTION:
 ! Create the model ESMF grid and field.
@@ -499,10 +510,19 @@ contains
       lon_corners = determine_lon_corners(lon_centers, periodic)
       lat_corners = determine_lat_corners(lat_centers, periodic)
 
-      gdas_struc(n)%model_grid = createRectilinearGrid(lon_centers, lat_centers, &
-                                lon_corners, lat_corners, &
-                               "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
-                                ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      if ( (trim(LIS_rc%met_interp(findex)) .eq. "bilinear") .OR. &
+           (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") )THEN
+         gdas_struc(n)%model_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                                   lon_corners, lat_corners, &
+                                  "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
+                                   ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      else if (trim(LIS_rc%met_interp(findex)) .eq. "neighbor") THEN
+         gdas_struc(n)%model_grid = createRectilinearGrid(lon_centers, lat_centers, &
+                                   lon_corners, lat_corners, &
+                                  "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
+                                   ESMF_COORDSYS_CART, periodic = periodic)
+      endif
+
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
@@ -560,7 +580,7 @@ contains
                          gdas_struc(n)%undefined_value, &
                          gdas_struc(n)%routehandle_bilinear, &
                          gdas_struc(n)%dynamicMask_bilinear, &
-                         lineType=ESMF_LINETYPE_CART)
+                         lineType=ESMF_LINETYPE_GREAT_CIRCLE)
          write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
       else if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
          call createESMF_RouteHandle(gdas_struc(n)%forcing_field, &
@@ -569,7 +589,7 @@ contains
                          gdas_struc(n)%undefined_value, &
                          gdas_struc(n)%routehandle_bilinear, &
                          gdas_struc(n)%dynamicMask_bilinear, &
-                         lineType=ESMF_LINETYPE_CART)
+                         lineType=ESMF_LINETYPE_GREAT_CIRCLE)
          write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
 
          call createESMF_RouteHandle(gdas_struc(n)%forcing_field, &

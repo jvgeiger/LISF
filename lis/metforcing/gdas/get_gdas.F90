@@ -231,7 +231,7 @@ subroutine get_gdas(n, findex)
      endif
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL create_gdasForcing_ESMFobjects(n, gridDesci(1:10))
+        CALL create_gdasForcing_ESMFobjects(n, findex, gridDesci(1:10))
         CALL create_gdas_ESMFroutehandle(n, findex)
      ELSE
         call gdas_reset_interp_input(n, findex, gridDesci)
@@ -273,7 +273,7 @@ subroutine get_gdas(n, findex)
      endif
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL create_gdasForcing_ESMFobjects(n, gridDesci(1:10))
+        CALL create_gdasForcing_ESMFobjects(n, findex, gridDesci(1:10))
         CALL create_gdas_ESMFroutehandle(n, findex)
      ELSE
         call gdas_reset_interp_input(n, findex, gridDesci)
@@ -315,7 +315,7 @@ subroutine get_gdas(n, findex)
      endif
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL create_gdasForcing_ESMFobjects(n, gridDesci(1:10))
+        CALL create_gdasForcing_ESMFobjects(n, findex, gridDesci(1:10))
         CALL create_gdas_ESMFroutehandle(n, findex)
      ELSE
         call gdas_reset_interp_input(n, findex, gridDesci)
@@ -357,7 +357,7 @@ subroutine get_gdas(n, findex)
      endif
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL create_gdasForcing_ESMFobjects(n, gridDesci(1:10))
+        CALL create_gdasForcing_ESMFobjects(n, findex, gridDesci(1:10))
         CALL create_gdas_ESMFroutehandle(n, findex)
      ELSE
         call gdas_reset_interp_input(n, findex, gridDesci)
@@ -399,7 +399,7 @@ subroutine get_gdas(n, findex)
      endif
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL create_gdasForcing_ESMFobjects(n, gridDesci(1:10))
+        CALL create_gdasForcing_ESMFobjects(n, findex, gridDesci(1:10))
         CALL create_gdas_ESMFroutehandle(n, findex)
      ELSE
         call gdas_reset_interp_input(n, findex, gridDesci)
@@ -440,7 +440,7 @@ subroutine get_gdas(n, findex)
      endif
 
      IF (LIS_rc%do_esmfRegridding) THEN
-        CALL create_gdasForcing_ESMFobjects(n, gridDesci(1:10))
+        CALL create_gdasForcing_ESMFobjects(n, findex, gridDesci(1:10))
         CALL create_gdas_ESMFroutehandle(n, findex)
      ELSE
         call gdas_reset_interp_input(n, findex, gridDesci)

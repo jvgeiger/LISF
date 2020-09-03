@@ -242,8 +242,8 @@ contains
           forcing_gridDesc(9) = gridDesci(n, 9) ! x-grid size
           forcing_gridDesc(10)= gridDesci(n, 10) ! y-grid size
 
-          CALL create_merra2_Forcing_ESMFobjects(n, forcing_gridDesc(1:10))
-          CALL create_merra2_Model_ESMFobjects(n)
+          CALL create_merra2_Forcing_ESMFobjects(n, findex, forcing_gridDesc(1:10))
+          CALL create_merra2_Model_ESMFobjects(n, findex)
           CALL create_merra2_ESMFroutehandle(n, findex)
        ELSE
           ! Setting up weights for Interpolation
@@ -385,7 +385,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_merra2_Forcing_ESMFobjects(n, forcing_gridDesc)
+      subroutine create_merra2_Forcing_ESMFobjects(n, findex, forcing_gridDesc)
 !
 ! !USES:
       use ESMF
@@ -396,6 +396,7 @@ contains
 !
 ! !INPUT PARAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
       real,    intent(in) :: forcing_gridDesc(10)
 !
 ! !DESCRIPTION:
@@ -449,10 +450,12 @@ contains
                                "MERRA2 Grid", LIS_rc%npesx, LIS_rc%npesy,  &
                                 ESMF_COORDSYS_CART, periodic   = periodic)
 
-      merra2_struc(n)%forcing_gridCS = createRectilinearGrid(lon_centers, lat_centers, &
-                               lon_corners, lat_corners, &
-                               "MERRA2 Grid Conservative", LIS_rc%npesx, LIS_rc%npesy,  &
-                                ESMF_COORDSYS_SPH_DEG, periodic   = periodic)
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         merra2_struc(n)%forcing_gridCS = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "MERRA2 Grid Conservative", LIS_rc%npesx, LIS_rc%npesy,  &
+                                   ESMF_COORDSYS_SPH_DEG, periodic   = periodic)
+      endif
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
@@ -467,27 +470,31 @@ contains
                               name = "Merra2 Forcing Field", rc=rc)
       call LIS_verify(rc, 'ESMF_FieldCreate failed ')
 
-      merra2_struc(n)%forcing_fieldCS = ESMF_FieldCreate(merra2_struc(n)%forcing_gridCS, arrayspec, &
-                                 indexflag=ESMF_INDEX_DELOCAL,  &
-                                 staggerloc=ESMF_STAGGERLOC_CENTER, &
-                              totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
-                              name = "Merra2 Forcing Field Conservative", rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         merra2_struc(n)%forcing_fieldCS = ESMF_FieldCreate(merra2_struc(n)%forcing_gridCS, &
+                                    arrayspec, &
+                                    indexflag=ESMF_INDEX_DELOCAL,  &
+                                    staggerloc=ESMF_STAGGERLOC_CENTER, &
+                                 totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
+                                 name = "Merra2 Forcing Field Conservative", rc=rc)
+         call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+      endif
 
-      IF (.FALSE.) THEN
       call ESMF_FieldGet(merra2_struc(n)%forcing_field, farrayPtr=PTR4, rc=rc)
       call LIS_verify(rc, 'ESMF_FieldGet failed ')
       PTR4 = 0.0
-      call ESMF_FieldGet(merra2_struc(n)%forcing_fieldCS, farrayPtr=PTR4, rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldGet failed ')
-      PTR4 = 0.0
-      ENDIF
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         call ESMF_FieldGet(merra2_struc(n)%forcing_fieldCS, farrayPtr=PTR4, rc=rc)
+         call LIS_verify(rc, 'ESMF_FieldGet failed ')
+         PTR4 = 0.0
+      endif
 
+      write(LIS_logunit,*) '[INFO] Done Initialize MERRA2 ESMF objects.'
       end subroutine create_merra2_Forcing_ESMFobjects
 !EOC
 !------------------------------------------------------------------------------
 !BOP
-      subroutine create_merra2_Model_ESMFobjects(n)
+      subroutine create_merra2_Model_ESMFobjects(n, findex)
 !
 ! !USES:
       use ESMF
@@ -498,6 +505,7 @@ contains
 !
 ! !INPUT PRAMETERS:
       integer, intent(in) :: n
+      integer, intent(in) :: findex
 !
 ! !DESCRIPTION:
 ! Create the model ESMF grid and field.
@@ -540,10 +548,12 @@ contains
                                "Model Grid", LIS_rc%npesx, LIS_rc%npesy, &
                                 ESMF_COORDSYS_CART, periodic = periodic)
 
-      merra2_struc(n)%model_gridCS = createRectilinearGrid(lon_centers, lat_centers, &
-                               lon_corners, lat_corners, &
-                               "Model Grid Conservative", LIS_rc%npesx, LIS_rc%npesy, &
-                                ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         merra2_struc(n)%model_gridCS = createRectilinearGrid(lon_centers, lat_centers, &
+                                  lon_corners, lat_corners, &
+                                  "Model Grid Conservative", LIS_rc%npesx, LIS_rc%npesy, &
+                                   ESMF_COORDSYS_SPH_DEG, periodic = periodic)
+      endif
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
@@ -558,19 +568,24 @@ contains
                               name = "Model Field", rc=rc)
       call LIS_verify(rc, 'ESMF_FieldCreate failed ')
 
-      merra2_struc(n)%model_fieldCS = ESMF_FieldCreate(merra2_struc(n)%model_gridCS, arrayspec, &
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         merra2_struc(n)%model_fieldCS = ESMF_FieldCreate(merra2_struc(n)%model_gridCS, &
+                                 arrayspec, &
                                  indexflag=ESMF_INDEX_DELOCAL,  &
                                  staggerloc=ESMF_STAGGERLOC_CENTER, &
-                              totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
-                              name = "Model Field Conservative", rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+                                 totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
+                                 name = "Model Field Conservative", rc=rc)
+         call LIS_verify(rc, 'ESMF_FieldCreate failed ')
+      endif
 
       call ESMF_FieldGet(merra2_struc(n)%model_field, farrayPtr=PTR4, rc=rc)
       call LIS_verify(rc, 'ESMF_FieldGet failed ')
       PTR4 = 0.0
-      call ESMF_FieldGet(merra2_struc(n)%model_fieldCS, farrayPtr=PTR4, rc=rc)
-      call LIS_verify(rc, 'ESMF_FieldGet failed ')
-      PTR4 = 0.0
+      if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
+         call ESMF_FieldGet(merra2_struc(n)%model_fieldCS, farrayPtr=PTR4, rc=rc)
+         call LIS_verify(rc, 'ESMF_FieldGet failed ')
+         PTR4 = 0.0
+      endif
 
       end subroutine create_merra2_Model_ESMFobjects
 !EOC
@@ -636,7 +651,8 @@ contains
                          merra2_struc(n)%regridMethod_neighbor, &
                          merra2_struc(n)%undefined_value, &
                          merra2_struc(n)%routehandle_neighbor, &
-                         merra2_struc(n)%dynamicMask_neighbor)
+                         merra2_struc(n)%dynamicMask_neighbor, &
+                         lineType=ESMF_LINETYPE_CART)
          write(LIS_logunit,*) '[INFO] Done with the nearest neighbor routehandle.'
       endif
 
