@@ -487,19 +487,19 @@ end subroutine interp_nldas2
        if (pcp_flag .and. &
               trim(LIS_rc%met_interp(findex)).eq."budget-bilinear") doConservative = .TRUE.
 
+       i_min = nldas2_struc(n)%i_min ! lower bound of the first  dimension
+       i_max = nldas2_struc(n)%i_max ! upper bound of the first  dimension
+       j_min = nldas2_struc(n)%j_min ! lower bound of the second dimension
+       j_max = nldas2_struc(n)%j_max ! upper bound of the second dimension
+
       ! Get the data from ESMF fields and dimensions from the grid
       IF (doConservative) THEN
          call getPointerFromField(nldas2_struc(n)%forcing_fieldCS, forcing_ptr2D)
-         call getInteriorGrid(nldas2_struc(n)%forcing_gridCS, i_min, i_max, j_min, j_max)
+         !call getInteriorGrid(nldas2_struc(n)%forcing_gridCS, i_min, i_max, j_min, j_max)
       ELSE
          call getPointerFromField(nldas2_struc(n)%forcing_field, forcing_ptr2D)
-         call getInteriorGrid(nldas2_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
+         !call getInteriorGrid(nldas2_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
       ENDIF
-
-      !i_min = lbound(forcing_ptr2D, 1) ! lower bound of the first  dimension
-      !i_max = ubound(forcing_ptr2D, 1) ! upper bound of the first  dimension
-      !j_min = lbound(forcing_ptr2D, 2) ! lower bound of the second dimension
-      !j_max = ubound(forcing_ptr2D, 2) ! upper bound of the second dimension
 
       ! Allocate 2D global array
       allocate(ptr2Dglob(nldas2_struc(n)%ncold, nldas2_struc(n)%nrold), stat=rc)

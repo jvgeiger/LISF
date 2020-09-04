@@ -1047,27 +1047,20 @@ end subroutine rescaleWithCDFmatching
        if (pcp_flag .and. &
               trim(LIS_rc%met_interp(findex)).eq."budget-bilinear") doConservative = .TRUE.
 
-       !IF (doConservative) THEN
-       !   call getInteriorGrid(merra2_struc(n)%forcing_gridCS, i_min, i_max, j_min, j_max)
-       !ELSE
-       !   call getInteriorGrid(merra2_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
-       !ENDIF
-
+       i_min = merra2_struc(n)%i_min ! lower bound of the first  dimension
+       i_max = merra2_struc(n)%i_max ! upper bound of the first  dimension
+       j_min = merra2_struc(n)%j_min ! lower bound of the second dimension
+       j_max = merra2_struc(n)%j_max ! upper bound of the second dimension
 
        DO irec = 1, 24
           ! Get the data from ESMF fields
           IF (doConservative) THEN
              call getPointerFromField(merra2_struc(n)%forcing_fieldCS, forcing_ptr2D)
-             call getInteriorGrid(merra2_struc(n)%forcing_gridCS, i_min, i_max, j_min, j_max)
+             !call getInteriorGrid(merra2_struc(n)%forcing_gridCS, i_min, i_max, j_min, j_max)
           ELSE
              call getPointerFromField(merra2_struc(n)%forcing_field, forcing_ptr2D)
-             call getInteriorGrid(merra2_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
+             !call getInteriorGrid(merra2_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
           ENDIF
-
-          !i_min = lbound(forcing_ptr2D, 1) ! lower bound of the first  dimension
-          !i_max = ubound(forcing_ptr2D, 1) ! upper bound of the first  dimension
-          !j_min = lbound(forcing_ptr2D, 2) ! lower bound of the second dimension
-          !j_max = ubound(forcing_ptr2D, 2) ! upper bound of the second dimension
 
           ! Extract the 2D local array from the 2D global array
           forcing_ptr2D(:,:) = input_var(i_min:i_max, j_min:j_max, irec)
@@ -1100,9 +1093,6 @@ end subroutine rescaleWithCDFmatching
           ELSE
              call getPointerFromField(merra2_struc(n)%model_field, model_ptr2D)
           ENDIF
-
-          !i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
-          !j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
 
           kk = 0
           do r=1,LIS_rc%lnr(n)

@@ -155,6 +155,8 @@ module gdas_forcingMod
      type(ESMF_Field)             :: forcing_field
      type(ESMF_Field)             :: model_field
      real                         :: undefined_value ! for missing value
+     integer                      :: i_min, i_max
+     integer                      :: j_min, j_max
 
   end type gdas_type_dec
 
@@ -442,6 +444,12 @@ contains
       DEALLOCATE(lon_corners, lat_corners)
       DEALLOCATE(slat, lat_weights)
 
+      ! Interior grid indices
+      call getInteriorGrid(gdas_struc(n)%forcing_grid, &
+                           gdas_struc(n)%i_min, gdas_struc(n)%i_max, &
+                           gdas_struc(n)%j_min, gdas_struc(n)%j_max)
+                          
+
       ! Create the forcing field
       call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=gdas_struc(n)%type_kind)
 
@@ -581,7 +589,7 @@ contains
                          gdas_struc(n)%routehandle_bilinear, &
                          gdas_struc(n)%dynamicMask_bilinear, &
                          lineType=ESMF_LINETYPE_GREAT_CIRCLE)
-         write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
+         !write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
       else if (trim(LIS_rc%met_interp(findex)) .eq. "budget-bilinear") THEN
          call createESMF_RouteHandle(gdas_struc(n)%forcing_field, &
                          gdas_struc(n)%model_field,  &
@@ -590,7 +598,7 @@ contains
                          gdas_struc(n)%routehandle_bilinear, &
                          gdas_struc(n)%dynamicMask_bilinear, &
                          lineType=ESMF_LINETYPE_GREAT_CIRCLE)
-         write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
+         !write(LIS_logunit,*) '[INFO] Done with the bilinear routehandle.'
 
          call createESMF_RouteHandle(gdas_struc(n)%forcing_field, &
                          gdas_struc(n)%model_field,  &
@@ -599,7 +607,7 @@ contains
                          gdas_struc(n)%routehandle_conserve, &
                          gdas_struc(n)%dynamicMask_conserve, &
                          lineType=ESMF_LINETYPE_GREAT_CIRCLE)
-         write(LIS_logunit,*) '[INFO] Done with the conservative routehandle.'
+         !write(LIS_logunit,*) '[INFO] Done with the conservative routehandle.'
       else if (trim(LIS_rc%met_interp(findex)) .eq. "neighbor") THEN
          call createESMF_RouteHandle(gdas_struc(n)%forcing_field, &
                          gdas_struc(n)%model_field,  &
@@ -607,7 +615,7 @@ contains
                          gdas_struc(n)%undefined_value, &
                          gdas_struc(n)%routehandle_neighbor, &
                          gdas_struc(n)%dynamicMask_neighbor)
-         write(LIS_logunit,*) '[INFO] Done with the nearest neighbor routehandle.'
+         !write(LIS_logunit,*) '[INFO] Done with the nearest neighbor routehandle.'
       endif
 
       end subroutine create_gdas_ESMFroutehandle

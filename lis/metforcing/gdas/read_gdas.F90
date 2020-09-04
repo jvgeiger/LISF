@@ -605,15 +605,15 @@ end subroutine interp_gdas
 !EOP
 !------------------------------------------------------------------------------
 !BOC
+       i_min = gdas_struc(n)%i_min ! lower bound of the first  dimension
+       i_max = gdas_struc(n)%i_max ! upper bound of the first  dimension
+       j_min = gdas_struc(n)%j_min ! lower bound of the second dimension
+       j_max = gdas_struc(n)%j_max ! upper bound of the second dimension
+
       ! Get the data from ESMF fields
       call getPointerFromField(gdas_struc(n)%forcing_field, forcing_ptr2D)
 
-      !i_min = lbound(forcing_ptr2D, 1) ! lower bound of the first  dimension
-      !i_max = ubound(forcing_ptr2D, 1) ! upper bound of the first  dimension
-      !j_min = lbound(forcing_ptr2D, 2) ! lower bound of the second dimension
-      !j_max = ubound(forcing_ptr2D, 2) ! upper bound of the second dimension
-
-      call getInteriorGrid(gdas_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
+      !call getInteriorGrid(gdas_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
 
       ! Allocate 2D global array
       allocate(ptr2Dglob(gdas_struc(n)%ncold, gdas_struc(n)%nrold), stat=rc)
@@ -659,15 +659,14 @@ end subroutine interp_gdas
             !--> Get the model  ESMF field from the bundle
        call getPointerFromField(gdas_struc(n)%model_field, model_ptr2D)
 
-       i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
-       j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
+       !i_min = lbound(model_ptr2D, 1) ! lower bound of the first  dimension
+       !j_min = lbound(model_ptr2D, 2) ! lower bound of the second dimension
 
-       IF (LIS_masterproc) &
-          print"(2i5,4f10.5)",i_min,j_min,minval(model_ptr2D),maxval(model_ptr2D),minval(forcing_ptr2D),maxval(forcing_ptr2D)
 
        do r=1,LIS_rc%lnr(n)
           do c=1,LIS_rc%lnc(n)
-             output_var(c,r) = model_ptr2D(i_min+c-1,j_min+r-1)
+             output_var(c,r) = model_ptr2D(c-1,r-1)
+             !output_var(c,r) = model_ptr2D(i_min+c-1,j_min+r-1)
           end do
        enddo
 

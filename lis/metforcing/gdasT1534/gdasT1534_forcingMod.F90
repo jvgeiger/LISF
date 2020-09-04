@@ -109,6 +109,8 @@ module gdasT1534_forcingMod
      type(ESMF_Field)             :: forcing_field
      type(ESMF_Field)             :: model_field
      real                         :: undefined_value ! for missing value
+     integer                      :: i_min, i_max
+     integer                      :: j_min, j_max
 
   end type gdasT1534_type_dec
   
@@ -376,6 +378,11 @@ contains
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
       DEALLOCATE(slat, lat_weights)
+
+      ! Interior grid indices
+      call getInteriorGrid(gdasT1534_struc(n)%forcing_grid, &
+                           gdasT1534_struc(n)%i_min, gdasT1534_struc(n)%i_max, &
+                           gdasT1534_struc(n)%j_min, gdasT1534_struc(n)%j_max)
 
       ! Create the forcing field
       call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4)

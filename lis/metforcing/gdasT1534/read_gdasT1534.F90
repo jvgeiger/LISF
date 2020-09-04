@@ -478,20 +478,16 @@ end subroutine interp_gdasT1534
 !EOP
 !------------------------------------------------------------------------------
 !BOC
+       ! Get the local dimensions of the gdasT1534 ESMF field
+       i_min = gdasT1534_struc(n)%i_min ! lower bound of the first  dimension
+       i_max = gdasT1534_struc(n)%i_max ! upper bound of the first  dimension
+       j_min = gdasT1534_struc(n)%j_min ! lower bound of the second dimension
+       j_max = gdasT1534_struc(n)%j_max ! upper bound of the second dimension
+
        call ESMF_FieldGet(gdasT1534_struc(n)%forcing_field, farrayPtr=forcing_ptr2D, rc=rc)
        call LIS_verify(rc, 'ESMF_FieldGet failed')
 
-       ! Get the local dimensions of the gdasT1534 ESMF field
-       !i_min = lbound(forcing_ptr2D, 1) ! lower bound of the first  dimension
-       !i_max = ubound(forcing_ptr2D, 1) ! upper bound of the first  dimension
-       !j_min = lbound(forcing_ptr2D, 2) ! lower bound of the second dimension
-       !j_max = ubound(forcing_ptr2D, 2) ! upper bound of the second dimension
-
-       !print"(a30,4i6)","1-i_min/i_max/j_min/j_max", i_min, i_max, j_min, j_max
-
-       call getInteriorGrid(gdasT1534_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
-
-       !print"(a30,4i6)","2-i_min/i_max/j_min/j_max", i_min, i_max, j_min, j_max
+       !call getInteriorGrid(gdasT1534_struc(n)%forcing_grid, i_min, i_max, j_min, j_max)
 
        ! Allocate 2D global array
        allocate(ptr2Dglob(gdasT1534_struc(n)%ncold, gdasT1534_struc(n)%nrold), stat=rc)

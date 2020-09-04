@@ -45,6 +45,7 @@ See the LIS Users' Guide for more informaion.
 # Define the required components
 #
 required_filepath='''\
+esmf_regrid
 core
 plugins
 interp

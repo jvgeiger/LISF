@@ -136,6 +136,8 @@ module nldas2_forcingMod
      type(ESMF_Field)             :: forcing_field, forcing_fieldCS
      type(ESMF_Field)             :: model_field, model_fieldCS
      real                         :: undefined_value ! for missing value
+     integer                      :: i_min, i_max
+     integer                      :: j_min, j_max
      
   end type nldas2_type_dec
 
@@ -456,6 +458,11 @@ contains
 
       DEALLOCATE(lon_centers, lat_centers)
       DEALLOCATE(lon_corners, lat_corners)
+
+      ! Interior grid indices
+      call getInteriorGrid(nldas2_struc(n)%forcing_grid, &
+                          nldas2_struc(n)%i_min, nldas2_struc(n)%i_max, &
+                          nldas2_struc(n)%j_min, nldas2_struc(n)%j_max)
 
       ! Create the forcing field
       call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=nldas2_struc(n)%type_kind)
