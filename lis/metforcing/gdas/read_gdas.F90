@@ -665,7 +665,7 @@ end subroutine interp_gdas
 
        do r=1,LIS_rc%lnr(n)
           do c=1,LIS_rc%lnc(n)
-             output_var(c,r) = model_ptr2D(c-1,r-1)
+             output_var(c,r) = model_ptr2D(c,r)
              !output_var(c,r) = model_ptr2D(i_min+c-1,j_min+r-1)
           end do
        enddo
