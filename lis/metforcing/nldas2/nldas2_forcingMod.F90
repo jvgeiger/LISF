@@ -400,7 +400,7 @@ contains
 ! !DESCRIPTION:
 ! Create the NLDAS2 forcing ESMF grid and field.
 ! This subroutine might be called several times depending on the integration date.
-! Howver, it will be called once for any period when the NLDAS2 forcing resolution
+! However, it will be called once for any period when the NLDAS2 forcing resolution
 ! does not change.
 !
 ! !LOCAL VARIABLES:
