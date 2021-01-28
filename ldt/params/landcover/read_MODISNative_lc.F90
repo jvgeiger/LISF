@@ -1,5 +1,11 @@
 !-----------------------BEGIN NOTICE -- DO NOT EDIT-----------------------
-! NASA GSFC Land Data Toolkit (LDT) V1.0
+! NASA Goddard Space Flight Center
+! Land Information System Framework (LISF)
+! Version 7.3
+!
+! Copyright (c) 2020 United States Government as represented by the
+! Administrator of the National Aeronautics and Space Administration.
+! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 #include "LDT_misc.h"
 !BOP
@@ -88,7 +94,7 @@ subroutine read_MODISNative_lc(n, num_types, fgrd, maskarray )
    inquire( file=trim(LDT_rc%vfile(n)), exist=file_exists )
    if(.not. file_exists) then
       write(LDT_logunit,*)"[ERR] The landcover map: ",trim(LDT_rc%vfile(n))," does not exist."
-      write(LDT_logunit,*)"Program stopping ..."
+      write(LDT_logunit,*)" Program stopping ..."
       call LDT_endrun
    endif
 
@@ -174,7 +180,7 @@ subroutine read_MODISNative_lc(n, num_types, fgrd, maskarray )
 !- Map Parameter Grid Info to LIS Target Grid/Projection Info -- 
    subparam_gridDesc = 0.
    call LDT_RunDomainPts( n, LDT_rc%lc_proj, param_gridDesc(:), &
-            glpnc, glpnr, subpnc, subpnr, subparam_gridDesc, lat_line, lon_line )
+        glpnc, glpnr, subpnc, subpnr, subparam_gridDesc, lat_line, lon_line )
 
    allocate( subset_veg(subpnc, subpnr) )
    subset_veg = LDT_rc%waterclass
@@ -268,7 +274,7 @@ subroutine read_MODISNative_lc(n, num_types, fgrd, maskarray )
 
 !- Estimate fraction of grid (fgrid) represented by vegetation type::
    call param_index_fgrdcalc( n, LDT_rc%lc_proj, LDT_rc%lc_gridtransform(n), &
-                              LDT_rc%waterclass, LDT_rc%nt, vegcnt, fgrd )
+        LDT_rc%waterclass, LDT_rc%nt, vegcnt, fgrd )
 
 ! -------------------------------------------------------------------
 !    CREATE OR READ-IN (OR IMPOSE) LAND MASK FILE AND CREATE

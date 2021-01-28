@@ -1,7 +1,9 @@
 !-----------------------BEGIN NOTICE -- DO NOT EDIT-----------------------
-! NASA Goddard Space Flight Center Land Information System (LIS) v7.2
+! NASA Goddard Space Flight Center
+! Land Information System Framework (LISF)
+! Version 7.3
 !
-! Copyright (c) 2015 United States Government as represented by the
+! Copyright (c) 2020 United States Government as represented by the
 ! Administrator of the National Aeronautics and Space Administration.
 ! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
@@ -106,7 +108,6 @@ subroutine read_syntheticsmobs(n, k, OBS_State, OBS_Pert_state)
      call ESMF_FieldGet(smfield,localDE=0,farrayPtr=obsl,rc=status)
      call LIS_verify(status)
      obsl = -1
-     ftn = LIS_getNextUnitNumber()
 
 !     open(ftn,file=name,form='unformatted')
 !     call readobsvar_1dgridded(ftn,n,k,obsl)

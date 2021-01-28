@@ -1,5 +1,11 @@
 !-----------------------BEGIN NOTICE -- DO NOT EDIT-----------------------
-! NASA Goddard Space Flight Center Land Data Toolkit (LDT) v1.0
+! NASA Goddard Space Flight Center
+! Land Information System Framework (LISF)
+! Version 7.3
+!
+! Copyright (c) 2020 United States Government as represented by the
+! Administrator of the National Aeronautics and Space Administration.
+! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 !BOP
 !
@@ -49,7 +55,8 @@ subroutine read_HYMAP_drain_area(n, array)
 
   inquire(file=trim(HYMAP_struc(n)%drainareafile), exist=file_exists)
   if(.not.file_exists) then 
-     write(LDT_logunit,*) 'Drainarea map ',trim(HYMAP_struc(n)%drainareafile),' not found'
+     write(LDT_logunit,*) '[ERR] Drainage area map, ',&
+           trim(HYMAP_struc(n)%drainareafile),', not found.'
      write(LDT_logunit,*) 'Program stopping ...'
      call LDT_endrun
   endif

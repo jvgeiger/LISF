@@ -1,5 +1,11 @@
 !-----------------------BEGIN NOTICE -- DO NOT EDIT-----------------------
-! NASA GSFC Land Data Toolkit (LDT) V1.0
+! NASA Goddard Space Flight Center
+! Land Information System Framework (LISF)
+! Version 7.3
+!
+! Copyright (c) 2020 United States Government as represented by the
+! Administrator of the National Aeronautics and Space Administration.
+! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
 module LDT_gridmappingMod
 !BOP
@@ -14,6 +20,7 @@ module LDT_gridmappingMod
 !  10 Jul 2012;  Kristi Arsenault;  Initial Specification
 !  10 Feb 2014;  Kristi Arsenault;  Updated routines to include add. options
 !  14 Aug 2019;  Kristi Arsenault;  Updated to account for crossing IDL
+!  21 Nov 2019;  Kristi Arsenault;  Add buffer to target domain for subsetting
 ! 
   implicit none
   PRIVATE
@@ -50,7 +57,7 @@ contains
    integer, intent(out)     :: subparam_nc, subparam_nr
    integer, allocatable, intent(out) :: lat_line(:,:)
    integer, allocatable, intent(out) :: lon_line(:,:)
-
+!
 ! !DESCRIPTION: 
 !  This subroutine creates the input parameter grid information
 !  required for reading in just a subsetted or the full global
@@ -58,6 +65,7 @@ contains
 !
 ! REVISION HISTORY:
 !  13FEB2014 -- K.R. Arsenault: Initial Specification
+!  13NOV2019 -- K.R. Arsenault: Added new buffer for LIS domain
 ! 
 !EOP      
    type(proj_info)  :: subset_paramproj
@@ -75,6 +83,8 @@ contains
    real,allocatable :: lats(:)
    real             :: diff_lon
    integer          :: nlats
+   real             :: rlat1, rlat2, rlon1, rlon2
+   real             :: plat1, plat2, plon1, plon2
 ! _____________________________________________________
 
    glpnr = 0
@@ -118,19 +128,42 @@ contains
          if(rlon(c,r).lt.lisdom_min_lon) lisdom_min_lon = rlon(c,r)
       enddo
    enddo
+   !NEW: Account for crossing IDL (KRA):
+   if( rlon(1,1) > rlon(LDT_rc%lnc(n),LDT_rc%lnr(n)) ) then
+     lisdom_min_lon = minval(rlon(1,:))
+     lisdom_max_lon = maxval(rlon(LDT_rc%lnc(n),:))
+   endif
+   !NEW ABOVE
 
-   lisdom_min_lat = rlat(1,1)
-   lisdom_min_lon = rlon(1,1)
-   lisdom_max_lat = rlat(LDT_rc%lnc(n),LDT_rc%lnr(n))
-   lisdom_max_lon = rlon(LDT_rc%lnc(n),LDT_rc%lnr(n))
+!- Set bounding points for LIS run domain for subsetting step:
 
-!- Calculate LIS run domain corner point resolutions: 
+   ! Calculate LIS run domain corner point resolutions: 
    lisdom_xres_ll = abs(rlon(2,1)-rlon(1,1))
    lisdom_yres_ll = abs(rlat(1,2)-rlat(1,1))
    lisdom_xres_ur = abs(rlon(LDT_rc%lnc(n),  LDT_rc%lnr(n))  &
                   - rlon(LDT_rc%lnc(n)-1,LDT_rc%lnr(n)) )
    lisdom_yres_ur = abs(rlat(LDT_rc%lnc(n),  LDT_rc%lnr(n))  &
                   - rlat(LDT_rc%lnc(n),  LDT_rc%lnr(n)-1) )
+
+
+!! NEW (KRA) -- ADD BUFFER OPTION, IF USER WANTS TO USE IT:
+   if( LDT_rc%add_buffer == 1 ) then
+
+     write(LDT_logunit,*) "[INFO] Incorporating buffer around subsetted grid domain ... "
+     lisdom_min_lat = max((lisdom_min_lat-(LDT_rc%y_buffer*lisdom_yres_ll)),-90.0)
+     lisdom_max_lat = min((lisdom_max_lat+(LDT_rc%y_buffer*lisdom_yres_ll)),90.0)
+     ! Account for crossing IDL:
+     if( rlon(1,1) <= rlon(LDT_rc%lnc(n),LDT_rc%lnr(n)) ) then
+       lisdom_min_lon = max((lisdom_min_lon-(LDT_rc%x_buffer*lisdom_xres_ll)),-180.0)
+       lisdom_max_lon = min((lisdom_max_lon+(LDT_rc%x_buffer*lisdom_xres_ll)),180.0)
+     else
+       lisdom_min_lon = max((lisdom_min_lon-(LDT_rc%x_buffer*lisdom_xres_ll)),0.0)
+       lisdom_max_lon = min((lisdom_max_lon+(LDT_rc%x_buffer*lisdom_xres_ll)),0.0)
+     endif
+
+   endif
+!! NEW
+
 
 ! -------------------------------------------------------------
 !  Select Parameter File Projection Type
@@ -145,46 +178,46 @@ contains
 
   !- Calculate total points for global (or "full") parameter file domains:
      glpnr = nint((param_grid(7)-param_grid(4))/param_grid(10)) + 1
-!     glpnc = nint((param_grid(8)-param_grid(5))/param_grid(9) ) + 1
      glpnc = nint(diff_lon(param_grid(8),param_grid(5))/param_grid(9) ) + 1
 
   !- LIS RUN DOMAIN GRID INFORMATION: 
   !  Used to determine parameter domain to be read in
-     select case ( LDT_rc%lis_map_proj )
+     select case ( LDT_rc%lis_map_proj(n) )
 
        case( "latlon" )
-          
           ! Parameter grid resolution SAME as LIS run grid resolution:
-          if( param_grid(9) == (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor)) then
+          if( param_grid(9) == (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor(n))) then
              subparm_lllat_ext = lisdom_min_lat 
              subparm_lllon_ext = lisdom_min_lon 
              subparm_urlat_ext = lisdom_max_lat 
              subparm_urlon_ext = lisdom_max_lon 
 
           ! Parameter grid resolution < as LIS run grid resolution:
-          elseif( param_grid(9) < (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor)) then
+          elseif( param_grid(9) < (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor(n))) then
              subparm_lllat_ext = lisdom_min_lat - (lisdom_yres_ll/2.) + &
                   (param_grid(10)/2.0)
-             subparm_lllon_ext = lisdom_min_lon - (lisdom_xres_ll/2.) + &
-                  (param_grid(9)/2.0)
              subparm_urlat_ext = lisdom_max_lat + (lisdom_yres_ur/2.) - &
                   (param_grid(10)/2.0)
+
+             subparm_lllon_ext = lisdom_min_lon - (lisdom_xres_ll/2.) + &
+                  (param_grid(9)/2.0)
              subparm_urlon_ext = lisdom_max_lon + (lisdom_xres_ur/2.) - &
                   (param_grid(9)/2.0)
 
           ! Parameter grid resolution > as LIS run grid resolution:
-          elseif( param_grid(9) > (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor)) then
+          elseif( param_grid(9) > (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor(n))) then
              subparm_lllat_ext = param_grid(4)
              subparm_urlat_ext = param_grid(7)
              subparm_lllon_ext = param_grid(5)
              subparm_urlon_ext = param_grid(8)
+
           endif
  
    !- Lambert conformal LIS run domain:
       case( "lambert" )
          
          ! Parameter grid resolution <= as LIS run grid resolution:
-         if( param_grid(9) <= (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor)) then
+         if( param_grid(9) <= (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor(n))) then
 
            ! Locate parameter longitude extents:
             do i = 1, nint(param_grid(2))
@@ -212,7 +245,7 @@ contains
             end do
 
          ! Parameter grid resolution > as LIS run grid resolution:
-         elseif( param_grid(9) > (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor)) then
+         elseif( param_grid(9) > (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor(n))) then
             
             ! Locate parameter longitude extents:
             do i = 1, nint(param_grid(2))
@@ -247,7 +280,7 @@ contains
    !- Mercator LIS run domain:
       case( "mercator" )
         ! Parameter grid resolution <= as LIS run grid resolution:
-         if( param_grid(9) <= (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor)) then
+         if( param_grid(9) <= (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor(n))) then
             
             ! Locate parameter longitude extents:
             do i = 1, nint(param_grid(2))
@@ -275,7 +308,7 @@ contains
             end do
             
       ! Parameter grid resolution > as LIS run grid resolution:
-         elseif( param_grid(9) > (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor)) then
+         elseif( param_grid(9) > (LDT_rc%gridDesc(n,9)/LDT_rc%lis_map_resfactor(n))) then
 
             ! Locate parameter longitude extents:
             do i = 1, nint(param_grid(2))
@@ -317,7 +350,6 @@ contains
    !! Assemble the parameter subdomain extents and other info:
 
      ! Estimate final number of subsetted parameter points:
-!     subparam_nc = nint((subparm_urlon_ext - subparm_lllon_ext)/param_grid(9) ) + 1
      subparam_nc = nint(diff_lon(subparm_urlon_ext,subparm_lllon_ext)/param_grid(9) ) + 1
      subparam_nr = nint((subparm_urlat_ext - subparm_lllat_ext)/param_grid(10)) + 1
 
@@ -374,7 +406,6 @@ contains
                               rlat(c,r), rlon(c,r) )
            lat_line(c,r) = nint((rlat(c,r)-param_grid(4))/param_grid(10))+1
            lon_line(c,r) = nint((rlon(c,r)-param_grid(5))/param_grid(9))+1
-!           lon_line(c,r) = nint(diff_lon(rlon(c,r),param_grid(5))/param_grid(9))+1
         enddo
      enddo
      deallocate(rlat,rlon)
@@ -395,21 +426,21 @@ contains
 
    case ( "gaussian" )
 
-      !glpnc = nint((param_grid(8)-param_grid(5))/param_grid(9)) + 1
-      glpnc = nint(diff_lon(param_grid(8),param_grid(5))/param_grid(9)) + 1
-      glpnr = param_grid(3)
+     !glpnc = nint((param_grid(8)-param_grid(5))/param_grid(9)) + 1
+     glpnc = nint(diff_lon(param_grid(8),param_grid(5))/param_grid(9)) + 1
+     glpnr = param_grid(3)
 
-    ! Assume that parameter grid resolution SAME as LIS run grid resolution
-      subparm_lllat_ext = lisdom_min_lat
-      subparm_lllon_ext = lisdom_min_lon
-      subparm_urlat_ext = lisdom_max_lat
-      subparm_urlon_ext = lisdom_max_lon
+     ! Assume that parameter grid resolution SAME as LIS run grid resolution
+     subparm_lllat_ext = lisdom_min_lat
+     subparm_lllon_ext = lisdom_min_lon
+     subparm_urlat_ext = lisdom_max_lat
+     subparm_urlon_ext = lisdom_max_lon
 
-  !- Estimate final number of subsetted parameter points:
-      subparam_nc = LDT_rc%lnc(n)
-      subparam_nr = LDT_rc%lnr(n) 
+     ! Estimate final number of subsetted parameter points:
+     subparam_nc = LDT_rc%lnc(n)
+     subparam_nr = LDT_rc%lnr(n) 
 
-  !- Set subsetted parameter grid array inputs:
+     ! Set subsetted parameter grid array inputs:
      subparam_gridDesc(1)  = 4  
      subparam_gridDesc(2)  = float(subparam_nc)
      subparam_gridDesc(3)  = float(subparam_nr)
@@ -422,7 +453,7 @@ contains
      subparam_gridDesc(10) = param_grid(10)
      subparam_gridDesc(11) = 64.
      subparam_gridDesc(20) = 64.
-  
+
      ! Set up map_set parameter array ...
 !    subset_paramproj = LDT_domain(n)%ldtproj
      call map_set( PROJ_GAUSS, subparam_gridDesc(4), subparam_gridDesc(5), &
