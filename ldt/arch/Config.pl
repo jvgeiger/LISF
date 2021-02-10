@@ -63,6 +63,19 @@ else{
 }
 
 
+if(defined($ENV{LDT_CPPC})){
+   $sys_cppc = $ENV{LDT_CPPC};
+}
+else{
+   print "--------------ERROR---------------------\n";
+   print "Please specify the C++ compiler \n";
+   print "using the LDT_CC variable.\n";
+   print "Configuration exiting ....\n";
+   print "--------------ERROR---------------------\n";
+   exit 1;
+}
+
+
 print "Parallelism (0-serial, 1-dmpar, default=0): ";
 $par_lev=<stdin>;
 chomp($par_lev);
@@ -712,6 +725,7 @@ printf conf_file "%s%s\n","FC              = $sys_fc";
 printf conf_file "%s%s\n","FC77            = $sys_fc";
 printf conf_file "%s%s\n","LD              = $sys_fc";
 printf conf_file "%s%s\n","CC              = $sys_cc";
+printf conf_file "%s%s\n","CPPC            = $sys_cppc";
 printf conf_file "%s%s\n","AR              = ar";
 printf conf_file "%s%s\n","MOD_ESMF        = $sys_esmfmod_path";
 printf conf_file "%s%s\n","LIB_ESMF        = $sys_esmflib_path";

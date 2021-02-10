@@ -146,7 +146,7 @@ include ./Crocus.make
 	$(CC) $(CFLAGS) $(HEADER_DIRS) $<
 
 %.o: %.cc
-	$(CC) $(CFLAGS) $(HEADER_DIRS) $<
+	$(CPPC) $(CFLAGS) $(HEADER_DIRS) $<
 
 version.o: version.F90
 	$(FC) $(FFLAGS) $(HEADER_DIRS) $<
