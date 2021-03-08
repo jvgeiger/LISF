@@ -260,6 +260,7 @@ This script will prompt the user with a series of questions regarding support to
 
 | `LVT_FC`         | Fortran 90                 | required
 | `LVT_CC`         | C compiler                 | required
+| `LVT_CPPC`       | {cpp} compiler             | required
 | `LVT_MODESMF`    | path to ESMF modules files | required
 | `LVT_LIBESMF`    | path to ESMF library files | required
 | `LVT_OPENJPEG`   | path to openJPEG library   | required
@@ -273,7 +274,6 @@ This script will prompt the user with a series of questions regarding support to
 |===
 
 //{cpp} is C++
-Note that the `CC` variable must be set to a C compiler, not a {cpp} compiler.  A {cpp} compiler may mangle internal names in a manner that is not consistent with the Fortran compiler.  This will cause errors during linking.
 
 It is suggested that you add these definitions to your _.profile_ (or equivalent) startup file.
 

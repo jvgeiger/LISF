@@ -379,6 +379,7 @@ This script will prompt the user with a series of questions regarding support to
 
 | `LIS_FC`        | Fortran 90 compiler              | required
 | `LIS_CC`        | C compiler                       | required
+| `LIS_CPPC`      | {cpp} compiler                   | required
 | `LIS_MODESMF`   | path to ESMF module files        | required
 | `LIS_LIBESMF`   | path to ESMF library files       | required
 | `LIS_OPENJPEG`  | path to openJPEG library         | required
@@ -394,7 +395,6 @@ This script will prompt the user with a series of questions regarding support to
 |====
 
 //{cpp} is C++
-Note that the `CC` variable must be set to a C compiler, not a {cpp} compiler.  A {cpp} compiler may mangle internal names in a manner that is not consistent with the Fortran compiler.  This will cause errors during linking.
 
 It is suggested that you add these definitions to your _.profile_ (or equivalent) startup file.
 
