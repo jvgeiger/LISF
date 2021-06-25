@@ -70,7 +70,7 @@ subroutine read_imerg (n, kk, name_imerg, findex, order, ferror_imerg )
   real :: realprecip(xd,yd)
   real :: testout(xd,yd)
   real, allocatable :: precip_regrid(:,:)                      ! Interpolated precip array
-  character(len=99) :: fname, zname                  ! Filename variables
+  character(len=200) :: fname, zname                  ! Filename variables
   logical           :: file_exists
   integer           :: ftn
   integer           :: ireaderr
@@ -143,7 +143,7 @@ subroutine read_imerghdf(filename, xsize, ysize, precipout, istatus)
   implicit none
 
 ! ARGUMENTS
-  character(len=99)    :: filename
+  character(len=200)    :: filename
   integer, intent(in)  :: xsize, ysize
 
   character(len=40) :: dsetname='/Grid/precipitationCal'
