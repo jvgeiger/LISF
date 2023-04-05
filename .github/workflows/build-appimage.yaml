@@ -16,7 +16,7 @@ jobs:
       - name: Make AppImage
         run: |
           sudo apt-get update
-          sudo apt-get upgrade -y --no-install-recommends
+          #sudo apt-get upgrade -y --no-install-recommends
           sudo apt-get install -y --no-install-recommends wget
           wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod 755 appimagetool-x86_64.AppImage
