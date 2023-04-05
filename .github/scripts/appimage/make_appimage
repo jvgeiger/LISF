@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+sudo rm -rf LISF-x86_64.AppImage
+sudo rm -rf LISF.AppDir
+
+sudo docker create --name dummy lisf_appdir
+sudo docker cp dummy:/home/workdir/LISF.AppDir .
+sudo docker rm -f dummy
+
+appimagetool --appimage-extract-and-run LISF.AppDir

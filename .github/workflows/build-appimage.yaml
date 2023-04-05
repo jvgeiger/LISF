@@ -1,0 +1,33 @@
+name: Build AppImage
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Get libraries image
+        run: curl -O https://portal.nccs.nasa.gov/lisdata_pub/TESTING/dev-images/lisf_libraries.tar.gz
+      - name: Load LISF libraries
+        run: docker image load --input lisf_libraries.tar.gz
+      - name: Checkout LISF
+        uses: actions/checkout@v3
+      - name: Compile LISF
+        run: docker build --build-arg LISF_SOURCE=$GITHUB_WORKSPACE --tag lisf_appdir --file ./.github/scripts/appimage/Dockerfile $GITHUB_WORKSPACE/..
+      - name: Make AppImage
+        run: |
+          apt-get update
+          apt-get upgrade -y
+          apt-get install -y --no-install-recommends wget
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod 755 appimagetool-x86_64.AppImage
+          mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
+          ./.github/scripts/appimage/make_appimage
+      - name: Prepare notes
+        run: |
+          echo "This is a test release." >> "$RUNNER_TEMP/notes.md"
+      - name: Put AppImage
+        env:
+          TEST_TAG: test_appimage
+          PRELEASE: --prerelease
+          TITLE: "Test Release"
+        run: gh release create $TEST_TAG $PRERELEASE --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
