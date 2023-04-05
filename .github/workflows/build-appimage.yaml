@@ -15,9 +15,9 @@ jobs:
         run: docker build --build-arg LISF_SOURCE=$GITHUB_WORKSPACE --tag lisf_appdir --file ./.github/scripts/appimage/Dockerfile $GITHUB_WORKSPACE/..
       - name: Make AppImage
         run: |
-          apt-get update
-          apt-get upgrade -y
-          apt-get install -y --no-install-recommends wget
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y --no-install-recommends wget
           wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod 755 appimagetool-x86_64.AppImage
           mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
