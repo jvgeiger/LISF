@@ -27,6 +27,7 @@ jobs:
           echo "This is a test release." >> "$RUNNER_TEMP/notes.md"
       - name: Put AppImage
         env:
+          GH_TOKEN: ${{ github.token }}
           TEST_TAG: test_appimage
           PRELEASE: --prerelease
           TITLE: "Test Release"
