@@ -29,10 +29,8 @@ git log -n 1 --oneline --decorate >revision.log
 # Include date/time stamp history? (1-yes, 0-no, default=1): 1
 
 cd ldt
-rm -f LDT
-make -C make realclean
 printf '%s\n' "0" "2" "2" "2" "4" "1" "1" "1" "1" "1" "1" "1" "1" "1" | ./configure
-./compile -j 2
+./compile
 
 #
 # LIS
@@ -59,11 +57,8 @@ printf '%s\n' "0" "2" "2" "2" "4" "1" "1" "1" "1" "1" "1" "1" "1" "1" | ./config
 # Use PETSc? (1-yes, 0-no, default=0): 0
 
 cd ../lis
-rm -f LIS
-make -C make realclean
 printf '%s\n' "1" "2" "2" "2" "0" "1" "4" "1" "1" "1" "1" "1" "1" "0" "0" "0" "0" "0" "0" | ./configure
-# for public #printf '%s\n' "1" "2" "2" "2" "0" "1" "4" "1" "1" "1" "1" "1" "1" "0" "0" "0" "0" "0" | ./configure
-./compile -j 2
+./compile
 
 #
 # LVT
@@ -85,7 +80,5 @@ printf '%s\n' "1" "2" "2" "2" "0" "1" "4" "1" "1" "1" "1" "1" "1" "0" "0" "0" "0
 # Use MATLAB support? (1-yes, 0-no, default=0): 0
 
 cd ../lvt
-rm -f LVT
-make -C make realclean
 printf '%s\n' "2" "2" "2" "1" "4" "1" "1" "1" "1" "1" "1" "0" "1" "0" | ./configure
-./compile -j 2
+./compile
