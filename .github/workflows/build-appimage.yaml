@@ -29,6 +29,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TEST_TAG: test_appimage
-          PRELEASE: --prerelease
+          PRERELEASE: --prerelease
           TITLE: "Test Release"
         run: gh release create $TEST_TAG $PRERELEASE --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
