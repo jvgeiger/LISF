@@ -30,7 +30,7 @@ git log -n 1 --oneline --decorate >revision.log
 
 cd ldt
 printf '%s\n' "0" "2" "2" "2" "4" "1" "1" "1" "1" "1" "1" "1" "1" "1" | ./configure
-./compile
+./compile -j 2
 
 #
 # LIS
@@ -58,7 +58,7 @@ printf '%s\n' "0" "2" "2" "2" "4" "1" "1" "1" "1" "1" "1" "1" "1" "1" | ./config
 
 cd ../lis
 printf '%s\n' "1" "2" "2" "2" "0" "1" "4" "1" "1" "1" "1" "1" "1" "0" "0" "0" "0" "0" "0" | ./configure
-./compile
+./compile -j 2
 
 #
 # LVT
@@ -81,4 +81,4 @@ printf '%s\n' "1" "2" "2" "2" "0" "1" "4" "1" "1" "1" "1" "1" "1" "0" "0" "0" "0
 
 cd ../lvt
 printf '%s\n' "2" "2" "2" "1" "4" "1" "1" "1" "1" "1" "1" "0" "1" "0" | ./configure
-./compile
+./compile -j 2
