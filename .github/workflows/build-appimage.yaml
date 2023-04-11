@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build AppImage
+    name: Publish AppImage
     runs-on: ubuntu-22.04
     steps:
       - if: github.event_name == 'release'
@@ -39,26 +39,26 @@ jobs:
         run: |
           echo "This AppImage is compatible with:" >>"$RUNNER_TEMP/notes.md"
           echo "" >>"$RUNNER_TEMP/notes.md"
-          echo "* Linux: x86_64 platforms" >>"$RUNNER_TEMP/notes.md"
-          echo "* GLIBC: 2.22 or newer (as reported by `ldd --version`)" >>"$RUNNER_TEMP/notes.md"
+          echo "* Linux: x86_64 machines (as reported by \`uname -s -m\`)" >>"$RUNNER_TEMP/notes.md"
+          echo "* GLIBC: 2.22 or newer (as reported by \`ldd --version\`)" >>"$RUNNER_TEMP/notes.md"
           echo "* MPI: MPICH, Intel MPI, or Cray MPI" >>"$RUNNER_TEMP/notes.md"
           echo "" >>"$RUNNER_TEMP/notes.md"
           echo "To get started with the AppImage, run:" >>"$RUNNER_TEMP/notes.md"
           echo "" >>"$RUNNER_TEMP/notes.md"
-          echo "```" >>"$RUNNER_TEMP/notes.md"
+          echo "\```" >>"$RUNNER_TEMP/notes.md"
           echo "./LISF-x86_64.AppImage -h" >>"$RUNNER_TEMP/notes.md"
-          echo "```" >>"$RUNNER_TEMP/notes.md"
+          echo "\```" >>"$RUNNER_TEMP/notes.md"
           echo "" >>"$RUNNER_TEMP/notes.md"
           echo "Note:" >>"$RUNNER_TEMP/notes.md"
           echo "" >>"$RUNNER_TEMP/notes.md"
           echo "This AppImage requires FUSE to run.  If you get an error, then try:" >>"$RUNNER_TEMP/notes.md"
-          echo "```" >>"$RUNNER_TEMP/notes.md"
+          echo "\```" >>"$RUNNER_TEMP/notes.md"
           echo "mkdir LISF-x86_64" >>"$RUNNER_TEMP/notes.md"
           echo "cd LISF-x86_64" >>"$RUNNER_TEMP/notes.md"
           echo "../LISF-x86_64.AppImage --appimage-extract" >>"$RUNNER_TEMP/notes.md"
           echo "cd .." >>"$RUNNER_TEMP/notes.md"
           echo "./LISF-x86_64/squashfs-root/AppRun -h" >>"$RUNNER_TEMP/notes.md"
-          echo "```" >>"$RUNNER_TEMP/notes.md"
+          echo "\```" >>"$RUNNER_TEMP/notes.md"
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
