@@ -59,7 +59,7 @@ jobs:
           echo "cd .." >>"$RUNNER_TEMP/notes.md"
           echo "./LISF-x86_64/squashfs-root/AppRun -h" >>"$RUNNER_TEMP/notes.md"
           echo "\`\`\`" >>"$RUNNER_TEMP/notes.md"
-      - name: Create release
+      - name: Create pre-release
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
           #GH_TOKEN: ${{ github.token }}
@@ -70,6 +70,7 @@ jobs:
           gh release delete $LISF_TAG --yes || true
           git push origin :$LISF_TAG || true
           gh release create $LISF_TAG $PRERELEASE --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
+      - name: Upload asset
         if: github.event_name == 'release'
         run: |
           gh release upload ${{ github.event.release.tag_name }} ./LISF-x86_64.AppImage
