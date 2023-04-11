@@ -1,12 +1,24 @@
 name: Build AppImage
-on: [workflow_dispatch, push]
+on:
+  push:
+    branches:
+      - feature/test_appimage
+  release:
+    types:
+      - published
+  workflow_dispatch:
 
 jobs:
   build:
+    name: Build AppImage
     runs-on: ubuntu-22.04
     steps:
+      - if: github.event_name == 'release'
+        run: echo "DEV_IMAGE=public74" >>$GITHUB_ENV
+      - if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: echo "DEV_IMAGE=master" >>$GITHUB_ENV
       - name: Get LISF libraries image
-        run: curl -O https://portal.nccs.nasa.gov/lisdata_pub/TESTING/dev-images/master/lisf_libraries.tar.gz
+        run: curl -O https://portal.nccs.nasa.gov/lisdata_pub/TESTING/dev-images/$DEV_IMAGE/lisf_libraries.tar.gz
       - name: Load LISF libraries image
         run: docker image load --input lisf_libraries.tar.gz
       - name: Checkout LISF source code
@@ -23,15 +35,37 @@ jobs:
           mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
           ./.github/scripts/appimage/make_appimage
       - name: Prepare release notes
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
-          echo "This is a test release." >> "$RUNNER_TEMP/notes.md"
+          echo "This AppImage is compatible with:" >>"$RUNNER_TEMP/notes.md"
+          echo "" >>"$RUNNER_TEMP/notes.md"
+          echo "* Linux: x86_64 platforms" >>"$RUNNER_TEMP/notes.md"
+          echo "* GLIBC: 2.22 or newer (as reported by `ldd --version`)" >>"$RUNNER_TEMP/notes.md"
+          echo "* MPI: MPICH, Intel MPI, or Cray MPI" >>"$RUNNER_TEMP/notes.md"
+          echo "" >>"$RUNNER_TEMP/notes.md"
+          echo "To get started with the AppImage, run:" >>"$RUNNER_TEMP/notes.md"
+          echo "" >>"$RUNNER_TEMP/notes.md"
+          echo "```" >>"$RUNNER_TEMP/notes.md"
+          echo "./LISF-x86_64.AppImage -h" >>"$RUNNER_TEMP/notes.md"
+          echo "```" >>"$RUNNER_TEMP/notes.md"
+          echo "" >>"$RUNNER_TEMP/notes.md"
+          echo "Note:" >>"$RUNNER_TEMP/notes.md"
+          echo "" >>"$RUNNER_TEMP/notes.md"
+          echo "This AppImage requires FUSE to run.  If you get an error, then try:" >>"$RUNNER_TEMP/notes.md"
+          echo "```" >>"$RUNNER_TEMP/notes.md"
+          echo "mkdir LISF-x86_64" >>"$RUNNER_TEMP/notes.md"
+          echo "cd LISF-x86_64" >>"$RUNNER_TEMP/notes.md"
+          echo "../LISF-x86_64.AppImage --appimage-extract" >>"$RUNNER_TEMP/notes.md"
+          echo "cd .." >>"$RUNNER_TEMP/notes.md"
+          echo "./LISF-x86_64/squashfs-root/AppRun -h" >>"$RUNNER_TEMP/notes.md"
+          echo "```" >>"$RUNNER_TEMP/notes.md"
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
-          TEST_TAG: test_appimage
+          LISF_TAG: test_appimage
           PRERELEASE: --prerelease
-          TITLE: "Test Release"
+          TITLE: "LISF master (pre-release) image"
         run: |
-          gh release delete $TEST_TAG --yes || true
-          git push origin :$TEST_TAG || true
-          gh release create $TEST_TAG $PRERELEASE --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
+          gh release delete $LISF_TAG --yes || true
+          git push origin :$LISF_TAG || true
+          gh release create $LISF_TAG $PRERELEASE --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
