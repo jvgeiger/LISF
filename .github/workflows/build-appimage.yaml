@@ -71,10 +71,5 @@ jobs:
           git push origin :$LISF_TAG || true
           gh release create $LISF_TAG $PRERELEASE --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
         if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./LISF-x86_64.AppImage
-          asset_name: LISF-x86_64.AppImage
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} ./LISF-x86_64.AppImage
