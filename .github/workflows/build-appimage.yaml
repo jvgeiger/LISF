@@ -38,7 +38,7 @@ jobs:
       - name: Prepare release notes (if necessary)
         if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
         run: |
-          cat <<EOB >>$RUNNER_TEMP/notes.md
+          cat <<EOB >$RUNNER_TEMP/notes.md
           This AppImage is compatible with:
 
           * Linux: x86_64 machines (as reported by \`uname -s -m\`)
@@ -72,13 +72,12 @@ jobs:
         if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
-          LISF_TAG: test_appimage
-          PRERELEASE: --prerelease
+          LISF_TAG: master-latest
           TITLE: "LISF master (pre-release) image"
         run: |
           gh release delete $LISF_TAG --yes || true
           git push origin :$LISF_TAG || true
-          gh release create $LISF_TAG $PRERELEASE --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
+          gh release create $LISF_TAG --prerelease --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
       - name: Upload asset (if necessary)
         if: github.event_name == 'release'
         env:
