@@ -9,16 +9,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Publish AppImage
+  build_and_publish:
+    name: Build and publish AppImage
     runs-on: ubuntu-22.04
     if: ${{ !contains(github.ref_name, 'support/lisf-557ww') }}
     steps:
-      - name: debug
-        run: |
-          echo "Ref: ${{github.ref}}"
-          echo "Ref name: ${{github.ref_name}}"
-          echo "commitish: ${{github.event.release.target_commitish}}"
       - if: github.event_name == 'release'
         run: echo "DEV_IMAGE=${{ github.event.release.target_commitish }}" >>$GITHUB_ENV
       - if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -40,7 +35,7 @@ jobs:
           chmod 755 appimagetool-x86_64.AppImage
           mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
           ./.github/scripts/appimage/make_appimage
-      - name: Prepare release notes
+      - name: Prepare release notes (if necessary)
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           cat <<EOB >>$RUNNER_TEMP/notes.md
@@ -73,7 +68,7 @@ jobs:
           ./LISF-x86_64/squashfs-root/AppRun -h
           \`\`\` 
           EOB
-      - name: Create pre-release
+      - name: Create pre-release (if necessary)
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -84,7 +79,7 @@ jobs:
           gh release delete $LISF_TAG --yes || true
           git push origin :$LISF_TAG || true
           gh release create $LISF_TAG $PRERELEASE --notes-file "$RUNNER_TEMP/notes.md" --title "$TITLE" --target $GITHUB_SHA ./LISF-x86_64.AppImage
-      - name: Upload asset
+      - name: Upload asset (if necessary)
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
