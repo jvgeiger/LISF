@@ -49,7 +49,10 @@ function lisf_usage {
    echo "   where [LISF options] are options to pass to LISF;"
    echo "   these must be preceeded by --"
    echo ""
-   echo "   Example $(basename ${0}) -a LIS -- --file lis.config"
+   echo "   Examples:"
+   echo "      $(basename ${0}) -a LDT ldt.config"
+   echo "      mpirun -n N $(basename ${0}) -a LIS -- --file lis.config"
+   echo "      $(basename ${0}) -a LVT lvt.config"
 }
 
 function lisf_version {
