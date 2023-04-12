@@ -6,7 +6,7 @@ on:
   release:
     types:
       - published
-  workflow_dispatch:
+  #workflow_dispatch:
 
 jobs:
   build_and_publish:
@@ -16,10 +16,10 @@ jobs:
     steps:
       - if: github.event_name == 'release'
         run: echo "DEV_IMAGE=${{ github.event.release.target_commitish }}" >>$GITHUB_ENV
-      - if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      - if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
         run: echo "DEV_IMAGE=master" >>$GITHUB_ENV
       - name: Get LISF libraries image
-        run: curl -O https://portal.nccs.nasa.gov/lisdata_pub/TESTING/dev-images/$DEV_IMAGE/lisf_libraries.tar.gz
+        run: curl --no-progress-meter -O https://portal.nccs.nasa.gov/lisdata_pub/TESTING/dev-images/$DEV_IMAGE/lisf_libraries.tar.gz
       - name: Load LISF libraries image
         run: docker image load --input lisf_libraries.tar.gz
       - name: Checkout LISF source code
@@ -36,7 +36,7 @@ jobs:
           mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
           ./.github/scripts/appimage/make_appimage
       - name: Prepare release notes (if necessary)
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
         run: |
           cat <<EOB >>$RUNNER_TEMP/notes.md
           This AppImage is compatible with:
@@ -69,7 +69,7 @@ jobs:
           \`\`\`
           EOB
       - name: Create pre-release (if necessary)
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
           LISF_TAG: test_appimage
