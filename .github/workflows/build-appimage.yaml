@@ -10,8 +10,9 @@ on:
 
 jobs:
   build:
-    if: !contains(github.ref, "support/lisf-557ww")
+    name: Publish AppImage
     runs-on: ubuntu-22.04
+    if: !contains(github.ref, "support/lisf-557ww")
     steps:
       - if: github.event_name == 'release'
         run: echo "DEV_IMAGE=${{ github.event.release.target_commitish }}" >>$GITHUB_ENV
