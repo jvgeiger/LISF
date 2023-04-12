@@ -14,6 +14,11 @@ jobs:
     runs-on: ubuntu-22.04
     if: ${{ !contains(github.ref, 'support/lisf-557ww') }}
     steps:
+      - name: debug
+        run: |
+          echo "Ref: ${{github.ref}}"
+          echo "Ref name: ${{github.ref_name}}"
+          echo "commitish: ${{github.event.release.target_commitish}}"
       - if: github.event_name == 'release'
         run: echo "DEV_IMAGE=${{ github.event.release.target_commitish }}" >>$GITHUB_ENV
       - if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
