@@ -10,11 +10,13 @@ on:
 
 jobs:
   build:
-    echo "Ref: ${{ github.ref }}"
-    echo "commitish: ${{ github.event.release.target_commitsh }}"
     name: Publish AppImage
     runs-on: ubuntu-22.04
     steps:
+      - name: debug
+        run: |
+          echo "Ref: ${{ github.ref }}"
+          echo "commitish: ${{ github.event.release.target_commitsh }}"
       - if: github.event_name == 'release'
         run: echo "DEV_IMAGE=${{ github.event.release.target_commitish }}" >>$GITHUB_ENV
       - if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
