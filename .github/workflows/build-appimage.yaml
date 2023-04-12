@@ -10,7 +10,6 @@ on:
 
 jobs:
   build:
-    if: !contains("support/lisf-557ww", github.ref)
     name: Publish AppImage
     if: !contains(github.ref, "support/lisf-557ww")
     runs-on: ubuntu-22.04
