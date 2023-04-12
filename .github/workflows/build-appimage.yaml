@@ -10,6 +10,8 @@ on:
 
 jobs:
   build:
+    echo "Ref: ${{ github.ref }}"
+    echo "commitish: ${{ github.event.release.target_commitsh }}"
     name: Publish AppImage
     runs-on: ubuntu-22.04
     steps:
