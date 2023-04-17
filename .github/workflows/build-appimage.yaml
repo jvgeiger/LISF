@@ -17,6 +17,7 @@ jobs:
       - name: Update ca certs
         run: |
           sudo apt-get install -y --no-install-recommends ca-certificates
+          sudo apt-get install -y --no-install-recommends wget
           #sudo apt-get upgrade -y ca-certificates
           ls /etc/ssl/certs/
           cat /etc/ssl/certs/DigiCert*
@@ -25,7 +26,9 @@ jobs:
       - if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
         run: echo "DEV_IMAGE=master" >>$GITHUB_ENV
       - name: Get LISF libraries image
-        run: curl --verbose --no-progress-meter -O https://portal.nccs.nasa.gov/lisdata_pub/TESTING/dev-images/$DEV_IMAGE/lisf_libraries.tar.gz
+        run: |
+          #curl --verbose --no-progress-meter -O https://portal.nccs.nasa.gov/lisdata_pub/TESTING/dev-images/$DEV_IMAGE/lisf_libraries.tar.gz
+          wget https://portal.nccs.nasa.gov/lisdata_pub/TESTING/dev-images/$DEV_IMAGE/lisf_libraries.tar.gz
       - name: Load LISF libraries image
         run: docker image load --input lisf_libraries.tar.gz
       - name: Checkout LISF source code
