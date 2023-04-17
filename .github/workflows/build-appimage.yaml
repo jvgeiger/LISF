@@ -17,11 +17,9 @@ jobs:
       - name: Update ca certs
         run: |
           sudo apt-get install -y --no-install-recommends ca-certificates
-          sudo apt-get upgrade -y ca-certificates
+          #sudo apt-get upgrade -y ca-certificates
           ls /etc/ssl/certs/
-          cat /etc/ssl/certs/DigiCert_Global_Root_CA.pem
-          cat /etc/ssl/certs/DigiCert_Global_Root_G2.pem
-          cat /etc/ssl/certs/DigiCert_Global_Root_G3.pem
+          cat /etc/ssl/certs/DigiCert*
       - if: github.event_name == 'release'
         run: echo "DEV_IMAGE=${{ github.event.release.target_commitish }}" >>$GITHUB_ENV
       - if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
