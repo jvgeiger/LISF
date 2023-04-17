@@ -15,7 +15,9 @@ jobs:
     if: ${{ !contains(github.ref_name, 'support/lisf-557ww') }}
     steps:
       - name: Update ca certs
-        run: sudo apt-get install -y --no-install-recommends ca-certificates
+        run: |
+          sudo apt-get install -y --no-install-recommends ca-certificates
+          ls /etc/ssl/certs/
       - if: github.event_name == 'release'
         run: echo "DEV_IMAGE=${{ github.event.release.target_commitish }}" >>$GITHUB_ENV
       - if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
