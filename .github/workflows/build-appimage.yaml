@@ -18,6 +18,9 @@ jobs:
         run: |
           sudo apt-get install -y --no-install-recommends ca-certificates
           ls /etc/ssl/certs/
+          cat /etc/ssl/certs/DigiCert_Global_Root_CA.pem
+          cat /etc/ssl/certs/DigiCert_Global_Root_G2.pem
+          cat /etc/ssl/certs/DigiCert_Global_Root_G3.pem
       - if: github.event_name == 'release'
         run: echo "DEV_IMAGE=${{ github.event.release.target_commitish }}" >>$GITHUB_ENV
       - if: github.event_name == 'push' #|| github.event_name == 'workflow_dispatch'
