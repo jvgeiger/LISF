@@ -731,6 +731,10 @@ contains
     external read_ISRIC_texture
     external read_ISRIC_soilfractions
 
+  ! SSURGO
+    external set_SSURGO_texture_attribs
+    external read_SSURGO_texture
+  
 !== FAO (global; original LIS-processed):
     call registerreadsoilfrac(trim(LDT_faoSoilId)//char(0),read_FAO_soilfractions)
     call registerreadsoiltexture(trim(LDT_faoSoilId)//char(0), read_FAO_texture)
@@ -830,6 +834,12 @@ contains
          read_ISRIC_texture)
     call registerreadsoilfrac(trim(LDT_ISRICsoilId)//char(0),&
          read_ISRIC_soilfractions)
+
+!=== SSURGO mukey
+    call registersettextureattribs(trim(LDT_SSURGOmukeyId)//char(0),&
+                                 set_SSURGO_texture_attribs)
+    call registerreadsoiltexture(trim(LDT_SSURGOmukeyId)//char(0), &
+         read_SSURGO_texture)
 
   end subroutine LDT_soils_plugin
 

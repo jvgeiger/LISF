@@ -505,6 +505,15 @@ contains
             write(LDT_logunit,*) " Stopping ..."
             call LDT_endrun
           endif
+
+        case( "SSURGO")
+!          if (nt.ne.13) then 
+!             write(LDT_logunit,*) "Param_Check: ISRIC has 13 types (includes water) for tiling."
+          write(LDT_logunit,*) " SSURGO: The current value of types is: ",nt
+!             write(LDT_logunit,*) " Stopping ..."
+!             call LDT_endrun
+!          endif
+
         case( "Special" )
 
         case default
