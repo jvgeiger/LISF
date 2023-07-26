@@ -25,6 +25,8 @@ module LDT_LSMCropModifier_Mod
 !
 ! !REVISION HISTORY:
 !  14 Jan 2014: K. Arsenault: Added to modify LSM parameters with crop data 
+!  11 May 2023: J. Erlingis:  Add CDL to LSM parameters and modified to 
+!                             allow time-varying CDL
 ! ___________________________________________________________
 
 #if(defined USE_NETCDF3 || defined USE_NETCDF4)
@@ -64,13 +66,15 @@ module LDT_LSMCropModifier_Mod
      character*20      :: assign_cropvalue
      character*20      :: config_croptype
      character*20      :: crop_classification
+     integer           :: begin_year, end_year
      character(len=LDT_CONST_PATH_LEN)     :: croplib_dir
 
      type(LDT_paramEntry) :: croptype    ! Crop type land cover
+     type(LDT_paramEntry) :: cdlyears       ! CDL years
   end type LSMCrop_type_dec
 
   type(LSMCrop_type_dec), allocatable :: LDT_LSMCrop_struc(:)
-
+  
 !BOP 
 ! 
 ! !ROUTINE: LDT_LSMCropMod_writeHeader 
@@ -183,15 +187,76 @@ contains
       !-- Crop Parameters:
           allocate ( LDT_rc%numcrop(LDT_rc%nnest) )
 
+          !JE Moved this section up in order to allow for time-varying vlevels
+          !- Crop classification:
+          LDT_LSMCrop_struc(:)%crop_classification = "none"          
+          call ESMF_ConfigFindLabel(LDT_config,"Crop classification:",rc=rc)
+          do n=1,LDT_rc%nnest
+             call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(n)%crop_classification,rc=rc)
+             call LDT_verify(rc,'Crop classification: not specified')
+             print*,LDT_LSMCrop_struc(n)%crop_classification
+          enddo
+
+          LDT_LSMCrop_struc(:)%begin_year = LDT_rc%udef
+          LDT_LSMCrop_struc(:)%end_year   = LDT_rc%udef
+
+          !- Assign number of crop types based on classification selected:
+          do n=1,LDT_rc%nnest
+             select case( LDT_LSMCrop_struc(n)%crop_classification )
+             case( "CROPMAP" )
+                LDT_rc%numcrop(n) = 19
+             case( "FAOSTAT01" )
+                LDT_rc%numcrop(n) = 18
+             case( "FAOSTAT05" )
+                LDT_rc%numcrop(n) = 175
+             case( "CDL" )
+                LDT_rc%numcrop(n) = 256
+                ! CDL is time-varying, so get the beginning and ending years
+                call ESMF_ConfigFindLabel(LDT_config,"CDL start year:",rc=rc)
+                call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(n)%begin_year,rc=rc)
+                call LDT_verify(rc,'CDL start year not specified')
+                call ESMF_ConfigFindLabel(LDT_config,"CDL end year:",rc=rc)
+                call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(n)%end_year,rc=rc)
+                call LDT_verify(rc,'CDL end year not specified')
+             case default
+                write(LDT_logunit,*) "[ERR] THE CROP CLASSIFICATION TYPE, ",&
+                     trim(LDT_LSMCrop_struc(n)%crop_classification),", IS NOT RECOGNIZED."
+                write(LDT_logunit,*) "  Please enter one of the following options: "
+                write(LDT_logunit,*) "   -- CROPMAP   "
+                write(LDT_logunit,*) "   -- FAOSTAT01 "
+                write(LDT_logunit,*) "   -- FAOSTAT05 "
+                write(LDT_logunit,*) "   -- CDL       "
+                write(LDT_logunit,*) "  Stopping ..." 
+                call LDT_endrun
+             end select
+             write(LDT_logunit,*) " -- Number of crop types for, ", &
+                  trim(LDT_LSMCrop_struc(n)%crop_classification),", is :: ",LDT_rc%numcrop(n)
+          enddo   ! End Nest Loop
+!JE End reordering
+
        !- Crop type:
           do n=1,LDT_rc%nnest
              if(LDT_LSMCrop_struc(n)%croptype%selectOpt.eq.1) then
                 croptype_select = .true.
              !- Allocate croptype values:
-                allocate(LDT_LSMCrop_struc(n)%croptype%value(&
-                     LDT_rc%lnc(n),LDT_rc%lnr(n),&
-                     LDT_LSMCrop_struc(n)%croptype%num_bins))
+             select case( LDT_LSMCrop_struc(n)%crop_classification )
+                case( "CDL" )
+                   ! Let CDL have a time-varying dimension
+                   allocate(LDT_LSMCrop_struc(n)%croptype%value(&
+                        LDT_rc%lnc(n),LDT_rc%lnr(n),&
+                        (LDT_LSMCrop_struc(n)%end_year-LDT_LSMCrop_struc(n)%begin_year)+1))
+                   print*,"Vlevels"
+                   print*,LDT_LSMCrop_struc(n)%croptype%vlevels
+                   print*,"Num_bins"
+                   print*,LDT_LSMCrop_struc(n)%croptype%num_bins
                 LDT_LSMCrop_struc(n)%croptype%value = -9999.   ! perhaps change to 0. later
+                case default
+                   ! All other datasets have a crop type dimension
+                   allocate(LDT_LSMCrop_struc(n)%croptype%value(&
+                        LDT_rc%lnc(n),LDT_rc%lnr(n),&
+                        LDT_LSMCrop_struc(n)%croptype%num_bins))
+                   LDT_LSMCrop_struc(n)%croptype%value = -9999. 
+                end select
              endif
              call setCropParmsFullnames(n,"croptype",LDT_LSMCrop_struc(n)%croptype%source)
           enddo   ! End nest loop
@@ -209,37 +274,52 @@ contains
                 call LDT_verify(rc,'Crop map spatial transform: option not specified in the config file')
              enddo
           endif
-
-          !- Crop classification:
-          LDT_LSMCrop_struc(:)%crop_classification = "none"
-          call ESMF_ConfigFindLabel(LDT_config,"Crop classification:",rc=rc)
-          do n=1,LDT_rc%nnest
-             call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(n)%crop_classification,rc=rc)
-             call LDT_verify(rc,'Crop classification: not specified')
-          enddo
-
-          !- Assign number of crop types based on classification selected:
-          do n=1,LDT_rc%nnest
-             select case( LDT_LSMCrop_struc(n)%crop_classification )
-             case( "CROPMAP" )
-                LDT_rc%numcrop(n) = 19
-             case( "FAOSTAT01" )
-                LDT_rc%numcrop(n) = 18
-             case( "FAOSTAT05" )
-                LDT_rc%numcrop(n) = 175
-             case default
-                write(LDT_logunit,*) "[ERR] THE CROP CLASSIFICATION TYPE, ",&
-                     trim(LDT_LSMCrop_struc(n)%crop_classification),", IS NOT RECOGNIZED."
-                write(LDT_logunit,*) "  Please enter one of the following options: "
-                write(LDT_logunit,*) "   -- CROPMAP   "
-                write(LDT_logunit,*) "   -- FAOSTAT01 "
-                write(LDT_logunit,*) "   -- FAOSTAT05 "
-                write(LDT_logunit,*) "  Stopping ..." 
-                call LDT_endrun
-             end select
-             write(LDT_logunit,*) " -- Number of crop types for, ", &
-                  trim(LDT_LSMCrop_struc(n)%crop_classification),", is :: ",LDT_rc%numcrop(n)
-          enddo   ! End Nest Loop
+! JE Move this section up
+!
+!          !- Crop classification:
+!          LDT_LSMCrop_struc(:)%crop_classification = "none"
+!          call ESMF_ConfigFindLabel(LDT_config,"Crop classification:",rc=rc)
+!          do n=1,LDT_rc%nnest
+!             call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(n)%crop_classification,rc=rc)
+!             call LDT_verify(rc,'Crop classification: not specified')
+!             print*,LDT_LSMCrop_struc(n)%crop_classification
+!          enddo
+!
+!          LDT_LSMCrop_struc(:)%begin_year = LDT_rc%udef
+!          LDT_LSMCrop_struc(:)%end_year   = LDT_rc%udef
+!
+!          !- Assign number of crop types based on classification selected:
+!          do n=1,LDT_rc%nnest
+!             select case( LDT_LSMCrop_struc(n)%crop_classification )
+!             case( "CROPMAP" )
+!                LDT_rc%numcrop(n) = 19
+!             case( "FAOSTAT01" )
+!                LDT_rc%numcrop(n) = 18
+!             case( "FAOSTAT05" )
+!                LDT_rc%numcrop(n) = 175
+!             case( "CDL" )
+!                LDT_rc%numcrop(n) = 256
+!                call ESMF_ConfigFindLabel(LDT_config,"CDL start year:",rc=rc)
+!                call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(n)%begin_year,rc=rc)
+!                call LDT_verify(rc,'CDL start year not specified')
+!                call ESMF_ConfigFindLabel(LDT_config,"CDL end year:",rc=rc)
+!                call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(n)%end_year,rc=rc)
+!                call LDT_verify(rc,'CDL end year not specified')
+!             case default
+!                write(LDT_logunit,*) "[ERR] THE CROP CLASSIFICATION TYPE, ",&
+!                     trim(LDT_LSMCrop_struc(n)%crop_classification),", IS NOT RECOGNIZED."
+!                write(LDT_logunit,*) "  Please enter one of the following options: "
+!                write(LDT_logunit,*) "   -- CROPMAP   "
+!                write(LDT_logunit,*) "   -- FAOSTAT01 "
+!                write(LDT_logunit,*) "   -- FAOSTAT05 "
+!                write(LDT_logunit,*) "   -- CDL       "
+!                write(LDT_logunit,*) "  Stopping ..." 
+!                call LDT_endrun
+!             end select
+!             write(LDT_logunit,*) " -- Number of crop types for, ", &
+!                  trim(LDT_LSMCrop_struc(n)%crop_classification),", is :: ",LDT_rc%numcrop(n)
+!          enddo   ! End Nest Loop
+! JE End Move Section
 
           LDT_LSMCrop_struc(:)%croplib_dir = "none"
           call ESMF_ConfigFindLabel(LDT_config,"Crop library directory:",rc=rc)
@@ -295,6 +375,10 @@ contains
                 if( LDT_LSMCrop_struc(n)%crop_gridtransform == "tile" ) then
                    LDT_LSMCrop_struc(n)%croptype%vlevels = &
                         LDT_LSMCrop_struc(n)%croptype%num_bins
+                elseif ( LDT_LSMCrop_struc(n)%crop_classification == "CDL" ) then
+                   LDT_LSMCrop_struc(n)%croptype%vlevels = &
+                      (LDT_LSMCrop_struc(n)%end_year - &
+                      LDT_LSMCrop_struc(n)%begin_year) + 1
                 elseif( LDT_LSMCrop_struc(n)%crop_gridtransform == "mode" ) then
                    LDT_LSMCrop_struc(n)%croptype%vlevels = 1
                 endif
@@ -302,13 +386,39 @@ contains
              !- Read crop type file and "blend" with output landcover map:
                 if( LDT_LSMCrop_struc(n)%croptype%source .ne. "CONSTANT" ) then
 
+!                   call readcroptype(&
+!                        trim(LDT_LSMCrop_struc(n)%croptype%source)//char(0),&
+!                        n, LDT_LSMCrop_struc(n)%croptype%num_bins, &
+!                        LDT_LSMCrop_struc(n)%croptype%value )
+
                    call readcroptype(&
-                        trim(LDT_LSMCrop_struc(n)%croptype%source)//char(0),&
+                        trim(LDT_LSMCrop_struc(n)%croptype%source)//char(0), &
                         n, LDT_LSMCrop_struc(n)%croptype%num_bins, &
                         LDT_LSMCrop_struc(n)%croptype%value )
 
+! JE          !- Crop classification:
+!          LDT_LSMCrop_struc(:)%crop_classification = "none"
+!          call ESMF_ConfigFindLabel(LDT_config,"Crop classification:",rc=rc)
+!          do r=1,LDT_rc%nnest
+!             call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(r)%crop_classification,rc=rc)
+!             call LDT_verify(rc,'Crop classification: not specified')
+!             print*,LDT_LSMCrop_struc(r)%crop_classification
+!          enddo
+!
+!          LDT_LSMCrop_struc(:)%croplib_dir = "none"
+!          call ESMF_ConfigFindLabel(LDT_config,"Crop library directory:",rc=rc)
+!          do r=1,LDT_rc%nnest
+!             call ESMF_ConfigGetAttribute(LDT_config,LDT_LSMCrop_struc(r)%croplib_dir,rc=rc)
+!             call LDT_verify(rc,'Crop library directory: not specified')
+!          enddo
+
                  ! Ensure consistency of dominant crop map with landcover cropland:
-                   croptemp = "maize"   
+                   croptemp = "maize"
+                   print*,n
+                   print*,LDT_LSMCrop_struc(n)%crop_classification
+                   print*,LDT_rc%numcrop(n)
+                   print*,croptemp
+                   print*,crop_index   
                    call assigncroptype( n, LDT_LSMCrop_struc(n)%crop_classification,   &
                         LDT_rc%numcrop(n), croptemp, crop_index ) ! default - most common crop
                 !  like in Ozdogan etal (2010)
@@ -381,20 +491,45 @@ contains
     integer      :: n
     integer      :: ftn
     integer      :: dimID(3)
-    integer      :: tdimID(3)
+    integer      :: tdimID(3),dimID2
+    integer      :: nyears
+    integer      :: jj 
+    integer      :: yearID
+    integer, allocatable:: years(:)
 
 #if(defined USE_NETCDF3 || defined USE_NETCDF4)
    if( LDT_rc%assimcropinfo(n) ) then
 
      tdimID(1) = dimID(1)
      tdimID(2) = dimID(2)
+  
+     print*,LDT_LSMCrop_struc(n)%croptype%vlevels
 
      if( LDT_LSMCrop_struc(n)%croptype%selectOpt > 0 ) then
-       call LDT_verify(nf90_def_dim(ftn,'croptypes',&
+       select case ( LDT_LSMCrop_struc(n)%crop_classification )
+       case( "CDL" )
+       call LDT_verify(nf90_def_dim(ftn,'cropyears',&
             LDT_LSMCrop_struc(n)%croptype%vlevels,tdimID(3)))
- 
+          nyears = (LDT_LSMCrop_struc(n)%end_year - LDT_LSMCrop_struc(n)%begin_year)+1
+          allocate(years(nyears))
+          do jj=1,nyears
+             years(jj)=(jj-1)+LDT_LSMCrop_struc(n)%begin_year
+             print*, years(jj)
+          enddo
+        call LDT_verify(nf90_def_var(ftn,'cropyears',nf90_int,dimids=tdimID(3),varid=yearID))
+!       LDT_LSMCrop_struc(n)%cdlyears=years
+!       call LDT_verify(nf90_def_dim(ftn,'cropyears',&
+!          LDT_LSMCrop_struc(n)%cdlyears,dimID2))
+       call LDT_verify(nf90_put_var(ftn,yearID,years))
        call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
             LDT_LSMCrop_struc(n)%croptype)
+       case default
+          call LDT_verify(nf90_def_dim(ftn,'croptypes',&
+               LDT_LSMCrop_struc(n)%croptype%vlevels,tdimID(3)))
+ 
+          call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
+               LDT_LSMCrop_struc(n)%croptype)
+        end select
      end if
  
      call LDT_verify(nf90_put_att(ftn,NF90_GLOBAL,"CROPCLASS_SCHEME", &
@@ -415,6 +550,9 @@ contains
     integer      :: ftn
     integer      :: dimID(4)
     integer      :: tdimID(4)
+    integer      :: nyears
+    integer      :: jj
+    integer, allocatable:: years(:)
     integer :: flag, flagn
 
 #if(defined USE_NETCDF3 || defined USE_NETCDF4)
@@ -425,11 +563,26 @@ contains
      tdimID(4) = dimID(4)
 
      if( LDT_LSMCrop_struc(n)%croptype%selectOpt > 0 ) then
-       call LDT_verify(nf90_def_dim(ftn,'croptypes',&
-            LDT_LSMCrop_struc(n)%croptype%vlevels,tdimID(3)))
+       select case ( LDT_LSMCrop_struc(n)%crop_classification )
+       case( "CDL" )
+          call LDT_verify(nf90_def_dim(ftn,'cropyears',&
+               LDT_LSMCrop_struc(n)%croptype%vlevels,tdimID(3)))
+          nyears = (LDT_LSMCrop_struc(n)%end_year - LDT_LSMCrop_struc(n)%begin_year)+1
+          allocate(years(nyears))
+          do jj=1,nyears
+             years(jj)=(jj-1)+LDT_LSMCrop_struc(n)%begin_year
+             print*, years(jj)
+          enddo
+          !call LDT_writeNETCDFdataHeader(n,ftn,tdimID(3),years)
+          call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
+               LDT_LSMCrop_struc(n)%croptype)
+       case default
+          call LDT_verify(nf90_def_dim(ftn,'croptypes',&
+               LDT_LSMCrop_struc(n)%croptype%vlevels,tdimID(3)))
  
-       call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
-            LDT_LSMCrop_struc(n)%croptype,flagn)
+          call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
+               LDT_LSMCrop_struc(n)%croptype,flagn)
+        end select
      end if
  
      call LDT_verify(nf90_put_att(ftn,NF90_GLOBAL,"CROPCLASS_SCHEME", &

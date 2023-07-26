@@ -115,6 +115,7 @@ module LDT_PRIV_rcMod
 ! -- Tile parameters:
      integer                :: nt             ! Number veg types (to be removed)
      integer, allocatable   :: numcrop(:)     ! Number crop types 
+     integer, allocatable   :: ncdl(:)        ! Number of CDL years
 
      integer, allocatable   :: surface_maxt(:)
      real, allocatable      :: surface_minp(:) 

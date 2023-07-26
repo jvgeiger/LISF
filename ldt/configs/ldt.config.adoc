@@ -1153,6 +1153,7 @@ Incorporate crop information:   .false.
 
 |UMDCROPMAP |UMD+CROPMAP crop type map. For more info, please refer to Ozdogan et al. (2010; JHM).
 |Monfreda08 |FAOSTAT05 crop type maps. For more info, please refer to Monfreda et al. (2008).
+|CDL |USDA NASS Cropland Data Layer (CDL). Currently LDT uses a reprocessed version with 0,01 degree grid spacing.  
 |CONSTANT |Ability to set a constant crop type for a set classification.
 |===
 
@@ -1171,6 +1172,7 @@ Crop type data source:  "none"
 |CROPMAP |19 classes; named by Ozdogan et al.(2010), used Leff et al.(2004)
 |FAOSTAT01 |19 classes; Used by Leff et al.(2004), considered obsolete
 |FAOSTAT05 |175 classes; Used by Monfreda et al. (2008)
+|CDL |256 classed; Used by USDA NASS
 |===
 
 .Example _ldt.config_ entry
@@ -1239,6 +1241,20 @@ options.
 .Example _ldt.config_ entry
 ....
 Crop map spatial transform:   mode
+....
+
+`CDL start year:` indicates the first year of CDL data to be processed. CDL data vary annually. This option is only used if CDL crop classification is used.
+
+.Example _ldt.config_ entry
+....
+CDL start year: 2014
+....
+
+`CDL end year:` indicates the last year of CDL data to be processed. CDL data vary annually. This option is only used if CDL crop classification is used.
+
+.Example _ldt.config_ entry
+....
+CDL end year: 2020
 ....
 
 `Irrigation type data source:` specifies the irrigation method type dataset source to be read in. Current source options include:

@@ -26,6 +26,7 @@ module LDT_param_pluginMod
 !  29 Jun 2020:  Mahdi Navari - Glacier fraction added 
 !  12 Apr 2021:  Wanshu Nie   - groundwater irrigation ratio added
 !  28 Jun 2022:  Eric Kemp    - Added NAFPA background precipitation
+!  10 Apr 2023:  J. Erlingis  - Added Cropland Data Layer
 !EOP
 
   use LDT_pluginIndices
@@ -406,10 +407,12 @@ contains
 !    external read_VIC411_maskfile
 
     external read_UMDCROPMAP_croptype
+    external read_CDL
 !    external read_Monfredaetal08_croptype
 
     external read_ALMIPII_droot
 !    external read_UMDCROPMAP_rootdepth
+
 ! _______________________________________
 
 ! - Landcover sources:
@@ -472,6 +475,7 @@ contains
 ! - Crop type sources:
     call registerreadcroptype(trim(LDT_umdcropmapId)//char(0), read_UMDCROPMAP_croptype)
     call registerreadcroptype(trim(LDT_monfredacropId)//char(0), read_Monfredaetal08_croptype)
+    call registerreadcroptype(trim(LDT_cdlID)//char(0), read_CDL)
 
 ! - Root depth:
     call registerreadrootdepth(trim(LDT_ALMIPIIlcId)//char(0),read_ALMIPII_droot)
