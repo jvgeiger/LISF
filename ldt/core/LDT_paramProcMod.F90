@@ -2445,6 +2445,11 @@ contains
           LDT_LSMparam_struc(n)%texture%standard_name = &
             "ISRIC soil texture map"
 
+       elseif(source.eq."SSURGO") then
+          LDT_LSMparam_struc(n)%texture%num_bins = 1
+          LDT_LSMparam_struc(n)%texture%standard_name = &
+            "SSURGO soil mukey map"
+
        elseif(source.eq."Special") then  
           LDT_LSMparam_struc(n)%texture%num_bins = 14
           LDT_LSMparam_struc(n)%texture%standard_name = &
