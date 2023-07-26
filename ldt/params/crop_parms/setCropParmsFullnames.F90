@@ -15,6 +15,7 @@
 !
 ! !REVISION HISTORY:
 !  19 Sep 2014: K. Arsenault; Initial Specification
+!  11 May 2023: J. Erlingis:  Add CDL
 !
 ! !INTERFACE:
 subroutine setCropParmsFullnames(n,datatype,source)
@@ -56,6 +57,10 @@ subroutine setCropParmsFullnames(n,datatype,source)
         case( "Monfreda08" )
           LDT_LSMCrop_struc(n)%croptype%standard_name =&
               "Monfreda et al (2008) crop types"
+
+        case( "CDL" )
+          LDT_LSMCrop_struc(n)%croptype%standard_name =&
+              "USDA Cropland Data Layer crop types"
       end select
 
     case default

@@ -61,6 +61,8 @@ subroutine assigncroptype( nest, crop_classification, &
    character(40)  :: read_fullname
 ! _____________________________________
 
+  !print*,crop_classification
+
   write(LDT_logunit,*)"[INFO] Obtaining the crop type for given classification: ",&
                        trim(crop_classification)
 
@@ -68,6 +70,10 @@ subroutine assigncroptype( nest, crop_classification, &
 !  e.g., FAOSTAT05_Crop.Inventory 
    cropinv_file = trim(LDT_LSMCrop_struc(nest)%croplib_dir)//&
                   trim(crop_classification)//"_Crop.Inventory"
+
+   !print*,cropinv_file
+   !print*,trim(LDT_LSMCrop_struc(nest)%croplib_dir)
+   !print*,trim(crop_classification)
 
    write(LDT_logunit,*) "- Reading Crop Library File: ",&
                          trim(cropinv_file)
@@ -80,7 +86,10 @@ subroutine assigncroptype( nest, crop_classification, &
 !- Read crop inventory file:
    read(ftn,fmt=*) header1
    do i = 1, num_types
+      !print*,i
       read(ftn,fmt=*) k, read_cropname, read_fullname 
+      !print*, read_cropname
+      !print*, read_fullname
       if( croptype == read_cropname ) then
         crop_index = k    ! Crop_index assignment
         exit

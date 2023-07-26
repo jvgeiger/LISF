@@ -249,6 +249,7 @@ module LDT_pluginIndices
 !-------------------------------------------------------------------------
    character*50, public,  parameter :: LDT_umdcropmapId   = "UMDCROPMAP"
    character*50, public,  parameter :: LDT_monfredacropId = "Monfreda08"
+   character*50, public,  parameter :: LDT_cdlID          = "CDL"
 
 !------------------------------------------------------------------------
 ! Mask sources
