@@ -295,7 +295,7 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
          do c = 1, LDT_rc%lnc(n)
           ! Assign soil texture types of less than 0 to an actual texture value:
           !  write(LDT_logunit,*) "[INFO] temp(c,r)",temp(c,r)
-            if( temp(c,r) .ge. 2e9 .OR. temp(c,r) .le. 10 ) then
+            if( temp(c,r) .ge. 2e9 .OR. temp(c,r) .lt. 0 ) then
               temp(c,r) = LDT_rc%udef   ! placeholder
             endif
             !write(LDT_logunit,*) "[INFO] LDT_rc%udef",LDT_rc%udef
