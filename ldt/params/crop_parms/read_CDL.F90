@@ -74,7 +74,7 @@ subroutine read_CDL(n, num_types, fgrd)
    integer :: rc
    integer :: mi                                    ! Total number of input param grid array points
    integer :: mo                                    ! Total number of output LIS grid array points
-   integer*2 :: read_cropmap(6254,2866              ! Input grid)
+   integer*2 :: read_cropmap(6254,2866)              ! Input grid)
    real    :: param_gridDesc(20)                    ! Input parameter grid desc fgrd
    real    :: subparam_gridDesc(20)                 ! Input parameter grid desc array
    integer, allocatable  :: lat_line(:,:), lon_line(:,:)
