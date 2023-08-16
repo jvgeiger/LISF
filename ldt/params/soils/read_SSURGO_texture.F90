@@ -53,7 +53,7 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
 !  \end{description}
 !EOP
 
-!  integer :: water_class
+  integer :: water_class
   integer :: ftn
   real    :: temp(LDT_rc%lnc(n),LDT_rc%lnr(n))
   real    :: gridcnt(LDT_rc%lnc(n),LDT_rc%lnr(n),num_bins)
@@ -93,7 +93,8 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
   logical*1 :: lo2(LDT_rc%lnc(n)*LDT_rc%lnr(n), num_bins) ! Output logical mask (go2)
 
 ! ___________________________________________________________________
-  
+water_class = 14 !setting to a value from STATSGO for water
+
    temp = LDT_rc%udef
    gridcnt = 0.
    fgrd = 0.
@@ -294,25 +295,24 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
       do r = 1, LDT_rc%lnr(n)
          do c = 1, LDT_rc%lnc(n)
           ! Assign soil texture types of less than 0 to an actual texture value:
-          !  write(LDT_logunit,*) "[INFO] temp(c,r)",temp(c,r)
-            if( temp(c,r) .ge. 2e9 .OR. temp(c,r) .lt. 0 ) then
+          ! write(LDT_logunit,*) "[INFO] temp(c,r)",temp(c,r)
+            if( nint(temp(c,r)) .ge. 2e9 .OR. nint(temp(c,r)) .lt. 0 ) then
               temp(c,r) = LDT_rc%udef   ! placeholder
             endif
             !write(LDT_logunit,*) "[INFO] LDT_rc%udef",LDT_rc%udef
-            !gridcnt(c,r,1) = NINT(temp(c,r))
             if( (nint(temp(c,r)) .ne. LDT_rc%udef) ) then
-               gridcnt(c,r,1) = NINT(temp(c,r))
-               !gridcnt(c,r,NINT(temp(c,r))) = 1.0
+               !gridcnt(c,r,1) = NINT(temp(c,r))
+               gridcnt(c,r,NINT(temp(c,r))) = 1.0
             endif
          enddo
       enddo
    end if
 
-   fgrd = gridcnt  ! assign the mukey grid to fraction grid (one dimension only)
+   !fgrd = gridcnt  ! assign the mukey grid to fraction grid (one dimension only)
    ! Estimate fraction of grid (fgrid) represented by soil type::
-!   call param_index_fgrdcalc( n, LDT_rc%soiltext_proj, &
- !       LDT_rc%soiltext_gridtransform(n), &
-  !      water_class, num_bins, gridcnt, fgrd )
+   call param_index_fgrdcalc( n, LDT_rc%soiltext_proj, &
+        LDT_rc%soiltext_gridtransform(n), &
+        water_class, num_bins, gridcnt, fgrd )
   
 ! ---
   write(LDT_logunit,*) "[INFO] Done reading SSURGO soil texture file."
