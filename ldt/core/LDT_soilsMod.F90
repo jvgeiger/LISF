@@ -782,8 +782,9 @@ module LDT_soilsMod
                trim(LDT_LSMparam_struc(n)%texture%source)=="Special" .or. &
                trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO" ) then
                soiltext%watervalue = 14.
-            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0) then 
-               soiltext%watervalue = 1.0
+            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0 .or. &
+                   trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO MUKEY" ) then 
+                   soiltext%watervalue = 1.0
             elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ISRIC") >0) then 
                soiltext%watervalue = 13.
             else
@@ -1487,8 +1488,9 @@ module LDT_soilsMod
                trim(LDT_LSMparam_struc(n)%texture%source)=="Special"  .or. &
                trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO") then
                soiltext%watervalue = 14.
-            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0) then 
-               soiltext%watervalue = 1.0
+            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0 .or. & 
+                   trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO MUKEY" ) then
+                   soiltext%watervalue = 1.0
             elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ISRIC") >0) then 
                soiltext%watervalue = 13.
             else
