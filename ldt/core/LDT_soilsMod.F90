@@ -488,6 +488,8 @@ module LDT_soilsMod
             LDT_rc%soil_classification(n) = "STATSGO"
          elseif( INDEX(LDT_LSMparam_struc(n)%texture%source,"ISRIC") > 0 ) then
             LDT_rc%soil_classification(n) = "STATSGO"
+         elseif( INDEX(LDT_LSMparam_struc(n)%texture%source,"SSURGO") > 0 ) then
+            LDT_rc%soil_classification(n) = "STATSGO"
          else
             LDT_rc%soil_classification(n) = LDT_LSMparam_struc(n)%texture%source
          endif
@@ -777,10 +779,12 @@ module LDT_soilsMod
                                   trim(LDT_LSMparam_struc(n)%texture%short_name)
             if( INDEX(LDT_LSMparam_struc(n)%texture%source,"STATSGO") > 0 .or. &
                trim(LDT_LSMparam_struc(n)%texture%source)=="CONSTANT" .or. &
-               trim(LDT_LSMparam_struc(n)%texture%source)=="Special" ) then
+               trim(LDT_LSMparam_struc(n)%texture%source)=="Special" .or. &
+               trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO" ) then
                soiltext%watervalue = 14.
-            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0) then 
-               soiltext%watervalue = 1.0
+            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0 .or. &
+                   trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO MUKEY" ) then 
+                   soiltext%watervalue = 1.0
             elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ISRIC") >0) then 
                soiltext%watervalue = 13.
             else
@@ -1190,6 +1194,8 @@ module LDT_soilsMod
             LDT_rc%soil_classification(n) = "STATSGO"
          elseif( INDEX(LDT_LSMparam_struc(n)%texture%source,"ISRIC") > 0 ) then
             LDT_rc%soil_classification(n) = "STATSGO"
+         elseif( INDEX(LDT_LSMparam_struc(n)%texture%source,"SSURGO") > 0 ) then
+            LDT_rc%soil_classification(n) = "STATSGO"
          else
             LDT_rc%soil_classification(n) = LDT_LSMparam_struc(n)%texture%source
          endif
@@ -1479,10 +1485,12 @@ module LDT_soilsMod
                                   trim(LDT_LSMparam_struc(n)%texture%short_name)
             if( INDEX(LDT_LSMparam_struc(n)%texture%source,"STATSGO") > 0 .or. &
                trim(LDT_LSMparam_struc(n)%texture%source)=="CONSTANT" .or. &
-               trim(LDT_LSMparam_struc(n)%texture%source)=="Special" ) then
+               trim(LDT_LSMparam_struc(n)%texture%source)=="Special"  .or. &
+               trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO") then
                soiltext%watervalue = 14.
-            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0) then 
-               soiltext%watervalue = 1.0
+            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0 .or. & 
+                   trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO MUKEY" ) then
+                   soiltext%watervalue = 1.0
             elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ISRIC") >0) then 
                soiltext%watervalue = 13.
             else

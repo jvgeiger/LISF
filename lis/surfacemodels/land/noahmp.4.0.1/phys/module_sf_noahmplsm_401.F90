@@ -1906,7 +1906,9 @@ ENDIF   ! CROPTYPE == 0
      IF(IST ==1 ) THEN
        DO IZ = 1, parameters%NROOT
           IF(OPT_BTR == 1) then                  ! Noah
-            GX    = (SH2O(IZ)-parameters%SMCWLT(IZ)) / (parameters%SMCREF(IZ)-parameters%SMCWLT(IZ))
+           write (*, *) 'parameters%SMCREF(IZ) =',parameters%SMCREF(IZ)
+           write (*, *) 'parameters%SMCWLT(IZ) =',parameters%SMCWLT(IZ)
+           GX    = (SH2O(IZ)-parameters%SMCWLT(IZ)) / (parameters%SMCREF(IZ)-parameters%SMCWLT(IZ))
           END IF
           IF(OPT_BTR == 2) then                  ! CLM
             PSI   = MAX(PSIWLT,-parameters%PSISAT(IZ)*(MAX(0.01,SH2O(IZ))/parameters%SMCMAX(IZ))**(-parameters%BEXP(IZ)) )
@@ -1939,6 +1941,11 @@ ENDIF   ! CROPTYPE == 0
          ! taking the "residual water content" to be the wilting point, 
          ! and correcting the exponent on the D term (typo in SZ09 ?)
          L_RSURF = (-ZSOIL(1)) * ( exp ( (1.0 - MIN(1.0,SH2O(1)/parameters%SMCMAX(1))) ** 5 ) - 1.0 ) / ( 2.71828 - 1.0 ) 
+        ! write (*, *) 'parameters%SMCMAX(1) =',parameters%SMCMAX(1)
+        ! write (*, *) 'parameters%SMCWLT(1) =',parameters%SMCWLT(1)
+        !write (*, *) '( 1.0 - parameters%SMCWLT(1) / parameters%SMCMAX(1) =',( 1.0 - parameters%SMCWLT(1) / parameters%SMCMAX(1))
+         write (*, *), 'parameters%BEXP(1)',parameters%BEXP(1)
+         !write (*, *), 'D_RSURF', 2.2E-5 * parameters%SMCMAX(1) * parameters%SMCMAX(1) * ( 1.0 - parameters%SMCWLT(1) / parameters%SMCMAX(1) ) ** (2.0+3.0/parameters%BEXP(1))
          D_RSURF = 2.2E-5 * parameters%SMCMAX(1) * parameters%SMCMAX(1) * ( 1.0 - parameters%SMCWLT(1) / parameters%SMCMAX(1) ) ** (2.0+3.0/parameters%BEXP(1))
          RSURF = L_RSURF / D_RSURF
 

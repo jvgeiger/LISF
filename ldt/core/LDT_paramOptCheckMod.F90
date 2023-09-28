@@ -514,6 +514,9 @@ contains
 !             call LDT_endrun
 !          endif
 
+        case( "SSURGO MUKEY")
+          write(LDT_logunit,*) " SSURGO MUKEY: The current value of types is: ",nt
+
         case( "Special" )
 
         case default
@@ -522,6 +525,7 @@ contains
           write(LDT_logunit,*) "          -- STATSGO (can include merged STATSGO+FAO)"
           write(LDT_logunit,*) "          -- FAO (which only includes FAO)"
           write(LDT_logunit,*) "          -- CONSTANT (which uses the STATSGO index range)"
+          write(LDT_logunit,*) "          -- SSURGO (which uses the STATSGO index range)"
           write(LDT_logunit,*) " Stopping ..."
           call LDT_endrun
       end select

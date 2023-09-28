@@ -93,7 +93,7 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
   logical*1 :: lo2(LDT_rc%lnc(n)*LDT_rc%lnr(n), num_bins) ! Output logical mask (go2)
 
 ! ___________________________________________________________________
-water_class = 14 !setting to a value from STATSGO for water
+   water_class = 14 !setting to a value from STATSGO for water
 
    temp = LDT_rc%udef
    gridcnt = 0.
@@ -133,9 +133,13 @@ water_class = 14 !setting to a value from STATSGO for water
    ysize = gdalgetrasterysize(ds)
 
    CALL gdalapplygeotransform(gt, 0.5_c_double, 0.5_c_double, x2, y1)
-
+   
+   dres = 0.01
    x1 = (xsize-1)*dres + x2
    y2 = y1 - (ysize-1)*dres
+ !  x1 = (xsize-2)*dres + x2
+  ! y2 = y1 - (ysize-2)*dres
+
 
  ! Set parameter grid fgrd inputs:
    param_gridDesc(1)  = 0.   ! Latlon "projection" 
@@ -217,8 +221,8 @@ water_class = 14 !setting to a value from STATSGO for water
 
    allocate( li(mi), gi(mi) )
    li = .false.
-   gi = LDT_rc%udef
-!   gi = float(water_class)
+!   gi = LDT_rc%udef
+   gi = float(water_class)
    lo1 = .false.
   
    ! Assign 2-D array to 1-D for grid transformation routines:
@@ -239,7 +243,7 @@ water_class = 14 !setting to a value from STATSGO for water
 
      ! (1) Single-layer selection:
 !     case( "none", "mode", "neighbor" )
-     case( "mode", "neighbor" )
+     case("none", "mode", "neighbor" )
 
      ! Transform parameter from original grid to LIS output grid:
        call LDT_transform_paramgrid(n, LDT_rc%soiltext_gridtransform(n), &
@@ -295,11 +299,10 @@ water_class = 14 !setting to a value from STATSGO for water
       do r = 1, LDT_rc%lnr(n)
          do c = 1, LDT_rc%lnc(n)
           ! Assign soil texture types of less than 0 to an actual texture value:
-          ! write(LDT_logunit,*) "[INFO] temp(c,r)",temp(c,r)
-            if( nint(temp(c,r)) .ge. 2e9 .OR. nint(temp(c,r)) .lt. 0 ) then
-              temp(c,r) = LDT_rc%udef   ! placeholder
+            if( nint(temp(c,r)) .ge. 2e9 .OR. nint(temp(c,r)) .le. 0 ) then
+          !   temp(c,r) = LDT_rc%udef   ! placeholder
+              temp(c,r) = 14 !LDT_rc%udef   ! placeholder
             endif
-            !write(LDT_logunit,*) "[INFO] LDT_rc%udef",LDT_rc%udef
             if( (nint(temp(c,r)) .ne. LDT_rc%udef) ) then
                !gridcnt(c,r,1) = NINT(temp(c,r))
                gridcnt(c,r,NINT(temp(c,r))) = 1.0
@@ -315,6 +318,7 @@ water_class = 14 !setting to a value from STATSGO for water
         water_class, num_bins, gridcnt, fgrd )
   
 ! ---
+!  call LDT_releaseUnitNumber(ftn)
   write(LDT_logunit,*) "[INFO] Done reading SSURGO soil texture file."
 
 #endif
