@@ -461,7 +461,9 @@ C-----------------------------------------------------------------------
 !      ENDIF
 !------------------------------------------------------------------------
 !    Pang: Organize all initialization variables here
-      
+
+       CONTROL % YRDOY = 2019110 !JE (add on Pang's advice)     
+       ENDYRS = 0                !JE (add on Pang's advice)
        RNMODE = CONTROL % RNMODE
        REPNO = CONTROL % REPNO
        RUN = CONTROL % RUN
