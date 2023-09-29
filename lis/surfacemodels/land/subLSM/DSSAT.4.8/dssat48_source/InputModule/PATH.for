@@ -139,7 +139,8 @@ C=======================================================================
       LOGICAL      FEXIST
 
 !     DSSATP(1:12) = DSSATF
-      DSSATP(1:12) = DSSATPRO
+      DSSATP(1:12) = DSSATPRO !Pang: DSSATPRO='DSSATPRO.L48'
+                              !Defined in OSDefsLINUX.for
       INQUIRE (FILE = DSSATP,EXIST = FEXIST)
       IF (.NOT. FEXIST .AND. IP .GT. 12) THEN
          DO I = IP, 0, -1

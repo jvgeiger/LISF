@@ -71,7 +71,7 @@ C  01/11/2007 CHP Changed GETPUT calls to GET and PUT
 C  01/12/2007 CHP Read trt number and rotation number for sequence mode
 C  10/09/2020 FO  Y4K implementation for weather files
 C=======================================================================
-      SUBROUTINE CSM
+      SUBROUTINE CSM_RUN(CONTROL, ISWITCH)
 
       USE ModuleDefs 
       USE ModuleData
@@ -101,7 +101,7 @@ C-----------------------------------------------------------------------
 
       LOGICAL       FEXIST, DONE
 
-      PARAMETER (ERRKEY = 'CSM   ')      
+      PARAMETER (ERRKEY = 'CSM_RUN   ')      
       PARAMETER (BLANK  = ' ')
 
 C     Define constructed variable types based on definitions in
@@ -112,38 +112,44 @@ C     The variable "CONTROL" is of type "ControlType".
 
 C     The variable "ISWITCH" is of type "SwitchType".
       TYPE (SwitchType) ISWITCH
+      PRINT*, 'CONTROL_CSM: ', CONTROL
+      PRINT*, 'SWITCH_CSM: ', ISWITCH
 
 !C-----------------------------------------------------------------------
 
       DONE = .FALSE.
       YRDOY_END = 9999999
-
+      PRINT*, 'Im In CSM'
 !     Pick up model version for setting the name of some files
       WRITE(ModelVerTxt,'(I2.2,I1)') Version%Major, Version%Minor
-
+      PRINT*,'before OPCLEAR'
       !Delete existing output files
       CALL OPCLEAR
-
+      PRINT*, 'before get experimental file'
       CALL GETLUN('FILEIO', LUNIO)
       FILEIO = 'DSSAT48.INP'
-
+      PRINT*, 'after get experimental file'
 C-----------------------------------------------------------------------
 C    Get argument from runtime module to determine path of the EXE files
 C-----------------------------------------------------------------------
-      CALL GETARG(0,PATHX)   !,IPX
-      CALL GETARG(1,DUMMY)   !,IP
+      !CALL GETARG(0,PATHX)   !,IPX  !Pang: Path od executable (This may not needed)
+      !CALL GETARG(1,DUMMY)   !,IP   !Pang: RUNNING MODE 7/10/2023
+      DUMMY="Q"  !Pang: Assigned Q mode to RUN 07102023
+      PRINT*, "DUMMY: ", trim(DUMMY)
       IF ((DUMMY(1:1) .NE. BLANK) .AND. (DUMMY(2:2) .EQ. BLANK))
      &    THEN
-        CALL GETARG(1,RNMODE)   !,IP
+        !CALL GETARG(1,RNMODE)   !,IP. Pang: 07102023
+        RNMODE = trim(DUMMY)     !Pang: 07102023
         NARG = 1
         CALL CheckRunMode(RNMODE)
+        PRINT*, 'RNMODE: ', RNMODE
       ELSE
         CALL GETARG(1,MODELARG)  !,IP
         CALL GETARG(2,RNMODE)    !,IP
         CALL CheckRunMode(RNMODE)
         NARG = 2
       ENDIF
-
+      PRINT*, "Passed Get Argument from runtime module"
 C-----------------------------------------------------------------------
 C     RNMODE:  
 C      A - Run all treatments.  User specifies fileX on the command
@@ -188,8 +194,11 @@ C-----------------------------------------------------------------------
       CASE('B','N','Q','S','F','T','E','L','Y')
 !           Batch, seasoNal, seQuence, Spatial, 
 !           Farm, Gencalc(T), sEnsitivity, Locus, Yield forecast
-        CALL GETARG(NARG+1,FILEB)   !,IP   !Batch file name
-        CALL GETARG(NARG+2,FILECTL) !,IP   !Simulation control file name
+        !CALL GETARG(NARG+1,FILEB)   !,IP   !Batch file name
+        FILEB = 'run.v48'  !Pang: Assigned batch file name
+        CALL GETARG(NARG+2,FILECTL) !,IP   !Simulation control file name(Pang: Can ignare!)
+        PRINT*, 'FILEB: ', FILEB
+        PRINT*, 'FILECTL: ', FILECTL
 
 !     Debug mode -- bypass input module and read FILEIO
       CASE ('D')  !Debug
@@ -222,27 +231,33 @@ C-----------------------------------------------------------------------
           OPEN (LUNIO, FILE = FILEIOH,STATUS = 'UNKNOWN',IOSTAT=ERRNUM)
           CLOSE (LUNIO,STATUS = 'DELETE')
         ENDIF
-
+        PRINT*, 'FILEIO FILEIOH ', FILEIO, FILEIOH
+        PRINT*, 'Before Open batch'
 C-----------------------------------------------------------------------
 C    Open BATCH file
 C-----------------------------------------------------------------------
         IF (INDEX('NQSFBETY',RNMODE) .GT. 0) THEN
+           PRINT*, 'In Open batch, RNMODE: ', RNMODE
+           PRINT*, 'In Open batch, LUNBIO1: ', LUNBIO
            CALL GETLUN('BATCH ', LUNBIO)
            FINDCH='$BATCH'
+           PRINT*, 'In Open batch, LUNBIO2: ', LUNBIO
            OPEN (LUNBIO, FILE = FILEB,STATUS = 'UNKNOWN',IOSTAT=ERRNUM)
+           PRINT*, 'In Open batch, ERRNUM:  ', ERRNUM
            IF (ERRNUM .NE. 0) CALL ERROR (ERRKEY,28,FILEB,LINBIO)
            CALL FIND (LUNBIO,FINDCH,LINBIO,IFIND)
+           PRINT*, 'In Open batch, LINBIO, IFIND:  ', LINBIO, IFIND
            IF (IFIND .EQ. 0) CALL ERROR (ERRKEY,26,FILEB,LINBIO)
         ENDIF
       ENDIF 
-
+      PRINT*, 'After Open batch'
 C-----------------------------------------------------------------------
 C    Set run number and replication number
 C-----------------------------------------------------------------------
       RUN   = 0
       REPNO = 1
       CONTROL % REPNO = REPNO
-
+      PRINT*, 'After Set run number: ', REPNO
 C*********************************************************************** 
 C*********************************************************************** 
 C     RUN INITIALIZATION
@@ -253,6 +268,7 @@ C***********************************************************************
       CONTROL % RUN = RUN
       CONTROL % YRDOY = 0
       CALL PUT(CONTROL)
+      PRINT*, 'After PUT CONTROL'
 
       IF ((INDEX('NSFBTY',RNMODE) .GT. 0) .OR. 
      &    (INDEX('E',RNMODE) .GT. 0 .AND. RUN .EQ. 1)) THEN
@@ -277,12 +293,16 @@ C***********************************************************************
           FINDCH='$BATCH'
           CALL FIND (LUNBIO,FINDCH,LINBIO,IFIND)
           CALL IGNORE (LUNBIO,LINBIO,ISECT,CHARTEST)
+          PRINT*, ",CHARTEST: ", CHARTEST
         ENDIF
         END_POS = INDEX(CHARTEST,BLANK)
         FILEX = CHARTEST((END_POS-12):(END_POS-1))
         PATHEX = CHARTEST(1:END_POS-13)
+        PRINT*, 'FILEX, PATHEX: ', FILEX, PATHEX
         READ (CHARTEST(93:113),110,IOSTAT=ERRNUM) TRTNUM,TRTREP,ROTNUM
         IF (ERRNUM .NE. 0) CALL ERROR (ERRKEY,26,FILEB,LINBIO)
+        PRINT*, 'TRTNUM,TRTREP,ROTNUM: ', TRTNUM,TRTREP,ROTNUM
+
       ENDIF
 
       CONTROL % FILEIO  = FILEIO
@@ -292,7 +312,8 @@ C***********************************************************************
       CONTROL % TRTNUM  = TRTNUM
       CONTROL % ERRCODE = 0
       CALL PUT(CONTROL)
-
+      CLOSE(LUNBIO) !Pang: Close Batch File 07/08/2023
+      PRINT*, 'After Initialization'
 C-KRT**************************************************************
       IF (RNMODE .EQ. 'A') THEN
         PATHEX=""
@@ -303,15 +324,25 @@ C-----------------------------------------------------------------------
 C    Run INPUT module
 C-----------------------------------------------------------------------
       IF (RNMODE .NE. 'D') THEN
+      PRINT*, 'Am I here?'
+      PRINT*, 'FILECTL, FILEIO, FILEX ', FILECTL, FILEIO, FILEX
+      PRINT*,'MODELARG, PATHEX ', MODELARG, PATHEX
+      PRINT*,'RNMODE, ROTNUM, RUN, TRTNUM ', RNMODE, ROTNUM, RUN, TRTNUM
+      PRINT*,'ISWITCH ',ISWITCH
+      PRINT*,'CONTROL ',CONTROL
         CALL INPUT_SUB(
      &    FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       !Input
      &    RNMODE, ROTNUM, RUN, TRTNUM,                    !Input
      &    ISWITCH, CONTROL)                               !Output
+      PRINT*,'ISWITCH ',ISWITCH
+      PRINT*,'CONTROL ',CONTROL
+      PRINT*, 'Do I get through INPUT_SUB'
       ELSE
         FILEX = '            '    !Debug mode - no FILEX
         CALL PATHD  (DSSATP,PATHX,LEN_TRIM(PATHX))
         CONTROL % DSSATP = DSSATP
       ENDIF
+      PRINT*, 'After run input module'
 C-----------------------------------------------------------------------
 C    Check to see if the temporary file exists
 C-----------------------------------------------------------------------
@@ -319,7 +350,7 @@ C-----------------------------------------------------------------------
       IF (.NOT. FEXIST) THEN
         CALL ERROR(ERRKEY,2,FILEIO,LUNIO)
       ENDIF
-
+      PRINT*, 'check file 1'
       OPEN (LUNIO, FILE = FILEIO,STATUS = 'OLD',IOSTAT=ERRNUM)
       IF (ERRNUM .NE. 0) CALL ERROR (ERRKEY,ERRNUM,FILEIO,0)
       READ (LUNIO,300,IOSTAT=ERRNUM) EXPNO,TRTNUM,TRTALL
@@ -385,7 +416,6 @@ C-----------------------------------------------------------------------
          YRDIF = YR - YR0
          CONTROL % YRDIF = YRDIF
       ENDIF
-       
       CONTROL % FILEX   = FILEX
       CONTROL % NYRS    = NYRS
       CONTROL % MULTI   = MULTI
@@ -398,7 +428,7 @@ C-----------------------------------------------------------------------
       CALL PUT(CONTROL)
 
       CALL RUNLIST(CONTROL)
-
+      
       WRITE(MSG(1),'("RNMODE = ",A)')  RNMODE
       WRITE(MSG(2),'("PATHEX = ",A)')  PATHEX(1:67)
       WRITE(MSG(3),'("FILEX  = ",A)')  FILEX
@@ -415,7 +445,7 @@ C-----------------------------------------------------------------------
 
       CALL LAND(CONTROL, ISWITCH, 
      &          YRPLT, MDATE, YREND)
-
+      PRINT*, 'End Check FIles'
 C*********************************************************************** 
 C*********************************************************************** 
 C-----------------------------------------------------------------------
@@ -425,6 +455,7 @@ C     SEASONAL INITIALIZATION
 C*********************************************************************** 
       SEAS_LOOP: DO WHILE (ENDYRS .NE. NYRS)
 C***********************************************************************
+      PRINT*, 'CSN: in SEASONAL INITIALIZATION'
       IF (NYRS .GT. 1) THEN 
         ENDYRS = ENDYRS + 1
         IF (RNMODE .NE. 'Y') THEN
@@ -477,6 +508,7 @@ C***********************************************************************
      &          YRPLT, MDATE, YREND)
 
       YRDOY = INCYD(YRDOY,-1)
+      PRINT*, 'CSN: After SEASONAL INITIALIZATION'
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     BEGINNING of DAILY SIMULATION loop
@@ -575,7 +607,7 @@ C-----------------------------------------------------------------------
         ANS = UPCASE(ANS)
         IF (ANS .NE. 'Y') DONE = .TRUE.
       ENDIF
-
+      
  2000 CONTINUE
       ENDDO RUN_LOOP 
 
@@ -590,7 +622,7 @@ C-----------------------------------------------------------------------
 
       CALL RUNLIST(CONTROL)
 
-      END SUBROUTINE CSM 
+      END SUBROUTINE CSM_RUN 
 
 !===========================================================================
 ! Variable listing for main program

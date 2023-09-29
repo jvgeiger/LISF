@@ -56,7 +56,7 @@ C-----------------------------------------------------------------------
 C     Weather module Variables
 C-----------------------------------------------------------------------
       TYPE (WeatherType)  WEATHER
-
+      CHARACTER*12 FILEW
 C-----------------------------------------------------------------------
 C     Soil Processes Module Variables 
 C-----------------------------------------------------------------------
@@ -153,13 +153,25 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Read switches from FILEIO
 C-----------------------------------------------------------------------
+      !Pang: LUNIO & N_ELEMS are Updated After IPBS
+      !      whil ISWITCH is same before and after
       CALL IPIBS (CONTROL, ISWITCH, CROP, IDETS, MODEL)
-
 C-----------------------------------------------------------------------
 C     Read input parameters for weather routines
 C-----------------------------------------------------------------------
+      PRINT*, 'IM IN LAND'
+      PRINT*, 'BF WEATHER'
+      PRINT*, 'CONTROL: ', CONTROL
+      PRINT*, 'ISWITCH: ', ISWITCH
+      PRINT*, 'WEATHER: ', WEATHER
+      PRINT*, 'YREND: ', YREND 
       CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
-
+      PRINT*, 'AF WEATHER'
+      PRINT*, 'CONTROL: ', CONTROL
+      PRINT*, 'ISWITCH: ', ISWITCH
+      PRINT*, 'WEATHER: ', WEATHER
+      PRINT*, 'YREND: ', YREND
+      PRINT*, 'FILEW af Weather: ', FILEW 
 C-----------------------------------------------------------------------
 C     Read initial soil data 
 C-----------------------------------------------------------------------

@@ -546,7 +546,6 @@ contains
     do i=1,LIS_rc%nSubLSMs
        call sublsminit(trim(LIS_rc%subLSM(i))//char(0),i)
     enddo
-
     TRACE_EXIT("lsm_init")
 
   end subroutine LIS_lsm_init
@@ -619,19 +618,17 @@ contains
     call lsmrun(trim(LIS_rc%lsm)//char(0), n)
 
     do i=1,LIS_rc%nSubLSMs    
-       if(LIS_rc%lsm.ne."none") then 
-          
+       if(LIS_rc%lsm.ne."none") then  
           !Get the export states from the LSM
           call lsm2sublsmgetexport(trim(LIS_rc%lsm)//"+"&
                //trim(LIS_rc%subLSM(i))//char(0), n,&
-                LIS_LSM2SUBLSM_State(n,i))
-       
+                LIS_LSM2SUBLSM_State(n,i)) 
           !Assign the LSM export states within the subLSM
           call sublsmsetlsmimport(&
                trim(LIS_rc%subLSM(i))//char(0), n,&
                LIS_LSM2SUBLSM_State(n,i))
        endif
-
+   
        !Run the subLSM
        call sublsmrun(trim(LIS_rc%subLSM(i))//char(0), n)
 
@@ -754,9 +751,9 @@ contains
     do i=1,LIS_rc%nSubLSMs
        call sublsmrestart(trim(LIS_rc%subLSM(i))//char(0))
     enddo
+
     TRACE_EXIT("lsm_readrst")
   end subroutine LIS_lsm_readrestart
-
 
 !BOP
 ! !ROUTINE: LIS_setLSMDynparams
@@ -791,7 +788,6 @@ contains
 
     TRACE_ENTER("lsm_dynsetup")
     call lsmdynsetup(trim(LIS_rc%lsm)//char(0),n)
-
     do i=1,LIS_rc%nSubLSMs
        call sublsmdynsetup(trim(LIS_rc%subLSM(i))//char(0),n)
     enddo
@@ -833,7 +829,6 @@ contains
     TRACE_ENTER("lsm_f2t")
     call lsmf2t(trim(LIS_rc%lsm)//"+"//trim(LIS_rc%runmode)//char(0),&
          n)
-
     do i=1,LIS_rc%nSubLSMs
        call sublsmf2t(trim(LIS_rc%subLSM(i))//"+"//&
             trim(LIS_rc%runmode)//char(0), n)
@@ -875,11 +870,11 @@ contains
 
     TRACE_ENTER("lsm_writerst")
     call lsmwrst(trim(LIS_rc%lsm)//char(0),n)
-
     do i=1,LIS_rc%nSubLSMs
        call sublsmwrst(trim(LIS_rc%subLSM(i))//char(0),n)
     enddo
     TRACE_EXIT("lsm_writerst")
+
   end subroutine LIS_lsm_writerestart
 
 !BOP
@@ -911,6 +906,7 @@ contains
     do i=1,LIS_rc%nSubLSMs
        call sublsmfinalize(trim(LIS_rc%subLSM(i))//char(0))
     enddo
+
   end subroutine LIS_lsm_finalize
 
 !BOP

@@ -138,13 +138,17 @@ C     Get argument from runtime module to determine path and run mode
 C-----------------------------------------------------------------------
 C   Fortran Compaq Visual Fortran
 C-----------------------------------------------------------------------
-      CALL GETARG (0,INPUTX)
-!      call path_adj(inputx)
-      IPX = LEN_TRIM(INPUTX)
+      PRINT*, 'In Input SUb?'
+!      CALL GETARG (0,INPUTX)    !Pang: INPUTX is the command line
+!D      call path_adj(inputx)
+!      IPX = LEN_TRIM(INPUTX)
+!       PRINT*, 'IPX, INPUTX: ', IPX, INPUTX
 !D     INPUTX = STDPATH // 'DSCSM048.EXE'
-      CALL PATHD  (DSSATP,INPUTX,IPX)
+!      CALL PATHD  (DSSATP,INPUTX,IPX) !
+      DSSATP(1:12) = DSSATPRO  !Pang: Directly assigned DSSATPRO to DSSATP
+                               !Note: DSSATPRO.V48 needs to be with LIS,
+                               !      so we can cooment out the use of ARG
       CONTROL % DSSATP = DSSATP
-
 C-----------------------------------------------------------------------
 C
 C-----------------------------------------------------------------------
@@ -161,23 +165,35 @@ C-----------------------------------------------------------------------
      &            IDETC,IDETW,IDETN,IDETP,IDETD,IDETL,IDETH,IDETR
           CLOSE (LUNIO,STATUS = 'DELETE')
       ENDIF
-
+      !Pang: The section is to delete DSSAT48.INP if existing
+      !      This may be good to keep here in case there is
+      !      an unwanted DSSAT48.INP file
 C-----------------------------------------------------------------------
 C     BEGINNING of READING INPUT files
 C-----------------------------------------------------------------------
       IF (RNMODE .EQ. 'I' .AND. RUN .EQ. 1) THEN
         CALL CLEAR
         CALL INTRO
+        !!Pang: RNMODE is always Q
       ENDIF
       NSENS  = 0
       ISENS  = 0
       TITLER(1:5) = '     '
       
-      FILEX_P = TRIM(PATHEX)//FILEX
+      FILEX_P = TRIM(PATHEX)//FILEX !Pang: Add path with exp file
       CALL Join_Trim(PATHEX, FILEX, FILEX_P)
 C-----------------------------------------------------------------------
 C     Call IPEXP
 C-----------------------------------------------------------------------
+      !PRINT*, 'PATHEX,FILEX_P,FILECTL: ', PATHEX,FILEX_P
+      !PRINT*,"Before: ", MODEL,RUN,RNMODE,FILEX,PATHEX,FILEX_P,FILECTL
+      !PRINT*,'L2: ',SLNO,NYRS,VARNO,CROP,WMODI
+      !PRINT*,'L3: ',FROP,TRTN,EXPP,EXPN,TITLET,TRTALL,TRTNUM,ROTNUM
+      !!PRINT*,'L4: ',IIRV,FTYPEN,CHEXTR,NFORC,PLTFOR,NDOF,PMTYPE
+      !PRINT*,'L5: ',LNSIM,LNCU,LNHAR,LNENV,LNTIL,LNCHE
+      !PRINT*,'L6: ',LNFLD,LNSA,LNIC,LNPLT,LNIR,LNFER,LNRES
+      !PRINT*,'L7: ', CONTROL, ISWITCH, UseSimCtr, MODELARG
+
        CALL IPEXP (MODEL, RUN, RNMODE, FILEX,PATHEX,FILEX_P, FILECTL,
      &     SLNO,NYRS,VARNO,CROP,WMODI,
      &     FROP,TRTN,EXPP,EXPN,TITLET,TRTALL,TRTNUM,ROTNUM, 
@@ -186,6 +202,14 @@ C-----------------------------------------------------------------------
      &     LNFLD,LNSA,LNIC,LNPLT,LNIR,LNFER,LNRES, 
      &     CONTROL, ISWITCH, UseSimCtr, MODELARG)
 
+      !PRINT*,"After: ", MODEL,RUN,RNMODE,FILEX,PATHEX,FILEX_P,FILECTL
+      !PRINT*,'L2: ',SLNO,NYRS,VARNO,CROP,WMODI
+      !PRINT*,'L3: ',FROP,TRTN,EXPP,EXPN,TITLET,TRTALL,TRTNUM,ROTNUM
+      !!PRINT*,'L4: ',IIRV,FTYPEN,CHEXTR,NFORC,PLTFOR,NDOF,PMTYPE
+      !PRINT*,'L5: ',LNSIM,LNCU,LNHAR,LNENV,LNTIL,LNCHE
+      !PRINT*,'L6: ',LNFLD,LNSA,LNIC,LNPLT,LNIR,LNFER,LNRES
+      !PRINT*,'L7: ', CONTROL, ISWITCH, UseSimCtr, MODELARG
+      !CALL EXIT
 C-----------------------------------------------------------------------
 C     Call IPSOIL
 C-----------------------------------------------------------------------
@@ -194,7 +218,7 @@ C-----------------------------------------------------------------------
 !  MESOL = '2' New soil layer distribution. Calls LYRSET2.
 !  MESOL = '3' User specified soil layer distribution. Calls LYRSET3.
 !     Skip soils field and soils input for sequence mode
-      IF (INDEX('FQ',RNMODE) .LE. 0 .OR. RUN == 1) THEN
+      IF (INDEX('FQ',RNMODE) .LE. 0 .OR. RUN == 1) THEN !Pang: only do once.
         CALL IPSOIL_Inp (RNMODE,FILES,PATHSL,NSENS,ISWITCH)
       ENDIF
 C-----------------------------------------------------------------------
@@ -205,7 +229,6 @@ C-----------------------------------------------------------------------
      &              ECONO, MODEL, ATLINE, CROP)
       ENDIF
       
-
 C-----------------------------------------------------------------------
 C     Call IPSLIN to read initial soil conditions
 C-----------------------------------------------------------------------
