@@ -175,9 +175,19 @@ contains
                 
             !enddo
             ! initialize forcing variables to zeros
-            !do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-                !dssat48_struc(n)%dssat48(t)%ppt = 0.0
-            !enddo ! end of tile (t) loop
+            do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+                dssat48_struc(n)%dssat48(t)%tair = 0.0
+                dssat48_struc(n)%dssat48(t)%tmax = 0.0
+                dssat48_struc(n)%dssat48(t)%tmin= 0.0          
+                dssat48_struc(n)%dssat48(t)%qair = 0.0
+                dssat48_struc(n)%dssat48(t)%uwind = 0.0
+                dssat48_struc(n)%dssat48(t)%vwind = 0.0
+                dssat48_struc(n)%dssat48(t)%rainf = 0.0
+                dssat48_struc(n)%dssat48(t)%snowf = 0.0
+                dssat48_struc(n)%dssat48(t)%lwdown = 0.0
+                dssat48_struc(n)%dssat48(t)%swdown = 0.0
+                dssat48_struc(n)%dssat48(t)%psurf = 0.0
+            enddo ! end of tile (t) loop
 
             do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
                ! These System Initial Values May Be Loaded From Config File
