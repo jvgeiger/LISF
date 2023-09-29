@@ -23,15 +23,19 @@ C  12/12/2001 GH  Rename to Land
 
 C=======================================================================
       SUBROUTINE LAND(CONTROL, ISWITCH, 
-     &                YRPLT, MDATE, YREND)
+     &                YRPLT, MDATE, YREND, nest, t)
       
 C-----------------------------------------------------------------------
       USE ModuleDefs      
       USE FloodModule      
       USE CsvOutput   ! VSH 
-
+      USE dssat48_lsmMod !Pang: Can we do this?
       IMPLICIT NONE
       SAVE
+C------------------------------------------------
+C    LIS-DSSAT
+C------------------------------------------------
+      INTEGER nest, t
 C-----------------------------------------------------------------------
 C     Crop, Experiment, Command line Variables
 C-----------------------------------------------------------------------
@@ -135,6 +139,10 @@ C     Transfer values from constructed data types into local variables.
 
       IPLTI   = ISWITCH % IPLTI
 
+      !---- Pang: 2023.09.26 -------------------------------------------
+      IDETS   = ISWITCH % IDETS !Used for Daily Loop
+      SOILPROP = dssat48_struc(nest)%SOILPROP(t) !Pang: Obtain SOILPROP from mem
+      !Pang: We cannot do this here
 C***********************************************************************
 C***********************************************************************
 C     Run Initialization - Called once per simulation
@@ -153,29 +161,17 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Read switches from FILEIO
 C-----------------------------------------------------------------------
-      !Pang: LUNIO & N_ELEMS are Updated After IPBS
-      !      whil ISWITCH is same before and after
+      !Pang: Read INP file. LUNIO & N_ELEMS are Updated After IPIBS
+      !      while ISWITCH is same before and after
       CALL IPIBS (CONTROL, ISWITCH, CROP, IDETS, MODEL)
 C-----------------------------------------------------------------------
 C     Read input parameters for weather routines
 C-----------------------------------------------------------------------
-      PRINT*, 'IM IN LAND'
-      PRINT*, 'BF WEATHER'
-      PRINT*, 'CONTROL: ', CONTROL
-      PRINT*, 'ISWITCH: ', ISWITCH
-      PRINT*, 'WEATHER: ', WEATHER
-      PRINT*, 'YREND: ', YREND 
       CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
-      PRINT*, 'AF WEATHER'
-      PRINT*, 'CONTROL: ', CONTROL
-      PRINT*, 'ISWITCH: ', ISWITCH
-      PRINT*, 'WEATHER: ', WEATHER
-      PRINT*, 'YREND: ', YREND
-      PRINT*, 'FILEW af Weather: ', FILEW 
 C-----------------------------------------------------------------------
 C     Read initial soil data 
 C-----------------------------------------------------------------------
-      CALL SOIL(CONTROL, ISWITCH, 
+      CALL SOIL(CONTROL, ISWITCH, nest, t,               !Pang2023.09.19 
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
      &    KTRANS, KUptake, OMAData, PUptake, RLV,         !Input
      &    SENESCE, ST, SWDELTX,TILLVALS, UNH4, UNO3,      !Input
@@ -184,7 +180,6 @@ C-----------------------------------------------------------------------
      &    NH4_plant, NO3_plant, SKi_AVAIL, SNOW,          !Output
      &    SPi_AVAIL, SOILPROP, SomLitC, SomLitE,          !Output
      &    SW, SWDELTS, SWDELTU, UPPM, WINF, YREND)        !Output
-
 C-----------------------------------------------------------------------
 C     Read initial soil-plant-atmosphere data
 C-----------------------------------------------------------------------
@@ -246,7 +241,8 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Seasonal initialization for soil processes
 C-----------------------------------------------------------------------
-      CALL SOIL(CONTROL, ISWITCH, 
+      !SOILPROP = dssat48_struc(nest)%SOILPROP(t) !Pang: Obtain SOILPROP from mem
+      CALL SOIL(CONTROL, ISWITCH, nest, t,                 !Pang2023.09.19
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
      &    KTRANS, KUptake, OMAData, PUptake, RLV,         !Input
      &    SENESCE, ST, SWDELTX,TILLVALS, UNH4, UNO3,      !Input
@@ -255,7 +251,6 @@ C-----------------------------------------------------------------------
      &    NH4_plant, NO3_plant, SKi_AVAIL, SNOW,          !Output
      &    SPi_AVAIL, SOILPROP, SomLitC, SomLitE,          !Output
      &    SW, SWDELTS, SWDELTU, UPPM, WINF, YREND)        !Output
-
 C-----------------------------------------------------------------------
 C     Seasonal initialization for soil-plant-atmosphere processes
 !     chp moved this before SOIL, so soil temp is available 
@@ -268,7 +263,6 @@ C-----------------------------------------------------------------------
      &    FLOODWAT, SWDELTU,                              !I/O
      &    EO, EOP, EOS, EP, ES, RWU, SRFTEMP, ST,         !Output
      &    SWDELTX, TRWU, TRWUP, UPFLOW)                   !Output
-
 !C-----------------------------------------------------------------------
 !C     Seasonal initialization for soil processes
 !C-----------------------------------------------------------------------
@@ -302,7 +296,6 @@ C-----------------------------------------------------------------------
       IF (IDETS .EQ. 'Y' .OR. IDETS .EQ. 'A') THEN
         CALL OPSUM (CONTROL, ISWITCH, YRPLT)
       ENDIF
-
 C***********************************************************************
 C***********************************************************************
 C     DAILY RATE CALCULATIONS
@@ -330,7 +323,7 @@ C-----------------------------------------------------------------------
 C     Call Soil processes module to determine today's rates of 
 C     change of soil properties.
 C-----------------------------------------------------------------------
-      CALL SOIL(CONTROL, ISWITCH, 
+      CALL SOIL(CONTROL, ISWITCH, nest, t,                !Pang2023.09.19
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
      &    KTRANS, KUptake, OMAData, PUptake, RLV,         !Input
      &    SENESCE, ST, SWDELTX,TILLVALS, UNH4, UNO3,      !Input
@@ -379,7 +372,7 @@ C***********************************************************************
 C***********************************************************************
 C     Integrate soil state variables
 C-----------------------------------------------------------------------
-      CALL SOIL(CONTROL, ISWITCH, 
+      CALL SOIL(CONTROL, ISWITCH, nest, t,                !Pang2023.09.19
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
      &    KTRANS, KUptake, OMAData, PUptake, RLV,         !Input
      &    SENESCE, ST, SWDELTX,TILLVALS, UNH4, UNO3,      !Input
@@ -437,7 +430,7 @@ C***********************************************************************
 
       CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
 
-        CALL SOIL(CONTROL, ISWITCH, 
+        CALL SOIL(CONTROL, ISWITCH, nest, t,              !Pang2023.09.19
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
      &    KTRANS, KUptake, OMAData, PUptake, RLV,         !Input
      &    SENESCE, ST, SWDELTX,TILLVALS, UNH4, UNO3,      !Input
@@ -488,7 +481,7 @@ C     Call WEATHER module to close current weather file
       CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
 
 C     Print seasonal summaries and close files.
-      CALL SOIL(CONTROL, ISWITCH, 
+      CALL SOIL(CONTROL, ISWITCH, nest, t,               !Pang2023.09.19
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
      &    KTRANS, KUptake, OMAData, PUptake, RLV,         !Input
      &    SENESCE, ST, SWDELTX,TILLVALS, UNH4, UNO3,      !Input
@@ -564,7 +557,7 @@ C***********************************************************************
 C     End of Run
 C*********************************************************************** 
       ELSE IF (DYNAMIC .EQ. ENDRUN) THEN
-        CALL SOIL(CONTROL, ISWITCH, 
+        CALL SOIL(CONTROL, ISWITCH, nest, t,             !Pang2023.09.19
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
      &    KTRANS, KUptake, OMAData, PUptake, RLV,         !Input
      &    SENESCE, ST, SWDELTX,TILLVALS, UNH4, UNO3,      !Input
@@ -590,11 +583,13 @@ C***********************************************************************
           CALL CsvOutputs(CONTROL % MODEL(1:5), CONTROL % N_ELEMS,
      & maxnlayers)
         END IF 
-
 !***********************************************************************
 !***********************************************************************
 !     END OF DYNAMIC IF CONSTRUCT
 !***********************************************************************
       ENDIF
+!------ Pang: 2023.09.27 --------------------------------------------------
+      dssat48_struc(nest)%SOILPROP(t) = SOILPROP !Assign updated var to mem
+!      May need to do for all variables
       RETURN
       END SUBROUTINE LAND 

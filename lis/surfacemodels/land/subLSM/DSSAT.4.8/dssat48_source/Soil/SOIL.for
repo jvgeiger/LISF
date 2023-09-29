@@ -32,7 +32,7 @@
 !  10/31/2007 CHP Added simple K model.
 C=====================================================================
 
-      SUBROUTINE SOIL(CONTROL, ISWITCH, 
+      SUBROUTINE SOIL(CONTROL, ISWITCH, nest, t,           !Pang2023.09.19 
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
      &    KTRANS, KUptake, OMAData, PUptake, RLV,         !Input
      &    SENESCE, ST, SWDELTX,TILLVALS, UNH4, UNO3,      !Input
@@ -97,6 +97,7 @@ C=====================================================================
 
 !-----------------------------------------------------------------------
 !     Local variables:
+      INTEGER nest, t !Pang2023.09.19
       INTEGER DYNAMIC
       CHARACTER*1  MESOM
 
@@ -105,7 +106,7 @@ C=====================================================================
       REAL, DIMENSION(NL) :: SPi_Labile, NO3, NH4
       REAL, DIMENSION(0:NL) :: LITC, SSOMC
       REAL, DIMENSION(0:NL,NELEM) :: IMM, MNR
-      
+       
 !     Added for tile drainage:
       REAL TDFC
       INTEGER TDLNO
@@ -113,7 +114,6 @@ C=====================================================================
 !     Added for methane
       REAL DRAIN
       TYPE (CH4_type) CH4_data
-
 !-----------------------------------------------------------------------
 !     Transfer values from constructed data types into local variables.
       DYNAMIC = CONTROL % DYNAMIC
@@ -122,7 +122,7 @@ C=====================================================================
 !***********************************************************************
 !     Call Soil Dynamics module 
 !      IF (DYNAMIC < OUTPUT) THEN
-        CALL SOILDYN(CONTROL, ISWITCH, 
+        CALL SOILDYN(CONTROL, ISWITCH, nest, t,          !Pang 2023.09.19
      &    KTRANS, MULCH, SomLit, SomLitC, SW, TILLVALS,   !Input
      &    WEATHER, XHLAI,                                 !Input
      &    SOILPROP)                                       !Output

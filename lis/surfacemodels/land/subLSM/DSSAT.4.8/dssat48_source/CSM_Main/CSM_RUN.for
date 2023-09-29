@@ -460,8 +460,10 @@ C-----------------------------------------------------------------------
 !        CALL INFO(7,ERRKEY,MSG)
 !      ENDIF
 !------------------------------------------------------------------------
-!    Pang: Organize all initialization variables here
-      
+!    Pang: Organize all initialization variables here 
+       CONTROL % YRDOY = 2019110 !Pang: 2023.9.7, to initialize the control value
+       ENDYRS = 0 !Pang: 2023.9.7, to initialize the control value
+
        RNMODE = CONTROL % RNMODE
        REPNO = CONTROL % REPNO
        RUN = CONTROL % RUN
@@ -476,6 +478,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
       PRINT*, 'CONTRO BF LAND: ', CONTROL
       PRINT*, 'ISWITCH BF LAND: ', ISWITCH
+
       PRINT*, 'YRPLT, YREND, YREND bf: ', YRPLT, MDATE, YREND
       CALL LAND(CONTROL, ISWITCH, 
      &          YRPLT, MDATE, YREND) !Pang: WHat is this doing?
@@ -483,6 +486,7 @@ C-----------------------------------------------------------------------
       PRINT*, 'YRPLT, YREND, YREND af: ', YRPLT, MDATE, YREND
       PRINT*, 'CONTRO AF LAND: ', CONTROL
       PRINT*, 'ISWITCH AF LAND: ', ISWITCH
+      PRINT*, 'ENDYRS, NYRS: ', ENDYRS, NYRS
 C*********************************************************************** 
 C*********************************************************************** 
 C-----------------------------------------------------------------------

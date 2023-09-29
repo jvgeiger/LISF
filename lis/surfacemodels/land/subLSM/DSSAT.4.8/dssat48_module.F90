@@ -62,11 +62,30 @@ module dssat48_module
         ! TIME CONTROL
         !-------------------------------------------------------------------------
          INTEGER            :: YREND, EXPNO, TRTALL
-         INTEGER            :: NYRS, NREPS, YRSIM, ENDYRS, YRDOY_END
+         INTEGER            :: NREPS, YRDOY_END
          CHARACTER*1        :: RNMODE
          CHARACTER*80       :: PATHEX
          CHARACTER*92       :: FILEX_P
          CHARACTER*120      :: FILECTL
+         INTEGER            :: YRPLT, MDATE        
+        !-------------------------------------------------------------------------
+        !  SOIL - SOILDYN
+        ! Pang 2023.09.18
+        !-------------------------------------------------------------------------
+          REAL :: CN_INIT, CRAIN, LCRAIN, SUMKE
+          REAL, DIMENSION(20) :: BD_INIT, DLAYR_INIT, DS_INIT, DUL_INIT
+          REAL, DIMENSION(20) :: LL_INIT, SWCN_INIT, SAT_INIT, SW_INIT
+          REAL, DIMENSION(20) :: SomLit_INIT, SOM_PCT_init, BD_calc_init
+          REAL, DIMENSION(20) :: BD_SOM, DLAYR_SOM, DS_SOM, DUL_SOM, LL_SOM
+          REAL, DIMENSION(20) :: OC_INIT, TOTN_INIT, TotOrgN_init !Pang: May not need
+          REAL, DIMENSION(0:20) :: KECHGE
+          LOGICAL :: TILLED, FIRST
+        !------------------------------------------------------------------------
+        !---- ADDITIONAL CONTROL ------------------------------------------------
+        !---- Pang 2023.09.19 ---------------------------------------------------
+        !------------------------------------------------------------------------
+          LOGICAL :: doseasinit
+
     end type dssat48dec
           !INTEGER, PARAMETER :: &
           !Dynamic variable values

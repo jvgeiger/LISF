@@ -18,7 +18,8 @@
 
       SUBROUTINE CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2)
 !-----------------------------------------------------------------------
-      USE ModuleDefs   
+      USE ModuleDefs  
+ 
       IMPLICIT NONE
       SAVE
 

@@ -47,7 +47,7 @@ module dssat48_lsmMod
 ! !USES:
   use dssat48_module
   use LIS_constantsMod, only : LIS_CONST_PATH_LEN
-  USE ModuleDefs, only: ControlType,SwitchType !From DSSAT
+  USE ModuleDefs, only: ControlType,SwitchType,SoilType !From DSSAT
   implicit none
   
   PRIVATE
@@ -94,10 +94,10 @@ module dssat48_lsmMod
      type(dssat48dec), pointer :: dssat48(:)
      TYPE (ControlType),pointer ::  CONTROL(:) !Use from DSSAT ModuleDefs
      TYPE (SwitchType), pointer ::  ISWITCH(:) !Use from DSSAT ModuleDefs
+     TYPE (SoilType), pointer :: SOILPROP(:)   !Use from DSSAT ModuleDefs
   end type dssat48_type_dec
   
   type(dssat48_type_dec), allocatable :: dssat48_struc(:)
-  
 contains 
   
 !BOP
@@ -114,7 +114,8 @@ contains
     use LIS_timeMgrMod
     use LIS_surfaceModelDataMod
     use LIS_lsmMod
-    USE ModuleDefs, only: ControlType,SwitchType !From DSSAT
+    USE ModuleDefs, only: ControlType,SwitchType,SoilType, ModelVerTxt !From DSSAT
+    USE CSMVersion
 ! !DESCRIPTION:
 !
 !  This routine creates the datatypes and allocates memory for dssat48-specific
@@ -144,7 +145,9 @@ contains
     INTEGER       :: ROTNUM, TRTNUM, YRSIM, YRDOY, MULTI, YRDIF
     INTEGER       :: ERRCODE, RUNINIT, YREND, EXPNO, TRTALL, NYRS, ENDYRS
     INTEGER       :: RUN, YRDOY_END, NREPS, REPNO, TRTREP, YRPLT, MDATE
+    INTEGER       :: ERRNUM
     LOGICAL       :: FEXIST
+    !CHARACTER(LEN=3)  ModelVerTxt
 
     !The variable "CONTROL" is of type "ControlType".
     !TYPE (ControlType) CONTROL
@@ -157,13 +160,17 @@ contains
     
     ! read configuation information from lis.config file
     call dssat48_readcrd()
-    PRINT*,'Im in dssat48_lsm mod'
+    PRINT*,'Im in dssat48_init'
         do n=1, LIS_rc%nnest
-            PRINT*, 'in dssat48_lsmMod, n: ', n
+            !Get  Dssat version # which is used to read dssat prms files
+            WRITE(ModelVerTxt,'(I2.2,I1)') Version%Major, Version%Minor !Obtain Dssat version #
+
             ! allocate memory for all tiles in current nest 
             allocate(dssat48_struc(n)%dssat48(LIS_rc%npatch(n, LIS_rc%lsm_index)))
             allocate(dssat48_struc(n)%CONTROL(LIS_rc%npatch(n, LIS_rc%lsm_index)))
             allocate(dssat48_struc(n)%ISWITCH(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%SOILPROP(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            !PRINT*, 'LIS_rc%lsm_index is the number of tiles'
             !------------------------------------------------------------------------
             ! allocate memory for vector variables passed to model interfaces        
             ! TODO: check the following allocation statements carefully!
@@ -180,18 +187,31 @@ contains
             !enddo ! end of tile (t) loop
 
             do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-               ! These System Initial Values May Be Loaded From Config File
+                 PRINT*, 'LIS_rc%npatch(n, LIS_rc%lsm_index): ', LIS_rc%npatch(n, LIS_rc%lsm_index)
+                 !These System Initial Values May Be Loaded From Config File
+                 ! Start CSM 
+                 !DONE =  .FALSE.  ! We don't use DONE to control run or not run
                  !YRDOY_END = 9999999 !Can be removed
                  RNMODE = 'Q'
                  FILEIO = 'DSSAT48.INP'
                  ROTNUM = 1
                  TRTNUM = 1
                  FILEX = 'NASA2019.SQX'
+               !----------------------------------------------------------------------------------------
+               ! Check If There is FILEIO and Delete It  
+                 INQUIRE (FILE = FILEIO,EXIST = FEXIST)
+                 IF (FEXIST) THEN
+                     OPEN (21, FILE = FILEIO,STATUS = 'UNKNOWN',IOSTAT=ERRNUM)
+                     CLOSE (21,STATUS = 'DELETE')
+                 ENDIF
+               !----------------------------------------------------------------------------------------
+               ! Initialization CSM
                  YREND = -99
+                 YRPLT = 0 !Initialization, Pang
+                 MDATE = 0 !Initialization, Pang
                  RUN = 1
                  REPNO = 1
                  !PATHEX = ""
-
                  dssat48_struc(n)%CONTROL(t)%repno = REPNO
                  dssat48_struc(n)%CONTROL(t)%run = RUN
                  dssat48_struc(n)%CONTROL(t)%yrdoy = 0 !YRDOY is initialized
@@ -208,7 +228,6 @@ contains
                         FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
                         RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input
                         dssat48_struc(n)%ISWITCH(t), dssat48_struc(n)%CONTROL(t)) !Output
-
                 !Check to see if the temporary file exists
                 !Needed when we still use .INP file
                  INQUIRE (FILE = FILEIO,EXIST = FEXIST)
@@ -222,13 +241,14 @@ contains
                  TRTALL = 999
                  NYRS = 1
                  NREPS = 1
-                 YRSIM = 2019110
+                 YRSIM = 2019110 !Day of Simulation
                  YRDOY_END = (INT(YRSIM/1000)+NYRS-1)*1000 + YRSIM-INT(YRSIM/1000.0)*1000 - 1 
-                 YRDOY = YRSIM
+                 YRDOY = YRSIM !YRDOY is initialized as same as YRSIM
                  MULTI = 0
                  YRDIF = 0
                  ENDYRS = 0
 
+                 dssat48_struc(n)%CONTROL(t)%filex  = FILEX
                  dssat48_struc(n)%CONTROL(t)%multi = MULTI
                  dssat48_struc(n)%CONTROL(t)%run = RUN
                  dssat48_struc(n)%CONTROL(t)%trtnum = TRTNUM
@@ -236,27 +256,30 @@ contains
                  dssat48_struc(n)%CONTROL(t)%nyrs = NYRS
                  dssat48_struc(n)%CONTROL(t)%yrdoy = YRDOY !For Q Model; Run=1
                  dssat48_struc(n)%CONTROL(t)%yrsim = YRSIM
+                 dssat48_struc(n)%CONTROL(t)%endyrs = ENDYRS
                  dssat48_struc(n)%CONTROL(t)%dynamic = 1 !1: RUNINIT
 
 
                  dssat48_struc(n)%dssat48(t)%yrend = YREND
                  dssat48_struc(n)%dssat48(t)%expno = EXPNO
                  dssat48_struc(n)%dssat48(t)%trtall= TRTALL
-                 dssat48_struc(n)%dssat48(t)%nyrs = NYRS
                  dssat48_struc(n)%dssat48(t)%nreps = NREPS
-                 dssat48_struc(n)%dssat48(t)%endyrs = ENDYRS
-                 dssat48_struc(n)%dssat48(t)%yrsim = YRSIM ! Simulation yr+doy
                  dssat48_struc(n)%dssat48(t)%yrdoy_end = YRDOY_END
 
-                PRINT*, 'ISWITCH after input sub: ', dssat48_struc(n)%ISWITCH(t)
-                PRINT*, 'CONTROL_after_inputMod_lsmMod2: ', dssat48_struc(n)%CONTROL(t)
-                PRINT*, 'YRPLT, MDATE, YREND', YRPLT, MDATE, YREND
+             !-------------------- LAND INITIALIZATION ---------------------------------------------------
                 CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
-                  YRPLT, MDATE, YREND)
-
+                  YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
+                dssat48_struc(n)%dssat48(t)%yrend = YREND
+                dssat48_struc(n)%dssat48(t)%mdate = MDATE
+                dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
+                dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
+                !PRINT*, 'SOILPROP af LAND in lsmMod: ', dssat48_struc(n)%SOILPROP(t)
                 PRINT*, 'ISWITCH af LAND in lsmMod: ', dssat48_struc(n)%ISWITCH(t)
                 PRINT*, 'CONTROL af LAND in lsmMod lsmMod2: ', dssat48_struc(n)%CONTROL(t)
                 PRINT*, 'YRPLT, MDATE, YREND', YRPLT, MDATE, YREND
+                !PRINT*, 'dssat48_struc(ens)%dssat48(t)%BD_INIT: ', dssat48_struc(n)%dssat48(t)%BD_INIT
+                !PRINT*, 'SOILPROP%BD: ', dssat48_struc(n)%SOILPROP(t)%BD.
+             !---------------------------------------------------------------------------------------------
             enddo
 
             !------------------------------------------------------------------------
