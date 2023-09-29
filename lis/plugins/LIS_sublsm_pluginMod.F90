@@ -23,6 +23,7 @@ module LIS_sublsm_pluginMod
 !  09 Oct 2003    Sujay Kumar  Initial Specification
 !  04 Jun 2021    Mahdi Navari Modified for Naoh.3.9
 !  12 Aug 2021    Kristi Arsenault  Added SnowModel 
+!  10 May 2023    Pang-Wei Liu Added DSSAT48
 !
 !EOP
   implicit none
@@ -130,6 +131,11 @@ contains
    use snowmodel_lsmMod, only : snowmodel_init
 #endif
 
+#if ( defined SM_DSSAT_4_8 )
+   use dssat48_lsmMod, only : dssat48_init
+#endif
+
+
    implicit none
 
 #if ( defined SM_Crocus_8_1 )
@@ -177,6 +183,26 @@ contains
 #if ( defined SM_NOAHMP_4_0_1 )
    external NoahMP401_getSnowModelexport
    external NoahMP401_setSnowModelimport
+#endif
+
+#endif
+
+#if ( defined SM_DSSAT_4_8 )
+   external dssat48_main
+   external dssat48_setup
+   external dssat48_readrst
+   external dssat48_dynsetup
+   external dssat48_f2t
+   external dssat48_writerst
+   external dssat48_finalize
+   !external dssat48_reset
+
+   external dssat48_setLSMimport
+   external dssat48_getLSMexport
+
+#if ( defined SM_NOAHMP_4_0_1 )
+   external NoahMP401_getdssat48export
+   external NoahMP401_setdssat48import
 #endif
 
 #endif
@@ -246,6 +272,49 @@ contains
    call registersublsm2lsmgetexport(trim(LIS_noahmp401Id)//"+"//&
         trim(LIS_snowmodelId)//char(0),SnowModel_getLSMexport)
 #endif
+#endif
+
+#if ( defined SM_DSSAT_4_8 )
+   PRINT*,'Im in plugin'
+   call registersublsminit(trim(LIS_dssat48Id)//char(0),dssat48_init)
+   PRINT*,'After Ini'
+   call registersublsmsetup(trim(LIS_dssat48Id)//char(0),dssat48_setup)
+    PRINT*,'After setup'
+   call registersublsmf2t(trim(LIS_dssat48Id)//"+"&
+        //trim(LIS_retroId)//char(0),dssat48_f2t)
+   call registersublsmf2t(trim(LIS_dssat48Id)//"+"//&
+        trim(LIS_agrmetrunId)//char(0),dssat48_f2t)
+    PRINT*,'After f2t'
+   call registersublsmrun(trim(LIS_dssat48Id)//char(0),dssat48_main)
+     PRINT*,'After main'
+   call registersublsmrestart(trim(LIS_dssat48Id)//char(0),dssat48_readrst)
+   PRINT*,'After readrst'
+   call registersublsmdynsetup(trim(LIS_dssat48Id)//char(0),dssat48_dynsetup)
+   PRINT*,'After dynsetup'
+   call registersublsmwrst(trim(LIS_dssat48Id)//char(0),dssat48_writerst)
+   PRINT*,'After writerst'
+   call registersublsmfinalize(trim(LIS_dssat48Id)//char(0),dssat48_finalize)
+   PRINT*,'After finalize'
+   !call registersublsmreset(trim(LIS_dssat48Id)//char(0),dssat48_reset)
+
+   !! Wirings between NoahMP and dssat48
+   call registersublsmsetLSMimport(trim(LIS_dssat48Id)//char(0),&
+        dssat48_setLSMimport)
+   PRINT*,'After LSMimport'
+#if ( defined SM_NOAHMP_4_0_1 )
+   call registerlsm2sublsmgetexport(trim(LIS_noahmp401Id)//"+"//&
+        trim(LIS_dssat48Id)//char(0),NoahMP401_getdssat48export)
+        PRINT*,'After getdssat48export'
+   call registerlsmsetsublsmimport(trim(LIS_noahmp401Id)//char(0),&
+        NoahMP401_setdssat48import)
+        PRINT*,'After setdssat48export'
+   call registersublsm2lsmgetexport(trim(LIS_noahmp401Id)//"+"//&
+        trim(LIS_dssat48Id)//char(0),dssat48_getLSMexport)
+        PRINT*,'After getLSMexport'
+
+#endif
+
+
 #endif
 
   end subroutine LIS_sublsm_plugin

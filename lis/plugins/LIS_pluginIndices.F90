@@ -30,7 +30,7 @@ module LIS_pluginIndices
 !  27 Jan 2014: Shugong Wang, added HRAP projection
 !   4 Nov 2014: Jonathan Case, added support for daily NESDIS/VIIRS GVF for Noah
 !  16 Aug 2016: Mahdi Navari, added PILDAS  
-!
+!  10 May 2023: Pang-Wei Liu, added DSSAT
 !EOP
   PRIVATE
    
@@ -388,6 +388,10 @@ module LIS_pluginIndices
 !-------------------------------------------------------------------------
    character*50, public, parameter :: LIS_ESPbootId = "ESP boot"
    character*50, public, parameter :: LIS_ESPconvId = "ESP conventional"
+!-------------------------------------------------------------------------
+!  Crop Growth Model
+!-------------------------------------------------------------------------
+   character*50, public,  parameter :: LIS_dssat48Id  = "DSSAT48"
 
 !EOC
  end module LIS_pluginIndices
