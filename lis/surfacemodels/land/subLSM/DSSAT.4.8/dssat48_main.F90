@@ -49,6 +49,8 @@ subroutine dssat48_main(n)
     real                 :: tmp_LAT                ! Latitude in decimal degree  (latitude (degrees +North)) [degrees]
     real                 :: tmp_LON                ! Longitude in decimal year    (longitude (degrees +East)) [degrees]
     integer              :: tmp_year, tmp_month, tmp_day, tmp_hour, tmp_minute
+    real                 :: tmp_pres, tmp_precip, tmp_tmax, tmp_tmin, tmp_tdew   ! Weather Forcing
+    real                 :: tmp_swrad, tmp_wind                                  ! Weather Forcing
     character*3          :: fnest ! MN Bug in toolkit (added to this code)
 ! CONTRO
     integer             :: RUN, REPNO
@@ -89,38 +91,46 @@ subroutine dssat48_main(n)
         !do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
         do t = 1, 1
             PRINT*, 'Am I inside the alarm on loop: Yes'
-            
+             
             dt = LIS_rc%ts
             PRINT*, "t, dt: ", t, dt
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
             col = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%col
             lat = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lat
             lon = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lon
-            !!------ This Block Is Where To Obtain Weather Forcing ------------------------------!!
-            ! retrieve forcing data from DSSAT48_struc(n)%crocus81(t) and assign to local variables
-            ! PPS: pressure at atmospheric model surface (Pa)
-            !tmp_PPS        = CROCUS81_struc(n)%crocus81(t)%PPS    / CROCUS81_struc(n)%forc_count
- 
-            ! RRSNOW: rain rate [kg/(m2 s)]
-            !tmp_RRSNOW     = CROCUS81_struc(n)%crocus81(t)%RRSNOW / CROCUS81_struc(n)%forc_count
 
-            ! TA: atmospheric temperature at level za (K)
-            !tmp_TA         = CROCUS81_struc(n)%crocus81(t)%TA     / CROCUS81_struc(n)%forc_count
+            !!------ This Block Is Where We Obtain Weather Forcing ------------------------------!!
+            ! retrieve forcing data from DSSAT48_struc(n)%dssat(t) and assign to local variables
+
+            write(LIS_logunit,*) 'Weather forcing for tile: ',t
+
+            ! Daily average surface pressure (Pa)
+            tmp_pres      = dssat48_struc(n)%dssat48(t)%psurf / dssat48_struc(n)%forc_count
+            write(LIS_logunit,*) 'p: ',tmp_pres
  
-            ! SW_RAD: incoming solar radiation (W/m2)
-            !tmp_SW_RAD     = CROCUS81_struc(n)%crocus81(t)%SW_RAD / CROCUS81_struc(n)%forc_count
- 
-            ! QA: atmospheric specific humidity at level za
-            !tmp_QA         = CROCUS81_struc(n)%crocus81(t)%QA     / CROCUS81_struc(n)%forc_count
- 
-            ! Wind_E: Eastward Wind
-            !tmp_Wind_E     = CROCUS81_struc(n)%crocus81(t)%Wind_E / CROCUS81_struc(n)%forc_count
- 
-            ! Wind_N: Northward Wind
-            !tmp_Wind_N     = CROCUS81_struc(n)%crocus81(t)%Wind_N / CROCUS81_struc(n)%forc_count
- 
-            ! LW_RAD: atmospheric infrared radiation (W/m2)
-            !tmp_LW_RAD     = CROCUS81_struc(n)%crocus81(t)%LW_RAD / CROCUS81_struc(n)%forc_count
+            ! Total daily precipitation (rain+snow) (mm)
+            tmp_precip    = dssat48_struc(n)%dssat48(t)%totprc * 3600. * 24. !Convert from kg/ms2 to mm
+            write(LIS_logunit,*) 'Precip: ',tmp_precip
+
+            ! Tmax: maximum daily air temperature (C)
+            tmp_tmax      = dssat48_struc(n)%dssat48(t)%tmax - 273.15 !Convert from K to C
+            write(LIS_logunit,*) 'Tmax: ',tmp_tmax
+
+            ! Tmin: minimum daily air temperature (C)
+            tmp_tmin      = dssat48_struc(n)%dssat48(t)%tmin - 273.15 !Convert from K to C 
+            write(LIS_logunit,*) 'Tmin: ',tmp_tmin
+
+            ! Tdew: average daily dewpoint temperature (C)
+            tmp_tdew      = (dssat48_struc(n)%dssat48(t)%tdew / dssat48_struc(n)%forc_count) - 273.15 !Convert from K to C
+            write(LIS_logunit,*) 'Tdew: ',tmp_tdew
+
+            ! SW_RAD: daily total incoming solar radiation (MJ/(m2d))
+            tmp_swrad     = (dssat48_struc(n)%dssat48(t)%swdown / dssat48_struc(n)%forc_count) * 0.0864 !Convert from W/m2 to MJ/(m2d)
+            write(LIS_logunit,*) 'Swrad: ',tmp_swrad
+
+            ! Wind: daily average wind speed (km/d)
+            tmp_wind      = (dssat48_struc(n)%dssat48(t)%wndspd / dssat48_struc(n)%forc_count) * 86.0 !Convert from m/s to km/d
+            write(LIS_logunit,*) 'Wind: ',tmp_wind
 
             !!---- Here Will Check Validity of Forcings ------------------!!
             ! check validity of PPS
@@ -338,15 +348,29 @@ subroutine dssat48_main(n)
             !                                      vlevel=i, unit="kg m-2", direction="-", surface_type = LIS_rc%lsm_index)
             !end do
 
-            ! reset forcing variables to zeros
-            !CROCUS81_struc(n)%crocus81(t)%PPS = 0.0
+            ! Reset forcing variables to zero
+            dssat48_struc(n)%dssat48(t)%tair = 0.0
+            dssat48_struc(n)%dssat48(t)%tmax = 0.0
+            dssat48_struc(n)%dssat48(t)%tmin = 0.0
+            dssat48_struc(n)%dssat48(t)%qair = 0.0
+            dssat48_struc(n)%dssat48(t)%swdown = 0.0
+            dssat48_struc(n)%dssat48(t)%lwdown = 0.0
+            dssat48_struc(n)%dssat48(t)%uwind = 0.0
+            dssat48_struc(n)%dssat48(t)%vwind = 0.0
+            dssat48_struc(n)%dssat48(t)%wndspd = 0.0
+            dssat48_struc(n)%dssat48(t)%psurf = 0.0
+            dssat48_struc(n)%dssat48(t)%rainf = 0.0
+            dssat48_struc(n)%dssat48(t)%snowf = 0.0
+            dssat48_struc(n)%dssat48(t)%totprc = 0.0
+            dssat48_struc(n)%dssat48(t)%tdew = 0.0
         enddo ! end of tile (t) loop
-        ! reset forcing counter to be zero
-        !dssat48_struc(n)%forc_count = 0 
+
+        ! Reset forcing counter to be zero
+        dssat48_struc(n)%forc_count = 0 
 
     endif ! end of alarmCheck loop 
 
-    !Deallocate Memory for Locan Variable
+    !Deallocate Memory for Local Variable
     !deallocate( tmp_SNOWSWE )
    
 end subroutine dssat48_main

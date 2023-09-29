@@ -24,7 +24,7 @@ module dssat48_module
 !
 ! !REVISION HISTORY:
 !  11 May 2023: Pang-Wei Liu
-!
+!  31 Aug 2023: J. Erlingis; Add forcing
 !EOP
     implicit none
     private
@@ -32,11 +32,11 @@ module dssat48_module
         !-------------------------------------------------------------------------
         ! forcing
         !-------------------------------------------------------------------------
-        !real               :: PPS
-        !real               :: TA
-        !real               :: SW_RAD
-        !real               :: QA
-        !real               :: Wind
+        real               :: tair, tmax, tmin
+        real               :: qair, swdown, lwdown
+        real               :: uwind, vwind, wndspd
+        real               :: psurf, rainf, snowf
+        real               :: tdew, totprc
       
         !-------------------------------------------------------------------------
         ! spatial parameter

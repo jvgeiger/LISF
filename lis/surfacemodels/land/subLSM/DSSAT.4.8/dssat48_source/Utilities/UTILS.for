@@ -639,7 +639,7 @@ C========================================================================
 
       TYPE (OutputType) FileData
 
-      DATA OUTLUN /30/    !LUN.LST - list of unit assignments
+      DATA OUTLUN /898/    !LUN.LST - list of unit assignments !JE Change for LIS
       DATA FIRST /.TRUE./
 
       INTEGER       DATE_TIME(8)
@@ -698,29 +698,30 @@ C========================================================================
       SELECT CASE (FileVarName(1:Length))
 
 !     Input Files (Units 8 through 29):
-      CASE ('FILEA');   LUN = 8   !observed time series data
-      CASE ('FILEC', 'FILEE', 'FINPUT');  LUN = 10          
+!JE   For coupling with LIS, avoid all unit numbers 12 (grib) - 99
+      CASE ('FILEA');   LUN = 800   !observed time series data
+      CASE ('FILEC', 'FILEE', 'FINPUT');  LUN = 801          
                   !*.spe, *.eco, miscellaneous input files
 
-      CASE ('FILEW');   LUN = 11  !*.wth - weather files
-      CASE ('FILEP');   LUN = 12  !*.pst - pest files
-      CASE ('FILESS');  LUN = 13  !RESCH???.SDA (was SOILN980.SOL)
-      CASE ('BATCH');   LUN = 14  !Batch run input file
-      CASE ('ERRORX');  LUN = 15  !Model.err
-      CASE ('FILETL');  LUN = 16  !TILOP???.SDA
-      CASE ('PFILE');   LUN = 17  !Phosphorus input files
-      CASE ('FILEIO');  LUN = 21  !temp. input file; dssat45.inp
-      CASE ('DTACDE');  LUN = 22  !DATA.CDE
-      CASE ('FILETMP'); LUN = 23  !Tony Hunt temp file
-      CASE ('SIMCNTL'); LUN = 24  !Simulation Control file
-      CASE ('DSPRO');   LUN = 25  !DSSATPRO file
-      CASE ('FILEWC');  LUN = 26  !*.cli - climate summary files
-      CASE ('FILEWG');  LUN = 27  !*.wtg - generated weather files
+      CASE ('FILEW');   LUN = 802  !*.wth - weather files
+      CASE ('FILEP');   LUN = 803  !*.pst - pest files
+      CASE ('FILESS');  LUN = 804  !RESCH???.SDA (was SOILN980.SOL)
+      CASE ('BATCH');   LUN = 805  !Batch run input file
+      CASE ('ERRORX');  LUN = 806  !Model.err
+      CASE ('FILETL');  LUN = 807  !TILOP???.SDA
+      CASE ('PFILE');   LUN = 808 !Phosphorus input files
+      CASE ('FILEIO');  LUN = 809  !temp. input file; dssat45.inp
+      CASE ('DTACDE');  LUN = 810  !DATA.CDE
+      CASE ('FILETMP'); LUN = 811  !Tony Hunt temp file
+      CASE ('SIMCNTL'); LUN = 812  !Simulation Control file
+      CASE ('DSPRO');   LUN = 813  !DSSATPRO file
+      CASE ('FILEWC');  LUN = 814  !*.cli - climate summary files
+      CASE ('FILEWG');  LUN = 815  !*.wtg - generated weather files
 
 !     Currently 30 is the highest number for reserved logical units
 !     Change value in subroutine OUTFILES if necessary
 
-!     Reserve unit #30 for OUTLUN
+!     Reserve unit #30 for OUTLUN !JE Switch to 898
       CASE ('LUN.LST'); LUN = OUTLUN  !List of output files
       CASE DEFAULT;     LUN = 0
       END SELECT
@@ -1329,7 +1330,7 @@ C=======================================================================
       ENDIF
 
       IF (FEXIST) THEN
-        LUN = 22
+        LUN = 899 !JE
         OPEN (LUN, FILE=DATAX, STATUS = 'OLD', IOSTAT=ERR)
         IF (ERR /= 0) THEN
           FEXIST = .FALSE.
