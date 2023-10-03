@@ -610,8 +610,8 @@ C     Initialize curve number (according to J.T. Ritchie) 1-JUL-97 BDB
       IF (U < 1.E-4) THEN
         U = 6.0
         IF (MULTI < 2) THEN
-          WRITE(MSG(1),505) U
-  505     FORMAT('Stage 1 soil evaporation limit has been set to ',
+          WRITE(MSG(1),577) U
+  577     FORMAT('Stage 1 soil evaporation limit has been set to ',
      &       F5.1,'.')
           CALL WARNING(1, ERRKEY, MSG)
         ENDIF
