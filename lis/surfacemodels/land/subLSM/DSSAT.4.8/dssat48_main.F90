@@ -40,7 +40,7 @@ subroutine dssat48_main(n)
     integer              :: t
     integer              :: i
     real                 :: dt
-    real                 :: lat, lon
+    real                 :: lat, lon, elev
     integer              :: row, col
     integer              :: year, month, day, hour, minute, second
     logical              :: alarmCheck
@@ -98,6 +98,13 @@ subroutine dssat48_main(n)
             col = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%col
             lat = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lat
             lon = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lon
+            elev = LIS_domain(n)%tile(t)%elev
+
+            ! Spatial Information
+            PRINT*, "lat, lon, elev: ", lat, lon, elev
+            dssat48_struc(n)%dssat48(t)%lat = lat
+            dssat48_struc(n)%dssat48(t)%lon = lon
+            dssat48_struc(n)%dssat48(t)%elev = elev
 
             !!------ This Block Is Where We Obtain Weather Forcing ------------------------------!!
             ! retrieve forcing data from DSSAT48_struc(n)%dssat(t) and assign to local variables
@@ -107,30 +114,37 @@ subroutine dssat48_main(n)
             ! Daily average surface pressure (Pa)
             tmp_pres      = dssat48_struc(n)%dssat48(t)%psurf / dssat48_struc(n)%forc_count
             write(LIS_logunit,*) 'p: ',tmp_pres
+            dssat48_struc(n)%dssat48(t)%forc_pres = tmp_pres
  
             ! Total daily precipitation (rain+snow) (mm)
             tmp_precip    = dssat48_struc(n)%dssat48(t)%totprc * 3600. * 24. !Convert from kg/ms2 to mm
             write(LIS_logunit,*) 'Precip: ',tmp_precip
+            dssat48_struc(n)%dssat48(t)%forc_precip = tmp_precip
 
             ! Tmax: maximum daily air temperature (C)
             tmp_tmax      = dssat48_struc(n)%dssat48(t)%tmax - 273.15 !Convert from K to C
             write(LIS_logunit,*) 'Tmax: ',tmp_tmax
+            dssat48_struc(n)%dssat48(t)%forc_tmax = tmp_tmax
 
             ! Tmin: minimum daily air temperature (C)
             tmp_tmin      = dssat48_struc(n)%dssat48(t)%tmin - 273.15 !Convert from K to C 
             write(LIS_logunit,*) 'Tmin: ',tmp_tmin
+            dssat48_struc(n)%dssat48(t)%forc_tmin = tmp_tmin
 
             ! Tdew: average daily dewpoint temperature (C)
             tmp_tdew      = (dssat48_struc(n)%dssat48(t)%tdew / dssat48_struc(n)%forc_count) - 273.15 !Convert from K to C
             write(LIS_logunit,*) 'Tdew: ',tmp_tdew
+            dssat48_struc(n)%dssat48(t)%forc_tdew = tmp_tdew
 
             ! SW_RAD: daily total incoming solar radiation (MJ/(m2d))
             tmp_swrad     = (dssat48_struc(n)%dssat48(t)%swdown / dssat48_struc(n)%forc_count) * 0.0864 !Convert from W/m2 to MJ/(m2d)
             write(LIS_logunit,*) 'Swrad: ',tmp_swrad
+            dssat48_struc(n)%dssat48(t)%forc_swrad = tmp_swrad
 
             ! Wind: daily average wind speed (km/d)
             tmp_wind      = (dssat48_struc(n)%dssat48(t)%wndspd / dssat48_struc(n)%forc_count) * 86.0 !Convert from m/s to km/d
             write(LIS_logunit,*) 'Wind: ',tmp_wind
+            dssat48_struc(n)%dssat48(t)%forc_wind = tmp_wind
 
             !!---- Here Will Check Validity of Forcings ------------------!!
             ! check validity of PPS

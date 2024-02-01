@@ -32,17 +32,21 @@ module dssat48_module
         !-------------------------------------------------------------------------
         ! forcing
         !-------------------------------------------------------------------------
-        real               :: tair, tmax, tmin
+        real               :: tair, tmax, tmin       !from LIS forcing
         real               :: qair, swdown, lwdown
         real               :: uwind, vwind, wndspd
         real               :: psurf, rainf, snowf
         real               :: tdew, totprc
-      
+        real               :: forc_pres, forc_precip !forc_* is passed to DSSAT
+        real               :: forc_tmax, forc_tmin
+        real               :: forc_tdew, forc_swrad
+        real               :: forc_wind      
         !-------------------------------------------------------------------------
         ! spatial parameter
         !-------------------------------------------------------------------------
         !real               :: CDL
         !real               :: NUKEY
+        real                :: lat, lon, elev
         !-------------------------------------------------------------------------
         ! multilevel spatial parameter
         !-------------------------------------------------------------------------

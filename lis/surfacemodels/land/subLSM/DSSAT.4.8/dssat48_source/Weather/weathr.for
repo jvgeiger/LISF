@@ -36,17 +36,19 @@ C  06/02/2005 GH  Fixed call to WTHMOD in Seasinit section
 C  02/13/2006 JIL Export AMTRH (R/R0) for leaf rolling calculation
 !  04/28/2008 CHP Added option to read CO2 from file 
 !  07/25/2014 CHP Added daily CO2 read from weather file (DCO2)
+!  10/05/2023 JE  Modify for ingesting forcing directly from LIS 
 C-----------------------------------------------------------------------
 C  Called by: Main
 c  Calls:     DAYLEN, ERROR, HMET, IPWTH, SOLAR, WGEN, WTHMDB, WTHMOD
 C=======================================================================
 
-      SUBROUTINE WEATHR (CONTROL, ISWITCH, WEATHER, YREND)
+      SUBROUTINE WEATHR (CONTROL, ISWITCH, nest, t, WEATHER, YREND) !JE
 
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
       USE Forecast
+      use dssat48_lsmMod !JE
 
       IMPLICIT NONE
       SAVE
@@ -61,6 +63,7 @@ C=======================================================================
       INTEGER DOY, MULTI, NEV, RUN, YEAR, YRDOY, YRSIM, YYDDD
       INTEGER RSEED1, RSEED(4), REPNO
       INTEGER DYNAMIC, YREND
+      INTEGER nest, t
 
 !     Yield forecast variables
       INTEGER FYRDOY, FYRSIM, INCDAT, WDATE, WYEAR
@@ -115,14 +118,17 @@ C=======================================================================
 !***********************************************************************
       IF (DYNAMIC .EQ. RUNINIT) THEN
 !-----------------------------------------------------------------------
-      CALL IPWTH(CONTROL, ERRKEY,
-     &    CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,      !Output
-     &    MEWTH, OZON7, PAR,                              !Output
-     &    PATHWTC, PATHWTG, PATHWTW,                      !Output
-     &    RAIN, REFHT, RHUM, RSEED1, SRAD,                !Output
-     &    TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,      !Output
-     &    WINDSP, XELEV, XLAT, XLONG, YREND,              !Output
-     &    RUNINIT)
+!JE Remove external read to weather files
+!JE      CALL IPWTH(nest, t, CONTROL, ERRKEY,
+!JE     &    CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,      !Output
+!JE     &    MEWTH, OZON7, PAR,                              !Output
+!JE     &    PATHWTC, PATHWTG, PATHWTW,                      !Output
+!JE     &    RAIN, REFHT, RHUM, RSEED1, SRAD,                !Output
+!JE     &    TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,      !Output
+!JE     &    WINDSP, XELEV, XLAT, XLONG, YREND,              !Output
+!JE     &    RUNINIT)
+
+      MEWTH = 'M'                 !JE Use LIS data
       PRINT*, 'FILEW: ', FILEW
       PRINT*, 'BF WTHMOD: '
       PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
@@ -152,6 +158,12 @@ C=======================================================================
       PRINT*, TMAX, TMIN, TWILEN, WINDSP
       PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
       PRINT*, DEC, NEV, SNUP, SNDN, YREND
+
+      PRINT*, "RUN INIT Assigning lat, lon, and elevation from LIS"
+      XLAT  = dssat48_struc(nest)%dssat48(t)%lat
+      XLONG = dssat48_struc(nest)%dssat48(t)%lon
+      XELEV = dssat48_struc(nest)%dssat48(t)%elev
+
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -176,19 +188,58 @@ C=======================================================================
           CALL YR_DOY(FYRSIM, WYEAR, DOY)
         ENDIF
 
+        !JE Check values for WINDSP and REFHT (copied from IPWTH)
+        IF (REFHT <= 0.) REFHT = 1.5
+        IF (WINDHT <= 0.) WINDHT = 2.0
+
+        !JE
+        PRINT*, "SEAS INIT Initializing with values from LIS: "
+        XLAT  = dssat48_struc(nest)%dssat48(t)%lat
+        XLONG = dssat48_struc(nest)%dssat48(t)%lon
+        XELEV = dssat48_struc(nest)%dssat48(t)%elev
+        TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
+        TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
+        WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
+        TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
+        RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip
+        SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
+        PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+        PRINT*, TMAX, TMIN, TDEW, WINDSP
+        PRINT*,'RAIN, RHUM, SRAD'
+        PRINT*, RAIN, RHUM, SRAD
+
 !       Initialize read from file for 'M', 'G' weather options and also for
 !         RNMODE = 'Y' (yield forecast mode) regardless of weather option
         IF (MEWTH .EQ. 'M' .OR. MEWTH .EQ. 'G')THEN
-          CALL IPWTH(CONTROL2, ERRKEY,
-     &      CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,    !Output
-     &      MEWTH, OZON7, PAR,                            !Output
-     &      PATHWTC, PATHWTG, PATHWTW,                    !Output
-     &      RAIN, REFHT, RHUM, RSEED1, SRAD,              !Output
-     &      TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,    !Output
-     &      WINDSP, XELEV, XLAT, XLONG, YREND,            !Output
-     &      SEASINIT)
+!JE Remove external read to weather files
+!JE          CALL IPWTH(nest, t, CONTROL2, ERRKEY,
+!JE     &      CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,    !Output
+!JE     &      MEWTH, OZON7, PAR,                            !Output
+!JE     &      PATHWTC, PATHWTG, PATHWTW,                    !Output
+!JE     &      RAIN, REFHT, RHUM, RSEED1, SRAD,              !Output
+!JE     &      TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,    !Output
+!JE     &      WINDSP, XELEV, XLAT, XLONG, YREND,            !Output
+!JE     &      SEASINIT)
           IF (YREND == CONTROL2 % YRDOY) RETURN
         ENDIF
+
+        !JE
+        PRINT*,'Season Init'
+        PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+        PRINT*, TMAX, TMIN, TDEW, WINDSP
+        PRINT*,'RAIN, RHUM, SRAD'
+        PRINT*, RAIN, RHUM, SRAD
+        PRINT*,'Replace with LIS'
+        TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
+        TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
+        WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
+        TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
+        RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip 
+        SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
+        PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+        PRINT*, TMAX, TMIN, TDEW, WINDSP
+        PRINT*,'RAIN, RHUM, SRAD'
+        PRINT*, RAIN, RHUM, SRAD
 
         IF (MEWTH .EQ. 'S' .OR. MEWTH .EQ. 'W') THEN
 C       Set default values FOR REFHT AND WINDHT
@@ -258,6 +309,11 @@ C     Calculate day length, sunrise and sunset.
       CALL DAYLEN(
      &    DOY, XLAT,                                      !Input
      &    DAYL, DEC, SNDN, SNUP)                          !Output
+    
+      print*, 'Input to DAYLEN'     !JE
+      print*, DOY, XLAT             !JE
+      print*, 'Output from DAYLEN'  !JE
+      print*, DAYL, DEC, SNDN, SNUP !JE
 
 !     Subroutine to determine daily CO2
       CALL CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2)
@@ -277,6 +333,10 @@ C     Calculate daily solar parameters.
      &    DAYL, DEC, SRAD, XLAT,                          !Input
      &    CLOUDS, ISINB, S0N)                             !Output
 
+      print*, 'Input to SOLAR'            !JE
+      print*,  DAYL,  DEC, SRAD, XLAT     !JE
+      print*, 'Output from SOLAR'         !JE
+      print*, CLOUDS, ISINB, S0N          !JE 
 !     Windspeed adjustment and initialization moved ahead
 !     of Call to HMET on 27MAR14 by BAK
 
@@ -284,6 +344,7 @@ C     Adjust wind speed from reference height to 2m height.
       WINDRUN = WINDSP
       IF (WINDSP > 0.0) THEN
 !       WINDSP = WINDSP * (2.0 / WINDHT) ** 2.0
+        PRINT*, 'WINDHT in weathr.for: ', WINDHT  !JE
         WINDSP = WINDSP * (2.0 / WINDHT) ** 0.2   !chp 8/28/13
       ELSE
         WINDSP = 86.4   ! Equivalent to average of 1.0 m/s
@@ -338,15 +399,36 @@ C     Compute daily normal temperature.
 !       Get weather data by normal means    
 !-----------------------------------------------------------------------
 C       Read new weather record.
+        PRINT*, 'MEWTH', MEWTH
         IF (MEWTH .EQ. 'M' .OR. MEWTH .EQ. 'G' ) THEN
-          CALL IPWTH(CONTROL2, ERRKEY,
-     &      CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,    !Output
-     &      MEWTH, OZON7, PAR,                            !Output
-     &      PATHWTC, PATHWTG, PATHWTW,                    !Output
-     &      RAIN, REFHT, RHUM, RSEED1, SRAD,              !Output
-     &      TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,    !Output
-     &      WINDSP, XELEV, XLAT, XLONG, YREND,            !Output
-     &      RATE)
+!JE Remove external read to weather files
+!JE          CALL IPWTH(nest, t, CONTROL2, ERRKEY,
+!JE     &      CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,    !Output
+!JE     &      MEWTH, OZON7, PAR,                            !Output
+!JE     &      PATHWTC, PATHWTG, PATHWTW,                    !Output
+!JE     &      RAIN, REFHT, RHUM, RSEED1, SRAD,              !Output
+!JE     &      TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,    !Output
+!JE     &      WINDSP, XELEV, XLAT, XLONG, YREND,            !Output
+!JE     &      RATE)
+
+            !JE 
+            PRINT*,'Rate Calculation'
+            PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+            PRINT*, TMAX, TMIN, TDEW, WINDSP
+            PRINT*,'RAIN, RHUM, SRAD'
+            PRINT*, RAIN, RHUM, SRAD
+            PRINT*,'Replace with LIS'
+            TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
+            TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
+            WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
+            TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
+            RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip
+            SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
+            PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+            PRINT*, TMAX, TMIN, TDEW, WINDSP
+            PRINT*,'RAIN, RHUM, SRAD'
+            PRINT*, RAIN, RHUM, SRAD
+
           IF (YREND == YRDOY) RETURN
         
         ELSE IF (MEWTH .EQ. 'S' .OR. MEWTH .EQ. 'W') THEN
@@ -437,14 +519,15 @@ C-----------------------------------------------------------------------
       ELSEIF (DYNAMIC .EQ. SEASEND) THEN
 !-----------------------------------------------------------------------
       IF (MEWTH .EQ. 'M' .OR. MEWTH .EQ. 'G') THEN
-        CALL IPWTH(CONTROL, ERRKEY,
-     &    CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,      !Output
-     &    MEWTH, OZON7, PAR,                              !Output
-     &    PATHWTC, PATHWTG, PATHWTW,                      !Output
-     &    RAIN, REFHT, RHUM, RSEED1, SRAD,                !Output
-     &    TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,      !Output
-     &    WINDSP, XELEV, XLAT, XLONG, YREND,              !Output
-     &    SEASEND)
+!JE Remove external read to weather files
+!JE        CALL IPWTH(nest, t, CONTROL, ERRKEY,
+!JE     &    CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,      !Output
+!JE     &    MEWTH, OZON7, PAR,                              !Output
+!JE     &    PATHWTC, PATHWTG, PATHWTW,                      !Output
+!JE     &    RAIN, REFHT, RHUM, RSEED1, SRAD,                !Output
+!JE     &    TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,      !Output
+!JE     &    WINDSP, XELEV, XLAT, XLONG, YREND,              !Output
+!JE     &    SEASEND)
       ENDIF
 
       CALL OpWeath(CONTROL, ISWITCH, 
@@ -508,6 +591,22 @@ C-----------------------------------------------------------------------
       WEATHER % TAIRHR = TAIRHR
       WEATHER % TGRO   = TGRO  
       WEATHER % WINDHR = WINDHR
+
+      PRINT*, "WEATHER STRUCTURE"
+      PRINT*, "DAILY DATA"
+      PRINT*, "TA: ", WEATHER%TA, "TAVG: ",WEATHER%TAVG
+      PRINT*, "TDAY: ", WEATHER%TDAY, "TDEW: ", WEATHER%TDEW
+      PRINT*, "TGROAV: ", WEATHER%TGROAV, "TGRODY: ", WEATHER%TGRODY
+      PRINT*, "TMAX: ", WEATHER%TMAX, "TMIN: ", WEATHER%TMIN
+      PRINT*, "TWILEN: ", WEATHER%TWILEN, "WINDRUN: ", WEATHER%WINDRUN
+      PRINT*, "WINDSP: ", WEATHER%WINDSP, "VAPR: ", WEATHER%VAPR
+
+      PRINT*, "HOURLY DATA"
+      PRINT*, "RADHR: ", WEATHER%RADHR
+      PRINT*, "RHUMHR: ", WEATHER%RHUMHR
+      PRINT*, "TAIRHR: ", WEATHER%TAIRHR
+      PRINT*, "TGRO: ", WEATHER%TGRO
+      PRINT*, "WINDHR: ", WEATHER%WINDHR
 
       CALL OPSTRESS(CONTROL, WEATHER=WEATHER)
 
