@@ -19,7 +19,7 @@
 !  07/13/2006 CHP Added P model
 !  07/11/2007 JIL Adapted for IXIM model
 !----------------------------------------------------------------------
-      SUBROUTINE MZ_IX_PHENOL(DYNAMIC,ISWWAT,FILEIO,IDETO,        !C
+      SUBROUTINE MZ_IX_PHENOL(DYNAMIC,ISWWAT,nest,t,FILEIO,IDETO, !C
      &    CUMDEP,DAYL,DLAYR,LEAFNO,LL,NLAYR,PLTPOP,SDEPTH,        !I
      &    SNOW, SRAD,SW,TMAX,TMIN, TWILEN,XN,YRDOY,YRSIM,         !I
      &    CUMDTT,DTT,GPP,ISDATE, ISTAGE,MDATE,STGDOY,SUMDTT,      !O
@@ -27,15 +27,16 @@
      &    PEAR,PSTM,GDDAE,SeedFrac,VegFrac,Z2STAGE)               !O
 
       USE ModuleDefs
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !----------------------------------------------------------------------
 !                             Define Variables
 !----------------------------------------------------------------------
       INTEGER         DYNAMIC         
-
+      INTEGER         nest, t !Pang 2024.01.26
       REAL            ACOEF           
-	REAL            AX
+      REAL            AX
       CHARACTER*1     BLANK         
       REAL            C1   
       INTEGER         CDAY 
@@ -65,7 +66,7 @@
       INTEGER         FOUND          
       REAL            G2             
       REAL            G3             
-	REAL            GDDAE
+      REAL            GDDAE
       REAL            GDDE
       REAL            GPP            
       INTEGER         I              
@@ -144,7 +145,7 @@ C      REAL            PRLF  ! JIL Prolificacy level
       INTEGER         YRDOY          
       INTEGER         YREMRG         
       INTEGER         YRSIM
-	REAL            Z2STAGE
+      REAL            Z2STAGE
       INTEGER ISDATE          
 
       INTEGER PATHL
@@ -162,7 +163,50 @@ C      REAL            PRLF  ! JIL Prolificacy level
 
 !     CHP added for P model
       REAL SeedFrac, VegFrac
-        
+!----------------------------------------------------------------------
+!----- Pang 2024.01.26 ------------------------------------------------
+      PATHL = dssat48_struc(nest)%dssat48(t)%PATHL
+      NDAS = dssat48_struc(nest)%dssat48(t)%NDAS
+      L0 = dssat48_struc(nest)%dssat48(t)%L0
+      L = dssat48_struc(nest)%dssat48(t)%L
+      PLTPOP = dssat48_struc(nest)%dssat48(t)%PLTPOP
+      SDEPTH = dssat48_struc(nest)%dssat48(t)%SDEPTH
+      P1 = dssat48_struc(nest)%dssat48(t)%P1
+      P2 = dssat48_struc(nest)%dssat48(t)%P2
+      P5 = dssat48_struc(nest)%dssat48(t)%P5
+      G2 = dssat48_struc(nest)%dssat48(t)%G2
+      G3 = dssat48_struc(nest)%dssat48(t)%G3
+      PHINT = dssat48_struc(nest)%dssat48(t)%PHINT
+      DSGT = dssat48_struc(nest)%dssat48(t)%DSGT
+      DGET = dssat48_struc(nest)%dssat48(t)%DGET
+      SWCG = dssat48_struc(nest)%dssat48(t)%SWCG
+      TBASE = dssat48_struc(nest)%dssat48(t)%TBASE
+      TOPT = dssat48_struc(nest)%dssat48(t)%TOPT
+      ROPT = dssat48_struc(nest)%dssat48(t)%ROPT
+      P2O = dssat48_struc(nest)%dssat48(t)%P2O
+      DJTI = dssat48_struc(nest)%dssat48(t)%DJTI
+      GDDE = dssat48_struc(nest)%dssat48(t)%GDDE
+      DSGFT = dssat48_struc(nest)%dssat48(t)%DSGFT
+      DUMMY = dssat48_struc(nest)%dssat48(t)%DUMMY
+      TNSOIL = dssat48_struc(nest)%dssat48(t)%TNSOIL
+      TMSOIL = dssat48_struc(nest)%dssat48(t)%TMSOIL
+      TH = dssat48_struc(nest)%dssat48(t)%TH
+      TEMPCX = dssat48_struc(nest)%dssat48(t)%TEMPCX
+      TEMPCR = dssat48_struc(nest)%dssat48(t)%TEMPCR
+      TDSOIL = dssat48_struc(nest)%dssat48(t)%TDSOIL
+      SWSD = dssat48_struc(nest)%dssat48(t)%SWSD
+      SNUP = dssat48_struc(nest)%dssat48(t)%SNUP
+      SNDN = dssat48_struc(nest)%dssat48(t)%SNDN
+      S1 = dssat48_struc(nest)%dssat48(t)%S1
+      RATEIN = dssat48_struc(nest)%dssat48(t)%RATEIN
+      PSKER = dssat48_struc(nest)%dssat48(t)%PSKER
+      PDTT = dssat48_struc(nest)%dssat48(t)%PDTT
+      P9 = dssat48_struc(nest)%dssat48(t)%P9
+      DLV = dssat48_struc(nest)%dssat48(t)%DLV
+      DEC = dssat48_struc(nest)%dssat48(t)%DEC
+      C1 = dssat48_struc(nest)%dssat48(t)%C1
+      ACOEF = dssat48_struc(nest)%dssat48(t)%ACOEF
+      DOPT = dssat48_struc(nest)%dssat48(t)%DOPT
 !----------------------------------------------------------------------
 !         DYNAMIC = RUNINIT OR DYNAMIC = SEASINIT
 ! ---------------------------------------------------------------------
@@ -902,6 +946,51 @@ C ** JIL Continuous phenological scale (0=Emergence; 1=Flowering; 2= Physiol Mat
 ! ----------------------------------------------------------------------
 
       ENDIF  ! End DYNAMIC STRUCTURE
+
+!----------------------------------------------------------------------
+!----- Pang 2024.01.26 ------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%PATHL = PATHL
+      dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
+      dssat48_struc(nest)%dssat48(t)%L0 = L0
+      dssat48_struc(nest)%dssat48(t)%L = L
+      dssat48_struc(nest)%dssat48(t)%PLTPOP = PLTPOP
+      dssat48_struc(nest)%dssat48(t)%SDEPTH = SDEPTH
+      dssat48_struc(nest)%dssat48(t)%P1 = P1
+      dssat48_struc(nest)%dssat48(t)%P2 = P2
+      dssat48_struc(nest)%dssat48(t)%P5 = P5
+      dssat48_struc(nest)%dssat48(t)%G2 = G2
+      dssat48_struc(nest)%dssat48(t)%G3 = G3
+      dssat48_struc(nest)%dssat48(t)%PHINT = PHINT
+      dssat48_struc(nest)%dssat48(t)%DSGT = DSGT
+      dssat48_struc(nest)%dssat48(t)%DGET = DGET
+      dssat48_struc(nest)%dssat48(t)%SWCG = SWCG
+      dssat48_struc(nest)%dssat48(t)%TBASE = TBASE
+      dssat48_struc(nest)%dssat48(t)%TOPT = TOPT
+      dssat48_struc(nest)%dssat48(t)%ROPT = ROPT
+      dssat48_struc(nest)%dssat48(t)%P2O = P2O
+      dssat48_struc(nest)%dssat48(t)%DJTI = DJTI
+      dssat48_struc(nest)%dssat48(t)%GDDE = GDDE
+      dssat48_struc(nest)%dssat48(t)%DSGFT = DSGFT
+      dssat48_struc(nest)%dssat48(t)%DUMMY = DUMMY
+      dssat48_struc(nest)%dssat48(t)%TNSOIL = TNSOIL
+      dssat48_struc(nest)%dssat48(t)%TMSOIL = TMSOIL
+      dssat48_struc(nest)%dssat48(t)%TH = TH
+      dssat48_struc(nest)%dssat48(t)%TEMPCX = TEMPCX
+      dssat48_struc(nest)%dssat48(t)%TEMPCR = TEMPCR
+      dssat48_struc(nest)%dssat48(t)%TDSOIL = TDSOIL
+      dssat48_struc(nest)%dssat48(t)%SWSD = SWSD
+      dssat48_struc(nest)%dssat48(t)%SNUP = SNUP
+      dssat48_struc(nest)%dssat48(t)%SNDN = SNDN
+      dssat48_struc(nest)%dssat48(t)%S1 = S1
+      dssat48_struc(nest)%dssat48(t)%RATEIN = RATEIN
+      dssat48_struc(nest)%dssat48(t)%PSKER = PSKER
+      dssat48_struc(nest)%dssat48(t)%PDTT = PDTT
+      dssat48_struc(nest)%dssat48(t)%P9 = P9
+      dssat48_struc(nest)%dssat48(t)%DLV = DLV
+      dssat48_struc(nest)%dssat48(t)%DEC = DEC
+      dssat48_struc(nest)%dssat48(t)%C1 = C1
+      dssat48_struc(nest)%dssat48(t)%ACOEF = ACOEF
+      dssat48_struc(nest)%dssat48(t)%DOPT = DOPT
       RETURN
 
 !-----------------------------------------------------------------------

@@ -20,7 +20,7 @@ C
 C  Calls  : None
 C----------------------------------------------------------------------
 
-      SUBROUTINE MZ_ROOTGR (DYNAMIC,ISWNIT,                       !C
+      SUBROUTINE MZ_ROOTGR (DYNAMIC,ISWNIT,nest,t,           !Pang 2024.01.30
      &        CUMDEP,CUMDTT,DEPMAX,DLAYR,DTT,ESW,GRORT,ISTAGE,    !I
      %        LL,DUL,NO3,NH4,NLAYR,PLTPOP,PORMIN,RLWR,SAT,SDEPTH, !I
      %        SHF,STGDOY,SW,SWFAC,YRDOY,                          !I
@@ -29,9 +29,10 @@ C----------------------------------------------------------------------
 
 C----------------------------------------------------------------------
       USE ModuleDefs
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
-
+      INTEGER     nest, t
       INTEGER     DYNAMIC     
 
       REAL        CUMDEP     
@@ -74,6 +75,13 @@ C----------------------------------------------------------------------
       REAL        SWFAC      
       REAL        TRLDF      
       INTEGER     YRDOY       
+
+!----MZ_ROOTGR: Pang 2024.01.30-------------------------------------------------------
+       ESW = dssat48_struc(nest)%dssat48(t)%ESW
+       RLDF = dssat48_struc(nest)%dssat48(t)%RLDF
+       RNLF = dssat48_struc(nest)%dssat48(t)%RNLF
+       RNFAC = dssat48_struc(nest)%dssat48(t)%RNFAC
+       RLNEW = dssat48_struc(nest)%dssat48(t)%RLNEW
 
 C----------------------------------------------------------------------
 C            DYNAMIC = RUNINIT OR SEASINIT
@@ -216,6 +224,12 @@ C----------------------------------------------------------------------
       ENDIF !Dynamic loop
 
 999   CONTINUE
+      !----MZ_ROOTGR: Pang 2024.01.30-------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%ESW = ESW
+       dssat48_struc(nest)%dssat48(t)%RLDF = RLDF
+       dssat48_struc(nest)%dssat48(t)%RNLF = RNLF
+       dssat48_struc(nest)%dssat48(t)%RNFAC = RNFAC
+       dssat48_struc(nest)%dssat48(t)%RLNEW = RLNEW
       RETURN
       END SUBROUTINE MZ_ROOTGR
 

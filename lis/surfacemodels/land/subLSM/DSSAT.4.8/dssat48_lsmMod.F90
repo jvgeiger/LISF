@@ -47,7 +47,11 @@ module dssat48_lsmMod
 ! !USES:
   use dssat48_module
   use LIS_constantsMod, only : LIS_CONST_PATH_LEN
-  USE ModuleDefs, only: ControlType,SwitchType,SoilType !From DSSAT
+  USE ModuleDefs, only: ControlType,SwitchType,SoilType, &
+                        MulchType, OxLayerType,ResidueType, &
+                        TillType, FertType, OrgMatAppType !From DSSAT
+  USE FloodModule !From DSSAT
+  USE GHG_mod, only: CH4_type, N2O_type !From DSSAT
   implicit none
   
   PRIVATE
@@ -95,6 +99,17 @@ module dssat48_lsmMod
      TYPE (ControlType),pointer ::  CONTROL(:) !Use from DSSAT ModuleDefs
      TYPE (SwitchType), pointer ::  ISWITCH(:) !Use from DSSAT ModuleDefs
      TYPE (SoilType), pointer :: SOILPROP(:)   !Use from DSSAT ModuleDefs
+     TYPE (MulchType), pointer :: MULCH(:)     !Use from DSSAT ModuleDefs
+     TYPE (ResidueType), pointer :: HARVRES(:) !Use from DSSAT ModuleDefs
+     TYPE (ResidueType), pointer :: SENESCE(:) !Use from DSSAT ModuleDefs
+     TYPE (TillType), pointer :: TILLVALS(:) !Use from DSSAT ModuleDefs
+     TYPE (FertType), pointer :: FERTDATA(:) !Use from DSSAT ModuleDefs
+     TYPE (OrgMatAppType), pointer :: OMADATA(:) !Use from DSSAT ModuleDefs
+     TYPE (FloodWatType), pointer :: FLOODWAT(:) !Use from DSSAT FloodModule
+     TYPE (FloodNType), pointer :: FLOODN(:) !Use from DSSAT FloodModule
+     TYPE (CH4_type), pointer :: CH4_data(:) !Use from DSSAT GHG_mod
+     TYPE (N2O_type), pointer :: N2O_data(:) !Use from DSSAT GHG_mod
+     TYPE (OxLayerType), pointer :: OXLAYR(:) !Use from DSSAT GHG_mod
   end type dssat48_type_dec
   
   type(dssat48_type_dec), allocatable :: dssat48_struc(:)
@@ -114,7 +129,7 @@ contains
     use LIS_timeMgrMod
     use LIS_surfaceModelDataMod
     use LIS_lsmMod
-    USE ModuleDefs, only: ControlType,SwitchType,SoilType, ModelVerTxt !From DSSAT
+    USE ModuleDefs, only: ModelVerTxt !From DSSAT
     USE CSMVersion
 ! !DESCRIPTION:
 !
@@ -160,7 +175,7 @@ contains
     
     ! read configuation information from lis.config file
     call dssat48_readcrd()
-    PRINT*,'Im in dssat48_init'
+    !PRINT*,'Im in dssat48_init'
         do n=1, LIS_rc%nnest
             !Get  Dssat version # which is used to read dssat prms files
             WRITE(ModelVerTxt,'(I2.2,I1)') Version%Major, Version%Minor !Obtain Dssat version #
@@ -170,6 +185,17 @@ contains
             allocate(dssat48_struc(n)%CONTROL(LIS_rc%npatch(n, LIS_rc%lsm_index)))
             allocate(dssat48_struc(n)%ISWITCH(LIS_rc%npatch(n, LIS_rc%lsm_index)))
             allocate(dssat48_struc(n)%SOILPROP(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%MULCH(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%FLOODWAT(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%FLOODN(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%CH4_data(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%N2O_data(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%OXLAYR(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%HARVRES(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%SENESCE(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%TILLVALS(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%FERTDATA(LIS_rc%npatch(n, LIS_rc%lsm_index)))
+            allocate(dssat48_struc(n)%OMADATA(LIS_rc%npatch(n, LIS_rc%lsm_index)))
             !PRINT*, 'LIS_rc%lsm_index is the number of tiles'
             !------------------------------------------------------------------------
             ! allocate memory for vector variables passed to model interfaces        
@@ -284,9 +310,9 @@ contains
                 dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
                 dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
                 !PRINT*, 'SOILPROP af LAND in lsmMod: ', dssat48_struc(n)%SOILPROP(t)
-                PRINT*, 'ISWITCH af LAND in lsmMod: ', dssat48_struc(n)%ISWITCH(t)
-                PRINT*, 'CONTROL af LAND in lsmMod lsmMod2: ', dssat48_struc(n)%CONTROL(t)
-                PRINT*, 'YRPLT, MDATE, YREND', YRPLT, MDATE, YREND
+                !PRINT*, 'ISWITCH af LAND in lsmMod: ', dssat48_struc(n)%ISWITCH(t)
+                !PRINT*, 'CONTROL af LAND in lsmMod lsmMod2: ', dssat48_struc(n)%CONTROL(t)
+                !PRINT*, 'YRPLT, MDATE, YREND', YRPLT, MDATE, YREND
                 !PRINT*, 'dssat48_struc(ens)%dssat48(t)%BD_INIT: ', dssat48_struc(n)%dssat48(t)%BD_INIT
                 !PRINT*, 'SOILPROP%BD: ', dssat48_struc(n)%SOILPROP(t)%BD.
              !---------------------------------------------------------------------------------------------
@@ -296,7 +322,7 @@ contains
             ! Model timestep Alarm
             !------------------------------------------------------------------------
             dssat48_struc(n)%forc_count = 0
-            PRINT*, 'dssat48_lsm mod inthe loop'
+            !PRINT*, 'dssat48_lsm mod inthe loop'
             call LIS_update_timestep(LIS_rc, n, dssat48_struc(n)%ts)
 
             write(fnest,'(i3.3)') n 
@@ -306,7 +332,7 @@ contains
             call LIS_registerAlarm("DSSAT48 restart alarm "//trim(fnest),&
                                    dssat48_struc(n)%ts,&
                                    dssat48_struc(n)%rstInterval)
-            PRINT*, 'dssat48_lsm mod after restart alarm'
+            !PRINT*, 'dssat48_lsm mod after restart alarm'
             LIS_sfmodel_struc(n)%ts = dssat48_struc(n)%ts
 !----------------------------------------------------------------------------------
 !           Create fields for LSM2SUBLSM exchanges

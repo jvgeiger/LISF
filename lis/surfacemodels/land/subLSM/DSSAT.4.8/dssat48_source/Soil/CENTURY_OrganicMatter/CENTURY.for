@@ -40,7 +40,7 @@
 !          SOMDEC_C, SOMLITPRINT_C, TSOMLIT_C, YR_DOY
 !=======================================================================
 
-      SUBROUTINE CENTURY (CONTROL, ISWITCH, 
+      SUBROUTINE CENTURY (CONTROL, ISWITCH, nest, t, 
      &  DRAIN, FERTDATA, FLOODWAT, FLOODN, HARVRES,   !Input
      &  NH4, NO3, OMADATA, RLV, SENESCE,              !Input
      &  SOILPROP, SPi_Labile, ST, SW, TILLVALS,       !Input
@@ -52,7 +52,7 @@
       USE FloodModule             
       USE ModSoilMix
       USE GHG_mod
-
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !     ------------------------------------------------------------------
@@ -62,6 +62,7 @@
       CHARACTER*1  IDETL, RNMODE, ISWWAT
       CHARACTER*2  CROP
 
+      INTEGER nest, t
       INTEGER DISTURBENDMAX, DISTURBNUM, DNUM, DOY, DYNAMIC, 
      &  FERTDAY, RESDAT, I, IEL, INCYD, L, N_ELEMS, 
      &  NLAYR, RUN, YEAR, YRDOY
@@ -194,6 +195,80 @@
 !     ------------------------------------------------------------------
 !     Split YRDOY into YR and DOY.
       CALL YR_DOY (YRDOY, YEAR, DOY)
+
+
+!----------------------------------------------------------------------
+!     Pang: 2023.10.13 obtain variables from LIS memory for each pixel.
+      ACCCO2 = dssat48_struc(nest)%dssat48(t)%ACCCO2
+      DISTURBDEPTHMAX = dssat48_struc(nest)%dssat48(t)%DISTURBDEPTHMAX
+      DISTURBENDMAX = dssat48_struc(nest)%dssat48(t)%DISTURBENDMAX
+      FRLSTR = dssat48_struc(nest)%dssat48(t)%FRLSTR
+
+      CEDAM = dssat48_struc(nest)%dssat48(t)%CEDAM
+      CES1M = dssat48_struc(nest)%dssat48(t)%CES1M
+      CES1T = dssat48_struc(nest)%dssat48(t)%CES1T
+      CES1X = dssat48_struc(nest)%dssat48(t)%CES1X
+      CES21I = dssat48_struc(nest)%dssat48(t)%CES21I
+      CES21M = dssat48_struc(nest)%dssat48(t)%CES21M
+      CES21S = dssat48_struc(nest)%dssat48(t)%CES21S
+      CES21T = dssat48_struc(nest)%dssat48(t)%CES21T
+      CES21X = dssat48_struc(nest)%dssat48(t)%CES21X
+      CES23LM = dssat48_struc(nest)%dssat48(t)%CES23LM
+      CES23LX = dssat48_struc(nest)%dssat48(t)%CES23LX
+      CES23M = dssat48_struc(nest)%dssat48(t)%CES23M
+      CES23T = dssat48_struc(nest)%dssat48(t)%CES23T
+      CES23X = dssat48_struc(nest)%dssat48(t)%CES23X
+      CES2LI = dssat48_struc(nest)%dssat48(t)%CES2LI
+      CES2LM = dssat48_struc(nest)%dssat48(t)%CES2LM
+      CES2LS = dssat48_struc(nest)%dssat48(t)%CES2LS
+      CES2LX = dssat48_struc(nest)%dssat48(t)%CES2LX
+      CES3M = dssat48_struc(nest)%dssat48(t)%CES3M
+      CES3T = dssat48_struc(nest)%dssat48(t)%CES3T
+      CES3X = dssat48_struc(nest)%dssat48(t)%CES3X
+      CESTR = dssat48_struc(nest)%dssat48(t)%CESTR
+      CO2MET = dssat48_struc(nest)%dssat48(t)%CO2MET
+      CO2S1 = dssat48_struc(nest)%dssat48(t)%CO2S1
+      CO2S2 = dssat48_struc(nest)%dssat48(t)%CO2S2
+      CO2S3 = dssat48_struc(nest)%dssat48(t)%CO2S3
+      CO2STR = dssat48_struc(nest)%dssat48(t)%CO2STR
+      CULMETQ = dssat48_struc(nest)%dssat48(t)%CULMETQ
+      CULS1Q = dssat48_struc(nest)%dssat48(t)%CULS1Q
+      CULS2Q = dssat48_struc(nest)%dssat48(t)%CULS2Q
+      CULS3Q = dssat48_struc(nest)%dssat48(t)%CULS3Q
+      CULSTRQ = dssat48_struc(nest)%dssat48(t)%CULSTRQ
+      DECMET = dssat48_struc(nest)%dssat48(t)%DECMET
+      DECS1 = dssat48_struc(nest)%dssat48(t)%DECS1
+      DECS2 = dssat48_struc(nest)%dssat48(t)%DECS2
+      DECS3 = dssat48_struc(nest)%dssat48(t)%DECS3
+      DECSTR = dssat48_struc(nest)%dssat48(t)%DECSTR
+      DISTURBNUM = dssat48_struc(nest)%dssat48(t)%DISTURBNUM
+      DISTURBEND = dssat48_struc(nest)%dssat48(t)%DISTURBEND
+      DISTURBDEPTH = dssat48_struc(nest)%dssat48(t)%DISTURBDEPTH
+      FRDAE = dssat48_struc(nest)%dssat48(t)%FRDAE
+      FRMETI = dssat48_struc(nest)%dssat48(t)%FRMETI
+      FRMETS = dssat48_struc(nest)%dssat48(t)%FRMETS
+      LIGC = dssat48_struc(nest)%dssat48(t)%LIGC
+      LIGSTR = dssat48_struc(nest)%dssat48(t)%LIGSTR
+      METABC = dssat48_struc(nest)%dssat48(t)%METABC
+      METABE = dssat48_struc(nest)%dssat48(t)%METABE
+      RESDAX = dssat48_struc(nest)%dssat48(t)%RESDAX
+      S1S3 = dssat48_struc(nest)%dssat48(t)%S1S3
+      S2S3 = dssat48_struc(nest)%dssat48(t)%S2S3
+      SOM1C = dssat48_struc(nest)%dssat48(t)%SOM1C
+      SOM1E = dssat48_struc(nest)%dssat48(t)%SOM1E
+      SOM2C = dssat48_struc(nest)%dssat48(t)%SOM2C
+      SOM2E = dssat48_struc(nest)%dssat48(t)%SOM2E
+      SOM23C = dssat48_struc(nest)%dssat48(t)%SOM23C
+      SOM23E = dssat48_struc(nest)%dssat48(t)%SOM23E
+      SOM3C = dssat48_struc(nest)%dssat48(t)%SOM3C
+      SOM3E = dssat48_struc(nest)%dssat48(t)%SOM3E
+      STRUCC = dssat48_struc(nest)%dssat48(t)%STRUCC 
+      STRUCE = dssat48_struc(nest)%dssat48(t)%STRUCE
+      TXS1 = dssat48_struc(nest)%dssat48(t)%TXS1
+
+      SENESSUMC = dssat48_struc(nest)%dssat48(t)%SENESSUMC
+      SENESSUMN = dssat48_struc(nest)%dssat48(t)%SENESSUMN
+      SENESSUMP = dssat48_struc(nest)%dssat48(t)%SENESSUMP
 
 !***********************************************************************
 !***********************************************************************
@@ -411,7 +486,7 @@
 !     &  ACCCO2, LITC, OMAData, SENESCE,                   !Input
 !     &    SOM1C, TLITC, TSOMC, YRDOY)                     !Input
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -727,7 +802,7 @@
         ENDIF   
       ENDDO
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -845,7 +920,7 @@
      &  METABE, NLAYR, SOM1C, SOM1E, SOM2C,               !Input
      &  SOM2E, SOM23E, SOM3C, SOM3E, STRUCC, STRUCE)      !Input
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -866,7 +941,7 @@
 !---------------------------------------------------------------------
       IF (ISWWAT == 'N') RETURN
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -914,7 +989,7 @@
 !     ------------------------------------------------------------------
       IF (ISWWAT == 'N') RETURN
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -960,7 +1035,78 @@
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!     Pang: 2023.10.13 assign variables to LIS memory for each pixel.
+      dssat48_struc(nest)%dssat48(t)%ACCCO2 = ACCCO2
+      dssat48_struc(nest)%dssat48(t)%DISTURBDEPTHMAX = DISTURBDEPTHMAX
+      dssat48_struc(nest)%dssat48(t)%DISTURBENDMAX = DISTURBENDMAX
+      dssat48_struc(nest)%dssat48(t)%FRLSTR = FRLSTR
 
+      dssat48_struc(nest)%dssat48(t)%CEDAM = CEDAM
+      dssat48_struc(nest)%dssat48(t)%CES1M = CES1M
+      dssat48_struc(nest)%dssat48(t)%CES1T = CES1T
+      dssat48_struc(nest)%dssat48(t)%CES1X = CES1X
+      dssat48_struc(nest)%dssat48(t)%CES21I = CES21I
+      dssat48_struc(nest)%dssat48(t)%CES21M = CES21M
+      dssat48_struc(nest)%dssat48(t)%CES21S = CES21S
+      dssat48_struc(nest)%dssat48(t)%CES21T = CES21T
+      dssat48_struc(nest)%dssat48(t)%CES21X = CES21X
+      dssat48_struc(nest)%dssat48(t)%CES23LM = CES23LM
+      dssat48_struc(nest)%dssat48(t)%CES23LX = CES23LX
+      dssat48_struc(nest)%dssat48(t)%CES23M = CES23M
+      dssat48_struc(nest)%dssat48(t)%CES23T = CES23T
+      dssat48_struc(nest)%dssat48(t)%CES23X = CES23X
+      dssat48_struc(nest)%dssat48(t)%CES2LI = CES2LI
+      dssat48_struc(nest)%dssat48(t)%CES2LM = CES2LM
+      dssat48_struc(nest)%dssat48(t)%CES2LS = CES2LS
+      dssat48_struc(nest)%dssat48(t)%CES2LX = CES2LX 
+      dssat48_struc(nest)%dssat48(t)%CES3M = CES3M 
+      dssat48_struc(nest)%dssat48(t)%CES3T = CES3T
+      dssat48_struc(nest)%dssat48(t)%CES3X = CES3X
+      dssat48_struc(nest)%dssat48(t)%CESTR = CESTR
+      dssat48_struc(nest)%dssat48(t)%CO2MET = CO2MET
+      dssat48_struc(nest)%dssat48(t)%CO2S1 = CO2S1
+      dssat48_struc(nest)%dssat48(t)%CO2S2 = CO2S2
+      dssat48_struc(nest)%dssat48(t)%CO2S3 = CO2S3 
+      dssat48_struc(nest)%dssat48(t)%CO2STR = CO2STR
+      dssat48_struc(nest)%dssat48(t)%CULMETQ = CULMETQ 
+      dssat48_struc(nest)%dssat48(t)%CULS1Q = CULS1Q
+      dssat48_struc(nest)%dssat48(t)%CULS2Q = CULS2Q
+      dssat48_struc(nest)%dssat48(t)%CULS3Q = CULS3Q
+      dssat48_struc(nest)%dssat48(t)%CULSTRQ = CULSTRQ
+      dssat48_struc(nest)%dssat48(t)%DECMET = DECMET
+      dssat48_struc(nest)%dssat48(t)%DECS1 = DECS1
+      dssat48_struc(nest)%dssat48(t)%DECS2 = DECS2
+      dssat48_struc(nest)%dssat48(t)%DECS3 = DECS3
+      dssat48_struc(nest)%dssat48(t)%DECSTR = DECSTR
+      dssat48_struc(nest)%dssat48(t)%DISTURBNUM = DISTURBNUM
+      dssat48_struc(nest)%dssat48(t)%DISTURBEND = DISTURBEND
+      dssat48_struc(nest)%dssat48(t)%DISTURBDEPTH = DISTURBDEPTH
+      dssat48_struc(nest)%dssat48(t)%FRDAE = FRDAE
+      dssat48_struc(nest)%dssat48(t)%FRMETI = FRMETI
+      dssat48_struc(nest)%dssat48(t)%FRMETS = FRMETS
+      dssat48_struc(nest)%dssat48(t)%LIGC = LIGC
+      dssat48_struc(nest)%dssat48(t)%LIGSTR = LIGSTR
+      dssat48_struc(nest)%dssat48(t)%METABC = METABC 
+      dssat48_struc(nest)%dssat48(t)%METABE = METABE
+      dssat48_struc(nest)%dssat48(t)%RESDAX = RESDAX
+      dssat48_struc(nest)%dssat48(t)%S1S3 = S1S3
+      dssat48_struc(nest)%dssat48(t)%S2S3 = S2S3
+      dssat48_struc(nest)%dssat48(t)%SOM1C = SOM1C 
+      dssat48_struc(nest)%dssat48(t)%SOM1E = SOM1E
+      dssat48_struc(nest)%dssat48(t)%SOM2C = SOM2C
+      dssat48_struc(nest)%dssat48(t)%SOM2E = SOM2E
+      dssat48_struc(nest)%dssat48(t)%SOM23C = SOM23C
+      dssat48_struc(nest)%dssat48(t)%SOM23E = SOM23E
+      dssat48_struc(nest)%dssat48(t)%SOM3C = SOM3C
+      dssat48_struc(nest)%dssat48(t)%SOM3E = SOM3E
+      dssat48_struc(nest)%dssat48(t)%STRUCC = STRUCC
+      dssat48_struc(nest)%dssat48(t)%STRUCE = STRUCE
+      dssat48_struc(nest)%dssat48(t)%TXS1 = TXS1
+
+      dssat48_struc(nest)%dssat48(t)%SENESSUMC = SENESSUMC
+      dssat48_struc(nest)%dssat48(t)%SENESSUMN = SENESSUMN
+      dssat48_struc(nest)%dssat48(t)%SENESSUMP = SENESSUMP
       RETURN
       END   SUBROUTINE Century
 

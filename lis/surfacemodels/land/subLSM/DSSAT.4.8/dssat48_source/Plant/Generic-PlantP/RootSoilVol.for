@@ -16,7 +16,7 @@
 !  04/10/2008 CHP / US Root radius is read from species file
 !=====================================================================
 
-      SUBROUTINE RootSoilVol(DYNAMIC, ISWPHO,   
+      SUBROUTINE RootSoilVol(DYNAMIC, ISWPHO, nest, t, !Pang 2024.01.31  
      &    DLAYR, DS, NLAYR,           !Input from all routines
      &    PLTPOP, RLV, RTDEP, FILECC, !Input from plant routine
      &    FracRts,                    !Output
@@ -26,9 +26,10 @@
 !-----------------------------------------------------------------------
       USE ModuleDefs 
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
 !     Input (required)
       CHARACTER*1,         INTENT(IN)           :: ISWPHO
       INTEGER,             INTENT(IN)           :: DYNAMIC, NLAYR
@@ -66,7 +67,12 @@
 !     REAL, PARAMETER :: ROOTRAD = 0.0028 !0.002 m = 2 mm
       REAL ROOTRAD
 !      REAL, PARAMETER :: PI = 3.14159
-
+!-----------------------------------------------------------------------
+!----- Pang 2024.01.31 -------------------------------------------------
+       PlantPop = dssat48_struc(nest)%dssat48(t)%PlantPop
+       ROWSPC = dssat48_struc(nest)%dssat48(t)%ROWSPC
+       ROOTRAD = dssat48_struc(nest)%dssat48(t)%ROOTRAD
+       FIRST = dssat48_struc(nest)%dssat48(t)%RootSoilVol_FIRST
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -221,7 +227,12 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
-
+!-----------------------------------------------------------------------
+!----- Pang 2024.01.31 -------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%PlantPop = PlantPop
+       dssat48_struc(nest)%dssat48(t)%ROWSPC = ROWSPC
+       dssat48_struc(nest)%dssat48(t)%ROOTRAD = ROOTRAD
+       dssat48_struc(nest)%dssat48(t)%RootSoilVol_FIRST = FIRST
       RETURN
       END SUBROUTINE RootSoilVol
 

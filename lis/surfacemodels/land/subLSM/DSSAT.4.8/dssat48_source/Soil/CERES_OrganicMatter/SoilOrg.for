@@ -53,7 +53,7 @@
 !  Calls  : IPSOIL, MULCHLAYER, NCHECK_organic, OpSoilOrg, SoilOrg_init
 !=======================================================================
 
-      SUBROUTINE SoilOrg (CONTROL, ISWITCH, 
+      SUBROUTINE SoilOrg (CONTROL, ISWITCH, nest, t, 
      &    DRAIN, FLOODWAT, FLOODN, HARVRES, NH4, NO3,     !Input
      &    OMAData, RLV,                                   !Input
      &    SENESCE, SOILPROP, SPi_Labile, ST, SW, TILLVALS,!Input
@@ -67,13 +67,13 @@
       USE FloodModule
       USE ModSoilMix
       USE GHG_MOD
-
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !-----------------------------------------------------------------------
       CHARACTER*1 ISWWAT
       CHARACTER(LEN=2) PREV_CROP
-
+      INTEGER nest, t
       INTEGER DYNAMIC, IEL, L, N_ELEMS
       INTEGER NLAYR, YRDOY, INDEX
       INTEGER, PARAMETER :: SRFC=0
@@ -178,6 +178,30 @@
 !     SenLig = SENESCE % ResLig
       SenE   = SENESCE % ResE
 
+!-----------------------------------------------------------------------
+!----- Obtain Vars From Memory -----------------------------------------
+!----- Oang 2023.10.05 -------------------------------------------------
+
+      SEN_AM = dssat48_struc(nest)%dssat48(t)%sen_am
+      SEN_EXTFAC = dssat48_struc(nest)%dssat48(t)%sen_extfac
+      SEN_WATFAC = dssat48_struc(nest)%dssat48(t)%sen_watfac
+      SEN_PRCEL = dssat48_struc(nest)%dssat48(t)%sen_prcel
+      SEN_PRCHO = dssat48_struc(nest)%dssat48(t)%sen_prcho
+      SEN_PRLIG = dssat48_struc(nest)%dssat48(t)%sen_prlig
+      SWEF = dssat48_struc(nest)%dssat48(t)%swef
+ 
+      CUMSENWT = dssat48_struc(nest)%dssat48(t)%CUMSENWT
+      CUMSENN = dssat48_struc(nest)%dssat48(t)%CUMSENN
+      CUMSENP = dssat48_struc(nest)%dssat48(t)%CUMSENP
+
+      FOM = dssat48_struc(nest)%dssat48(t)%fom
+      FON = dssat48_struc(nest)%dssat48(t)%fon
+      FOP = dssat48_struc(nest)%dssat48(t)%fop
+      FPOOL = dssat48_struc(nest)%dssat48(t)%fpool
+      SSOME = dssat48_struc(nest)%dssat48(t)%ssome
+
+      ACCCO2 = dssat48_struc(nest)%dssat48(t)%accco2
+      PREV_CROP = dssat48_struc(nest)%dssat48(t)%PREV_CROP
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -221,7 +245,7 @@
       newCO2_HUM = 0.0
       newCO2 = 0.0
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -254,7 +278,17 @@
       Mulch % NewMulch   = 0.0
 
       SWEF = 0.9-0.00038*(DLAYR(1)-30.)**2
-
+!-----------------------------------------------------------------------
+!----- Put These Variables in Memory -----------------------------------
+!----- Pang: Do this only when seas. init. -----------------------------
+      dssat48_struc(nest)%dssat48(t)%sen_am = SEN_AM
+      dssat48_struc(nest)%dssat48(t)%sen_extfac = SEN_EXTFAC
+      dssat48_struc(nest)%dssat48(t)%sen_watfac = SEN_WATFAC
+      dssat48_struc(nest)%dssat48(t)%sen_prcel = SEN_PRCEL
+      dssat48_struc(nest)%dssat48(t)%sen_prcho = SEN_PRCHO
+      dssat48_struc(nest)%dssat48(t)%sen_prlig = SEN_PRLIG
+      dssat48_struc(nest)%dssat48(t)%swef = SWEF
+!-----------------------------------------------------------------------
       CALL SoilOrg_init(CONTROL, 
      &    HARVRES, PREV_CROP, SOILPROP,                   !Input
      &    CNRAT, FOM, FON, FOP, FPOOL, SSOMC,             !Output
@@ -296,6 +330,8 @@
       ENDDO
 
       PREV_CROP = CONTROL % CROP  !Save crop name for harvest residue
+      !Pang: This line is here for only doing in seas. init.
+      dssat48_struc(nest)%dssat48(t)%PREV_CROP = PREV_CROP
 
       ACCCO2 = 0.0 !Cumulative CO2 released from SOM, FOM decomposition
       newCO2_FOM = 0.0
@@ -730,7 +766,7 @@ C         recruit (NREQ-N CONC) g of N
         ENDIF
       END DO   !End of soil layer loop.
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -857,7 +893,7 @@ C         recruit (NREQ-N CONC) g of N
 !     Compute mulch properties
       CALL MULCHLAYER (MULCH)
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -889,7 +925,7 @@ C     Write seasonal output
      &    FON, HARVRES, IMM, LITE, MNR, MULCH, N_ELEMS,   !Input
      &    NLAYR, OMADATA, SENESCE, TLITE, TSOME)          !Input
 
-      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,        !Input
+      CALL MethaneDynamics(CONTROL, ISWITCH, SOILPROP,nest,t,        !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -899,6 +935,20 @@ C***********************************************************************
 C     END OF OUTPUT
 C***********************************************************************
       ENDIF
+!***********************************************************************
+!----- Assigned Vars to Memory -----------------------------------------
+!----- Pang 2023.10.05 -------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CUMSENWT = CUMSENWT
+      dssat48_struc(nest)%dssat48(t)%CUMSENN = CUMSENN
+      dssat48_struc(nest)%dssat48(t)%CUMSENP = CUMSENP
+
+      dssat48_struc(nest)%dssat48(t)%fom = FOM
+      dssat48_struc(nest)%dssat48(t)%fon = FON
+      dssat48_struc(nest)%dssat48(t)%fop = FOP
+      dssat48_struc(nest)%dssat48(t)%fpool = FPOOL
+      dssat48_struc(nest)%dssat48(t)%ssome = SSOME
+
+      dssat48_struc(nest)%dssat48(t)%accco2 = ACCCO2
 C-----------------------------------------------------------------------
       RETURN
       END SUBROUTINE SoilOrg

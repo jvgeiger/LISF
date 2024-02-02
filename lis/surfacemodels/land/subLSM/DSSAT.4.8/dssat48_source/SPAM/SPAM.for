@@ -176,7 +176,7 @@ C=======================================================================
            CALL STEMP(CONTROL, ISWITCH,
      &    SOILPROP, SRAD, SW, TAVG, TMAX, XLAT, TAV, TAMP,!Input
      &    SRFTEMP, ST)   !Output
-     	   END SELECT
+        END SELECT
       ENDIF
 !     ---------------------------------------------------------
       IF (MEEVP .NE. 'Z') THEN

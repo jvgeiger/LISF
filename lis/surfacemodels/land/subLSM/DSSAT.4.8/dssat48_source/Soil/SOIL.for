@@ -46,6 +46,7 @@ C=====================================================================
       USE ModuleDefs
       USE FloodModule
       USE GHG_mod
+      USE dssat48_lsmMod !Pang: 2023.10.03
       IMPLICIT NONE
       SAVE
 !-----------------------------------------------------------------------
@@ -118,7 +119,16 @@ C=====================================================================
 !     Transfer values from constructed data types into local variables.
       DYNAMIC = CONTROL % DYNAMIC
       MESOM   = ISWITCH % MESOM
-
+!----------------------------------------------------------------------
+!     Pang: 2023.10.03 obtain variables from LIS memory for each pixel.
+      SomLit =  dssat48_struc(nest)%dssat48(t)%somlit
+      SSOMC = dssat48_struc(nest)%dssat48(t)%ssomc
+      NH4 = dssat48_struc(nest)%dssat48(t)%nh4
+      NO3 = dssat48_struc(nest)%dssat48(t)%no3
+      SPi_Labile = dssat48_struc(nest)%dssat48(t)%spi_labile
+      TDFC = dssat48_struc(nest)%dssat48(t)%tdfc
+      TDLNO = dssat48_struc(nest)%dssat48(t)%tdlno
+      CH4_data = dssat48_struc(n)%CH4_data(t)
 !***********************************************************************
 !     Call Soil Dynamics module 
 !      IF (DYNAMIC < OUTPUT) THEN
@@ -130,7 +140,7 @@ C=====================================================================
 
 !     Call WATBAL first for all except seasonal initialization
       IF (DYNAMIC /= SEASINIT) THEN
-        CALL WATBAL(CONTROL, ISWITCH, 
+        CALL WATBAL(CONTROL, ISWITCH, nest, t,
      &    ES, IRRAMT, SOILPROP, SWDELTX,                  !Input
      &    TILLVALS, WEATHER,                              !Input
      &    FLOODWAT, MULCH, SWDELTU,                       !I/O
@@ -141,7 +151,7 @@ C=====================================================================
 !     Soil organic matter modules
       IF (MESOM .EQ. 'P') THEN
 !       Parton (Century-based) soil organic matter module
-        CALL CENTURY(CONTROL, ISWITCH, 
+        CALL CENTURY(CONTROL, ISWITCH, nest, t, 
      &  DRAIN, FERTDATA, FLOODWAT, FLOODN, HARVRES,   !Input
      &  NH4, NO3, OMADATA, RLV, SENESCE,              !Input
      &  SOILPROP, SPi_Labile, ST, SW, TILLVALS,       !Input
@@ -150,7 +160,7 @@ C=====================================================================
       ELSE
 !      ELSEIF (MESOM .EQ. 'G') THEN
 !       Godwin (Ceres-based) soil organic matter module (formerly NTRANS)
-        CALL SoilOrg (CONTROL, ISWITCH, 
+        CALL SoilOrg (CONTROL, ISWITCH, nest, t, 
      &    DRAIN, FLOODWAT, FLOODN, HARVRES, NH4, NO3,     !Input
      &    OMAData, RLV,                                   !Input
      &    SENESCE, SOILPROP, SPi_Labile, ST, SW, TILLVALS,!Input
@@ -159,7 +169,7 @@ C=====================================================================
       ENDIF
 
 !     Inorganic N (formerly NTRANS)
-      CALL SoilNi (CONTROL, ISWITCH, 
+      CALL SoilNi (CONTROL, ISWITCH, nest, t,
      &    CH4_data, DRN, ES, FERTDATA, FLOODWAT, IMM,     !Input
      &    LITC, MNR, newCO2, SNOW, SOILPROP, SSOMC, ST,   !Input
      &    SW, TDFC, TDLNO, TILLVALS, UNH4, UNO3, UPFLOW,  !Input
@@ -168,19 +178,19 @@ C=====================================================================
      &    NH4, NO3, NH4_plant, NO3_plant, UPPM)           !Output
 
 !     Inorganic P
-      CALL SoilPi(CONTROL, ISWITCH, FLOODWAT, 
+      CALL SoilPi(CONTROL, ISWITCH, nest, t, FLOODWAT, 
      &    FERTDATA, IMM, MNR, PUptake, SOILPROP,          !Input
      &    FracRts, SW, TillVals,                          !Input
      &    SPi_AVAIL, SPi_Labile, YREND)                   !Output
 
 !     Inorganic K
-      CALL SoilKi(CONTROL, ISWITCH, 
+      CALL SoilKi(CONTROL, ISWITCH,nest, t, 
      &    FERTDATA, KUptake, SOILPROP, TILLVALS,          !Input
      &    SKi_Avail)                                      !Output
 
       IF (DYNAMIC == SEASINIT) THEN
 !       Soil water balance -- call last for initialization
-        CALL WATBAL(CONTROL, ISWITCH, 
+        CALL WATBAL(CONTROL, ISWITCH, nest, t,
      &    ES, IRRAMT, SOILPROP, SWDELTX,                  !Input
      &    TILLVALS, WEATHER,                              !Input
      &    FLOODWAT, MULCH, SWDELTU,                       !I/O
@@ -189,7 +199,16 @@ C=====================================================================
       ENDIF
 
 !***********************************************************************
-
+!----------------------------------------------------------------------
+!   Pang: 2023.10.03 assigned variables to LIS memory for each pixel.
+      dssat48_struc(nest)%dssat48(t)%somlit = SomLit
+      dssat48_struc(nest)%dssat48(t)%ssomc = SSOMC
+      dssat48_struc(nest)%dssat48(t)%nh4 = NH4
+      dssat48_struc(nest)%dssat48(t)%no3 = NO3
+      dssat48_struc(nest)%dssat48(t)%spi_labile = SPi_Labile
+      dssat48_struc(nest)%dssat48(t)%tdfc = TDFC
+      dssat48_struc(nest)%dssat48(t)%tdlno = TDLNO
+      dssat48_struc(n)%CH4_data(t) = CH4_data
 !-----------------------------------------------------------------------
 
       RETURN

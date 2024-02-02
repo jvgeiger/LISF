@@ -1906,8 +1906,8 @@ ENDIF   ! CROPTYPE == 0
      IF(IST ==1 ) THEN
        DO IZ = 1, parameters%NROOT
           IF(OPT_BTR == 1) then                  ! Noah
-           write (*, *) 'parameters%SMCREF(IZ) =',parameters%SMCREF(IZ)
-           write (*, *) 'parameters%SMCWLT(IZ) =',parameters%SMCWLT(IZ)
+           !write (*, *) 'parameters%SMCREF(IZ) =',parameters%SMCREF(IZ) !Pang: 2023.10.02 comment out
+           !write (*, *) 'parameters%SMCWLT(IZ) =',parameters%SMCWLT(IZ) !Pang: 2023.10.02 comment out
            GX    = (SH2O(IZ)-parameters%SMCWLT(IZ)) / (parameters%SMCREF(IZ)-parameters%SMCWLT(IZ))
           END IF
           IF(OPT_BTR == 2) then                  ! CLM
@@ -1944,7 +1944,7 @@ ENDIF   ! CROPTYPE == 0
         ! write (*, *) 'parameters%SMCMAX(1) =',parameters%SMCMAX(1)
         ! write (*, *) 'parameters%SMCWLT(1) =',parameters%SMCWLT(1)
         !write (*, *) '( 1.0 - parameters%SMCWLT(1) / parameters%SMCMAX(1) =',( 1.0 - parameters%SMCWLT(1) / parameters%SMCMAX(1))
-         write (*, *), 'parameters%BEXP(1)',parameters%BEXP(1)
+        ! write (*, *), 'parameters%BEXP(1)',parameters%BEXP(1) !Pang: 2023.10.02 comment out
          !write (*, *), 'D_RSURF', 2.2E-5 * parameters%SMCMAX(1) * parameters%SMCMAX(1) * ( 1.0 - parameters%SMCWLT(1) / parameters%SMCMAX(1) ) ** (2.0+3.0/parameters%BEXP(1))
          D_RSURF = 2.2E-5 * parameters%SMCMAX(1) * parameters%SMCMAX(1) * ( 1.0 - parameters%SMCWLT(1) / parameters%SMCMAX(1) ) ** (2.0+3.0/parameters%BEXP(1))
          RSURF = L_RSURF / D_RSURF

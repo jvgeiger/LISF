@@ -11,7 +11,7 @@ C-----------------------------------------------------------------------
 C  Called by: PEST
 C  Calls:     None
 C=======================================================================
-      SUBROUTINE SEEDDM(
+      SUBROUTINE SEEDDM(nest, t,                    !Pang 2024.02.01
      &    DAS, LAGSD, LNGPEG, NR2, PHTIM, PHTHRS8,        !Input
      &    PSDDL, PSDDM, PSDDS, PSHDL, PSHDM, PSHDS,       !Input
      &    NSDDL, NSDDM, NSDDS, NSHDL, NSHDM, NSHDS,       !Input/Output
@@ -29,10 +29,10 @@ C=======================================================================
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
 !     NCOHORTS defined in ModuleDefs.for
-
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
       INTEGER NR2, NPP, DAS, DYNAMIC
 
       REAL PHTIM(NCOHORTS)
@@ -52,6 +52,18 @@ C     Shell Variables
       REAL TSHNOS,TSHNOL,TSHNOM,TSHWTS,TSHWTL,TSHWTM
       REAL SHWDES(NCOHORTS), SHNDES(NCOHORTS)
 
+
+!***********************************************************************
+!------ Obtain Vars From Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.01.31 ----------------------------------------
+      SDWDES = dssat48_struc(nest)%dssat48(t)%SDWDES
+      SDNDES = dssat48_struc(nest)%dssat48(t)%SDNDES
+      SHWDES = dssat48_struc(nest)%dssat48(t)%SHWDES
+      SHNDES = dssat48_struc(nest)%dssat48(t)%SHNDES
+      TSDNO = dssat48_struc(nest)%dssat48(t)%TSDNO
+      TSDWT = dssat48_struc(nest)%dssat48(t)%TSDWT
+      TSHNO = dssat48_struc(nest)%dssat48(t)%TSHNO
+      TSHWT = dssat48_struc(nest)%dssat48(t)%TSHWT
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -419,6 +431,16 @@ C-----------------------------------------------------------------------
 !***********************************************************************
 !     END OF DYNAMIC IF CONSTRUCT
 !***********************************************************************
+!------ Save Vars To Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.01.31 ----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%SDWDES = SDWDES
+      dssat48_struc(nest)%dssat48(t)%SDNDES = SDNDES
+      dssat48_struc(nest)%dssat48(t)%SHWDES = SHWDES
+      dssat48_struc(nest)%dssat48(t)%SHNDES = SHNDES
+      dssat48_struc(nest)%dssat48(t)%TSDNO = TSDNO
+      dssat48_struc(nest)%dssat48(t)%TSDWT = TSDWT
+      dssat48_struc(nest)%dssat48(t)%TSHNO = TSHNO
+      dssat48_struc(nest)%dssat48(t)%TSHWT = TSHWT
       END   ! SUBROUTINE SEEDDM
 
 !-----------------------------------------------------------------------

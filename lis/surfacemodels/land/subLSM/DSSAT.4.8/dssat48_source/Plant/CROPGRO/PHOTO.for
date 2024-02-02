@@ -21,7 +21,7 @@ C  07/30/2004 CHP Added KC_SLOPE to SPE file and KC_ECO to ECO file.
 !  Calls:         PHOTIP
 C=======================================================================
 
-      SUBROUTINE PHOTO(CONTROL, 
+      SUBROUTINE PHOTO(CONTROL, nest, t,           !Pang 2024.01.24
      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
@@ -31,6 +31,7 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod !Pang: 2024.01.24
       IMPLICIT NONE
       SAVE
 
@@ -39,7 +40,7 @@ C=======================================================================
 
       INTEGER DYNAMIC
       INTEGER DAS, NR5
-
+      INTEGER nest, t !Pang 2024.01.24
       REAL AGEFAC, AGEFCC, AGEREF, A0, BETN, CCEFF, CCK, CCMAX, 
      &  CCMP, CO2, COLDSTR, CUMSTR, CURV, DXR57, EXCESS,
      &  KCAN, KCANR, KC_SLOPE, LMXSTD, LNREF, PAR, PARMAX, PG, PGFAC, 
@@ -65,6 +66,25 @@ C=======================================================================
       DAS     = CONTROL % DAS
       DYNAMIC = CONTROL % DYNAMIC
       FILEIO  = CONTROL % FILEIO
+!----------------------------------------------------------------------
+! Pang 2024.01.24
+!-----------------------------------------------------------------------
+      TYPPGN = dssat48_struc(nest)%dssat48(t)%TYPPGN
+      TYPPGT = dssat48_struc(nest)%dssat48(t)%TYPPGT
+      CCEFF = dssat48_struc(nest)%dssat48(t)%CCEFF
+      CCMAX = dssat48_struc(nest)%dssat48(t)%CCMAX
+      CCMP = dssat48_struc(nest)%dssat48(t)%CCMP
+      FNPGN = dssat48_struc(nest)%dssat48(t)%FNPGN
+      FNPGT = dssat48_struc(nest)%dssat48(t)%FNPGT
+      LNREF = dssat48_struc(nest)%dssat48(t)%LNREF
+      PARMAX = dssat48_struc(nest)%dssat48(t)%PARMAX
+      PHTHRS10 = dssat48_struc(nest)%dssat48(t)%PHTHRS10
+      PHTMAX = dssat48_struc(nest)%dssat48(t)%PHTMAX
+      ROWSPC = dssat48_struc(nest)%dssat48(t)%ROWSPC
+      XPGSLW = dssat48_struc(nest)%dssat48(t)%XPGSLW
+      YPGSLW = dssat48_struc(nest)%dssat48(t)%YPGSLW
+      PGLFMX = dssat48_struc(nest)%dssat48(t)%PGLFMX
+      CUMSTR = dssat48_struc(nest)%dssat48(t)%CUMSTR
 
 C***********************************************************************
 C***********************************************************************
@@ -87,6 +107,24 @@ C-----------------------------------------------------------------------
         PGLFMX = 1.0
       ENDIF
 
+!----------------------------------------------------------------------
+! Pang 2024.01.24 (Only Do Once in INIT)
+!-----------------------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%TYPPGN = TYPPGN
+      dssat48_struc(nest)%dssat48(t)%TYPPGT = TYPPGT
+      dssat48_struc(nest)%dssat48(t)%CCEFF = CCEFF
+      dssat48_struc(nest)%dssat48(t)%CCMAX = CCMAX
+      dssat48_struc(nest)%dssat48(t)%CCMP = CCMP
+      dssat48_struc(nest)%dssat48(t)%FNPGN = FNPGN
+      dssat48_struc(nest)%dssat48(t)%FNPGT = FNPGT
+      dssat48_struc(nest)%dssat48(t)%LNREF = LNREF
+      dssat48_struc(nest)%dssat48(t)%PARMAX = PARMAX
+      dssat48_struc(nest)%dssat48(t)%PHTHRS10 = PHTHRS10
+      dssat48_struc(nest)%dssat48(t)%PHTMAX = PHTMAX
+      dssat48_struc(nest)%dssat48(t)%ROWSPC = ROWSPC
+      dssat48_struc(nest)%dssat48(t)%XPGSLW = XPGSLW
+      dssat48_struc(nest)%dssat48(t)%YPGSLW = YPGSLW
+      dssat48_struc(nest)%dssat48(t)%PGLFMX = PGLFMX
 C***********************************************************************
 C***********************************************************************
 C     Seasonal initialization - run once per season
@@ -235,6 +273,7 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+      dssat48_struc(nest)%dssat48(t)%CUMSTR = CUMSTR
       RETURN
       END !SUBROUTINE PHOTO
 

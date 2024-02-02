@@ -94,16 +94,17 @@ C  08/12/2003 CHP Added I/O error checking
 !  Called by: WATBAL
 !  Calls    : ERROR, FIND
 !=======================================================================
-      SUBROUTINE IPWBAL (CONTROL, DLAYR, LL, NLAYR, SAT,  !Input
-     &    SW, WTDEP)                                      !Output
+      SUBROUTINE IPWBAL (CONTROL, DLAYR, nest, t, LL, NLAYR, SAT,  !Input
+     &    SW, WTDEP)                                               !Output
 
 !-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER :: nest, t
       REAL, DIMENSION(NL), INTENT(IN) :: DLAYR, LL, SAT
       INTEGER, INTENT(IN) :: NLAYR
       REAL, DIMENSION(NL), INTENT(OUT) :: SW
@@ -133,7 +134,11 @@ C  08/12/2003 CHP Added I/O error checking
 !      MESIC   = CONTROL % MESIC
       RNMODE  = CONTROL % RNMODE
       RUN     = CONTROL % RUN
-
+!-----------------------------------------------------------------------
+!----- Obtain Vars From Memory -----------------------------------------
+!----- Pang 2023.10.11 -------------------------------------------------
+       SW_INIT = dssat48_struc(nest)%dssat48(t)%SW_INIT
+       ICWD_INIT = dssat48_struc(nest)%dssat48(t)%ICWD_INIT
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -226,6 +231,12 @@ C     Find and Read Initial Conditions Section
 !     END OF DYNAMIC IF CONSTRUCT
 !***********************************************************************
       ENDIF
+!-----------------------------------------------------------------------
+!----- Assign Vars To Memory -----------------------------------------
+!----- Pang 2023.10.11 -------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%SW_INIT=SW_INIT
+       dssat48_struc(nest)%dssat48(t)%ICWD_INIT=ICWD_INIT
+
 !-----------------------------------------------------------------------
       RETURN
       END SUBROUTINE IPWBAL
@@ -444,7 +455,7 @@ C  12/05/93 NBP Made into subroutine
 !  Called by: WATBAL
 !  Calls:     None
 C=======================================================================
-      SUBROUTINE WBSUM(DYNAMIC,
+      SUBROUTINE WBSUM(DYNAMIC, nest, t,
      &    NLAYR, DRAIN, RAIN, RUNOFF, DLAYR, SW,          !Input
      &    CRAIN, TDRAIN, TRUNOF, TSW, TSWINI)             !Output
 
@@ -452,14 +463,20 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER :: nest, t
       INTEGER DYNAMIC, L, NLAYR
       REAL CRAIN, DRAIN, RAIN, RUNOFF
       REAL TDRAIN, TRUNOF, TSW, TSWINI
       REAL DLAYR(NL), SW(NL)
-
+!-----------------------------------------------------------------------
+!----- Obtain Vars From Memory -----------------------------------------
+!----- Pang 2023.10.11 -------------------------------------------------
+      CRAIN = dssat48_struc(nest)%dssat48(t)%WB_CRAIN
+      TDRAIN = dssat48_struc(nest)%dssat48(t)%TDRAIN
+      TRUNOF = dssat48_struc(nest)%dssat48(t)%TRUNOF
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -498,6 +515,12 @@ C     Increment summation variables.
 !     END OF DYNAMIC IF CONSTRUCT
 !***********************************************************************
       ENDIF
+!-----------------------------------------------------------------------
+!----- Assign Vars To Memory -----------------------------------------
+!----- Pang 2023.10.11 -------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%WB_CRAIN = CRAIN
+      dssat48_struc(nest)%dssat48(t)%TDRAIN = TDRAIN
+      dssat48_struc(nest)%dssat48(t)%TRUNOF = TRUNOF
 !***********************************************************************
       RETURN
       END SUBROUTINE WBSUM

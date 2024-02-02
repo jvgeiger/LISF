@@ -60,14 +60,45 @@ module dssat48_module
         !real               :: LAI
         !-------------------------------------------------------------------------
         ! TIME CONTROL
+        ! Pang 2023.09.29
         !-------------------------------------------------------------------------
-         INTEGER            :: YREND, EXPNO, TRTALL
+         INTEGER            :: EXPNO, TRTALL
          INTEGER            :: NREPS, YRDOY_END
          CHARACTER*1        :: RNMODE
          CHARACTER*80       :: PATHEX
          CHARACTER*92       :: FILEX_P
          CHARACTER*120      :: FILECTL
-         INTEGER            :: YRPLT, MDATE        
+        !------------------------------------------------------------------------
+        !  LAND
+        !------------------------------------------------------------------------
+         INTEGER            :: YRPLT, MDATE, YREND        
+        !-------------------------------------------------------------------------
+        !  LAND - SOIL
+        !  Pang 2023.09.29
+        !------------------------------------------------------------------------
+          REAL, DIMENSION(0:20) :: SomLitC
+          REAL, DIMENSION(20) :: SKi_Avail, SW
+          REAL                :: SNOW
+        !-------------------------------------------------------------------------
+        !  LAND - SPAM
+        !  Pang 2024.01.12
+        !------------------------------------------------------------------------
+          REAL :: ES
+          REAL, DIMENSION(20) :: ST, SWDELTX, UPFLOW
+        !-------------------------------------------------------------------------
+        !  LAND - Management
+        !  Pang 2024.01.17
+        !-------------------------------------------------------------------------
+          REAL IRRAMT     
+          REAL, DIMENSION(2) :: HARVFRAC
+        !-------------------------------------------------------------------------
+        !  SOIL
+        !  Pang 2023.10.03
+        !-------------------------------------------------------------------------
+          REAL, DIMENSION(20) :: SomLit, SPi_Labile, NO3, NH4
+          REAL, DIMENSION(0:20) :: SSOMC
+          REAL                  :: TDFC
+          INTEGER               :: TDLNO
         !-------------------------------------------------------------------------
         !  SOIL - SOILDYN
         ! Pang 2023.09.18
@@ -79,7 +110,208 @@ module dssat48_module
           REAL, DIMENSION(20) :: BD_SOM, DLAYR_SOM, DS_SOM, DUL_SOM, LL_SOM
           REAL, DIMENSION(20) :: OC_INIT, TOTN_INIT, TotOrgN_init !Pang: May not need
           REAL, DIMENSION(0:20) :: KECHGE
-          LOGICAL :: TILLED, FIRST
+          LOGICAL :: TILLED, SOILDYN_FIRST
+        !-------------------------------------------------------------------------
+        !  SOIL - WATBAL
+        !  Pang 2023.10.11
+        !-------------------------------------------------------------------------
+          REAL :: ICWD_INIT !(IPWBAL modeul)
+          REAL :: WB_CRAIN,TDRAIN, TRUNOF !(WBSUM)
+          REAL, DIMENSION(20) :: DLAYR_YEST
+        !-------------------------------------------------------------------------
+        !  SOIL - SoilOrg
+        !  Pang 2023.10.05
+        !-------------------------------------------------------------------------
+          REAL :: SEN_AM, SEN_PRCEL, SEN_PRCHO, SEN_PRLIG,SEN_EXTFAC, SEN_WATFAC
+          REAL :: SWEF, CUMSENWT, CUMSENN , CUMSENP
+          REAL :: FOM(20), FON(20), FOP(20), FPOOL(20,3), SSOME(0:20,3)
+          REAL :: ACCCO2(0:1)
+          CHARACTER(LEN=2) :: PREV_CROP
+        !------------------------------------------------------------------------
+        !  SOIL - CENTURY
+        !  Pang 2023.10.10
+        !------------------------------------------------------------------------
+          !NELEM = 3
+          REAL, DIMENSION(3) :: CEDAM, CES21T, CES23T, CES3M, CES3T
+          REAL, DIMENSION(3) :: CES3X, CESTR, FRDAE
+          REAL, DIMENSION(0:0,3) :: CES21I
+          REAL, DIMENSION(0:1,3) :: CES1M, CES1T, CES1X, CES21M, CES21S
+          REAL, DIMENSION(0:1,3) :: CES21X, CES23LM
+          REAL, DIMENSION(0:1,3) :: CES23LX, CES23M, CES23X
+          REAL, DIMENSION(0:1,3) :: CES2LI, CES2LM, CES2LS, CES2LX
+          REAL, DIMENSION(0:1) :: CO2MET, DECMET, DECS1, DECSTR, LIGSTR
+          REAL :: DECS2(1), DECS3(1), METABE(0:20,3)
+          REAL :: SOM1E(0:20,3),SOM23E(20,3), SOM2E(20,3), SOM3E(20,3)
+          REAL :: STRUCE(0:20,3)
+          REAL :: CO2S2, CO2S3, CULMETQ, CULS1Q, CULS2Q, CULS3Q, CULSTRQ
+          REAL :: FRMETI, FRMETS, RESDAX, SENESSUMC, SENESSUMN, SENESSUMP
+          REAL, DIMENSION(0:20) :: FRLSTR, CO2S1, LIGC, METABC, SOM1C
+          REAL, DIMENSION(0:20) :: STRUCC
+          REAL, DIMENSION(20) :: S1S3, S2S3, SOM23C, SOM2C, SOM3C, TXS1
+          INTEGER DISTURBENDMAX, DISTURBNUM
+          REAL :: DISTURBDEPTHMAX
+          INTEGER, DIMENSION(9000*3) :: DISTURBEND  !Do we really need 9000*3?
+          REAL, DIMENSION(9000*3) :: DISTURBDEPTH
+          REAL, DIMENSION(0:1,2) :: CO2STR(0:1,2)
+        !------------------------------------------------------------------------
+        !  SOIL - SoilOrg/CENTURY - MethaneDynamics
+        !  Pang 2023.10.05
+        !------------------------------------------------------------------------
+          REAL :: Buffer(20,2), CH4Stored_Y, CumNewCO2, lamda_rho
+        !------------------------------------------------------------------------
+        !  SOIL - SoilNi
+        !  Pang 2023.10.12
+        !------------------------------------------------------------------------
+           LOGICAL :: IUON
+           INTEGER :: LFD10
+           REAL :: TNOM, CMINERN, CIMMOBN, WTNUP, CumSumFert
+           REAL :: CLeach, CNTILEDR !(NFLUX)
+           !REAL :: CNITRIFY, CN2Onitrif, CNOflux !(N2O_data)
+           REAL :: TFNITY(20), SNH4(20), SNO3(20), UREA(20)
+           REAL :: ALGFIX, CUMFNRO, TOTAML !(FLOOD_CHEM)
+           REAL :: CNOX, TNOXD !(Denit)
+        !------------------------------------------------------------------------
+        !  SOIL - SoilPi
+        !  Pang 2023.10.16
+        !------------------------------------------------------------------------
+           REAL, DIMENSION(20) :: FracRtsY
+           REAL, DIMENSION(20) :: SPiLabRts, SPiLabNoRts
+           REAL, DIMENSION(20) :: SPi_Active, SPiActRts, SPiActNoRts
+           REAL, DIMENSION(20) :: SPi_Stable, SPiStaRts, SPiStaNoRts
+           REAL, DIMENSION(20) :: SPi_Soluble, SPiSolRts, SPiSolNoRts
+           REAL, DIMENSION(20) :: PiActRts, PiStaRts, FracPSoln
+           REAL :: CMINERP, CIMMOBP, PERROR
+           LOGICAL :: SOILPI_FIRST
+        !------------------------------------------------------------------------
+        !  SOIL - SoilKi
+        !  Pang 2023.10.16
+        !------------------------------------------------------------------------
+           REAL, DIMENSION(20) :: SKi_Tot
+        !-------------------------------------------------------------------------
+        !  LAND - PLANT
+        !  Pang 2024.01.17
+        !-------------------------------------------------------------------------
+          REAL CANHT, EORATIO, NSTRES, PSTRES1, PORMIN, RWUMX
+          REAL KSEVAP, KTRANS
+          REAL, Dimension(20) :: KUptake, PUptake, RLV, FracRts, UNH4, UNO3
+          INTEGER STGDOY(20)
+          REAL XHLAI, XLAI
+          REAL UH2O(20)
+
+        !-------------------------------------------------------------------------
+        !  PLANT
+        !  Pang 2024.01.18
+        !-------------------------------------------------------------------------
+           REAL KCAN, KEP
+           LOGICAL FixCanht
+           !------------------------------------------------------------------------
+           ! PLANT - CROPGRO
+           ! Pang 2024.01.24
+           !------------------------------------------------------------------------
+           !---- PLANT - IPPLNT Module
+             CHARACTER*1 DETACH
+             CHARACTER*6 ECONO
+             CHARACTER(LEN=92) FILECC, FILEGC
+             INTEGER NOUTDO
+             REAL CADPR1, CMOBMX, FRCNOD, FREEZ1, FREEZ2, KC_SLOPE, PCARSH, &
+                  PCH2O, PLIPSH, PLIGSD, PLIGSH, PMINSD, PMINSH, POASD, POASH, PROLFI, &
+                  PRORTI, PROSHI, PROSTI, R30C2, RCH2O, RES30C, RFIXN, RLIG, RLIP, RMIN, &
+                  RNH4C, RNO3C, ROA, RPRO, RWUEP1, TTFIX
+           !------------------------------------------------------------------------
+           !---- CROPGRO - PHOTO------------------------------------------------------
+              REAL AGEFAC, PG
+              !---- In PHOTP.for
+                 CHARACTER*3  TYPPGN, TYPPGT
+                 REAL CCEFF, CCMAX, CCMP, FNPGN(4), FNPGT(4), LNREF, PARMAX, PHTHRS10, PHTMAX, ROWSPC, &
+                      XPGSLW(15), YPGSLW(15), PGLFMX, CUMSTR
+           !-----------------------------------------------------------------------
+           !---- CROPGROW - PHENOL ----------------------------------
+           !-----------------------------------------------------------------------
+
+           !-----------------------------------------------------------------------
+           ! PLANT - MZ_CERES
+           ! Pang 2024.01.24
+           !------------------------------------------------------------------------
+            CHARACTER*10 STNAME(20)
+
+           !-----------------------------------------------------------------------
+           ! PLANT - MZ_CERES - MZ_PHENOL & MZ_IX_PHENOL
+             INTEGER ISDATE, ISTAGE, YREMRG, CDAY
+             REAL CUMDTT, DTT, EARS, GPP, SUMDTT, XNTI,TLNO,XSTAGE,RUE, P3, TSEN, SeedFrac, VegFrac 
+             REAL PEAR, PSTM, GDDAE, Z2STAGE !For MZ_IX_PHENOL only
+             !----- In  MZ_PHENOL.for & MZ_IX_PHENOL.for
+                INTEGER PATHL, NDAS, L0, L
+                REAL PLTPOP,SDEPTH,P1,P2,P5,G2, G3, PHINT, DSGT, DGET, SWCG, TBASE, TOPT,ROPT,P2O,DJTI,GDDE,DSGFT, &
+                     DUMMY,TNSOIL,TMSOIL,TH,TEMPCX,TEMPCR,TDSOIL,SWSD,SNUP,SNDN,S1,RATEIN,PSKER,PDTT, &
+                     P9, DLV, DEC, C1, ACOEF, DOPT
+
+           !-----------------------------------------------------------------------
+           ! PLANT - MZ_CERES - MZ_GROSUB & MZ_IX_GROSUB & SW_GROSUB
+           ! Pang 2024.01.30
+             INTEGER LEAFNO, RSTAGE
+             REAL APTNUP, AREALF, CANNAA, CANWAA, CANWH, CARBO, GNUP, GPSM, GRNWT, GRORT, HI, HIP, &
+                  PCNGRN, PCNL, PCNRT, PCNST, PCNVEG, PODNO, PConc_Root, PConc_Seed, &
+                  PConc_Shel, PConc_Shut, PODWT, PSTRES2, PTF, RLWR, ROOTN, RTWT, &
+                  RTWTO, SATFAC, SDWT, SEEDNO, SHELPC, SI1(6), SI3(6), SKERWT, SLA, STMWTO, STOVER,  &
+                  STOVN, STOVWT, SUMP, SWFAC, TOPWT, TURFAC, VSTAGE, WTLF, WTNCAN, WTNLF, WTNSD, WTNST, &
+                  WTNVEG, XGNP, XN, YIELD, KSTRES
+              !----- In MZ_GROSUB.for
+                  INTEGER CMAT, EMAT, ICOLD, ICSDUR
+                  CHARACTER*1 ISWNIT, ISWPOT, ISWPHO, ISWWAT, IDETO 
+                  !CHARACTER*92 FILECC
+                  REAL PRFTC(4), RGFIL(4), PARSR, CO2X(10), CO2Y(10), FSLFW, FSLFN, FSLFP, &
+                       SDSZ, RSGR, RSGRT, CARBOT, STMWTE, RTWTE, LFWTE, SEEDRVE, LEAFNOE, PLAE, TMNC, &
+                       TANCE, RCNP, RANCE, CTCNP1, CTCNP2, PLIGLF, PLIGRT, ASGDD, BSGDD, &
+                       BIOMAS, CANHT_POT, CUMDTTEG, CumLeafSenes, CumLeafSenesY, CumLfNSenes, CUMPH, &
+                       EARWT, EP1, GRAINN, GRF, GNP, GROEAR, GROGRN, GROLF, GROSTM, PAR, LAI, &
+                       LAIDOT, LFWT, LIFAC, MAXLAI, NPOOL, NPOOL1, NPOOL2, NSDR, NSINK,PCO2,PCNSD,PDWI, &
+                       PLA, PLAG, PLAS, PRFT, RANC, RMNC, RNLAB, SEEDRV, SENLA, SLAN, SLFC, SLFN, SLFP, & 
+                       SLFT, SLFW, SI2(6), SI4(6), SI5(6), SI6(6), Stem2Ear, STMWT, SUMRL, SUMEX, SWEXF, &
+                       SWMAX, SWMIN, TANC, TAVGD, TCNP, TEMPM, TFAC, TI, TNLAB, TOTNUP, TRNU, TSS(20), &
+                       VANC, VMNC, XANC, XLFWT, XNF, YIELDB, NDEF3, NFAC, PGRORT
+                 !----- In MZ_GROSUB -> P_Ceres.for
+                       CHARACTER*2 CROP
+                       REAL SenSoilP, SenSurfP, CumSenSurfP, PestShut, PestRoot, PestShel, PestSeed, ShutMob, &
+                            RootMob, ShelMob, PShut_kg, PShel_kg, PSeed_kg
+                    !----- IN MZ_GROSUB -> P_Ceres -> RootSoilVol.for
+                           REAL PlantPop, ROOTRAD
+                           LOGICAL RootSoilVol_FIRST 
+           !-----------------------------------------------------------------------
+           ! PLANT - MZ_CERES - PEST
+             REAL SDNO(300), SHELN(300), WTSHE(300), SDDES(300), WTSD(300)   !300 is NCOHORTS in DSSAT
+             REAL SWIDOT, WSHIDT, ASMDOT, DISLA, NPLTD, PPLTD, WLIDOT, WRIDOT, WSIDOT
+              !----- In PEST.for
+                  CHARACTER*5   PID(500), PCPID(500,6)   !500 is MAXPEST in DSSAT
+                  CHARACTER*12  FILET
+                  INTEGER TRTNUM, PCTID(500), IDAP(6,500), PCN, PNO(6)
+                  REAL PHTHRS8, PDCF1(500,6), YPL(6,500)
+              !----- PEST - PESTCP
+                  REAL NSDDL, NSDDM, NSDDS, NSHDL, NSHDM, NSHDS, TLFAD, TLFMD, TRTLV, WRTMD, WSDDL, WSDDM, &
+                       WSDDS, WSHDL, WSHDM, WSHDS, CPPLTD, PCLMA, PCLMT, PCSTMD, PDLA, PLFAD, PLFMD, PPSR, &
+                       PRTLF, PRTLV, PRTMD, PSDDL, PSDDM, PSDDS, PSHDL, PSHDM, PSHDS, PSTMD, PVSTGD, TDLA, &
+                       TPSR, TRTLF, VSTGD, WSTMD, WSDD, PSDD, PRLV
+                 !----- In PEST -> PESTCP.for
+                       REAL PL(6), LAIW, PLAIW, PDAM, FSM
+              !----- PEST - ASMDM
+                  REAL CASM
+              !----- PEST - SEEDDM
+                  REAL CSDM, CSDN, CSHM, CSHN, SDIDOT, SHIDOT, TSDNOL, TSDNOM, TSDNOS, TSDWTL, TSDWTM, & 
+                       TSDWTS, TSHNOL, TSHNOM, TSHNOS, TSHWTL, TSHWTM, TSHWTS
+                 !----- In PEST -> SEEDDM.for
+                       REAL SDWDES(300),SDNDES(300),SHWDES(300),SHNDES(300),TSDNO,TSDWT,TSHNO,TSHWT  
+              !----- PEST - VEGDM
+                  REAL CLAI, CLFM, CSTEM, DISLAP
+                 !----- In PEST -> VEGDM.for
+                       REAL CLSEN, CLFRZ, LDAM, LAIDAM, SDAM
+              !----- PEST - ROOTDM
+                  REAL CRLF, CRLV, CRTM, RLFDOT, RLVDOT
+                 !----- In PEST -> ROOTDM.for
+                  REAL CUMDEP
+           !-----------------------------------------------------------------------
+           ! PLANT - MZ_CERES - MZ_ROOTGR
+             REAL RTDEP
+              !----- In MZ_ROOTS.for
+                  REAL ESW(20),RLDF(20),RNLF,RNFAC,RLNEW
         !------------------------------------------------------------------------
         !---- ADDITIONAL CONTROL ------------------------------------------------
         !---- Pang 2023.09.19 ---------------------------------------------------

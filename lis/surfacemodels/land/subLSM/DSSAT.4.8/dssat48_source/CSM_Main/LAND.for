@@ -29,11 +29,12 @@ C-----------------------------------------------------------------------
       USE ModuleDefs      
       USE FloodModule      
       USE CsvOutput   ! VSH 
-      USE dssat48_lsmMod !Pang: Can we do this?
+      USE dssat48_lsmMod !Pang: Use memory from LIS
       IMPLICIT NONE
       SAVE
 C------------------------------------------------
-C    LIS-DSSAT
+C     LIS-DSSAT
+C     Pang 2023.09.29  
 C------------------------------------------------
       INTEGER nest, t
 C-----------------------------------------------------------------------
@@ -140,9 +141,71 @@ C     Transfer values from constructed data types into local variables.
       IPLTI   = ISWITCH % IPLTI
 
       !---- Pang: 2023.09.26 -------------------------------------------
+      !---- SOIL -------------------------------------------------------
       IDETS   = ISWITCH % IDETS !Used for Daily Loop
-      SOILPROP = dssat48_struc(nest)%SOILPROP(t) !Pang: Obtain SOILPROP from mem
-      !Pang: We cannot do this here
+
+      SOILPROP = dssat48_struc(nest)%SOILPROP(t) !Pang: Obtain SOILPROP from memory
+      MULCH = dssat48_struc(nest)%MULCH(t) !Pang: Obtain MULCH from memory
+      FLOODWAT = dssat48_struc(nest)%FLOODWAT(t) !Pang: Obtain FLOODWAT from memory
+      FLOODN = dssat48_struc(nest)%FLOODN(t) !Pang: Obtain FLOODN from memory
+      SW = dssat48_struc(nest)%dssat48(t)%SW
+      SNOW = dssat48_struc(nest)%dssat48(t)%SNOW
+      SomLitC = dssat48_struc(nest)%dssat48(t)%SomLitC
+      SKi_Avail = dssat48_struc(nest)%dssat48(t)%SKi_Avail
+      !PRINT*, 'SOILPROP bg LAND: ', SOILPROP
+      !PRINT*, 'FLOODWAT bg LAND: ', FLOODWAT
+      !PRINT*, 'FLOODN bg LAND: ', FLOODN
+      !PRINT*, 'MULCH bg LAND: ', MULCH
+      !PRINT*, 'SW bg LAND: ', SW
+      !PRINT*, 'SNOW bg LAND: ', SNOW
+      !PRINT*, 'SomLitC bg LAND: ', SomLitC
+      !PRINT*, 'Ski_Avail bg LAND: ', SKi_Avail
+      !---- Pang: 2024.01.12 -------------------------------------------
+      !---- SPAM -------------------------------------------------------
+      ES = dssat48_struc(nest)%dssat48(t)%ES
+      ST = dssat48_struc(nest)%dssat48(t)%ST
+      SWDELTX = dssat48_struc(nest)%dssat48(t)%SWDELTX
+      UPFLOW = dssat48_struc(nest)%dssat48(t)%UPFLOW
+
+      !PRINT*, 'ES af LAND: ', ES
+      !PRINT*, 'ST af LAND: ', ST
+      !PRINT*, 'SWDELTX af LAND: ', SWDELTX
+      !PRINT*, 'UPFLOW af LAND: ', UPFLOW
+
+
+      !---- Pang: 2024.01.17 -------------------------------------------
+      !---- PLANT ------------------------------------------------------
+      HARVRES = dssat48_struc(nest)%HARVRES(t)
+      SENESCE = dssat48_struc(nest)%SENESCE(t)
+
+      CANHT = dssat48_struc(nest)%dssat48(t)%CANHT
+      EORATIO = dssat48_struc(nest)%dssat48(t)%EORATIO
+      NSTRES = dssat48_struc(nest)%dssat48(t)%NSTRES
+      PSTRES1 = dssat48_struc(nest)%dssat48(t)%PSTRES1
+      PORMIN = dssat48_struc(nest)%dssat48(t)%PORMIN
+      RWUMX = dssat48_struc(nest)%dssat48(t)%RWUMX
+      KSEVAP = dssat48_struc(nest)%dssat48(t)%KSEVAP
+      KTRANS = dssat48_struc(nest)%dssat48(t)%KTRANS
+      KUptake = dssat48_struc(nest)%dssat48(t)%KUptake
+      PUptake = dssat48_struc(nest)%dssat48(t)%PUptake
+      RLV = dssat48_struc(nest)%dssat48(t)%RLV
+      FracRts = dssat48_struc(nest)%dssat48(t)%FracRts
+      UNH4 = dssat48_struc(nest)%dssat48(t)%UNH4
+      UNO3 = dssat48_struc(nest)%dssat48(t)%UNO3
+      STGDOY = dssat48_struc(nest)%dssat48(t)%STGDOY
+      XHLAI = dssat48_struc(nest)%dssat48(t)%XHLAI
+      XLAI = dssat48_struc(nest)%dssat48(t)%XLAI
+      UH2O = dssat48_struc(nest)%dssat48(t)%UH2O
+
+      !---- Pang: 2024.01.17 -------------------------------------------
+      !---- MGMTOPS ------------------------------------------------------
+
+      FERTDATA = dssat48_struc(nest)%FERTDATA(t)
+      OMADATA = dssat48_struc(nest)%OMADATA(t)
+      TILLVALS = dssat48_struc(nest)%TILLVALS(t)
+      HARVFRAC = dssat48_struc(nest)%dssat48(t)%HARVFRAC
+      IRRAMT = dssat48_struc(nest)%dssat48(t)%IRRAMT
+
 C***********************************************************************
 C***********************************************************************
 C     Run Initialization - Called once per simulation
@@ -194,7 +257,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Read initial plant module data
 C-----------------------------------------------------------------------
-      CALL PLANT(CONTROL, ISWITCH, 
+      CALL PLANT(CONTROL, ISWITCH, nest, t,              !Pang2024.01.18
      &    EO, EOP, EOS, EP, ES, FLOODWAT, HARVFRAC,       !Input
      &    NH4_plant, NO3_plant, SKi_Avail, SomLitC, SomLitE, !Input
      &    SPi_AVAIL, SNOW, SOILPROP, SRFTEMP, ST, SW,     !Input
@@ -278,7 +341,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Initialize PLANT routines (including phenology and pest)
 C-----------------------------------------------------------------------
-      CALL PLANT(CONTROL, ISWITCH, 
+      CALL PLANT(CONTROL, ISWITCH, nest, t,              !Pang2024.01.18 
      &    EO, EOP, EOS, EP, ES, FLOODWAT, HARVFRAC,       !Input
      &    NH4_plant, NO3_plant, SKi_Avail, SomLitC, SomLitE, !Input
      &    SPi_AVAIL, SNOW, SOILPROP, SRFTEMP, ST, SW,     !Input
@@ -352,7 +415,7 @@ C     Skip plant growth and development routines for fallow runs
 C-----------------------------------------------------------------------
 !      IF (CROP .NE. 'FA' .AND. 
 !     &    YRDOY .GE. YRPLT .AND. YRPLT .NE. -99) THEN
-        CALL PLANT(CONTROL, ISWITCH, 
+        CALL PLANT(CONTROL, ISWITCH,  nest, t,              !Pang2024.01.18
      &    EO, EOP, EOS, EP, ES, FLOODWAT, HARVFRAC,       !Input
      &    NH4_plant, NO3_plant, SKi_Avail, SomLitC, SomLitE, !Input
      &    SPi_AVAIL, SNOW, SOILPROP, SRFTEMP, ST, SW,     !Input
@@ -399,7 +462,7 @@ C     plant state variables.
 C-----------------------------------------------------------------------
       IF (CROP .NE. 'FA' .AND. 
      &        YRDOY .GE. YRPLT .AND. YRPLT .NE. -99) THEN
-        CALL PLANT(CONTROL, ISWITCH, 
+        CALL PLANT(CONTROL, ISWITCH,  nest, t,              !Pang2024.01.18
      &    EO, EOP, EOS, EP, ES, FLOODWAT, HARVFRAC,       !Input
      &    NH4_plant, NO3_plant, SKi_Avail, SomLitC, SomLitE, !Input
      &    SPi_AVAIL, SNOW, SOILPROP, SRFTEMP, ST, SW,     !Input
@@ -452,7 +515,7 @@ C-----------------------------------------------------------------------
 C     Call plant module for daily printout.
 C-----------------------------------------------------------------------
         IF (CROP .NE. 'FA') THEN
-          CALL PLANT(CONTROL, ISWITCH, 
+          CALL PLANT(CONTROL, ISWITCH, nest, t,           !Pang2024.01.18
      &    EO, EOP, EOS, EP, ES, FLOODWAT, HARVFRAC,       !Input
      &    NH4_plant, NO3_plant, SKi_Avail, SomLitC, SomLitE, !Input
      &    SPi_AVAIL, SNOW, SOILPROP, SRFTEMP, ST, SW,     !Input
@@ -499,7 +562,7 @@ C     Print seasonal summaries and close files.
      &    EO, EOP, EOS, EP, ES, RWU, SRFTEMP, ST,         !Output
      &    SWDELTX, TRWU, TRWUP, UPFLOW)                   !Output
 
-      CALL PLANT(CONTROL, ISWITCH, 
+      CALL PLANT(CONTROL, ISWITCH, nest, t,              !Pang2024.01.18 
      &    EO, EOP, EOS, EP, ES, FLOODWAT, HARVFRAC,       !Input
      &    NH4_plant, NO3_plant, SKi_Avail, SomLitC, SomLitE, !Input
      &    SPi_AVAIL, SNOW, SOILPROP, SRFTEMP, ST, SW,     !Input
@@ -589,7 +652,65 @@ C***********************************************************************
 !***********************************************************************
       ENDIF
 !------ Pang: 2023.09.27 --------------------------------------------------
+!------ SOIL --------------------------------------------------------------
       dssat48_struc(nest)%SOILPROP(t) = SOILPROP !Assign updated var to mem
-!      May need to do for all variables
+      dssat48_struc(nest)%MULCH(t) = MULCH
+      dssat48_struc(nest)%FLOODWAT(t) = FLOODWAT
+      dssat48_struc(nest)%FLOODN(t) = FLOODN
+      dssat48_struc(nest)%dssat48(t)%SW = SW
+      dssat48_struc(nest)%dssat48(t)%SNOW = SNOW
+      dssat48_struc(nest)%dssat48(t)%SomLitC = SomLitC
+      dssat48_struc(nest)%dssat48(t)%SKi_Avail = SKi_Avail
+      !PRINT*, 'SOILPROP af LAND: ', SOILPROP
+      !PRINT*, 'FLOODWAT af LAND: ', FLOODWAT
+      !PRINT*, 'FLOODN af LAND: ', FLOODN
+      !PRINT*, 'MULCH af LAND: ', MULCH
+      !PRINT*, 'SW af LAND: ', SW
+      !PRINT*, 'SNOW af LAND: ', SNOW
+      !PRINT*, 'SomLitC af LAND: ', SomLitC
+      !PRINT*, 'Ski_Avail af LAND: ', SKi_Avail
+!------ Pang: 2024.01.12 --------------------------------------------------
+!------ SPAM --------------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%ES = ES
+      dssat48_struc(nest)%dssat48(t)%ST = ST
+      dssat48_struc(nest)%dssat48(t)%SWDELTX = SWDELTX
+      dssat48_struc(nest)%dssat48(t)%UPFLOW = UPFLOW
+      !PRINT*, 'ES af LAND: ', ES
+      !PRINT*, 'ST af LAND: ', ST
+      !PRINT*, 'SWDELTX af LAND: ', SWDELTX
+      !PRINT*, 'UPFLOW af LAND: ', UPFLOW
+!------ Pang: 2024.01.12 --------------------------------------------------
+!------ PLANT --------------------------------------------------------------
+      dssat48_struc(nest)%HARVRES(t) = HARVRES
+      dssat48_struc(nest)%SENESCE(t) = SENESCE
+
+      dssat48_struc(nest)%dssat48(t)%CANHT = CANHT
+      dssat48_struc(nest)%dssat48(t)%EORATIO = EORATIO
+      dssat48_struc(nest)%dssat48(t)%NSTRES = NSTRES
+      dssat48_struc(nest)%dssat48(t)%PSTRES1 = PSTRES1
+      dssat48_struc(nest)%dssat48(t)%PORMIN = PORMIN
+      dssat48_struc(nest)%dssat48(t)%RWUMX = RWUMX
+      dssat48_struc(nest)%dssat48(t)%KSEVAP = KSEVAP
+      dssat48_struc(nest)%dssat48(t)%KTRANS = KTRANS
+      dssat48_struc(nest)%dssat48(t)%KUptake = KUptake
+      dssat48_struc(nest)%dssat48(t)%PUptake = PUptake
+      dssat48_struc(nest)%dssat48(t)%RLV = RLV
+      dssat48_struc(nest)%dssat48(t)%FracRts = FracRts 
+      dssat48_struc(nest)%dssat48(t)%UNH4 = UNH4
+      dssat48_struc(nest)%dssat48(t)%UNO3 = UNO3
+      dssat48_struc(nest)%dssat48(t)%STGDOY = STGDOY
+      dssat48_struc(nest)%dssat48(t)%XHLAI = XHLAI
+      dssat48_struc(nest)%dssat48(t)%XLAI = XLAI
+      dssat48_struc(nest)%dssat48(t)%UH2O = UH2O
+!---- Pang: 2024.01.17 -------------------------------------------
+!---- MGMTOPS ------------------------------------------------------
+
+      dssat48_struc(nest)%FERTDATA(t) = FERTDATA
+      dssat48_struc(nest)%OMADATA(t) = OMADATA
+      dssat48_struc(nest)%TILLVALS(t) = TILLVALS
+      dssat48_struc(nest)%dssat48(t)%HARVFRAC = HARVFRAC
+      dssat48_struc(nest)%dssat48(t)%IRRAMT = IRRAMT
+
+
       RETURN
       END SUBROUTINE LAND 

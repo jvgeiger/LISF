@@ -26,7 +26,7 @@ C   CH4flux    : total CH4 emission (kgCH4 ha-1 d-1)
 !  - Soil Alternative Electron Acceptors input from soil file or otherwise
 !      estimated from soil properties. Currently hardwired at 26.5.
 C=======================================================================
-      SUBROUTINE MethaneDynamics(CONTROL, ISWITCH, SOILPROP,  !Input
+      SUBROUTINE MethaneDynamics(CONTROL, ISWITCH, SOILPROP, nest, t,  !Input
      &    FLOODWAT, SW, RLV, newCO2, DRAIN,                   !Input
      &    CH4_data)                                           !Output
 
@@ -34,9 +34,10 @@ C=======================================================================
       USE FloodModule
       USE MethaneConstants
       USE MethaneVariables
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
       INTEGER n1,NLAYR,i,j, DYNAMIC
       REAL dlayr(NL),SW(NL),DLL(NL),RLV(NL),CSubstrate(NL),BD(NL),
      &     Buffer(NL,2),afp(NL)
@@ -73,6 +74,20 @@ C=======================================================================
       BD    = SOILPROP % BD
       NLAYR = SOILPROP % NLAYR
 
+
+!-----------------------------------------------------------------------
+!----- Pang: Obtained Vars from Memory (previous day) for Daily Loop ---
+!-----------------------------------------------------------------------
+      Buffer = dssat48_struc(nest)%dssat48(t)%buffer 
+      CH4Stored_Y = dssat48_struc(nest)%dssat48(t)%CH4Stored_Y
+      CumNewCO2 = dssat48_struc(nest)%dssat48(t)%CumNewCO2
+      lamda_rho = dssat48_struc(nest)%dssat48(t)%lamda_rho
+
+      CH4Stored = CH4_data % CH4Stored
+      CumCO2Emission = CH4_data % CumCO2Emission
+      CumCH4Emission = CH4_data % CumCH4Emission
+      CumCH4Consumpt = CH4_data % CumCH4Consumpt
+      CumCH4Leaching = CH4_data % CumCH4Leaching
 C***********************************************************************
 C***********************************************************************
 C    Input and Initialization 
@@ -113,8 +128,10 @@ C-----------------------------------------------------------------------
 !     lamda_rho = lamdarho  ! 0.00015
       lamda_rho = 0.00015
 
-      ENDIF
+      !Pang: Record this only in SEAS. INIT
+      dssat48_struc(nest)%dssat48(t)%lamda_rho=lamda_rho
 
+      ENDIF
 ! Sample soil profile used in MERES example from IRRI with SAEA values.
 !*IBRI910025  IRRI-UNDP   -99      50  
 !@SITE        COUNTRY          LAT     LONG SCS FAMILY
@@ -344,8 +361,12 @@ C***********************************************************************
       CH4_data % CumCH4Emission = CumCH4Emission
       CH4_data % CumCH4Consumpt = CumCH4Consumpt
       CH4_data % CumCH4Leaching = CumCH4Leaching                    
-
-
+!-----------------------------------------------------------------------
+!----- Pang: Assign Variables to memory --------------------------------
+      dssat48_struc(nest)%dssat48(t)%buffer = Buffer
+      dssat48_struc(nest)%dssat48(t)%CH4Stored_Y = CH4Stored_Y
+      dssat48_struc(nest)%dssat48(t)%CumNewCO2 = CumNewCO2
+!-----------------------------------------------------------------------
       RETURN
       END
 

@@ -56,7 +56,7 @@ C  Calls  : Fert_Place, IPSOIL, NCHECK, NFLUX, RPLACE,
 C           SOILNI, YR_DOY, FLOOD_CHEM, OXLAYER
 C=======================================================================
 
-      SUBROUTINE SoilNi (CONTROL, ISWITCH, 
+      SUBROUTINE SoilNi (CONTROL, ISWITCH, nest, t, 
      &    CH4_data, DRN, ES, FERTDATA, FLOODWAT, IMM,     !Input
      &    LITC, MNR, newCO2, SNOW, SOILPROP, SSOMC, ST,   !Input
      &    SW, TDFC, TDLNO, TILLVALS, UNH4, UNO3, UPFLOW,  !Input
@@ -70,13 +70,14 @@ C=======================================================================
       USE ModuleData
       USE FloodModule
       USE ModSoilMix
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !-----------------------------------------------------------------------
       CHARACTER*1 ISWNIT, MEGHG
-
+     
       LOGICAL IUON
-
+      INTEGER nest, t
       INTEGER DOY, DYNAMIC, INCDAT, IUYRDOY, IUOF, L
       INTEGER NLAYR
       INTEGER NSOURCE, YEAR, YRDOY   
@@ -192,6 +193,31 @@ C=======================================================================
       TMAX = WEATHER % TMAX
       TMIN = WEATHER % TMIN
       RAIN = WEATHER % RAIN
+!----------------------------------------------------------------------
+!     Pang: 2023.10.13 obtain variables from LIS memory for each pixel.
+      TNOM =  dssat48_struc(nest)%dssat48(t)%TNOM
+      CMINERN =  dssat48_struc(nest)%dssat48(t)%CMINERN
+      CIMMOBN = dssat48_struc(nest)%dssat48(t)%CIMMOBN
+      WTNUP = dssat48_struc(nest)%dssat48(t)%WTNUP
+      CumSumFert = dssat48_struc(nest)%dssat48(t)%CumSumFert
+      IUON = dssat48_struc(nest)%dssat48(t)%IUON 
+      LFD10 = dssat48_struc(nest)%dssat48(t)%LFD10
+      N2O_data = dssat48_struc(nest)%N2O_data(t)
+      CNITRIFY = N2O_data%CNITRIFY
+      CN2Onitrif = N2O_data%CN2Onitrif
+      CNOflux = N2O_data%CNOflux
+      CLeach = dssat48_struc(nest)%dssat48(t)%CLeach
+      CNTILEDR = dssat48_struc(nest)%dssat48(t)%CNTILEDR
+      TFNITY = dssat48_struc(nest)%dssat48(t)%TFNITY
+      SNH4 = dssat48_struc(nest)%dssat48(t)%SNH4
+      SNO3 = dssat48_struc(nest)%dssat48(t)%SNO3
+      UREA = dssat48_struc(nest)%dssat48(t)%UREA
+      OXLAYR = dssat48_struc(nest)%OXLAYR(t)
+      ALGFIX = dssat48_struc(nest)%dssat48(t)%ALGFIX
+      CUMFNRO = dssat48_struc(nest)%dssat48(t)%CUMFNRO
+      TOTAML = dssat48_struc(nest)%dssat48(t)%TOTAML
+      CNOX = dssat48_struc(nest)%dssat48(t)%CNOX
+      TNOXD = dssat48_struc(nest)%dssat48(t)%TNOXD
 
 !***********************************************************************
 !***********************************************************************
@@ -1008,6 +1034,27 @@ C     END OF SECOND DYNAMIC IF CONSTRUCT
 C***********************************************************************
       ENDIF
 C-----------------------------------------------------------------------
+!     Pang: 2023.10.13 assign variables to LIS memory for each pixel.
+      dssat48_struc(nest)%dssat48(t)%TNOM = TNOM
+      dssat48_struc(nest)%dssat48(t)%CMINERN = CMINERN
+      dssat48_struc(nest)%dssat48(t)%CIMMOBN = CIMMOBN
+      dssat48_struc(nest)%dssat48(t)%WTNUP = WTNUP
+      dssat48_struc(nest)%dssat48(t)%CumSumFert = CumSumFert
+      dssat48_struc(nest)%dssat48(t)%IUON = IUON
+      dssat48_struc(nest)%dssat48(t)%LFD10 = LFD10
+      dssat48_struc(nest)%N2O_data(t) = N2O_data
+      dssat48_struc(nest)%dssat48(t)%CLeach = CLeach
+      dssat48_struc(nest)%dssat48(t)%CNTILEDR = CNTILEDR
+      dssat48_struc(nest)%dssat48(t)%TFNITY = TFNITY
+      dssat48_struc(nest)%dssat48(t)%SNH4 = SNH4
+      dssat48_struc(nest)%dssat48(t)%SNO3 = SNO3
+      dssat48_struc(nest)%dssat48(t)%UREA = UREA
+      dssat48_struc(nest)%OXLAYR(t) = OXLAYR
+      dssat48_struc(nest)%dssat48(t)%ALGFIX = ALGFIX
+      dssat48_struc(nest)%dssat48(t)%CUMFNRO = CUMFNRO
+      dssat48_struc(nest)%dssat48(t)%TOTAML = TOTAML
+      dssat48_struc(nest)%dssat48(t)%CNOX = CNOX 
+      dssat48_struc(nest)%dssat48(t)%TNOXD = TNOXD
       RETURN
       END SUBROUTINE SoilNi
 

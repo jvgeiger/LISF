@@ -188,8 +188,38 @@ C-----------------------------------------------------------------------
       MULCHALB = MULCH % MULCHALB
 
       RAIN = WEATHER % RAIN
+!-----------------------------------------------------------------------
+!----- Obtain Vars From Memory -----------------------------------------
+!----- Oang 2023.10.04 -------------------------------------------------
+      BD_INIT    = dssat48_struc(nest)%dssat48(t)%BD_INIT
+      CN_INIT    = dssat48_struc(nest)%dssat48(t)%CN_INIT
+      DLAYR_INIT = dssat48_struc(nest)%dssat48(t)%DLAYR_INIT
+      DS_INIT    = dssat48_struc(nest)%dssat48(t)%DS_INIT
+      DUL_INIT   = dssat48_struc(nest)%dssat48(t)%DUL_INIT
+      LL_INIT    = dssat48_struc(nest)%dssat48(t)%LL_INIT
+      SAT_INIT   = dssat48_struc(nest)%dssat48(t)%SAT_INIT
+      SWCN_INIT  = dssat48_struc(nest)%dssat48(t)%SWCN_INIT
+      OC_INIT   = dssat48_struc(nest)%dssat48(t)%OC_INIT   !Pang: OC_INIT is not used
+      TOTN_INIT = dssat48_struc(nest)%dssat48(t)%TOTN_INIT !TOTN_INIT is not used
+      TotOrgN_INIT = dssat48_struc(nest)%dssat48(t)%TotOrgN_INIT !TotOrgN_INIT is not used
+      SW_INIT   = dssat48_struc(nest)%dssat48(t)%SW_INIT   !SW_INIT is not used   
+      
+      BD_SOM = dssat48_struc(nest)%dssat48(t)%BD_SOM
+      DUL_SOM = dssat48_struc(nest)%dssat48(t)%DUL_SOM
+      DS_SOM = dssat48_struc(nest)%dssat48(t)%DS_SOM
+      LL_SOM = dssat48_struc(nest)%dssat48(t)%LL_SOM
+      DLAYR_SOM = dssat48_struc(nest)%dssat48(t)%DLAYR_SOM
+   
+      SOM_PCT_init = dssat48_struc(nest)%dssat48(t)%SOM_PCT_init
+      BD_calc_init= dssat48_struc(nest)%dssat48(t)% BD_calc_init
 
-    
+      TILLED = dssat48_struc(nest)%dssat48(t)%TILLED
+      FIRST = dssat48_struc(nest)%dssat48(t)%SOILDYN_FIRST
+
+      CRAIN = dssat48_struc(nest)%dssat48(t)%CRAIN
+      LCRAIN = dssat48_struc(nest)%dssat48(t)%LCRAIN
+      SUMKE = dssat48_struc(nest)%dssat48(t)%SUMKE
+      KECHGE = dssat48_struc(nest)%dssat48(t)%KECHGE
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -1157,6 +1187,8 @@ C  tillage and rainfall kinetic energy
 !-----------------------------------------------------------------------
 !----- Save Initial Values to dssat48 ----------------------------------
 !----- Pang 2023.09.18 -------------------------------------------------
+!----- Thes INIT VARS ARE ONLY DONE ONCE HERE -------------------------
+
       dssat48_struc(nest)%dssat48(t)%BD_INIT = BD_INIT
       dssat48_struc(nest)%dssat48(t)%CN_INIT = CN_INIT
       dssat48_struc(nest)%dssat48(t)%DLAYR_INIT = DLAYR_INIT
@@ -1169,16 +1201,6 @@ C  tillage and rainfall kinetic energy
       dssat48_struc(nest)%dssat48(t)%TotOrgN_INIT = TotOrgN_INIT !May not need
       dssat48_struc(nest)%dssat48(t)%SWCN_INIT = SWCN_INIT
       dssat48_struc(nest)%dssat48(t)%SW_INIT = SW_INIT
-
-      dssat48_struc(nest)%dssat48(t)%BD_SOM = BD_SOM
-      dssat48_struc(nest)%dssat48(t)%DUL_SOM = DUL_SOM
-      dssat48_struc(nest)%dssat48(t)%DS_SOM = DS_SOM
-      dssat48_struc(nest)%dssat48(t)%LL_SOM = LL_SOM
-      dssat48_struc(nest)%dssat48(t)%DLAYR_SOM = DLAYR_SOM
-
-      dssat48_struc(nest)%dssat48(t)%TILLED = TILLED
-      dssat48_struc(nest)%dssat48(t)%CRAIN = CRAIN
-      dssat48_struc(nest)%dssat48(t)%LCRAIN = LCRAIN
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization
@@ -1201,65 +1223,30 @@ C  tillage and rainfall kinetic energy
       TILLED    =.FALSE.
 
       SUMKE  = 0.0
-      KECHGE = 0.0 !Pang: May not need
+      KECHGE = 0.0
       CRAIN  = 0.0
       LCRAIN = 0.0
-!------ Pang Comment These Out -----------------
-!      BD    = BD_INIT  
-!      CN    = CN_INIT  
-!      DLAYR = DLAYR_INIT
-!      DS    = DS_INIT  
-!      DUL   = DUL_INIT 
-!      LL    = LL_INIT  
-!      OC    = OC_INIT
-!      SAT   = SAT_INIT 
-!      SWCN  = SWCN_INIT
-!      TOTN  = TOTN_INIT
-!      TotOrgN = TotOrgN_INIT
 
-!      SW    = SW_INIT
+      BD    = BD_INIT  
+      CN    = CN_INIT  
+      DLAYR = DLAYR_INIT
+      DS    = DS_INIT  
+      DUL   = DUL_INIT 
+      LL    = LL_INIT  
+      OC    = OC_INIT
+      SAT   = SAT_INIT 
+      SWCN  = SWCN_INIT
+      TOTN  = TOTN_INIT
+      TotOrgN = TotOrgN_INIT
 
-!      BD_SOM   = BD
-!      DUL_SOM  = DUL
-!      DS_SOM   = DS
-!      LL_SOM   = LL
-!      DLAYR_SOM= DLAYR
-!------------------------------------------------------------------------
-!----- Save SEA Initial Values to dssat48 ----------------------------------
-!----- Pang 2023.09.18 -------------------------------------------------
-      dssat48_struc(nest)%dssat48(t)%FIRST = .TRUE.
-      dssat48_struc(nest)%dssat48(t)%TILLED = .FALSE.
-
-      dssat48_struc(nest)%dssat48(t)%SUMKE = SUMKE
-      dssat48_struc(nest)%dssat48(t)%KECHGE = KECHGE
-      dssat48_struc(nest)%dssat48(t)%CRAIN = CRAIN
-      dssat48_struc(nest)%dssat48(t)%LCRAIN = LCRAIN
-
-      BD    = dssat48_struc(nest)%dssat48(t)%BD_INIT
-      CN    = dssat48_struc(nest)%dssat48(t)%CN_INIT
-      DLAYR = dssat48_struc(nest)%dssat48(t)%DLAYR_INIT
-      DS    = dssat48_struc(nest)%dssat48(t)%DS_INIT
-      DUL   = dssat48_struc(nest)%dssat48(t)%DUL_INIT
-      LL    = dssat48_struc(nest)%dssat48(t)%LL_INIT
-      OC    = dssat48_struc(nest)%dssat48(t)%OC_INIT          
-      SAT   = dssat48_struc(nest)%dssat48(t)%SAT_INIT
-      SWCN  = dssat48_struc(nest)%dssat48(t)%SWCN_INIT
-      TOTN  = dssat48_struc(nest)%dssat48(t)%TOTN_INIT       
-      TotOrgN = dssat48_struc(nest)%dssat48(t)%TotOrgN_INIT 
-      SW    = dssat48_struc(nest)%dssat48(t)%SW_INIT
+      SW    = SW_INIT
 
       BD_SOM   = BD
       DUL_SOM  = DUL
       DS_SOM   = DS
       LL_SOM   = LL
       DLAYR_SOM= DLAYR
-
-       dssat48_struc(nest)%dssat48(t)%BD_SOM = BD_SOM
-       dssat48_struc(nest)%dssat48(t)%DUL_SOM = DUL_SOM
-       dssat48_struc(nest)%dssat48(t)%DS_SOM = DS_SOM
-       dssat48_struc(nest)%dssat48(t)%LL_SOM = LL_SOM
-       dssat48_struc(nest)%dssat48(t)%DLAYR_SOM = DLAYR_SOM
-!------------------------------------------------------------------------
+!-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
       DO L = 1, NLAYR
 !       Conversion from kg/ha to ppm (or mg/l).  Recalculate daily.
@@ -1293,14 +1280,6 @@ C  tillage and rainfall kinetic energy
 !----------- Obtained Variables Whitch Are Updated Day to Day ----------
 !----------- Or Varies Pixel to Pixel ----------------------------------
 !---------- Added by Pang-Wei Liu 2023.09.18 ---------------------------
-      TILLED = dssat48_struc(nest)%dssat48(t)%TILLED
-      FIRST = dssat48_struc(nest)%dssat48(t)%FIRST
-
-      CRAIN = dssat48_struc(nest)%dssat48(t)%CRAIN
-      LCRAIN = dssat48_struc(nest)%dssat48(t)%LCRAIN
-      SUMKE = dssat48_struc(nest)%dssat48(t)%SUMKE
-      KECHGE = dssat48_struc(nest)%dssat48(t)%KECHGE   
-
       BD = SOILPROP % BD
       CN = SOILPROP % CN
       DLAYR = SOILPROP % DLAYR
@@ -1312,32 +1291,11 @@ C  tillage and rainfall kinetic energy
       SWCN = SOILPROP % SWCN
       TOTN = SOILPROP % TOTN
       TotOrgN = SOILPROP % TotOrgN
-!     !SW = SOILPROP % SW !This may not need, cuz SW is an input
 !---------------------------------------------------------------
 !----- These two are calculated at the Initilization phase
 !----  and could vary pixel to pixel -------------------------------------
       NLAYR = SOILPROP % NLAYR
       COARSE = SOILPROP % COARSE
-!-------------------------------------------------------------
-
-      BD_SOM = dssat48_struc(nest)%dssat48(t)%BD_SOM
-      DUL_SOM = dssat48_struc(nest)%dssat48(t)%DUL_SOM
-      DS_SOM = dssat48_struc(nest)%dssat48(t)%DS_SOM
-      LL_SOM = dssat48_struc(nest)%dssat48(t)%LL_SOM
-      DLAYR_SOM = dssat48_struc(nest)%dssat48(t)%DLAYR_SOM
-
-      BD_INIT    = dssat48_struc(nest)%dssat48(t)%BD_INIT
-      CN_INIT    = dssat48_struc(nest)%dssat48(t)%CN_INIT
-      DLAYR_INIT = dssat48_struc(nest)%dssat48(t)%DLAYR_INIT
-      DS_INIT    = dssat48_struc(nest)%dssat48(t)%DS_INIT
-      DUL_INIT   = dssat48_struc(nest)%dssat48(t)%DUL_INIT
-      LL_INIT    = dssat48_struc(nest)%dssat48(t)%LL_INIT
-      SAT_INIT   = dssat48_struc(nest)%dssat48(t)%SAT_INIT
-      SWCN_INIT  = dssat48_struc(nest)%dssat48(t)%SWCN_INIT
-!      OC_INIT   = dssat48_struc(nest)%dssat48(t)%OC_INIT   !Pang: OC_INIT is not used
-!      TOTN_INIT = dssat48_struc(nest)%dssat48(t)%TOTN_INIT !TOTN_INIT is not used
-!      TotOrgN_INIT = dssat48_struc(nest)%dssat48(t)%TotOrgN_INIT !TotOrgN_INIT is not used
-!      SW_INIT   = dssat48_struc(nest)%dssat48(t)%SW_INIT   !SW_INIT is not used
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 !     Initial SOM not established until end of SEASINIT section so 
@@ -1363,7 +1321,7 @@ C  tillage and rainfall kinetic energy
         SOM_PCT_init = SOM_PCT
         BD_calc_init = BD_calc
 
-        !Pang 20230918
+        !Pang 20230918, these two lines here are only done once
         dssat48_struc(nest)%dssat48(t)%SOM_PCT_init = SOM_PCT_init
         dssat48_struc(nest)%dssat48(t)% BD_calc_init= BD_calc_init 
 
@@ -1371,12 +1329,9 @@ C  tillage and rainfall kinetic energy
         Print_today = .TRUE.
         FIRST = .FALSE.
 
-        !Pang 20230918
-        dssat48_struc(nest)%dssat48(t)%FIRST = FIRST
+        !Pang 20230918, this line here is only done once.
+        dssat48_struc(nest)%dssat48(t)%SOILDYN_FIRST = FIRST
       ENDIF
-        !Pang 20230918
-        SOM_PCT_init = dssat48_struc(nest)%dssat48(t)%SOM_PCT_init
-        BD_calc_init= dssat48_struc(nest)%dssat48(t)% BD_calc_init
 
 !     ------------------------------------------------------------------
       CALL ALBEDO(KTRANS, MEINF, MULCH, SOILPROP, SW(1), XHLAI)
@@ -1718,21 +1673,6 @@ c** wdb orig          SUMKEL = SUMKE * EXP(-0.15*MCUMDEP)
       SOILPROP % SWCN   = SWCN 
       SOILPROP % POROS  = POROS  
       CALL PUT(SOILPROP)
-!-----------------------------------------------------------------------
-!-------------- Update Local Dynamic Vars to dssat48 -------------------
-!-------------- Pang 2023.09.18 ----------------------------------------
-      dssat48_struc(nest)%dssat48(t)%TILLED = TILLED
-      !FIRST has been updated in IF FIRST Loop
-      dssat48_struc(nest)%dssat48(t)%CRAIN = CRAIN
-      dssat48_struc(nest)%dssat48(t)%LCRAIN = LCRAIN
-      dssat48_struc(nest)%dssat48(t)%SUMKE = SUMKE
-      dssat48_struc(nest)%dssat48(t)%KECHGE = KECHGE
-
-      dssat48_struc(nest)%dssat48(t)%BD_SOM = BD_SOM
-      dssat48_struc(nest)%dssat48(t)%DUL_SOM = DUL_SOM
-      dssat48_struc(nest)%dssat48(t)%DS_SOM = DS_SOM
-      dssat48_struc(nest)%dssat48(t)%LL_SOM = LL_SOM
-      dssat48_struc(nest)%dssat48(t)%DLAYR_SOM = DLAYR_SOM
 !***********************************************************************
 !***********************************************************************
 !     Daily output
@@ -1751,7 +1691,20 @@ c** wdb orig          SUMKEL = SUMKE * EXP(-0.15*MCUMDEP)
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!----- Assigned Vars to Memory -----------------------------------------
+!----- Pang 2023.10.04 -------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%BD_SOM = BD_SOM
+      dssat48_struc(nest)%dssat48(t)%DUL_SOM = DUL_SOM
+      dssat48_struc(nest)%dssat48(t)%DS_SOM = DS_SOM
+      dssat48_struc(nest)%dssat48(t)%LL_SOM = LL_SOM
+      dssat48_struc(nest)%dssat48(t)%DLAYR_SOM = DLAYR_SOM
 
+      dssat48_struc(nest)%dssat48(t)%SOILDYN_FIRST = FIRST
+      dssat48_struc(nest)%dssat48(t)%TILLED = TILLED
+      dssat48_struc(nest)%dssat48(t)%CRAIN = CRAIN
+      dssat48_struc(nest)%dssat48(t)%LCRAIN = LCRAIN
+      dssat48_struc(nest)%dssat48(t)%SUMKE = SUMKE
+      dssat48_struc(nest)%dssat48(t)%KECHGE = KECHGE
       RETURN
       END SUBROUTINE SOILDYN
 

@@ -31,7 +31,7 @@ subroutine dssat48_main(n)
     use LIS_logMod, only     : LIS_logunit, LIS_endrun
     use LIS_FORC_AttributesMod 
     use dssat48_lsmMod
-    USE ModuleDefs, only: ControlType,SwitchType,MonthTxt,ModelVerTxt !From DSSAT
+    USE ModuleDefs, only: MonthTxt !From DSSAT
    !use other modules
   
     implicit none
@@ -88,12 +88,10 @@ subroutine dssat48_main(n)
 
     alarmCheck = LIS_isAlarmRinging(LIS_rc, "DSSAT48 model alarm "// trim(fnest)) !MN  Bug in the toolkit 
     if (alarmCheck) Then
-        !do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-        do t = 1, 1
-            PRINT*, 'Am I inside the alarm on loop: Yes'
+        do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+        !do t = 1, 1
              
             dt = LIS_rc%ts
-            PRINT*, "t, dt: ", t, dt
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
             col = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%col
             lat = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lat
@@ -195,7 +193,8 @@ subroutine dssat48_main(n)
             tmp_day    = LIS_rc%da
             tmp_hour   = LIS_rc%hr
             tmp_minute = LIS_rc%mn
-            PRINT*, 'time: ', tmp_year, tmp_month, tmp_day, tmp_hour, tmp_minute
+            !PRINT*, 'time: ', tmp_year, tmp_month, tmp_day, tmp_hour, tmp_minute
+
             ! get parameters 
             !tmp_nsnow                               = CROCUS81_struc(n)%nsnow                           
 
@@ -218,11 +217,11 @@ subroutine dssat48_main(n)
             YRPLT = dssat48_struc(n)%dssat48(t)%yrplt
             RNMODE = dssat48_struc(n)%CONTROL(t)%rnmode
             YRDOY= tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year)
-            PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
-            PRINT*, 'RNMODE: ', RNMODE
+            !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
+            !PRINT*, 'RNMODE: ', RNMODE
             !----- SEASONAL INITIALIZATION -------------------------------------------
             IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
-                 PRINT*, 'Im in seas init'
+                 !PRINT*, 'Im in seas init'
                  NYRS = dssat48_struc(n)%CONTROL(t)%nyrs
                  ENDYRS = dssat48_struc(n)%CONTROL(t)%endyrs
                  MULTI = dssat48_struc(n)%CONTROL(t)%multi
@@ -230,9 +229,7 @@ subroutine dssat48_main(n)
                  YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
                  REPNO = dssat48_struc(n)%CONTROL(t)%repno
                  !CONDITIONS
-
-                 PRINT*, 'NYRS, ENDYRS, MULTI bf: ', NYRS, ENDYRS, MULTI
-
+                 !PRINT*, 'NYRS, ENDYRS, MULTI bf: ', NYRS, ENDYRS, MULTI
                  IF (NYRS .GT. 1) THEN
                      ENDYRS = ENDYRS + 1
                      IF (RNMODE .NE. 'Y') THEN
@@ -242,7 +239,7 @@ subroutine dssat48_main(n)
                      MULTI = 1
                      ENDYRS = 1
                  ENDIF
-                 PRINT*, 'NYRS, ENDYRS, MULTI AF: ', NYRS, ENDYRS, MULTI
+                 !PRINT*, 'NYRS, ENDYRS, MULTI AF: ', NYRS, ENDYRS, MULTI
                  !IF (MULTI .GT. 1) THEN
                  !   RUN   = RUN + 1
                  !   CALL MULTIRUN(RUN, 0)  !Pang: don't need this
@@ -270,22 +267,22 @@ subroutine dssat48_main(n)
 
                 dssat48_struc(n)%dssat48(t)%doseasinit = .FALSE. !Pnng 2023.09.19
                 
-                PRINT*, 'YREND in seas: ', YREND, YRDOY
-                 PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
+                !PRINT*, 'YREND in seas: ', YREND, YRDOY
+                !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
             !----- DAILY  ------------------------------------------------------------
             ELSE
-               PRINT*, 'Im in seas daily rate'
+               !PRINT*, 'Im in seas daily rate'
                !-----------------------------------------------------------------------
                !     Calculate days after simulation (DAS) 
                !-----------------------------------------------------------------------
-                PRINT*, 'DAS1: ', DAS, YRDOY, DOY
+                !PRINT*, 'DAS1: ', DAS, YRDOY, DOY
                 YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
                 CALL YR_DOY(YRDOY,YEAR,DOY)
                 DAS   = MAX(0,TIMDIF(INCYD(YRSIM,-1),YRDOY))
                 dssat48_struc(n)%CONTROL(t) % yrdoy = YRDOY
                 dssat48_struc(n)%CONTROL(t) % das = DAS
-                 PRINT*, 'DAS2: ', DAS, YRDOY, DOY
-                 PRINT*, 'DAS3: ', dssat48_struc(n)%CONTROL(t) % das
+                 !PRINT*, 'DAS2: ', DAS, YRDOY, DOY
+                 !PRINT*, 'DAS3: ', dssat48_struc(n)%CONTROL(t) % das
                !-----------------------------------------------------------------------
                !*********************************************************************** 
                !     RATE CALCULATIONS
@@ -293,24 +290,24 @@ subroutine dssat48_main(n)
                dssat48_struc(n)%CONTROL(t)%dynamic = 3 !3: DAILY RATE
                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-                PRINT*, 'YREND in Rate: ', YREND, YRDOY
-                PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
+                !PRINT*, 'YREND in Rate: ', YREND, YRDOY
+                !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
                !*********************************************************************** 
                !     INTEGRATION 
                !*********************************************************************** 
                dssat48_struc(n)%CONTROL(t)%dynamic = 4 !4: DAILY INTEGR
                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-                PRINT*, 'YREND in Integr: ', YREND, YRDOY
-                PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
+                !PRINT*, 'YREND in Integr: ', YREND, YRDOY
+                !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
                !*********************************************************************** 
                !     OUTPUT
                !*********************************************************************** 
                dssat48_struc(n)%CONTROL(t)%dynamic = 5 !5: DAILY OUTPUT IF NEEDED
                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-               PRINT*, 'YREND in Output: ', YREND, YRDOY
-               PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
+               !PRINT*, 'YREND in Output: ', YREND, YRDOY
+               !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
                !-----------------------------------------------------------------------
 
                 IF (YRDOY.EQ.YREND) THEN
