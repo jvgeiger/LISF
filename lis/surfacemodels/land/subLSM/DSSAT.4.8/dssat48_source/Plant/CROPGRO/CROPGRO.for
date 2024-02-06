@@ -36,7 +36,7 @@ C  07/08/2003 CHP Added KSEVAP for export to soil evaporation routines.
 !  06/11/2007 CHP PStres1 affects photosynthesis, PStres2 affects growth
 C=======================================================================
 
-      SUBROUTINE CROPGRO(CONTROL, ISWITCH, 
+      SUBROUTINE CROPGRO(CONTROL, ISWITCH, nest, t, !Pang: 2024.01.24
      &    EOP, HARVFRAC, NH4, NO3, SOILPROP, SPi_AVAIL,   !Input
      &    ST, SW, TRWUP, WEATHER, YREND, YRPLT,           !Input
      &    CANHT, EORATIO, HARVRES, KSEVAP, KTRANS, MDATE, !Output
@@ -47,7 +47,7 @@ C=======================================================================
 !-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
       USE ModuleData
-
+      USE dssat48_lsmMod !Pang: 2024.01.24
       IMPLICIT NONE
       SAVE
 !-----------------------------------------------------------------------
@@ -57,7 +57,7 @@ C=======================================================================
       CHARACTER*6 ECONO
       CHARACTER*30 FILEIO
       CHARACTER*92 FILECC, FILEGC
-
+      INTEGER nest, t
       INTEGER DAS, DYNAMIC, RUN
       INTEGER NDLEAF, NDSET, NLAYR, NOUTDO,
      &    NR1, NR2, NR5, NR7, NVEG0
@@ -210,7 +210,54 @@ C=======================================================================
       TGRO   = WEATHER % TGRO  
       TGROAV = WEATHER % TGROAV
       TMIN   = WEATHER % TMIN  
-
+!-----------------------------------------------------------------------
+! CROPGRO - IPPLNT
+! Pang 2024.01.24
+!-----------------------------------------------------------------------
+      DETACH = dssat48_struc(nest)%dssat48(t)%DETACH
+      ECONO = dssat48_struc(nest)%dssat48(t)%ECONO
+      FILECC = dssat48_struc(nest)%dssat48(t)%FILECC
+      FILEGC = dssat48_struc(nest)%dssat48(t)%FILEGC
+      NOUTDO = dssat48_struc(nest)%dssat48(t)%NOUTDO
+      CADPR1 = dssat48_struc(nest)%dssat48(t)%CADPR1
+      CMOBMX = dssat48_struc(nest)%dssat48(t)%CMOBMX
+      FRCNOD = dssat48_struc(nest)%dssat48(t)%FRCNOD
+      FREEZ1 = dssat48_struc(nest)%dssat48(t)%FREEZ1
+      FREEZ2 = dssat48_struc(nest)%dssat48(t)%FREEZ2
+      KCAN = dssat48_struc(nest)%dssat48(t)%KCAN
+      KC_SLOPE = dssat48_struc(nest)%dssat48(t)%KC_SLOPE
+      PCARSH = dssat48_struc(nest)%dssat48(t)%PCARSH
+      PCH2O = dssat48_struc(nest)%dssat48(t)%PCH2O
+      PLIPSH = dssat48_struc(nest)%dssat48(t)%PLIPSH
+      PLIGSD = dssat48_struc(nest)%dssat48(t)%PLIGSD
+      PLIGSH = dssat48_struc(nest)%dssat48(t)%PLIGSH
+      PMINSD = dssat48_struc(nest)%dssat48(t)%PMINSD
+      PMINSH = dssat48_struc(nest)%dssat48(t)%PMINSH
+      POASD = dssat48_struc(nest)%dssat48(t)%POASD
+      POASH = dssat48_struc(nest)%dssat48(t)%POASH
+      PROLFI = dssat48_struc(nest)%dssat48(t)%PROLFI
+      PRORTI = dssat48_struc(nest)%dssat48(t)%PRORTI
+      PROSHI = dssat48_struc(nest)%dssat48(t)%PROSHI
+      PROSTI = dssat48_struc(nest)%dssat48(t)%PROSTI
+      R30C2 = dssat48_struc(nest)%dssat48(t)%R30C2
+      RCH2O = dssat48_struc(nest)%dssat48(t)%RCH2O
+      RES30C = dssat48_struc(nest)%dssat48(t)%RES30C
+      RFIXN = dssat48_struc(nest)%dssat48(t)%RFIXN
+      RLIG = dssat48_struc(nest)%dssat48(t)%RLIG
+      RLIP = dssat48_struc(nest)%dssat48(t)%RLIP
+      RMIN = dssat48_struc(nest)%dssat48(t)%RMIN
+      RNH4C = dssat48_struc(nest)%dssat48(t)%RNH4C
+      RNO3C = dssat48_struc(nest)%dssat48(t)%RNO3C
+      ROA = dssat48_struc(nest)%dssat48(t)%ROA
+      RPRO = dssat48_struc(nest)%dssat48(t)%RPRO
+      RWUEP1 = dssat48_struc(nest)%dssat48(t)%RWUEP1
+      TTFIX = dssat48_struc(nest)%dssat48(t)%TTFIX
+!-----------------------------------------------------------------------
+! CROPGRO - PHOTO
+! Pang 2024.01.24
+!-----------------------------------------------------------------------
+       AGEFAC = dssat48_struc(nest)%dssat48(t)%AGEFAC
+       PG = dssat48_struc(nest)%dssat48(t)%PG
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -231,6 +278,48 @@ C=======================================================================
       KTRANS = KEP
       KSEVAP = -99.   !Defaults to old method of light
                       !  extinction calculation for soil evap.
+!-----------------------------------------------------------------------
+! CROPGRO - IPPLNT (Assigned this to memory once at INIT)
+! Pang 2024.01.24
+!-----------------------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%DETACH = DETACH
+      dssat48_struc(nest)%dssat48(t)%ECONO = ECONO
+      dssat48_struc(nest)%dssat48(t)%FILECC = FILECC
+      dssat48_struc(nest)%dssat48(t)%FILEGC = FILEGC
+      dssat48_struc(nest)%dssat48(t)%NOUTDO = NOUTDO
+      dssat48_struc(nest)%dssat48(t)%CADPR1 = CADPR1
+      dssat48_struc(nest)%dssat48(t)%CMOBMX = CMOBMX
+      dssat48_struc(nest)%dssat48(t)%FRCNOD = FRCNOD
+      dssat48_struc(nest)%dssat48(t)%FREEZ1 = FREEZ1
+      dssat48_struc(nest)%dssat48(t)%FREEZ2 = FREEZ2
+      dssat48_struc(nest)%dssat48(t)%KCAN = KCAN
+      dssat48_struc(nest)%dssat48(t)%KC_SLOPE = KC_SLOPE
+      dssat48_struc(nest)%dssat48(t)%PCARSH = PCARSH
+      dssat48_struc(nest)%dssat48(t)%PCH2O = PCH2O
+      dssat48_struc(nest)%dssat48(t)%PLIPSH = PLIPSH
+      dssat48_struc(nest)%dssat48(t)%PLIGSD = PLIGSD
+      dssat48_struc(nest)%dssat48(t)%PLIGSH = PLIGSH
+      dssat48_struc(nest)%dssat48(t)%PMINSD = PMINSD
+      dssat48_struc(nest)%dssat48(t)%PMINSH = PMINSH
+      dssat48_struc(nest)%dssat48(t)%POASD = POASD
+      dssat48_struc(nest)%dssat48(t)%POASH = POASH
+      dssat48_struc(nest)%dssat48(t)%PROLFI = PROLFI
+      dssat48_struc(nest)%dssat48(t)%PRORTI = PRORTI
+      dssat48_struc(nest)%dssat48(t)%PROSHI = PROSHI
+      dssat48_struc(nest)%dssat48(t)%PROSTI = PROSTI
+      dssat48_struc(nest)%dssat48(t)%R30C2 = R30C2
+      dssat48_struc(nest)%dssat48(t)%RCH2O = RCH2O
+      dssat48_struc(nest)%dssat48(t)%RES30C = RES30C
+      dssat48_struc(nest)%dssat48(t)%RFIXN = RFIXN
+      dssat48_struc(nest)%dssat48(t)%RLIG = RLIG
+      dssat48_struc(nest)%dssat48(t)%RLIP = RLIP
+      dssat48_struc(nest)%dssat48(t)%RMIN = RMIN
+      dssat48_struc(nest)%dssat48(t)%RNH4C = RNH4C
+      dssat48_struc(nest)%dssat48(t)%RNO3C = RNO3C
+      dssat48_struc(nest)%dssat48(t)%ROA = ROA
+      dssat48_struc(nest)%dssat48(t)%RPRO = RPRO
+      dssat48_struc(nest)%dssat48(t)%RWUEP1 = RWUEP1
+      dssat48_struc(nest)%dssat48(t)%TTFIX = TTFIX
 
       IF (CROP .NE. 'FA' .AND. MEPHO .EQ. 'C') THEN
         CALL PHOTO(CONTROL, 
@@ -1348,6 +1437,13 @@ C-----------------------------------------------------------------------
       Call PUT('PLANT', 'RNITP',  RNITP) 
       Call PUT('PLANT', 'SLAAD',  SLAAD) 
       Call PUT('PLANT', 'XPOD',   XPOD)
+
+!-----------------------------------------------------------------------
+! CROPGRO - PHOTO
+! Pang 2024.01.24
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%AGEFAC = AGEFAC
+       dssat48_struc(nest)%dssat48(t)%PG = PG
 
       RETURN
       END SUBROUTINE CROPGRO

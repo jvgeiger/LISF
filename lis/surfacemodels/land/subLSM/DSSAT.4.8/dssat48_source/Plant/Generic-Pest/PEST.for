@@ -30,7 +30,7 @@ C             ROOTDM
 C             SEEDDM
 C             VEGDM
 C=======================================================================
-      SUBROUTINE PEST(CONTROL, ISWITCH, 
+      SUBROUTINE PEST(CONTROL, ISWITCH,nest, t,       !Pang 2024.01.31 
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, PGAVL,    !Input
      &    PHTIM, PLTPOP, RTWT, SLA, SLDOT, SOILPROP,      !Input
      &    SSDOT, STMWT, TOPWT, WLFDOT, WTLF, YRPLT,       !Input
@@ -43,6 +43,7 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 !-----------------------------------------------------------------------
@@ -53,7 +54,7 @@ C=======================================================================
       CHARACTER*12  FILEP, FILET
       CHARACTER*30  FILEIO
       CHARACTER*80  PATHPE, PATHEX
-
+      INTEGER nest, t
       INTEGER DYNAMIC, LUNIO, MULTI, PCN
 
       INTEGER TRTNUM, NR2
@@ -140,7 +141,100 @@ C** WDB 1/2022 Added Target LAI from remote sensing observations (TLAI)
       YRDOY   = CONTROL % YRDOY
 
       ISWDIS  = ISWITCH % ISWDIS
-
+!-----------------------------------------------------------------------
+!------ Obtain Vars From Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.01.31 ----------------------------------------
+!------ IPPEST, IPPARM, IPPROG -----------------------------------------
+      FILET = dssat48_struc(nest)%dssat48(t)%FILET
+      PATHEX = dssat48_struc(nest)%dssat48(t)%PATHEX
+      PHTHRS8 = dssat48_struc(nest)%dssat48(t)%PHTHRS8
+      TRTNUM = dssat48_struc(nest)%dssat48(t)%TRTNUM
+      PCPID = dssat48_struc(nest)%dssat48(t)%PCPID
+      PCTID = dssat48_struc(nest)%dssat48(t)%PCTID
+      PDCF1 = dssat48_struc(nest)%dssat48(t)%PDCF1
+      PID = dssat48_struc(nest)%dssat48(t)%PID
+      IDAP = dssat48_struc(nest)%dssat48(t)%IDAP
+      PCN = dssat48_struc(nest)%dssat48(t)%PCN
+      PNO= dssat48_struc(nest)%dssat48(t)%PNO
+      YPL= dssat48_struc(nest)%dssat48(t)%YPL
+!------ PESTCP ---------------------------------------------------------
+      NSDDL = dssat48_struc(nest)%dssat48(t)%NSDDL
+      NSDDM = dssat48_struc(nest)%dssat48(t)%NSDDM
+      NSDDS = dssat48_struc(nest)%dssat48(t)%NSDDS
+      NSHDL = dssat48_struc(nest)%dssat48(t)%NSHDL
+      NSHDM = dssat48_struc(nest)%dssat48(t)%NSHDM
+      NSHDS = dssat48_struc(nest)%dssat48(t)%NSHDS
+      TLFAD = dssat48_struc(nest)%dssat48(t)%TLFAD
+      TLFMD = dssat48_struc(nest)%dssat48(t)%TLFMD
+      TRTLV = dssat48_struc(nest)%dssat48(t)%TRTLV
+      WRTMD = dssat48_struc(nest)%dssat48(t)%WRTMD
+      WSDDL= dssat48_struc(nest)%dssat48(t)%WSDDL
+      WSDDM= dssat48_struc(nest)%dssat48(t)%WSDDM
+      WSDDS= dssat48_struc(nest)%dssat48(t)%WSDDS
+      WSHDL= dssat48_struc(nest)%dssat48(t)%WSHDL
+      WSHDM= dssat48_struc(nest)%dssat48(t)%WSHDM
+      WSHDS= dssat48_struc(nest)%dssat48(t)%WSHDS
+      CPPLTD= dssat48_struc(nest)%dssat48(t)%CPPLTD
+      PCLMA= dssat48_struc(nest)%dssat48(t)%PCLMA
+      PCLMT= dssat48_struc(nest)%dssat48(t)%PCLMT
+      PCSTMD= dssat48_struc(nest)%dssat48(t)%PCSTMD
+      PDLA= dssat48_struc(nest)%dssat48(t)%PDLA
+      PLFAD= dssat48_struc(nest)%dssat48(t)%PLFAD
+      PLFMD= dssat48_struc(nest)%dssat48(t)%PLFMD
+      PPSR= dssat48_struc(nest)%dssat48(t)%PPSR
+      PRTLF= dssat48_struc(nest)%dssat48(t)%PRTLF
+      PRTLV= dssat48_struc(nest)%dssat48(t)%PRTLV
+      PRTMD= dssat48_struc(nest)%dssat48(t)%PRTMD
+      PSDDL= dssat48_struc(nest)%dssat48(t)%PSDDL
+      PSDDM= dssat48_struc(nest)%dssat48(t)%PSDDM
+      PSDDS= dssat48_struc(nest)%dssat48(t)%PSDDS
+      PSHDL= dssat48_struc(nest)%dssat48(t)%PSHDL
+      PSHDM= dssat48_struc(nest)%dssat48(t)%PSHDM
+      PSHDS= dssat48_struc(nest)%dssat48(t)%PSHDS
+      PSTMD= dssat48_struc(nest)%dssat48(t)%PSTMD
+      PVSTGD= dssat48_struc(nest)%dssat48(t)%PVSTGD
+      TDLA= dssat48_struc(nest)%dssat48(t)%TDLA
+      TPSR= dssat48_struc(nest)%dssat48(t)%TPSR
+      TRTLF= dssat48_struc(nest)%dssat48(t)%TRTLF
+      VSTGD= dssat48_struc(nest)%dssat48(t)%VSTGD
+      WSTMD= dssat48_struc(nest)%dssat48(t)%WSTMD
+      WSDD= dssat48_struc(nest)%dssat48(t)%WSDD
+      PSDD= dssat48_struc(nest)%dssat48(t)%PSDD
+      PRLV = dssat48_struc(nest)%dssat48(t)%PRLV
+!------ ASMDM ---------------------------------------------------------
+      CASM = dssat48_struc(nest)%dssat48(t)%CASM
+!------ SEEDDM ---------------------------------------------------------
+      CSDM = dssat48_struc(nest)%dssat48(t)%CSDM
+      CSDN = dssat48_struc(nest)%dssat48(t)%CSDN
+      CSHM = dssat48_struc(nest)%dssat48(t)%CSHM
+      CSHN = dssat48_struc(nest)%dssat48(t)%CSHN
+      SDIDOT = dssat48_struc(nest)%dssat48(t)%SDIDOT
+      SHIDOT = dssat48_struc(nest)%dssat48(t)%SHIDOT
+      TSDNOL = dssat48_struc(nest)%dssat48(t)%TSDNOL
+      TSDNOM = dssat48_struc(nest)%dssat48(t)%TSDNOM
+      TSDNOS = dssat48_struc(nest)%dssat48(t)%TSDNOS
+      TSDWTL = dssat48_struc(nest)%dssat48(t)%TSDWTL
+      TSDWTM = dssat48_struc(nest)%dssat48(t)%TSDWTM
+      TSDWTS = dssat48_struc(nest)%dssat48(t)%TSDWTS
+      TSHNOL = dssat48_struc(nest)%dssat48(t)%TSHNOL
+      TSHNOM = dssat48_struc(nest)%dssat48(t)%TSHNOM
+      TSHNOS = dssat48_struc(nest)%dssat48(t)%TSHNOS
+      TSHWTL = dssat48_struc(nest)%dssat48(t)%TSHWTL
+      TSHWTM = dssat48_struc(nest)%dssat48(t)%TSHWTM
+      TSHWTS = dssat48_struc(nest)%dssat48(t)%TSHWTS
+!------ VEGDM ---------------------------------------------------------
+      CLAI = dssat48_struc(nest)%dssat48(t)%CLAI
+      CLFM = dssat48_struc(nest)%dssat48(t)%CLFM
+      CSTEM = dssat48_struc(nest)%dssat48(t)%CSTEM
+      DISLAP = dssat48_struc(nest)%dssat48(t)%DISLAP
+      LAIDOT = dssat48_struc(nest)%dssat48(t)%LAIDOT
+!------ ROOTDM ---------------------------------------------------------
+      CLAI = dssat48_struc(nest)%dssat48(t)%CLAI
+      CRLF = dssat48_struc(nest)%dssat48(t)%CRLF
+      CRLV = dssat48_struc(nest)%dssat48(t)%CRLV
+      CRTM = dssat48_struc(nest)%dssat48(t)%CRTM
+      RLFDOT = dssat48_struc(nest)%dssat48(t)%RLFDOT
+      RLVDOT = dssat48_struc(nest)%dssat48(t)%RLVDOT
 C***********************************************************************
 C***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -177,7 +271,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C  Initialize whole plant factors
 C-----------------------------------------------------------------------
-      CALL PESTCP(
+      CALL PESTCP(nest, t,                      !Pang 2024.01.01
      &    PCN, PCPID, PCTID, PDCF1,                       !Input
      &    PL, PLTPOP, PNO, RTWT, SLA, STMWT, TOPWT,        !Input
      &    TSDNOL, TSDNOM, TSDNOS, TSDWTL, TSDWTM, TSDWTS, !Input
@@ -201,7 +295,7 @@ C-----------------------------------------------------------------------
      &    ASMDOT, CASM,                                   !Output
      &    SEASINIT)                                       !Control
 
-      CALL SEEDDM(
+      CALL SEEDDM(nest, t,                      !Pang 2024.02.01
      &    DAS, LAGSD, LNGPEG, NR2, PHTIM, PHTHRS8,        !Input
      &    PSDDL, PSDDM, PSDDS, PSHDL, PSHDM, PSHDS,       !Input
      &    NSDDL, NSDDM, NSDDS, NSHDL, NSHDM, NSHDS,       !Input/Output
@@ -214,7 +308,7 @@ C-----------------------------------------------------------------------
      &    TSHWTL, TSHWTM, TSHWTS,                         !Output
      &    SEASINIT,WSDD,PSDD,SDWT)                             !Control
 
-      CALL VEGDM(SEASINIT,
+      CALL VEGDM(SEASINIT,nest,t,               !Pang 2024.02.01
      &    AREALF, CLW, CSW, PCLMT, PCSTMD, PDLA, PLFAD,   !Input
      &    PLFMD, PSTMD, PVSTGD, SLA, SLDOT, SSDOT,        !Input
      &    STMWT, TDLA, TLAI,VSTGD, WLFDOT, WSTMD, WTLF,        !Input
@@ -222,7 +316,7 @@ C-----------------------------------------------------------------------
      &    CLAI, CLFM, CSTEM, DISLA, DISLAP,               !Output
      &    LAIDOT, WSIDOT)                                 !Output
 
-      CALL ROOTDM(
+      CALL ROOTDM(nest, t,                       !Pang 2024.02.01
      &    PRLV,PRTLF, PRTLV, PRTMD, RTWT, SOILPROP, TRTLF,     !Input
      &    RLV, TRTLV, WRTMD,                              !Input/Output
      &    CRLF, CRLV, CRTM, RLFDOT, RLVDOT, WRIDOT,       !Output
@@ -252,7 +346,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Compute damage applied to each coupling point.
 C-----------------------------------------------------------------------
-      CALL PESTCP(
+      CALL PESTCP(nest, t,                      !Pang 2024.01.01
      &    PCN, PCPID, PCTID, PDCF1,                       !Input
      &    PL, PLTPOP, PNO, RTWT, SLA, STMWT, TOPWT,       !Input
      &    TSDNOL, TSDNOM, TSDNOS, TSDWTL, TSDWTM, TSDWTS, !Input
@@ -269,7 +363,7 @@ C-----------------------------------------------------------------------
      &    TDLA, TPSR, TRTLF, VSTGD, WSTMD,                !Output
      &    RATE,WSDD,PSDD,PRLV)
 
-      CALL SEEDDM(
+      CALL SEEDDM(nest, t,                      !Pang 2024.02.01
      &    DAS, LAGSD, LNGPEG, NR2, PHTIM, PHTHRS8,        !Input
      &    PSDDL, PSDDM, PSDDS, PSHDL, PSHDM, PSHDS,       !Input
      &    NSDDL, NSDDM, NSDDS, NSHDL, NSHDM, NSHDS,       !Input/Output
@@ -284,7 +378,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call vegetative pest damage routine and compute damage rates
 C-----------------------------------------------------------------------
-      CALL VEGDM(RATE,
+      CALL VEGDM(RATE, nest, t,                     !Pang 2024.02.01
      &    AREALF, CLW, CSW, PCLMT, PCSTMD, PDLA, PLFAD,   !Input
      &    PLFMD, PSTMD, PVSTGD, SLA, SLDOT, SSDOT,        !Input
      &    STMWT, TDLA, TLAI,VSTGD, WLFDOT, WSTMD, WTLF,        !Input
@@ -294,7 +388,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call root pest damage routine and compute damage rates
 C-----------------------------------------------------------------------
-      CALL ROOTDM(
+      CALL ROOTDM(nest, t,                           !Pang 2024.02.01
      &    PRLV,PRTLF, PRTLV, PRTMD, RTWT, SOILPROP, TRTLF,     !Input
      &    RLV, TRTLV, WRTMD,                              !Input/Output
      &    CRLF, CRLV, CRTM, RLFDOT, RLVDOT, WRIDOT,       !Output
@@ -318,7 +412,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call routine to apply damage to seed and shell
 C-----------------------------------------------------------------------
-      CALL SEEDDM(
+      CALL SEEDDM(nest, t,                          !Pang 2024.02.01
      &    DAS, LAGSD, LNGPEG, NR2, PHTIM, PHTHRS8,        !Input
      &    PSDDL, PSDDM, PSDDS, PSHDL, PSHDM, PSHDS,       !Input
      &    NSDDL, NSDDM, NSDDS, NSHDL, NSHDM, NSHDS,       !Input/Output
@@ -333,7 +427,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call routine to apply damage to leaf and stem
 C-----------------------------------------------------------------------
-      CALL VEGDM(INTEGR,
+      CALL VEGDM(INTEGR, nest, t,                  !Pang 2024.02.01
      &    AREALF, CLW, CSW, PCLMT, PCSTMD, PDLA, PLFAD,   !Input
      &    PLFMD, PSTMD, PVSTGD, SLA, SLDOT, SSDOT,        !Input
      &    STMWT, TDLA, TLAI,VSTGD, WLFDOT, WSTMD, WTLF,        !Input
@@ -343,7 +437,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call root pest damage routine and compute damage factors
 C-----------------------------------------------------------------------
-      CALL ROOTDM(
+      CALL ROOTDM(nest, t,                         !Pang 2024.02.01
      &    PRLV, PRTLF, PRTLV, PRTMD, RTWT, SOILPROP, TRTLF,     !Input
      &    RLV, TRTLV, WRTMD,                              !Input/Output
      &    CRLF, CRLV, CRTM, RLFDOT, RLVDOT, WRIDOT,       !Output
@@ -367,6 +461,99 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!------ ASSIGN Vars To Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.01.31 ----------------------------------------
+!------ IPPEST, IPPARM, IPPROG -----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%FILET = FILET
+      dssat48_struc(nest)%dssat48(t)%PATHEX = PATHEX
+      dssat48_struc(nest)%dssat48(t)%PHTHRS8 = PHTHRS8
+      dssat48_struc(nest)%dssat48(t)%TRTNUM = TRTNUM
+      dssat48_struc(nest)%dssat48(t)%PCPID = PCPID
+      dssat48_struc(nest)%dssat48(t)%PCTID = PCTID
+      dssat48_struc(nest)%dssat48(t)%PDCF1 = PDCF1
+      dssat48_struc(nest)%dssat48(t)%PID = PID
+      dssat48_struc(nest)%dssat48(t)%IDAP = IDAP
+      dssat48_struc(nest)%dssat48(t)%PCN = PCN
+      dssat48_struc(nest)%dssat48(t)%PNO = PNO
+      dssat48_struc(nest)%dssat48(t)%YPL = YPL
+!------ PESTCP ---------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%NSDDL = NSDDL
+      dssat48_struc(nest)%dssat48(t)%NSDDM = NSDDM
+      dssat48_struc(nest)%dssat48(t)%NSDDS = NSDDS
+      dssat48_struc(nest)%dssat48(t)%NSHDL = NSHDL
+      dssat48_struc(nest)%dssat48(t)%NSHDM = NSHDM
+      dssat48_struc(nest)%dssat48(t)%NSHDS = NSHDS
+      dssat48_struc(nest)%dssat48(t)%TLFAD = TLFAD
+      dssat48_struc(nest)%dssat48(t)%TLFMD = TLFMD
+      dssat48_struc(nest)%dssat48(t)%TRTLV = TRTLV
+      dssat48_struc(nest)%dssat48(t)%WRTMD = WRTMD
+      dssat48_struc(nest)%dssat48(t)%WSDDL = WSDDL
+      dssat48_struc(nest)%dssat48(t)%WSDDM = WSDDM
+      dssat48_struc(nest)%dssat48(t)%WSDDS = WSDDS
+      dssat48_struc(nest)%dssat48(t)%WSHDL = WSHDL
+      dssat48_struc(nest)%dssat48(t)%WSHDM = WSHDM
+      dssat48_struc(nest)%dssat48(t)%WSHDS = WSHDS
+      dssat48_struc(nest)%dssat48(t)%CPPLTD = CPPLTD
+      dssat48_struc(nest)%dssat48(t)%PCLMA = PCLMA
+      dssat48_struc(nest)%dssat48(t)%PCLMT = PCLMT
+      dssat48_struc(nest)%dssat48(t)%PCSTMD = PCSTMD
+      dssat48_struc(nest)%dssat48(t)%PDLA = PDLA
+      dssat48_struc(nest)%dssat48(t)%PLFAD = PLFAD
+      dssat48_struc(nest)%dssat48(t)%PLFMD = PLFMD
+      dssat48_struc(nest)%dssat48(t)%PPSR = PPSR
+      dssat48_struc(nest)%dssat48(t)%PRTLF = PRTLF
+      dssat48_struc(nest)%dssat48(t)%PRTLV = PRTLV
+      dssat48_struc(nest)%dssat48(t)%PRTMD = PRTMD
+      dssat48_struc(nest)%dssat48(t)%PSDDL = PSDDL
+      dssat48_struc(nest)%dssat48(t)%PSDDM = PSDDM
+      dssat48_struc(nest)%dssat48(t)%PSDDS = PSDDS
+      dssat48_struc(nest)%dssat48(t)%PSHDL = PSHDL
+      dssat48_struc(nest)%dssat48(t)%PSHDM = PSHDM
+      dssat48_struc(nest)%dssat48(t)%PSHDS = PSHDS
+      dssat48_struc(nest)%dssat48(t)%PSTMD = PSTMD
+      dssat48_struc(nest)%dssat48(t)%PVSTGD= PVSTGD
+      dssat48_struc(nest)%dssat48(t)%TDLA = TDLA
+      dssat48_struc(nest)%dssat48(t)%TPSR = TPSR
+      dssat48_struc(nest)%dssat48(t)%TRTLF = TRTLF
+      dssat48_struc(nest)%dssat48(t)%VSTGD = VSTGD
+      dssat48_struc(nest)%dssat48(t)%WSTMD = WSTMD
+      dssat48_struc(nest)%dssat48(t)%WSDD = WSDD
+      dssat48_struc(nest)%dssat48(t)%PSDD = PSDD
+      dssat48_struc(nest)%dssat48(t)%PRLV = PRLV
+!------ ASMDM ---------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CASM = CASM
+!------ SEEDDM ---------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CSDM = CSDM
+      dssat48_struc(nest)%dssat48(t)%CSDN = CSDN
+      dssat48_struc(nest)%dssat48(t)%CSHM = CSHM
+      dssat48_struc(nest)%dssat48(t)%CSHN =CSHN
+      dssat48_struc(nest)%dssat48(t)%SDIDOT = SDIDOT
+      dssat48_struc(nest)%dssat48(t)%SHIDOT = SHIDOT
+      dssat48_struc(nest)%dssat48(t)%TSDNOL = TSDNOL
+      dssat48_struc(nest)%dssat48(t)%TSDNOM = TSDNOM
+      dssat48_struc(nest)%dssat48(t)%TSDNOS = TSDNOS
+      dssat48_struc(nest)%dssat48(t)%TSDWTL = TSDWTL
+      dssat48_struc(nest)%dssat48(t)%TSDWTM = TSDWTM
+      dssat48_struc(nest)%dssat48(t)%TSDWTS = TSDWTS
+      dssat48_struc(nest)%dssat48(t)%TSHNOL = TSHNOL
+      dssat48_struc(nest)%dssat48(t)%TSHNOM = TSHNOM
+      dssat48_struc(nest)%dssat48(t)%TSHNOS = TSHNOS
+      dssat48_struc(nest)%dssat48(t)%TSHWTL = TSHWTL
+      dssat48_struc(nest)%dssat48(t)%TSHWTM = TSHWTM
+      dssat48_struc(nest)%dssat48(t)%TSHWTS = TSHWTS
+!------ VEGDM ---------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CLAI = CLAI
+      dssat48_struc(nest)%dssat48(t)%CLFM = CLFM
+      dssat48_struc(nest)%dssat48(t)%CSTEM = CSTEM
+      dssat48_struc(nest)%dssat48(t)%DISLAP = DISLAP
+      dssat48_struc(nest)%dssat48(t)%LAIDOT = LAIDOT
+!------ ROOTDM ---------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CLAI = CLAI
+      dssat48_struc(nest)%dssat48(t)%CRLF = CRLF
+      dssat48_struc(nest)%dssat48(t)%CRLV = CRLV
+      dssat48_struc(nest)%dssat48(t)%CRTM = CRTM
+      dssat48_struc(nest)%dssat48(t)%RLFDOT = RLFDOT
+      dssat48_struc(nest)%dssat48(t)%RLVDOT = RLVDOT
       END  ! SUBROUTINE PEST
 
 !-----------------------------------------------------------------------

@@ -123,17 +123,17 @@ C=======================================================================
      &    TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,      !Output
      &    WINDSP, XELEV, XLAT, XLONG, YREND,              !Output
      &    RUNINIT)
-      PRINT*, 'FILEW: ', FILEW
-      PRINT*, 'BF WTHMOD: '
-      PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
-      PRINT*, 'FILEWW, XLAT, YYDDD'
-      PRINT*, FILEWW, XLAT, YYDDD
-      PRINT*, 'CO2, DAYL, PAR, RAIN, SRAD, TDEW'
-      PRINT*, CO2, DAYL, PAR, RAIN, SRAD, TDEW
-      PRINT*, 'TMAX, TMIN, TWILEN, WINDSP'
-      PRINT*, TMAX, TMIN, TWILEN, WINDSP
-      PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
-      PRINT*, DEC, NEV, SNUP, SNDN, YREND
+      !PRINT*, 'FILEW: ', FILEW
+      !PRINT*, 'BF WTHMOD: '
+      !PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
+      !PRINT*, 'FILEWW, XLAT, YYDDD'
+      !PRINT*, FILEWW, XLAT, YYDDD
+      !PRINT*, 'CO2, DAYL, PAR, RAIN, SRAD, TDEW'
+      !PRINT*, CO2, DAYL, PAR, RAIN, SRAD, TDEW
+      !PRINT*, 'TMAX, TMIN, TWILEN, WINDSP'
+      !PRINT*, TMAX, TMIN, TWILEN, WINDSP
+      !PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
+      !PRINT*, DEC, NEV, SNUP, SNDN, YREND
 
       CALL WTHMOD(RUNINIT,
      &    CONTROL, FILEWW, XLAT, YYDDD,                   !Input
@@ -142,16 +142,16 @@ C=======================================================================
      &    DEC, NEV, SNUP, SNDN, YREND)                    !Output
 
       FYRDOY = 0
-      PRINT*, 'AF WTHMOD: '
-      PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
-      PRINT*, 'FILEWW, XLAT, YYDDD'
-      PRINT*, FILEWW, XLAT, YYDDD
-      PRINT*, 'CO2, DAYL, PAR, RAIN, SRAD, TDEW'
-      PRINT*, CO2, DAYL, PAR, RAIN, SRAD, TDEW
-      PRINT*, 'TMAX, TMIN, TWILEN, WINDSP'
-      PRINT*, TMAX, TMIN, TWILEN, WINDSP
-      PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
-      PRINT*, DEC, NEV, SNUP, SNDN, YREND
+      !PRINT*, 'AF WTHMOD: '
+      !PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
+      !PRINT*, 'FILEWW, XLAT, YYDDD'
+      !PRINT*, FILEWW, XLAT, YYDDD
+      !PRINT*, 'CO2, DAYL, PAR, RAIN, SRAD, TDEW'
+      !PRINT*, CO2, DAYL, PAR, RAIN, SRAD, TDEW
+      !PRINT*, 'TMAX, TMIN, TWILEN, WINDSP'
+      !PRINT*, TMAX, TMIN, TWILEN, WINDSP
+      !PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
+      !PRINT*, DEC, NEV, SNUP, SNDN, YREND
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season

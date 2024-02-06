@@ -59,7 +59,7 @@ C  08/09/2012 GH  Added CSCAS model
 !  08/19/2021 FV Added OilcropSun
 C=======================================================================
 
-      SUBROUTINE PLANT(CONTROL, ISWITCH,
+      SUBROUTINE PLANT(CONTROL, ISWITCH, nest, t,         !Pang2024.01.18
      &    EO, EOP, EOS, EP, ES, FLOODWAT, HARVFRAC,       !Input
      &    NH4, NO3, SKi_Avail, SomLitC, SomLitE,          !Input
      &    SPi_AVAIL, SNOW, SOILPROP, SRFTEMP, ST, SW,     !Input
@@ -105,10 +105,11 @@ C-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
       USE FloodModule
+      USE dssat48_lsmMod !Pang: 2024.01.18
 
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
       CHARACTER*1  MEEVP, RNMODE
       CHARACTER*6  ERRKEY
       PARAMETER (ERRKEY = 'PLANTS')
@@ -186,6 +187,12 @@ C         Variables to run CASUPRO from Alt_PLANT.  FSR 07-23-03
       TMIN   = WEATHER % TMIN
       TWILEN = WEATHER % TWILEN
 
+!------ Obtain Vars From Memory -------------
+!------ Pang-Wei Liu 2024.01.18 -------------
+      KCAN = dssat48_struc(nest)%dssat48(t)%KCAN
+      KEP =  dssat48_struc(nest)%dssat48(t)%KEP
+      !RWUEP1 = dssat48_struc(nest)%dssat48(t)%RWUEP1 
+      FixCanht =  dssat48_struc(nest)%dssat48(t)%FixCanht
 !***********************************************************************
 !***********************************************************************
       IF (DYNAMIC .EQ. RUNINIT) THEN
@@ -353,7 +360,7 @@ C         Variables to run CASUPRO from Alt_PLANT.  FSR 07-23-03
 !-----------------------------------------------------------------------
 !     CROPGRO model
       CASE('CRGRO')
-        CALL CROPGRO(CONTROL, ISWITCH,
+        CALL CROPGRO(CONTROL, ISWITCH, nest, t,           !
      &    EOP, HARVFRAC, NH4, NO3, SOILPROP, SPi_AVAIL,   !Input
      &    ST, SW, TRWUP, WEATHER, YREND, YRPLT,           !Input
      &    CANHT, EORATIO, HARVRES, KSEVAP, KTRANS, MDATE, !Output
@@ -493,7 +500,7 @@ C         Variables to run CASUPRO from Alt_PLANT.  FSR 07-23-03
 !     -------------------------------------------------
 !     Maize, Sweetcorn
       CASE('MZCER','MZIXM','SWCER')
-        CALL MZ_CERES (CONTROL, ISWITCH,                  !Input
+        CALL MZ_CERES (CONTROL, ISWITCH, nest, t,         !Input
      &     EOP, HARVFRAC, NH4, NO3, SKi_Avail,            !Input
      &     SPi_AVAIL, SNOW,                               !Input
      &     SOILPROP, SW, TRWUP, WEATHER, YREND, YRPLT,    !Input
@@ -733,6 +740,12 @@ c     Total LAI must exceed or be equal to healthy LAI:
       ENDIF
 
 !***********************************************************************
+!------ Update Vars To Memory -------------
+!------ Pang-Wei Liu 2024.01.18 -------------
+      dssat48_struc(nest)%dssat48(t)%KCAN = KCAN
+      dssat48_struc(nest)%dssat48(t)%KEP = KEP
+      dssat48_struc(nest)%dssat48(t)%FixCanht = FixCanht
+      !dssat48_struc(nest)%dssat48(t)%RWUEP1 = RWUEP1
       RETURN
       END SUBROUTINE PLANT
 

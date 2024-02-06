@@ -46,7 +46,7 @@ C             RNOFF   (File RNOFF.for)
 C             SATFLO  (File SATFLO.for)
 C=======================================================================
 
-      SUBROUTINE WATBAL(CONTROL, ISWITCH, 
+      SUBROUTINE WATBAL(CONTROL, ISWITCH, nest, t,
      &    ES, IRRAMT, SOILPROP, SWDELTX,                  !Input
      &    TILLVALS, WEATHER,                              !Input
      &    FLOODWAT, MULCH, SWDELTU,                       !I/O
@@ -57,12 +57,14 @@ C=======================================================================
       USE ModuleDefs     
       USE ModuleData
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 !-----------------------------------------------------------------------
 !     Interface variables:
 !-----------------------------------------------------------------------
 !     Input:
+      INTEGER :: nest, t
       TYPE (ControlType), INTENT(IN) :: CONTROL
       TYPE (SwitchType) , INTENT(IN) :: ISWITCH
       REAL              , INTENT(IN) :: ES   
@@ -123,7 +125,6 @@ C=======================================================================
 !     Transfer values from constructed data types into local variables.
       DYNAMIC = CONTROL % DYNAMIC
       YRDOY   = CONTROL % YRDOY
-
       CN     = SOILPROP % CN     
       DLAYR  = SOILPROP % DLAYR  
       DS     = SOILPROP % DS     
@@ -142,7 +143,9 @@ C=======================================================================
 
       RAIN = WEATHER % RAIN
       TMAX = WEATHER % TMAX
-
+!----- Obtain Vars From Memory -----------------------------------------
+!----- Pang 2023.10.11 -------------------------------------------------
+      DLAYR_YEST= dssat48_struc(nest)%dssat48(t)%DLAYR_YEST
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -150,8 +153,8 @@ C=======================================================================
       IF (DYNAMIC .EQ. RUNINIT) THEN
 !-----------------------------------------------------------------------
 !     Call IPWBAL to read in values from input file
-      CALL IPWBAL (CONTROL, DLAYR, LL, NLAYR, SAT,        !Input
-     &    SW, WTDEP)                                      !Output
+      CALL IPWBAL (CONTROL, DLAYR, nest, t, LL, NLAYR, SAT,!Input
+     &    SW, WTDEP)                                       !Output
 
 !     Read tile drainage variables from FILEIO
       CALL TILEDRAIN(CONTROL, 
@@ -179,13 +182,13 @@ C=======================================================================
       IF (ISWWAT .EQ. 'Y') THEN
         IF (CONTROL%MULTI .GT. 1 .OR. CONTROL%RNMODE .EQ. 'Y') THEN
         !Re-read initial conditions if multi-season or forecast run
-          CALL IPWBAL (CONTROL, DLAYR, LL, NLAYR, SAT,    !Input
+          CALL IPWBAL (CONTROL, DLAYR, nest, t, LL, NLAYR, SAT, !Input
      &    SW, WTDEP)                                      !Output
         ENDIF
       ENDIF
 
 !     Initialize summary variables
-      CALL WBSUM(SEASINIT,
+      CALL WBSUM(SEASINIT, nest, t,
      &    NLAYR, DRAIN, RAIN, RUNOFF, DLAYR, SW,          !Input
      &    CRAIN, TDRAIN, TRUNOF, TSW, TSWINI)             !Output
 
@@ -233,7 +236,9 @@ C=======================================================================
       SWDELTL = 0.0
 
       DLAYR_YEST = DLAYR
-
+!----- Assign Vars To Memory do Once-----------------------------------------
+!----- Pang 2023.10.11 -------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%DLAYR_YEST = DLAYR_YEST
 !***********************************************************************
 !***********************************************************************
 !     DAILY RATE CALCULATIONS
@@ -470,7 +475,7 @@ C       extraction (based on yesterday's values) for each soil layer.
 !       DIFFSW = SWTOT2 - SWTOT1
 
 !       Perform daily summation of water balance variables.
-        CALL WBSUM(INTEGR,
+        CALL WBSUM(INTEGR, nest, t,
      &    NLAYR, DRAIN, RAIN, RUNOFF, DLAYR, SW,          !Input
      &    CRAIN, TDRAIN, TRUNOF, TSW, TSWINI)             !Output
 

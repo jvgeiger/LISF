@@ -7,13 +7,14 @@ C  REVISION HISTORY
 C  10/31/2007 US/CHP Written
 C=====================================================================
 
-      SUBROUTINE SoilKi(CONTROL, ISWITCH, 
+      SUBROUTINE SoilKi(CONTROL, ISWITCH, nest, t, 
      &    FERTDATA, KUptake, SOILPROP, TILLVALS,          !Input
      &    SKi_Avail)                                      !Output
 
 C-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModSoilMix
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -21,6 +22,7 @@ C-----------------------------------------------------------------------
       CHARACTER*6, PARAMETER :: ERRKEY = 'SOILKi'
       CHARACTER*78 MSG(4)
 
+      INTEGER nest, t
       INTEGER DYNAMIC, FERTDAY, L, NLAYR, RUN, YRDOY
 
       REAL SKiAvlProf, SKiTotProf
@@ -58,7 +60,9 @@ C-----------------------------------------------------------------------
       NLAYR   = SOILPROP % NLAYR
 
       FERTDAY = FERTDATA % FERTDAY
-
+!----------------------------------------------------------------------
+!     Pang: 2023.10.16 obtain variables from LIS memory for each pixel.
+      SKi_Tot =  dssat48_struc(nest)%dssat48(t)%SKi_Tot
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -172,6 +176,9 @@ C     END OF DYNAMIC IF CONSTRUCT
 C***********************************************************************
       ENDIF
 C***********************************************************************
+!----------------------------------------------------------------------
+!     Pang: 2023.10.16 assign variables to LIS memory for each pixel.
+      dssat48_struc(nest)%dssat48(t)%SKi_Tot = SKi_Tot
 
       RETURN
       END SUBROUTINE SoilKi

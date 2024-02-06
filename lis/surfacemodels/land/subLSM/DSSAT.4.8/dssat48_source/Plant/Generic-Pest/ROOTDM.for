@@ -10,7 +10,7 @@ C-----------------------------------------------------------------------
 C  Called by: PEST
 C  Calls:     None
 C=======================================================================
-      SUBROUTINE ROOTDM(
+      SUBROUTINE ROOTDM(nest, t,                       !Pang 2024.02.01
      &    PRLV,PRTLF, PRTLV, PRTMD, RTWT, SOILPROP, TRTLF, !Input
      &    RLV, TRTLV, WRTMD,                              !Input/Output
      &    CRLF, CRLV, CRTM, RLFDOT, RLVDOT, WRIDOT,       !Output
@@ -22,9 +22,10 @@ C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-      
+      INTEGER nest, t 
       INTEGER L
       INTEGER NLAYR
       INTEGER DYNAMIC
@@ -45,6 +46,10 @@ C-----------------------------------------------------------------------
 
       DLAYR  = SOILPROP % DLAYR  
       NLAYR  = SOILPROP % NLAYR  
+!-----------------------------------------------------------------------
+!------ Obtain Vars From Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.01.31 ----------------------------------------
+      CUMDEP = dssat48_struc(nest)%dssat48(t)%CUMDEP
 
 !***********************************************************************
 !***********************************************************************
@@ -67,6 +72,11 @@ C-----------------------------------------------------------------------
       DO L = 1,NLAYR
         CUMDEP = CUMDEP + DLAYR(L)
       ENDDO
+
+!-----------------------------------------------------------------------
+!------ Save Vars To Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.01.31 ----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CUMDEP = CUMDEP
 
 !***********************************************************************
 !***********************************************************************

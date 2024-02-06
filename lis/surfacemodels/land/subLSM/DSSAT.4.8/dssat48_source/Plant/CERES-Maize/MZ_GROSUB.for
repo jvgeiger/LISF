@@ -38,7 +38,7 @@
 !  Calls  : NFACTO NUPTAK
 !----------------------------------------------------------------------
 
-      SUBROUTINE MZ_GROSUB (DYNAMIC, ISWITCH, 
+      SUBROUTINE MZ_GROSUB (DYNAMIC, ISWITCH, nest, t, !Pang 2024.01.30
      &      ASMDOT, CDAY, CO2, DLAYR, DS, DTT, EOP, FILEIO,   !Input
      &      FracRts, ISTAGE, KG2PPM, LL, NLAYR, NH4, NO3, P3, !Input
      &      PLTPOP, PPLTD, RLV, RTDEP, RUE, SAT, SeedFrac,    !Input
@@ -62,12 +62,13 @@
 
       USE ModuleDefs
       USE Interface_SenLig_Ceres
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !----------------------------------------------------------------------
 !                         Variable Declaration
 !----------------------------------------------------------------------
-
+      INTEGER nest, t
       REAL        AGEFAC            
       REAL        APTNUP      
       REAL        AREALF
@@ -365,6 +366,129 @@
 !     Proportion of lignin in STOVER and Roots
       REAL PLIGLF, PLIGRT
 
+
+!----Pang 2024.01.30------------------------------
+       CMAT = dssat48_struc(nest)%dssat48(t)%CMAT
+       EMAT = dssat48_struc(nest)%dssat48(t)%EMAT
+       ICOLD = dssat48_struc(nest)%dssat48(t)%ICOLD
+       ICSDUR = dssat48_struc(nest)%dssat48(t)%ICSDUR
+       ISWNIT = dssat48_struc(nest)%dssat48(t)%ISWNIT
+       ISWPOT = dssat48_struc(nest)%dssat48(t)%ISWPOT
+       ISWPHO = dssat48_struc(nest)%dssat48(t)%ISWPHO
+       ISWWAT = dssat48_struc(nest)%dssat48(t)%ISWWAT
+       IDETO = dssat48_struc(nest)%dssat48(t)%IDETO
+       FILECC = dssat48_struc(nest)%dssat48(t)%FILECC
+       P1 = dssat48_struc(nest)%dssat48(t)%P1
+       P2 = dssat48_struc(nest)%dssat48(t)%P2
+       P5 = dssat48_struc(nest)%dssat48(t)%P5
+       G2 = dssat48_struc(nest)%dssat48(t)%G2
+       G3 = dssat48_struc(nest)%dssat48(t)%G3
+       PHINT = dssat48_struc(nest)%dssat48(t)%PHINT
+       PRFTC = dssat48_struc(nest)%dssat48(t)%PRFTC
+       RGFIL = dssat48_struc(nest)%dssat48(t)%RGFIL
+       PARSR = dssat48_struc(nest)%dssat48(t)%PARSR
+       CO2X = dssat48_struc(nest)%dssat48(t)%CO2X
+       CO2Y = dssat48_struc(nest)%dssat48(t)%CO2Y
+       FSLFW = dssat48_struc(nest)%dssat48(t)%FSLFW
+       FSLFN = dssat48_struc(nest)%dssat48(t)%FSLFN
+       FSLFP = dssat48_struc(nest)%dssat48(t)%FSLFP
+       SDSZ = dssat48_struc(nest)%dssat48(t)%SDSZ
+       RSGR = dssat48_struc(nest)%dssat48(t)%RSGR
+       RSGRT = dssat48_struc(nest)%dssat48(t)%RSGRT
+       CARBOT = dssat48_struc(nest)%dssat48(t)%CARBOT
+       STMWTE = dssat48_struc(nest)%dssat48(t)%STMWTE
+       RTWTE = dssat48_struc(nest)%dssat48(t)%RTWTE
+       LFWTE = dssat48_struc(nest)%dssat48(t)%LFWTE
+       SEEDRVE = dssat48_struc(nest)%dssat48(t)%SEEDRVE
+       LEAFNOE = dssat48_struc(nest)%dssat48(t)%LEAFNOE
+       PLAE = dssat48_struc(nest)%dssat48(t)%PLAE
+       TMNC = dssat48_struc(nest)%dssat48(t)%TMNC
+       TANCE = dssat48_struc(nest)%dssat48(t)%TANCE
+       RCNP = dssat48_struc(nest)%dssat48(t)%RCNP
+       RANCE = dssat48_struc(nest)%dssat48(t)%RANCE
+       CTCNP1 = dssat48_struc(nest)%dssat48(t)%CTCNP1
+       CTCNP2 = dssat48_struc(nest)%dssat48(t)%CTCNP2
+       RWUEP1 = dssat48_struc(nest)%dssat48(t)%RWUEP1
+       PLIGLF = dssat48_struc(nest)%dssat48(t)%PLIGLF
+       PLIGRT = dssat48_struc(nest)%dssat48(t)%PLIGRT
+       ASGDD = dssat48_struc(nest)%dssat48(t)%ASGDD
+       BSGDD = dssat48_struc(nest)%dssat48(t)%BSGDD
+       BIOMAS = dssat48_struc(nest)%dssat48(t)%BIOMAS
+       CANHT_POT = dssat48_struc(nest)%dssat48(t)%CANHT_POT
+       CUMDTTEG = dssat48_struc(nest)%dssat48(t)%CUMDTTEG
+       CumLeafSenes = dssat48_struc(nest)%dssat48(t)%CumLeafSenes
+       CumLeafSenesY = dssat48_struc(nest)%dssat48(t)%CumLeafSenesY
+       CumLfNSenes = dssat48_struc(nest)%dssat48(t)%CumLfNSenes
+       CUMPH = dssat48_struc(nest)%dssat48(t)%CUMPH
+       DUMMY = dssat48_struc(nest)%dssat48(t)%DUMMY
+       EARWT = dssat48_struc(nest)%dssat48(t)%EARWT
+       EP1 = dssat48_struc(nest)%dssat48(t)%EP1
+       GRAINN = dssat48_struc(nest)%dssat48(t)%GRAINN
+       GRF = dssat48_struc(nest)%dssat48(t)%GRF
+       GNP = dssat48_struc(nest)%dssat48(t)%GNP
+       GROEAR = dssat48_struc(nest)%dssat48(t)%GROEAR
+       GROGRN = dssat48_struc(nest)%dssat48(t)%GROGRN
+       GROLF = dssat48_struc(nest)%dssat48(t)%GROLF
+       GROSTM = dssat48_struc(nest)%dssat48(t)%GROSTM
+       PAR = dssat48_struc(nest)%dssat48(t)%PAR
+       LAI= dssat48_struc(nest)%dssat48(t)%LAI
+       LAIDOT = dssat48_struc(nest)%dssat48(t)%LAIDOT
+       LFWT = dssat48_struc(nest)%dssat48(t)%LFWT
+       LIFAC = dssat48_struc(nest)%dssat48(t)%LIFAC
+       MAXLAI = dssat48_struc(nest)%dssat48(t)%MAXLAI
+       NPOOL = dssat48_struc(nest)%dssat48(t)%NPOOL
+       NPOOL1 = dssat48_struc(nest)%dssat48(t)%NPOOL1
+       NPOOL2 = dssat48_struc(nest)%dssat48(t)%NPOOL2
+       NSDR = dssat48_struc(nest)%dssat48(t)%NSDR
+       NSINK = dssat48_struc(nest)%dssat48(t)%NSINK
+       PCO2 = dssat48_struc(nest)%dssat48(t)%PCO2
+       PCNSD = dssat48_struc(nest)%dssat48(t)%PCNSD
+       PDWI = dssat48_struc(nest)%dssat48(t)%PDWI
+       PLA = dssat48_struc(nest)%dssat48(t)%PLA
+       PLAG = dssat48_struc(nest)%dssat48(t)%PLAG
+       PLAS = dssat48_struc(nest)%dssat48(t)%PLAS
+       PRFT = dssat48_struc(nest)%dssat48(t)%PRFT
+       RANC = dssat48_struc(nest)%dssat48(t)%RANC
+       RMNC = dssat48_struc(nest)%dssat48(t)%RMNC
+       RNLAB = dssat48_struc(nest)%dssat48(t)%RNLAB
+       SEEDRV = dssat48_struc(nest)%dssat48(t)%SEEDRV
+       SENLA = dssat48_struc(nest)%dssat48(t)%SENLA
+       SLAN = dssat48_struc(nest)%dssat48(t)%SLAN
+       SLFC = dssat48_struc(nest)%dssat48(t)%SLFC
+       SLFN = dssat48_struc(nest)%dssat48(t)%SLFN
+       SLFP = dssat48_struc(nest)%dssat48(t)%SLFP
+       SLFT = dssat48_struc(nest)%dssat48(t)%SLFT
+       SLFW = dssat48_struc(nest)%dssat48(t)%SLFW
+       SI2 = dssat48_struc(nest)%dssat48(t)%SI2
+       SI4 = dssat48_struc(nest)%dssat48(t)%SI4
+       SI5 = dssat48_struc(nest)%dssat48(t)%SI5
+       SI6 = dssat48_struc(nest)%dssat48(t)%SI6
+       Stem2Ear = dssat48_struc(nest)%dssat48(t)%Stem2Ear
+       STMWT = dssat48_struc(nest)%dssat48(t)%STMWT
+       SUMRL = dssat48_struc(nest)%dssat48(t)%SUMRL
+       SUMEX = dssat48_struc(nest)%dssat48(t)%SUMEX
+       SWEXF = dssat48_struc(nest)%dssat48(t)%SWEXF
+       SWMAX = dssat48_struc(nest)%dssat48(t)%SWMAX
+       SWMIN = dssat48_struc(nest)%dssat48(t)%SWMIN
+       TANC = dssat48_struc(nest)%dssat48(t)%TANC
+       TAVGD = dssat48_struc(nest)%dssat48(t)%TAVGD
+       TCNP = dssat48_struc(nest)%dssat48(t)%TCNP
+       TEMPM = dssat48_struc(nest)%dssat48(t)%TEMPM
+       TFAC = dssat48_struc(nest)%dssat48(t)%TFAC
+       TI = dssat48_struc(nest)%dssat48(t)%TI
+       TNLAB = dssat48_struc(nest)%dssat48(t)%TNLAB
+       TOTNUP = dssat48_struc(nest)%dssat48(t)%TOTNUP
+       TRNU = dssat48_struc(nest)%dssat48(t)%TRNU
+       TSS = dssat48_struc(nest)%dssat48(t)%TSS
+       VANC = dssat48_struc(nest)%dssat48(t)%VANC
+       VMNC = dssat48_struc(nest)%dssat48(t)%VMNC
+       XANC = dssat48_struc(nest)%dssat48(t)%XANC
+       XLFWT = dssat48_struc(nest)%dssat48(t)%XLFWT
+       XNF = dssat48_struc(nest)%dssat48(t)%XNF
+       YIELDB = dssat48_struc(nest)%dssat48(t)%YIELDB
+       NDEF3 = dssat48_struc(nest)%dssat48(t)%NDEF3
+       NFAC = dssat48_struc(nest)%dssat48(t)%NFAC
+       PGRORT = dssat48_struc(nest)%dssat48(t)%PGRORT
 !----------------------------------------------------------------------
 !                     DYNAMIC = RUNINIT
 !----------------------------------------------------------------------
@@ -828,7 +952,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
      &       ISWPOT, NLAYR, SKi_Avail, UNH4, UNO3,        !Input
      &       KUPTAKE, KSTRES)                             !Output
 
-          CALL P_Ceres (DYNAMIC, ISWPHO,                    !Input
+          CALL P_Ceres (DYNAMIC, ISWPHO, nest, t,     !Pang 2024.01.31 !Input
      &      CumLeafSenes, DLAYR, DS, FILECC, MDATE, NLAYR,  !Input
      &      PCNVEG, PLTPOP, PODWT, RLV, RTDEP, RTWTO,       !Input
      &      SDWT, SWIDOT, SeedFrac, SPi_AVAIL, Stem2Ear,    !Input
@@ -995,7 +1119,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
               WTLF = LFWT * PLTPOP      !Leaf weight, g/m2
               STMWTO = STMWT * PLTPOP   !Stem weight, g/m2
               RTWTO = RTWT * PLTPOP     !Root weight, g/m2
-              CALL P_Ceres (EMERG, ISWPHO,                      !Input
+              CALL P_Ceres (EMERG, ISWPHO, nest, t,             !Input
      &          CumLeafSenes, DLAYR, DS, FILECC, MDATE, NLAYR,  !Input
      &          PCNVEG, PLTPOP, PODWT, RLV, RTDEP, RTWTO,       !Input
      &          SDWT, SWIDOT, SeedFrac, SPi_AVAIL, Stem2Ear,    !Input
@@ -1935,7 +2059,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
           ENDIF
 
           IF (ISWPHO .NE. 'N') THEN 
-            CALL P_Ceres (DYNAMIC, ISWPHO,                    !Input
+            CALL P_Ceres (DYNAMIC, ISWPHO,nest, t,            !Input
      &        CumLeafSenes, DLAYR, DS, FILECC, MDATE, NLAYR,  !Input
      &        PCNVEG, PLTPOP, PODWT, RLV, RTDEP, RTWTO,       !Input
      &        SDWT, SWIDOT, SeedFrac, SPi_AVAIL, Stem2Ear,    !Input
@@ -2015,7 +2139,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
           IF(ISTAGE.EQ.6) TOTNUP      = GNUP + APTNUP  
               !Need to track the logic for this...
 
-          CALL P_Ceres (DYNAMIC, ISWPHO,                    !Input
+          CALL P_Ceres (DYNAMIC, ISWPHO,nest, t,            !Input
      &      CumLeafSenes, DLAYR, DS, FILECC, MDATE, NLAYR,  !Input
      &      PCNVEG, PLTPOP, PODWT, RLV, RTDEP, RTWTO,       !Input
      &      SDWT, SWIDOT, SeedFrac, SPi_AVAIL, Stem2Ear,    !Input
@@ -2056,7 +2180,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
 !              HARVFRAC(2) = 1.0
 !        ENDIF
         
-        CALL P_Ceres (DYNAMIC, ISWPHO,                    !Input
+        CALL P_Ceres (DYNAMIC, ISWPHO, nest, t,             !Input
      &      CumLeafSenes, DLAYR, DS, FILECC, MDATE, NLAYR,  !Input
      &      PCNVEG, PLTPOP, PODWT, RLV, RTDEP, RTWTO,       !Input
      &      SDWT, SWIDOT, SeedFrac, SPi_AVAIL, Stem2Ear,    !Input
@@ -2074,6 +2198,129 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
         SENESCE % ResE(0,1) = CumLfNSenes
 
       ENDIF       !Endif for DYNAMIC LOOP
+
+!----Pang 2024.01.30------------------------------
+       dssat48_struc(nest)%dssat48(t)%CMAT = CMAT
+       dssat48_struc(nest)%dssat48(t)%EMAT = EMAT
+       dssat48_struc(nest)%dssat48(t)%ICOLD = ICOLD
+       dssat48_struc(nest)%dssat48(t)%ICSDUR = ICSDUR
+       dssat48_struc(nest)%dssat48(t)%ISWNIT = ISWNIT
+       dssat48_struc(nest)%dssat48(t)%ISWPOT = ISWPOT
+       dssat48_struc(nest)%dssat48(t)%ISWPHO = ISWPHO
+       dssat48_struc(nest)%dssat48(t)%ISWWAT = ISWWAT
+       dssat48_struc(nest)%dssat48(t)%IDETO = IDETO
+       dssat48_struc(nest)%dssat48(t)%FILECC = FILECC
+       dssat48_struc(nest)%dssat48(t)%P1 = P1
+       dssat48_struc(nest)%dssat48(t)%P2 = P2
+       dssat48_struc(nest)%dssat48(t)%P5 = P5
+       dssat48_struc(nest)%dssat48(t)%G2 = G2
+       dssat48_struc(nest)%dssat48(t)%G3 = G3
+       dssat48_struc(nest)%dssat48(t)%PHINT = PHINT
+       dssat48_struc(nest)%dssat48(t)%PRFTC = PRFTC
+       dssat48_struc(nest)%dssat48(t)%RGFIL = RGFIL
+       dssat48_struc(nest)%dssat48(t)%PARSR = PARSR
+       dssat48_struc(nest)%dssat48(t)%CO2X = CO2X
+       dssat48_struc(nest)%dssat48(t)%CO2Y = CO2Y
+       dssat48_struc(nest)%dssat48(t)%FSLFW = FSLFW
+       dssat48_struc(nest)%dssat48(t)%FSLFN = FSLFN
+       dssat48_struc(nest)%dssat48(t)%FSLFP = FSLFP
+       dssat48_struc(nest)%dssat48(t)%SDSZ = SDSZ
+       dssat48_struc(nest)%dssat48(t)%RSGR = RSGR
+       dssat48_struc(nest)%dssat48(t)%RSGRT = RSGRT
+       dssat48_struc(nest)%dssat48(t)%CARBOT = CARBOT
+       dssat48_struc(nest)%dssat48(t)%STMWTE =STMWTE
+       dssat48_struc(nest)%dssat48(t)%RTWTE = RTWTE
+       dssat48_struc(nest)%dssat48(t)%LFWTE = LFWTE
+       dssat48_struc(nest)%dssat48(t)%SEEDRVE = SEEDRVE
+       dssat48_struc(nest)%dssat48(t)%LEAFNOE = LEAFNOE
+       dssat48_struc(nest)%dssat48(t)%PLAE = PLAE
+       dssat48_struc(nest)%dssat48(t)%TMNC = TMNC
+       dssat48_struc(nest)%dssat48(t)%TANCE = TANCE
+       dssat48_struc(nest)%dssat48(t)%RCNP = RCNP
+       dssat48_struc(nest)%dssat48(t)%RANCE = RANCE
+       dssat48_struc(nest)%dssat48(t)%CTCNP1 = CTCNP1
+       dssat48_struc(nest)%dssat48(t)%CTCNP2 = CTCNP2
+       dssat48_struc(nest)%dssat48(t)%RWUEP1 = RWUEP1
+       dssat48_struc(nest)%dssat48(t)%PLIGLF = PLIGLF
+       dssat48_struc(nest)%dssat48(t)%PLIGRT = PLIGRT
+       dssat48_struc(nest)%dssat48(t)%ASGDD = ASGDD
+       dssat48_struc(nest)%dssat48(t)%BSGDD = BSGDD
+       dssat48_struc(nest)%dssat48(t)%BIOMAS = BIOMAS
+       dssat48_struc(nest)%dssat48(t)%CANHT_POT = CANHT_POT
+       dssat48_struc(nest)%dssat48(t)%CUMDTTEG = CUMDTTEG
+       dssat48_struc(nest)%dssat48(t)%CumLeafSenes = CumLeafSenes
+       dssat48_struc(nest)%dssat48(t)%CumLeafSenesY = CumLeafSenesY
+       dssat48_struc(nest)%dssat48(t)%CumLfNSenes = CumLfNSenes
+       dssat48_struc(nest)%dssat48(t)%CUMPH = CUMPH
+       dssat48_struc(nest)%dssat48(t)%DUMMY = DUMMY
+       dssat48_struc(nest)%dssat48(t)%EARWT = EARWT
+       dssat48_struc(nest)%dssat48(t)%EP1 = EP1
+       dssat48_struc(nest)%dssat48(t)%GRAINN = GRAINN
+       dssat48_struc(nest)%dssat48(t)%GRF = GRF
+       dssat48_struc(nest)%dssat48(t)%GNP = GNP
+       dssat48_struc(nest)%dssat48(t)%GROEAR = GROEAR
+       dssat48_struc(nest)%dssat48(t)%GROGRN = GROGRN
+       dssat48_struc(nest)%dssat48(t)%GROLF = GROLF
+       dssat48_struc(nest)%dssat48(t)%GROSTM = GROSTM
+       dssat48_struc(nest)%dssat48(t)%PAR = PAR
+       dssat48_struc(nest)%dssat48(t)%LAI = LAI
+       dssat48_struc(nest)%dssat48(t)%LAIDOT = LAIDOT
+       dssat48_struc(nest)%dssat48(t)%LFWT = LFWT
+       dssat48_struc(nest)%dssat48(t)%LIFAC = LIFAC
+       dssat48_struc(nest)%dssat48(t)%MAXLAI = MAXLAI
+       dssat48_struc(nest)%dssat48(t)%NPOOL = NPOOL
+       dssat48_struc(nest)%dssat48(t)%NPOOL1 = NPOOL1
+       dssat48_struc(nest)%dssat48(t)%NPOOL2 = NPOOL2
+       dssat48_struc(nest)%dssat48(t)%NSDR = NSDR
+       dssat48_struc(nest)%dssat48(t)%NSINK = NSINK
+       dssat48_struc(nest)%dssat48(t)%PCO2 = PCO2
+       dssat48_struc(nest)%dssat48(t)%PCNSD = PCNSD
+       dssat48_struc(nest)%dssat48(t)%PDWI = PDWI
+       dssat48_struc(nest)%dssat48(t)%PLA = PLA
+       dssat48_struc(nest)%dssat48(t)%PLAG = PLAG
+       dssat48_struc(nest)%dssat48(t)%PLAS = PLAS
+       dssat48_struc(nest)%dssat48(t)%PRFT = PRFT
+       dssat48_struc(nest)%dssat48(t)%RANC = RANC
+       dssat48_struc(nest)%dssat48(t)%RMNC = RMNC
+       dssat48_struc(nest)%dssat48(t)%RNLAB = RNLAB
+       dssat48_struc(nest)%dssat48(t)%SEEDRV = SEEDRV
+       dssat48_struc(nest)%dssat48(t)%SENLA = SENLA
+       dssat48_struc(nest)%dssat48(t)%SLAN = SLAN
+       dssat48_struc(nest)%dssat48(t)%SLFC = SLFC
+       dssat48_struc(nest)%dssat48(t)%SLFN = SLFN
+       dssat48_struc(nest)%dssat48(t)%SLFP = SLFP
+       dssat48_struc(nest)%dssat48(t)%SLFT = SLFT
+       dssat48_struc(nest)%dssat48(t)%SLFW = SLFW
+       dssat48_struc(nest)%dssat48(t)%SI2 = SI2
+       dssat48_struc(nest)%dssat48(t)%SI4 = SI4
+       dssat48_struc(nest)%dssat48(t)%SI5 = SI5
+       dssat48_struc(nest)%dssat48(t)%SI6 = SI6
+       dssat48_struc(nest)%dssat48(t)%Stem2Ear = Stem2Ear
+       dssat48_struc(nest)%dssat48(t)%STMWT = STMWT 
+       dssat48_struc(nest)%dssat48(t)%SUMRL = SUMRL
+       dssat48_struc(nest)%dssat48(t)%SUMEX = SUMEX
+       dssat48_struc(nest)%dssat48(t)%SWEXF = SWEXF
+       dssat48_struc(nest)%dssat48(t)%SWMAX = SWMAX
+       dssat48_struc(nest)%dssat48(t)%SWMIN = SWMIN
+       dssat48_struc(nest)%dssat48(t)%TANC = TANC
+       dssat48_struc(nest)%dssat48(t)%TAVGD = TAVGD
+       dssat48_struc(nest)%dssat48(t)%TCNP = TCNP
+       dssat48_struc(nest)%dssat48(t)%TEMPM = TEMPM
+       dssat48_struc(nest)%dssat48(t)%TFAC = TFAC
+       dssat48_struc(nest)%dssat48(t)%TI = TI
+       dssat48_struc(nest)%dssat48(t)%TNLAB = TNLAB
+       dssat48_struc(nest)%dssat48(t)%TOTNUP = TOTNUP
+       dssat48_struc(nest)%dssat48(t)%TRNU = TRNU 
+       dssat48_struc(nest)%dssat48(t)%TSS = TSS
+       dssat48_struc(nest)%dssat48(t)%VANC = VANC
+       dssat48_struc(nest)%dssat48(t)%VMNC = VMNC
+       dssat48_struc(nest)%dssat48(t)%XANC = XANC
+       dssat48_struc(nest)%dssat48(t)%XLFWT = XLFWT
+       dssat48_struc(nest)%dssat48(t)%XNF = XNF
+       dssat48_struc(nest)%dssat48(t)%YIELDB = YIELDB
+       dssat48_struc(nest)%dssat48(t)%NDEF3 = NDEF3
+       dssat48_struc(nest)%dssat48(t)%NFAC = NFAC
+       dssat48_struc(nest)%dssat48(t)%PGRORT = PGRORT
 
       RETURN
 

@@ -11,7 +11,7 @@ C-----------------------------------------------------------------------
 C  Called by: PEST
 C  Calls:     None
 C=======================================================================
-      SUBROUTINE VEGDM(DYNAMIC,
+      SUBROUTINE VEGDM(DYNAMIC,nest,t,               !Pang 2024.02.01
      &    AREALF, CLW, CSW, PCLMT, PCSTMD, PDLA, PLFAD,   !Input
      &    PLFMD, PSTMD, PVSTGD, SLA, SLDOT, SSDOT,        !Input
      &    STMWT, TDLA, TLAI, VSTGD, WLFDOT, WSTMD, WTLF,        !Input
@@ -23,10 +23,12 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
 C     Leaf Variables
+      INTEGER nest,t
       REAL TLFAD,PLFAD,TLFMD,PLFMD,PCLMT  !,PCLMA
       REAL CLSEN,CLAI,CLFM,LAIDOT
       REAL DISLA, DISLAP, AREALF
@@ -46,6 +48,14 @@ C** WDB 1/2022 Added Target LAI from remote sensing observations (TLAI)
       
       INTEGER DYNAMIC
 
+!-----------------------------------------------------------------------
+!------ Obtain Vars From Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.02.01 ----------------------------------------
+      CLSEN = dssat48_struc(nest)%dssat48(t)%CLSEN
+      CLFRZ = dssat48_struc(nest)%dssat48(t)%CLFRZ
+      LDAM = dssat48_struc(nest)%dssat48(t)%LDAM
+      LAIDAM = dssat48_struc(nest)%dssat48(t)%LAIDAM
+      SDAM = dssat48_struc(nest)%dssat48(t)%SDAM
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -257,6 +267,14 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!-----------------------------------------------------------------------
+!------ Save Vars To Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.02.01 ----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CLSEN = CLSEN
+      dssat48_struc(nest)%dssat48(t)%CLFRZ = CLFRZ
+      dssat48_struc(nest)%dssat48(t)%LDAM = LDAM
+      dssat48_struc(nest)%dssat48(t)%LAIDAM = LAIDAM
+      dssat48_struc(nest)%dssat48(t)%SDAM = SDAM
       RETURN
       END  ! SUBROUTINE VEGDM
 

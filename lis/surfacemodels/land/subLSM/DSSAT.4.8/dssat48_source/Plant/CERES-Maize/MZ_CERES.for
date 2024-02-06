@@ -31,7 +31,7 @@ C======================================================================
 !----------------------------------------------------------------------
 
 
-      SUBROUTINE MZ_CERES (CONTROL, ISWITCH,              !Input
+      SUBROUTINE MZ_CERES (CONTROL, ISWITCH, nest, t,  !Pang 2024.01.26 !Input
      &     EOP, HARVFRAC, NH4, NO3, SKi_Avail,            !Input
      &     SPi_AVAIL, SNOW,                               !Input
      &     SOILPROP, SW, TRWUP, WEATHER, YREND, YRPLT,    !Input
@@ -40,12 +40,12 @@ C======================================================================
      &     STGDOY, FracRts, UNH4, UNO3, XLAI, XHLAI)      !Output
 
       USE ModuleDefs
-
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
 !----------------------------------------------------------------------
-
+      INTEGER nest, t
       REAL            AGEFAC    
       REAL            AMTRH(TS)
       REAL            APTNUP       
@@ -190,7 +190,7 @@ C      REAL            PRLF
       INTEGER         YREMRG   
       INTEGER         YRPLT 
       INTEGER         YRSIM    
-	REAL            Z2STAGE
+      REAL            Z2STAGE
 
 !     Added by W.D.B. for pest damage at CIMMYT 4/14/2001
 
@@ -282,7 +282,111 @@ C      REAL            PRLF
      &  '          ',   !19
      &  'Harvest   '/   !20
 
-
+!----------------------------------------------------------------------
+!----- Pang 2024.01.26 ------------------------------------------------
+       STNAME = dssat48_struc(nest)%dssat48(t)%STNAME 
+!----MZ_PHENOL & MZ_IX_PHENOL------------------------------------------
+       ISDATE = dssat48_struc(nest)%dssat48(t)%ISDATE
+       ISTAGE = dssat48_struc(nest)%dssat48(t)%ISTAGE
+       YREMRG = dssat48_struc(nest)%dssat48(t)%YREMRG
+       CDAY = dssat48_struc(nest)%dssat48(t)%CDAY
+       CUMDTT = dssat48_struc(nest)%dssat48(t)%CUMDTT
+       DTT = dssat48_struc(nest)%dssat48(t)%DTT
+       EARS = dssat48_struc(nest)%dssat48(t)%EARS
+       GPP = dssat48_struc(nest)%dssat48(t)%GPP
+       SUMDTT = dssat48_struc(nest)%dssat48(t)%SUMDTT
+       XNTI = dssat48_struc(nest)%dssat48(t)%XNTI
+       TLNO = dssat48_struc(nest)%dssat48(t)%TLNO
+       XSTAGE = dssat48_struc(nest)%dssat48(t)%XSTAGE
+       RUE = dssat48_struc(nest)%dssat48(t)%RUE
+       P3 = dssat48_struc(nest)%dssat48(t)%P3
+       TSEN = dssat48_struc(nest)%dssat48(t)%TSEN
+       SeedFrac = dssat48_struc(nest)%dssat48(t)%SeedFrac
+       VegFrac = dssat48_struc(nest)%dssat48(t)%VegFrac
+       PEAR = dssat48_struc(nest)%dssat48(t)%PEAR !For MZIXM
+       PSTM = dssat48_struc(nest)%dssat48(t)%PSTM
+       GDDAE = dssat48_struc(nest)%dssat48(t)%GDDAE
+       Z2STAGE = dssat48_struc(nest)%dssat48(t)%Z2STAGE
+!----MZ_GROSUB & MZ_IX_GROSUB & SW_GROSUB------------------------------
+       LEAFNO = dssat48_struc(nest)%dssat48(t)%LEAFNO
+       RSTAGE = dssat48_struc(nest)%dssat48(t)%RSTAGE
+       AGEFAC = dssat48_struc(nest)%dssat48(t)%AGEFAC
+       APTNUP = dssat48_struc(nest)%dssat48(t)%APTNUP
+       AREALF = dssat48_struc(nest)%dssat48(t)%AREALF
+       CANNAA = dssat48_struc(nest)%dssat48(t)%CANNAA
+       CANWAA = dssat48_struc(nest)%dssat48(t)%CANWAA
+       CANWH = dssat48_struc(nest)%dssat48(t)%CANWH
+       CARBO = dssat48_struc(nest)%dssat48(t)%CARBO
+       GNUP = dssat48_struc(nest)%dssat48(t)%GNUP
+       GPSM = dssat48_struc(nest)%dssat48(t)%GPSM
+       GRNWT = dssat48_struc(nest)%dssat48(t)%GRNWT
+       GRORT = dssat48_struc(nest)%dssat48(t)%GRORT
+       HI  = dssat48_struc(nest)%dssat48(t)%HI
+       HIP= dssat48_struc(nest)%dssat48(t)%HIP
+       PCNGRN= dssat48_struc(nest)%dssat48(t)%PCNGRN
+       PCNL = dssat48_struc(nest)%dssat48(t)%PCNL
+       PCNRT = dssat48_struc(nest)%dssat48(t)%PCNRT
+       PCNST = dssat48_struc(nest)%dssat48(t)%PCNST
+       PCNVEG = dssat48_struc(nest)%dssat48(t)%PCNVEG
+       PHINT = dssat48_struc(nest)%dssat48(t)%PHINT
+       PODNO = dssat48_struc(nest)%dssat48(t)%PODNO
+       PConc_Root = dssat48_struc(nest)%dssat48(t)%PConc_Root
+       PConc_Seed= dssat48_struc(nest)%dssat48(t)%PConc_Seed
+       PConc_Shel = dssat48_struc(nest)%dssat48(t)%PConc_Shel
+       PConc_Shut = dssat48_struc(nest)%dssat48(t)%PConc_Shut
+       PODWT = dssat48_struc(nest)%dssat48(t)%PODWT
+       PSTRES2 = dssat48_struc(nest)%dssat48(t)%PSTRES2
+       PTF = dssat48_struc(nest)%dssat48(t)%PTF
+       RLWR = dssat48_struc(nest)%dssat48(t)%RLWR
+       ROOTN = dssat48_struc(nest)%dssat48(t)%ROOTN
+       RTWT= dssat48_struc(nest)%dssat48(t)%RTWT
+       RTWTO = dssat48_struc(nest)%dssat48(t)%RTWTO
+       SATFAC = dssat48_struc(nest)%dssat48(t)%SATFAC
+       SDWT = dssat48_struc(nest)%dssat48(t)%SDWT
+       SEEDNO = dssat48_struc(nest)%dssat48(t)%SEEDNO
+       SHELPC = dssat48_struc(nest)%dssat48(t)%SHELPC
+       SI1  = dssat48_struc(nest)%dssat48(t)%SI1
+       SI3 = dssat48_struc(nest)%dssat48(t)%SI3
+       SKERWT = dssat48_struc(nest)%dssat48(t)%SKERWT
+       SLA = dssat48_struc(nest)%dssat48(t)%SLA
+       STMWTO = dssat48_struc(nest)%dssat48(t)%STMWTO
+       STOVER = dssat48_struc(nest)%dssat48(t)%STOVER
+       STOVN = dssat48_struc(nest)%dssat48(t)%STOVN
+       STOVWT = dssat48_struc(nest)%dssat48(t)%STOVWT
+       SUMP = dssat48_struc(nest)%dssat48(t)%SUMP
+       SWFAC = dssat48_struc(nest)%dssat48(t)%SWFAC
+       TOPWT = dssat48_struc(nest)%dssat48(t)%TOPWT
+       TURFAC = dssat48_struc(nest)%dssat48(t)%TURFAC
+       VSTAGE = dssat48_struc(nest)%dssat48(t)%VSTAGE
+       WTLF = dssat48_struc(nest)%dssat48(t)%WTLF
+       WTNCAN = dssat48_struc(nest)%dssat48(t)%WTNCAN
+       WTNLF = dssat48_struc(nest)%dssat48(t)%WTNLF
+       WTNSD = dssat48_struc(nest)%dssat48(t)%WTNSD
+       WTNST= dssat48_struc(nest)%dssat48(t)%WTNST
+       WTNUP = dssat48_struc(nest)%dssat48(t)%WTNUP
+       WTNVEG = dssat48_struc(nest)%dssat48(t)%WTNVEG
+       XGNP = dssat48_struc(nest)%dssat48(t)%XGNP
+       XN = dssat48_struc(nest)%dssat48(t)%XN
+       YIELD = dssat48_struc(nest)%dssat48(t)%YIELD
+       KSTRES= dssat48_struc(nest)%dssat48(t)%KSTRES
+!---- PEST ------------------------------------------------------------
+       SDNO = dssat48_struc(nest)%dssat48(t)%SDNO
+       SHELN = dssat48_struc(nest)%dssat48(t)%SHELN 
+       WSHIDT = dssat48_struc(nest)%dssat48(t)%WSHIDT
+       WTSD = dssat48_struc(nest)%dssat48(t)%WTSD
+       WTSHE = dssat48_struc(nest)%dssat48(t)%WTSHE
+       DISLA = dssat48_struc(nest)%dssat48(t)%DISLA
+       NPLTD = dssat48_struc(nest)%dssat48(t)%NPLTD
+       SDDES = dssat48_struc(nest)%dssat48(t)%SDDES
+       SDWT= dssat48_struc(nest)%dssat48(t)%SDWT
+       ASMDOT = dssat48_struc(nest)%dssat48(t)%ASMDOT
+       PPLTD = dssat48_struc(nest)%dssat48(t)%PPLTD
+       SWIDOT = dssat48_struc(nest)%dssat48(t)%SWIDOT
+       WLIDOT  = dssat48_struc(nest)%dssat48(t)%WLIDOT
+       WRIDOT = dssat48_struc(nest)%dssat48(t)%WRIDOT
+       WSIDOT = dssat48_struc(nest)%dssat48(t)%WSIDOT
+!----MZ_ROOTGR -------------------------------------------------------
+       RTDEP = dssat48_struc(nest)%dssat48(t)%RTDEP
 C----------------------------------------------------------------------
 C
 C              Code for all Dynamic Variables
@@ -312,28 +416,28 @@ C----------------------------------------------------------------------
           !Call phenology routine
           !-------------------------------------------------------------
           IF(MODEL(1:5).EQ.'MZCER'.OR.MODEL(1:5).EQ.'SWCER') THEN
-            CALL MZ_PHENOL(DYNAMIC,ISWWAT,FILEIO,IDETO,             !C
+            CALL MZ_PHENOL(DYNAMIC,ISWWAT,nest,t,FILEIO,IDETO,      !Pang 2024.01.24
      &      CUMDEP,DAYL,DLAYR,LEAFNO,LL,NLAYR,PLTPOP,SDEPTH,        !I
      &      SI1,SI3,SNOW, SRAD,SUMP,SW,TMAX,TMIN, TWILEN,           !I
      &      XN,YRDOY,YRSIM,                                         !I
      &      CUMDTT,DTT,EARS,GPP,ISDATE, ISTAGE,MDATE,STGDOY,SUMDTT, !O
      &      XNTI,TLNO,XSTAGE,YREMRG,RUE,KCAN,KEP, P3, TSEN, CDAY,   !O
      &      SeedFrac, VegFrac)                                      !O
-	    ELSEIF(MODEL(1:5).EQ.'MZIXM')THEN
-            CALL MZ_IX_PHENOL(DYNAMIC,ISWWAT,FILEIO,IDETO,        !C
-     &    CUMDEP,DAYL,DLAYR,LEAFNO,LL,NLAYR,PLTPOP,SDEPTH,        !I
-     &    SNOW, SRAD,SW,TMAX,TMIN, TWILEN,XN,YRDOY,YRSIM,         !I
-     &    CUMDTT,DTT,GPP,ISDATE, ISTAGE,MDATE,STGDOY,SUMDTT,      !O
-     &    XNTI,TLNO,XSTAGE,YREMRG,RUE,KCAN,KEP, P3, TSEN, CDAY,   !O
-     &    PEAR,PSTM,GDDAE,SeedFrac,VegFrac,Z2STAGE)               !O
-	    ENDIF
+          ELSEIF(MODEL(1:5).EQ.'MZIXM')THEN
+            CALL MZ_IX_PHENOL(DYNAMIC,ISWWAT,nest,t,FILEIO,IDETO, !Pang 2024.01.24
+     &      CUMDEP,DAYL,DLAYR,LEAFNO,LL,NLAYR,PLTPOP,SDEPTH,        !I
+     &      SNOW, SRAD,SW,TMAX,TMIN, TWILEN,XN,YRDOY,YRSIM,         !I
+     &      CUMDTT,DTT,GPP,ISDATE, ISTAGE,MDATE,STGDOY,SUMDTT,      !O
+     &      XNTI,TLNO,XSTAGE,YREMRG,RUE,KCAN,KEP, P3, TSEN, CDAY,   !O
+     &      PEAR,PSTM,GDDAE,SeedFrac,VegFrac,Z2STAGE)               !O
+          ENDIF
 
           !-------------------------------------------------------------
           !Call growth routine
           !-------------------------------------------------------------
           SELECT CASE(MODEL(1:5))
           CASE ('MZCER')  !CERES-Maize
-          CALL MZ_GROSUB (DYNAMIC, ISWITCH, 
+          CALL MZ_GROSUB (DYNAMIC, ISWITCH, nest, t, !Pang 2024.01.30 
      &      ASMDOT, CDAY, CO2, DLAYR, DS, DTT, EOP, FILEIO,   !Input
      &      FracRts, ISTAGE, KG2PPM, LL, NLAYR, NH4, NO3, P3, !Input
      &      PLTPOP, PPLTD, RLV, RTDEP, RUE, SAT, SeedFrac,    !Input
@@ -355,7 +459,7 @@ C----------------------------------------------------------------------
      &      WTNUP, WTNVEG, XGNP, XHLAI, XLAI, XN, YIELD,      !Output
      &      KUptake, KSTRES)                                  !Output
           CASE ('MZIXM')  !IXIM Maize
-          CALL MZ_IX_GROSUB (DYNAMIC, ISWITCH, 
+          CALL MZ_IX_GROSUB (DYNAMIC, ISWITCH,
      &      AMTRH,ASMDOT,CDAY,CO2,DLAYR,DS,DTT,DUL,EOP,FILEIO,  !Input
      &      FracRts,GDDAE,ISTAGE,KG2PPM,LL,NLAYR,NH4,NO3,P3,    !Input
      &      PLTPOP, PPLTD, PEAR, PSTM, RLV, RTDEP, RUE, SAT,    !Input
@@ -402,7 +506,7 @@ C----------------------------------------------------------------------
           !Call Root routine
           !-------------------------------------------------------------
 
-          CALL MZ_ROOTGR (DYNAMIC,ISWNIT,                         !C
+          CALL MZ_ROOTGR (DYNAMIC,ISWNIT,nest,t,           !Pang 2024.01.30
      &        CUMDEP,CUMDTT,DEPMAX,DLAYR,DTT,ESW,GRORT,ISTAGE,    !I
      %        LL,DUL,NO3,NH4,NLAYR,PLTPOP,PORMIN,RLWR,SAT,SDEPTH, !I
      %        SHF,STGDOY,SW,SWFAC,YRDOY,                          !I
@@ -429,7 +533,7 @@ C----------------------------------------------------------------------
      &    YIELD, YREMRG, YRPLT,                           !Input
      &    BWAH, SDWTAH)                                   !Output
 
-          CALL PEST(CONTROL, ISWITCH, 
+          CALL PEST(CONTROL, ISWITCH,nest, t, !Pang 2024.01.31
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, CARBO,    !Input
      &    PHTIM, PLTPOP, RTWTO, SLA, SLDOT, SOILPROP,     !Input
      &    SSDOT, STMWTO, TOPWT, WLFDOT, WTLF, YRPLT,      !Input
@@ -447,7 +551,7 @@ C-----------------------------------------------------------------------
 C     Subroutine IPPARM reads FILEP, the PEST progress file.
 C-----------------------------------------------------------------------
           IF (ISWDIS.EQ.'Y') THEN
-          CALL PEST(CONTROL, ISWITCH, 
+          CALL PEST(CONTROL, ISWITCH,nest, t,  
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, CARBO,    !Input
      &    PHTIM, PLTPOP, RTWTO, SLA, SLDOT, SOILPROP,     !Input
      &    SSDOT, STMWTO, TOPWT, WLFDOT, WTLF, YRPLT,      !Input
@@ -468,25 +572,25 @@ C-----------------------------------------------------------------------
           MDATE      = -99      
 
           IF(MODEL(1:5).EQ.'MZCER'.OR.MODEL(1:5).EQ.'SWCER') THEN
-            CALL MZ_PHENOL(DYNAMIC,ISWWAT,FILEIO,IDETO,             !C
+            CALL MZ_PHENOL(DYNAMIC,ISWWAT,nest,t,FILEIO,IDETO,      !C
      &      CUMDEP,DAYL,DLAYR,LEAFNO,LL,NLAYR,PLTPOP,SDEPTH,        !I
      &      SI1,SI3,SNOW, SRAD,SUMP,SW,TMAX,TMIN, TWILEN,           !I
      &      XN,YRDOY,YRSIM,                                         !I
      &      CUMDTT,DTT,EARS,GPP,ISDATE, ISTAGE,MDATE,STGDOY,SUMDTT, !O
      &      XNTI,TLNO,XSTAGE,YREMRG,RUE,KCAN,KEP, P3, TSEN, CDAY,   !O
      &      SeedFrac, VegFrac)                                      !O
-	    ELSEIF(MODEL(1:5).EQ.'MZIXM')THEN
-            CALL MZ_IX_PHENOL(DYNAMIC,ISWWAT,FILEIO,IDETO,        !C
+          ELSEIF(MODEL(1:5).EQ.'MZIXM')THEN
+            CALL MZ_IX_PHENOL(DYNAMIC,ISWWAT,nest,t,FILEIO,IDETO, !C
      &    CUMDEP,DAYL,DLAYR,LEAFNO,LL,NLAYR,PLTPOP,SDEPTH,        !I
      &    SNOW, SRAD,SW,TMAX,TMIN, TWILEN,XN,YRDOY,YRSIM,         !I
      &    CUMDTT,DTT,GPP,ISDATE, ISTAGE,MDATE,STGDOY,SUMDTT,      !O
      &    XNTI,TLNO,XSTAGE,YREMRG,RUE,KCAN,KEP, P3, TSEN, CDAY,   !O
      &    PEAR,PSTM,GDDAE,SeedFrac,VegFrac,Z2STAGE)               !O
-	    ENDIF
+          ENDIF
 
           SELECT CASE(MODEL(1:5))
           CASE ('MZCER')  !CERES-Maize
-          CALL MZ_GROSUB (DYNAMIC, ISWITCH, 
+          CALL MZ_GROSUB (DYNAMIC, ISWITCH, nest, t,
      &      ASMDOT, CDAY, CO2, DLAYR, DS, DTT, EOP, FILEIO,   !Input
      &      FracRts, ISTAGE, KG2PPM, LL, NLAYR, NH4, NO3, P3, !Input
      &      PLTPOP, PPLTD, RLV, RTDEP, RUE, SAT, SeedFrac,    !Input
@@ -551,7 +655,7 @@ C-----------------------------------------------------------------------
      &      WTNVEG, XGNP, XHLAI, XLAI, XN, YIELD)             !Output
           END SELECT
                          
-          CALL MZ_ROOTGR (DYNAMIC,ISWNIT,                         !C
+          CALL MZ_ROOTGR (DYNAMIC,ISWNIT,nest,t, !Pang 2024.01.30 !C
      &        CUMDEP,CUMDTT,DEPMAX,DLAYR,DTT,ESW,GRORT,ISTAGE,    !I
      %        LL,DUL,NO3,NH4,NLAYR,PLTPOP,PORMIN,RLWR,SAT,SDEPTH, !I
      %        SHF,STGDOY,SW,SWFAC,YRDOY,                          !I
@@ -591,7 +695,7 @@ C----------------------------------------------------------------------
 
 
         IF (ISWDIS.EQ.'Y') THEN
-          CALL PEST(CONTROL, ISWITCH, 
+          CALL PEST(CONTROL, ISWITCH,nest,t, 
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, CARBO,    !Input
      &    PHTIM, PLTPOP, RTWTO, SLA, SLDOT, SOILPROP,     !Input
      &    SSDOT, STMWTO, TOPWT, WLFDOT, WTLF, YRPLT,      !Input
@@ -611,7 +715,7 @@ C----------------------------------------------------------------------
       ELSEIF(DYNAMIC.EQ.INTEGR) THEN
 
         IF (ISWDIS.EQ.'Y') THEN
-          CALL PEST(CONTROL, ISWITCH, 
+          CALL PEST(CONTROL, ISWITCH,nest, t, 
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, CARBO,    !Input
      &    PHTIM, PLTPOP, RTWTO, SLA, SLDOT, SOILPROP,     !Input
      &    SSDOT, STMWTO, TOPWT, WLFDOT, WTLF, YRPLT,      !Input
@@ -627,21 +731,21 @@ C----------------------------------------------------------------------
         IF (YRDOY .EQ. YRPLT .OR. ISTAGE .NE. 7) THEN               
           IF (CROP .NE. 'FA') THEN
             IF(MODEL(1:5).EQ.'MZCER'.OR.MODEL(1:5).EQ.'SWCER') THEN
-              CALL MZ_PHENOL(DYNAMIC,ISWWAT,FILEIO,IDETO,             !C
+              CALL MZ_PHENOL(DYNAMIC,ISWWAT,nest,t,FILEIO,IDETO,      !C
      &        CUMDEP,DAYL,DLAYR,LEAFNO,LL,NLAYR,PLTPOP,SDEPTH,        !I
      &        SI1,SI3,SNOW, SRAD,SUMP,SW,TMAX,TMIN, TWILEN,           !I
      &        XN,YRDOY,YRSIM,                                         !I
      &        CUMDTT,DTT,EARS,GPP,ISDATE, ISTAGE,MDATE,STGDOY,SUMDTT, !O
      &        XNTI,TLNO,XSTAGE,YREMRG,RUE,KCAN,KEP, P3, TSEN, CDAY,   !O
      &        SeedFrac, VegFrac)                                      !O
-	      ELSEIF(MODEL(1:5).EQ.'MZIXM')THEN
-              CALL MZ_IX_PHENOL(DYNAMIC,ISWWAT,FILEIO,IDETO,      !C
+            ELSEIF(MODEL(1:5).EQ.'MZIXM')THEN
+              CALL MZ_IX_PHENOL(DYNAMIC,ISWWAT,nest,t,FILEIO,IDETO, !C
      &    CUMDEP,DAYL,DLAYR,LEAFNO,LL,NLAYR,PLTPOP,SDEPTH,        !I
      &    SNOW, SRAD,SW,TMAX,TMIN, TWILEN,XN,YRDOY,YRSIM,         !I
      &    CUMDTT,DTT,GPP,ISDATE, ISTAGE,MDATE,STGDOY,SUMDTT,      !O
      &    XNTI,TLNO,XSTAGE,YREMRG,RUE,KCAN,KEP, P3, TSEN, CDAY,   !O
      &    PEAR,PSTM,GDDAE,SeedFrac,VegFrac,Z2STAGE)               !O
-	      ENDIF
+            ENDIF
           ENDIF
         ENDIF
           !------------------------------------------------------------
@@ -650,7 +754,7 @@ C----------------------------------------------------------------------
         IF (ISTAGE .GT. 0 .AND. ISTAGE .LE. 6) THEN  
           SELECT CASE(MODEL(1:5))
           CASE ('MZCER')  !CERES-Maize
-          CALL MZ_GROSUB (DYNAMIC, ISWITCH, 
+          CALL MZ_GROSUB (DYNAMIC, ISWITCH,nest, t, 
      &      ASMDOT, CDAY, CO2, DLAYR, DS, DTT, EOP, FILEIO,   !Input
      &      FracRts, ISTAGE, KG2PPM, LL, NLAYR, NH4, NO3, P3, !Input
      &      PLTPOP, PPLTD, RLV, RTDEP, RUE, SAT, SeedFrac,    !Input
@@ -729,7 +833,7 @@ C----------------------------------------------------------------------
           IF (ISWWAT .EQ. 'Y') THEN
 
             DEPMAX = DS(NLAYR)
-            CALL MZ_ROOTGR (DYNAMIC,ISWNIT,                       !C
+            CALL MZ_ROOTGR (DYNAMIC,ISWNIT,nest,t,  !Pang 2024.01.30!C
      &        CUMDEP,CUMDTT,DEPMAX,DLAYR,DTT,ESW,GRORT,ISTAGE,    !I
      %        LL,DUL,NO3,NH4,NLAYR,PLTPOP,PORMIN,RLWR,SAT,SDEPTH, !I
      %        SHF,STGDOY,SW,SWFAC,YRDOY,                          !I
@@ -751,7 +855,7 @@ C----------------------------------------------------------------------
         IF (YRDOY .GE. YRPLT) THEN
           SELECT CASE(MODEL(1:5))
           CASE ('MZCER')  !CERES-Maize
-          CALL MZ_GROSUB (DYNAMIC, ISWITCH, 
+          CALL MZ_GROSUB (DYNAMIC, ISWITCH,nest,t,  
      &      ASMDOT, CDAY, CO2, DLAYR, DS, DTT, EOP, FILEIO,   !Input
      &      FracRts, ISTAGE, KG2PPM, LL, NLAYR, NH4, NO3, P3, !Input
      &      PLTPOP, PPLTD, RLV, RTDEP, RUE, SAT, SeedFrac,    !Input
@@ -839,7 +943,7 @@ C----------------------------------------------------------------------
      &    BWAH, SDWTAH)                                   !Output
 
       IF (ISWDIS.EQ.'Y') THEN
-        CALL PEST(CONTROL, ISWITCH, 
+        CALL PEST(CONTROL, ISWITCH,nest,t, 
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, CARBO,    !Input
      &    PHTIM, PLTPOP, RTWTO, SLA, SLDOT, SOILPROP,     !Input
      &    SSDOT, STMWTO, TOPWT, WLFDOT, WTLF, YRPLT,      !Input
@@ -859,7 +963,7 @@ C----------------------------------------------------------------------
 
           SELECT CASE(MODEL(1:5))
           CASE ('MZCER')  !CERES-Maize
-          CALL MZ_GROSUB (DYNAMIC, ISWITCH, 
+          CALL MZ_GROSUB (DYNAMIC, ISWITCH,nest, t, 
      &      ASMDOT, CDAY, CO2, DLAYR, DS, DTT, EOP, FILEIO,   !Input
      &      FracRts, ISTAGE, KG2PPM, LL, NLAYR, NH4, NO3, P3, !Input
      &      PLTPOP, PPLTD, RLV, RTDEP, RUE, SAT, SeedFrac,    !Input
@@ -958,7 +1062,112 @@ C----------------------------------------------------------------------
         SENESCE % ResE     = 0.0
 
       ENDIF
+!----------------------------------------------------------------------
+!----- Pang 2024.01.26 ------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%STNAME = STNAME
+!----MZ_PHENOL & MZ_IX_PHENOL------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%ISDATE = ISDATE
+       dssat48_struc(nest)%dssat48(t)%ISTAGE = ISTAGE
+       dssat48_struc(nest)%dssat48(t)%YREMRG = YREMRG
+       dssat48_struc(nest)%dssat48(t)%CDAY = CDAY
+       dssat48_struc(nest)%dssat48(t)%CUMDTT = CUMDTT
+       dssat48_struc(nest)%dssat48(t)%DTT = DTT
+       dssat48_struc(nest)%dssat48(t)%EARS = EARS
+       dssat48_struc(nest)%dssat48(t)%GPP = GPP
+       dssat48_struc(nest)%dssat48(t)%SUMDTT = SUMDTT
+       dssat48_struc(nest)%dssat48(t)%XNTI = XNTI
+       dssat48_struc(nest)%dssat48(t)%TLNO = TLNO
+       dssat48_struc(nest)%dssat48(t)%XSTAGE = XSTAGE
+       dssat48_struc(nest)%dssat48(t)%RUE = RUE
+       dssat48_struc(nest)%dssat48(t)%P3 = P3
+       dssat48_struc(nest)%dssat48(t)%TSEN = TSEN
+       dssat48_struc(nest)%dssat48(t)%SeedFrac = SeedFrac
+       dssat48_struc(nest)%dssat48(t)%VegFrac = VegFrac
+       dssat48_struc(nest)%dssat48(t)%PEAR = PEAR
+       dssat48_struc(nest)%dssat48(t)%PSTM = PSTM
+       dssat48_struc(nest)%dssat48(t)%GDDAE = GDDAE
+       dssat48_struc(nest)%dssat48(t)%Z2STAGE = Z2STAGE
+!----MZ_GROSUB & MZ_IX_GROSUB & SW_GROSUB------------------------------
+       dssat48_struc(nest)%dssat48(t)%LEAFNO = LEAFNO
+       dssat48_struc(nest)%dssat48(t)%RSTAGE = RSTAGE
+       dssat48_struc(nest)%dssat48(t)%AGEFAC = AGEFAC
+       dssat48_struc(nest)%dssat48(t)%APTNUP = APTNUP
+       dssat48_struc(nest)%dssat48(t)%AREALF = AREALF
+       dssat48_struc(nest)%dssat48(t)%CANNAA = CANNAA
+       dssat48_struc(nest)%dssat48(t)%CANWAA = CANWAA
+       dssat48_struc(nest)%dssat48(t)%CANWH = CANWH
+       dssat48_struc(nest)%dssat48(t)%CARBO = CARBO
+       dssat48_struc(nest)%dssat48(t)%GNUP = GNUP
+       dssat48_struc(nest)%dssat48(t)%GPSM = GPSM
+       dssat48_struc(nest)%dssat48(t)%GRNWT = GRNWT
+       dssat48_struc(nest)%dssat48(t)%GRORT = GRORT
+       dssat48_struc(nest)%dssat48(t)%HI = HI
+       dssat48_struc(nest)%dssat48(t)%HIP = HIP
+       dssat48_struc(nest)%dssat48(t)%PCNGRN = PCNGRN
+       dssat48_struc(nest)%dssat48(t)%PCNL = PCNL
+       dssat48_struc(nest)%dssat48(t)%PCNRT = PCNRT
+       dssat48_struc(nest)%dssat48(t)%PCNST = PCNST
+       dssat48_struc(nest)%dssat48(t)%PCNVEG = PCNVEG
+       dssat48_struc(nest)%dssat48(t)%PHINT = PHINT
+       dssat48_struc(nest)%dssat48(t)%PODNO = PODNO
+       dssat48_struc(nest)%dssat48(t)%PConc_Root = PConc_Root
+       dssat48_struc(nest)%dssat48(t)%PConc_Seed = PConc_Seed
+       dssat48_struc(nest)%dssat48(t)%PConc_Shel = PConc_Shel
+       dssat48_struc(nest)%dssat48(t)%PConc_Shut = PConc_Shut
+       dssat48_struc(nest)%dssat48(t)%PODWT = PODWT
+       dssat48_struc(nest)%dssat48(t)%PSTRES2 = PSTRES2
+       dssat48_struc(nest)%dssat48(t)%PTF = PTF
+       dssat48_struc(nest)%dssat48(t)%RLWR = RLWR
+       dssat48_struc(nest)%dssat48(t)%ROOTN = ROOTN
+       dssat48_struc(nest)%dssat48(t)%RTWT = RTWT
+       dssat48_struc(nest)%dssat48(t)%RTWTO = RTWTO
+       dssat48_struc(nest)%dssat48(t)%SATFAC = SATFAC
+       dssat48_struc(nest)%dssat48(t)%SDWT = SDWT
+       dssat48_struc(nest)%dssat48(t)%SEEDNO = SEEDNO
+       dssat48_struc(nest)%dssat48(t)%SHELPC = SHELPC 
+       dssat48_struc(nest)%dssat48(t)%SI1 = SI1
+       dssat48_struc(nest)%dssat48(t)%SI3 = SI3
+       dssat48_struc(nest)%dssat48(t)%SKERWT = SKERWT
+       dssat48_struc(nest)%dssat48(t)%SLA = SLA
+       dssat48_struc(nest)%dssat48(t)%STMWTO = STMWTO
+       dssat48_struc(nest)%dssat48(t)%STOVER = STOVER
+       dssat48_struc(nest)%dssat48(t)%STOVN = STOVN
+       dssat48_struc(nest)%dssat48(t)%STOVWT = STOVWT
+       dssat48_struc(nest)%dssat48(t)%SUMP = SUMP
+       dssat48_struc(nest)%dssat48(t)%SWFAC = SWFAC
+       dssat48_struc(nest)%dssat48(t)%TOPWT = TOPWT
+       dssat48_struc(nest)%dssat48(t)%TURFAC = TURFAC
+       dssat48_struc(nest)%dssat48(t)%VSTAGE = VSTAGE
+       dssat48_struc(nest)%dssat48(t)%WTLF = WTLF
+       dssat48_struc(nest)%dssat48(t)%WTNCAN = WTNCAN
+       dssat48_struc(nest)%dssat48(t)%WTNLF = WTNLF
+       dssat48_struc(nest)%dssat48(t)%WTNSD = WTNSD
+       dssat48_struc(nest)%dssat48(t)%WTNST = WTNST
+       dssat48_struc(nest)%dssat48(t)%WTNUP = WTNUP
+       dssat48_struc(nest)%dssat48(t)%WTNVEG = WTNVEG
+       dssat48_struc(nest)%dssat48(t)%XGNP = XGNP
+       dssat48_struc(nest)%dssat48(t)%XN = XN
+       dssat48_struc(nest)%dssat48(t)%YIELD = YIELD
+       dssat48_struc(nest)%dssat48(t)%KSTRES = KSTRES
 
+!---- PEST ------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%SDNO = SDNO
+       dssat48_struc(nest)%dssat48(t)%SHELN = SHELN
+       dssat48_struc(nest)%dssat48(t)%WSHIDT = WSHIDT
+       dssat48_struc(nest)%dssat48(t)%WTSD = WTSD
+       dssat48_struc(nest)%dssat48(t)%WTSHE = WTSHE
+       dssat48_struc(nest)%dssat48(t)%DISLA = DISLA
+       dssat48_struc(nest)%dssat48(t)%NPLTD = NPLTD
+       dssat48_struc(nest)%dssat48(t)%SDDES = SDDES
+       dssat48_struc(nest)%dssat48(t)%SDWT = SDWT
+       dssat48_struc(nest)%dssat48(t)%ASMDOT = ASMDOT
+       dssat48_struc(nest)%dssat48(t)%PPLTD = PPLTD
+       dssat48_struc(nest)%dssat48(t)%SWIDOT = SWIDOT
+       dssat48_struc(nest)%dssat48(t)%WLIDOT = WLIDOT
+       dssat48_struc(nest)%dssat48(t)%WRIDOT = WRIDOT
+       dssat48_struc(nest)%dssat48(t)%WSIDOT = WSIDOT
+!----MZ_ROOTGR -------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%RTDEP = RTDEP
       RETURN
       END SUBROUTINE MZ_CERES
 

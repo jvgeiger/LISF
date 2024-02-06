@@ -12,7 +12,7 @@
 !  Called by: MZ_CERES
 !  Calls:     P_PLANT
 !=======================================================================
-      SUBROUTINE P_Ceres (DYNAMIC, ISWPHO,                !Input
+      SUBROUTINE P_Ceres (DYNAMIC, ISWPHO, nest, t,       !Input, Pang 2024.01.31
      &    CumLeafSenes, DLAYR, DS, FILECC, MDATE, NLAYR,  !Input
      &    PCNVEG, PLTPOP, PODWT, RLV, RTDEP, RTWTO,       !Input
      &    SDWT, SWIDOT, SeedFrac, SPi_AVAIL, Stem2Ear,    !Input
@@ -28,6 +28,8 @@
 !     ------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
+      USE dssat48_lsmMod
+
       IMPLICIT  NONE
       SAVE
 !     ------------------------------------------------------------------
@@ -36,7 +38,7 @@
       CHARACTER*2 CROP 
       CHARACTER*6, PARAMETER :: ERRKEY = 'PCERES'
       CHARACTER*92 FILECC
-
+      INTEGER nest, t
       INTEGER DYNAMIC, L, MDATE, NLAYR, YRPLT
       INTEGER, PARAMETER :: SRFC = 0
 
@@ -65,13 +67,14 @@
 !    03/20/2007 CHP Need to call RootSoilVol to initialize root volume
 !     when fertilizer added in bands or hills prior to planting.
       INTERFACE 
-        SUBROUTINE RootSoilVol(DYNAMIC, ISWPHO,  
+        SUBROUTINE RootSoilVol(DYNAMIC, ISWPHO,  nest, t, !Pang 2024.01.31
      &    DLAYR, DS, NLAYR,           !Input from all routines
      &    PLTPOP, RLV, RTDEP, FILECC, !Input from plant routine
      &    FracRts,                    !Output
      &    LAYER, AppType)      !Input from soil module (for banded fert)
           USE ModuleDefs
           IMPLICIT NONE
+          INTEGER nest, t
           CHARACTER*1,         INTENT(IN)           :: ISWPHO
           INTEGER,             INTENT(IN)           :: DYNAMIC, NLAYR
           REAL, DIMENSION(NL), INTENT(IN)           :: DS, DLAYR
@@ -83,7 +86,23 @@
           CHARACTER*7,         INTENT(IN), OPTIONAL :: AppType
         END SUBROUTINE RootSoilVol
       END INTERFACE
-
+!-----------------------------------------------------------------------
+!----- Pang 2024.01.31 
+      CROP = dssat48_struc(nest)%dssat48(t)%CROP
+      SenSoilP = dssat48_struc(nest)%dssat48(t)%SenSoilP
+      SenSurfP = dssat48_struc(nest)%dssat48(t)%SenSurfP
+      CumSenSurfP = dssat48_struc(nest)%dssat48(t)%CumSenSurfP
+      PestShut = dssat48_struc(nest)%dssat48(t)%PestShut
+      PestRoot = dssat48_struc(nest)%dssat48(t)%PestRoot
+      PestShel = dssat48_struc(nest)%dssat48(t)%PestShel
+      PestSeed = dssat48_struc(nest)%dssat48(t)%PestSeed
+      ShutMob = dssat48_struc(nest)%dssat48(t)%ShutMob
+      RootMob = dssat48_struc(nest)%dssat48(t)%RootMob
+      ShelMob = dssat48_struc(nest)%dssat48(t)%ShelMob
+      CumLeafSenesY= dssat48_struc(nest)%dssat48(t)%CumLeafSenesY
+      PShut_kg = dssat48_struc(nest)%dssat48(t)%PShut_kg
+      PShel_kg = dssat48_struc(nest)%dssat48(t)%PShel_kg
+      PSeed_kg = dssat48_struc(nest)%dssat48(t)%PSeed_kg
 !***********************************************************************
 !***********************************************************************
       IF (DYNAMIC == SEASINIT) THEN
@@ -92,7 +111,7 @@
       CROP = CONTROL % CROP
 
 !       Soil phosphorus routine needs volume of soil adjacent to roots.
-        CALL RootSoilVol(DYNAMIC, ISWPHO,    
+        CALL RootSoilVol(DYNAMIC, ISWPHO, nest, t,   
      &    DLAYR, DS, NLAYR, PLTPOP, RLV, RTDEP, FILECC,   !Input
      &    FracRts)                                        !Output
 
@@ -149,7 +168,7 @@
       ENDIF
 
       IF (DYNAMIC == INTEGR) THEN
-        CALL RootSoilVol(DYNAMIC, ISWPHO,    
+        CALL RootSoilVol(DYNAMIC, ISWPHO, nest, t,   
      &    DLAYR, DS, NLAYR, PLTPOP, RLV, RTDEP, FILECC,   !Input
      &    FracRts)                                        !Output
 
@@ -205,6 +224,22 @@
         SENESCE % ResE(SRFC,P) = CumSenSurfP
       ENDIF
 !***********************************************************************
+      dssat48_struc(nest)%dssat48(t)%CROP = CROP
+      dssat48_struc(nest)%dssat48(t)%SenSoilP = SenSoilP
+      dssat48_struc(nest)%dssat48(t)%SenSurfP = SenSurfP
+      dssat48_struc(nest)%dssat48(t)%CumSenSurfP = CumSenSurfP
+      dssat48_struc(nest)%dssat48(t)%PestShut = PestShut
+      dssat48_struc(nest)%dssat48(t)%PestRoot = PestRoot
+      dssat48_struc(nest)%dssat48(t)%PestShel = PestShel
+      dssat48_struc(nest)%dssat48(t)%PestSeed = PestSeed
+      dssat48_struc(nest)%dssat48(t)%ShutMob = ShutMob
+      dssat48_struc(nest)%dssat48(t)%RootMob = RootMob
+      dssat48_struc(nest)%dssat48(t)%ShelMob = ShelMob
+      dssat48_struc(nest)%dssat48(t)%CumLeafSenesY = CumLeafSenesY
+      dssat48_struc(nest)%dssat48(t)%PShut_kg = PShut_kg
+      dssat48_struc(nest)%dssat48(t)%PShel_kg = PShel_kg
+      dssat48_struc(nest)%dssat48(t)%PSeed_kg = PSeed_kg
+
       RETURN
       END SUBROUTINE P_Ceres
 C=======================================================================

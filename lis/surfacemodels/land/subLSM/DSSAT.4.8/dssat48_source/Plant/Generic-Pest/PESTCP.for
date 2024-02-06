@@ -16,7 +16,7 @@ C-----------------------------------------------------------------------
 C  Called by: PEST
 C  Calls:
 C=======================================================================
-      SUBROUTINE PESTCP(
+      SUBROUTINE PESTCP(nest, t,                !Pang 2024.01.01
      &    PCN, PCPID, PCTID, PDCF1,                       !Input
      &    PL, PLTPOP, PNO, RTWT, SLA, STMWT, TOPWT,       !Input
      &    TSDNOL, TSDNOM, TSDNOS, TSDWTL, TSDWTM, TSDWTS, !Input
@@ -39,11 +39,12 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
       USE ModuleData     ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*5 PCPID(MAXPEST,6)
-
+      INTEGER nest, t
       INTEGER DYNAMIC
       INTEGER I,J,K
       INTEGER PCN
@@ -84,6 +85,15 @@ c**WDB 1/29/2020 Added Target LAI from Remote Sensing Data coupling point
       REAL TLAI
 C**WDB End change      
 
+
+!-----------------------------------------------------------------------
+!------ Obtain Vars From Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.02.01 ----------------------------------------
+      PL = dssat48_struc(nest)%dssat48(t)%PL
+      LAIW = dssat48_struc(nest)%dssat48(t)%LAIW
+      PLAIW = dssat48_struc(nest)%dssat48(t)%PLAIW
+      PDAM = dssat48_struc(nest)%dssat48(t)%PDAM
+      FSM = dssat48_struc(nest)%dssat48(t)%FSM
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -562,6 +572,14 @@ C                PSDD = PSDD + PPLTD
 !     END OF DYNAMIC IF CONSTRUCT
 !***********************************************************************
       ENDIF
+!-----------------------------------------------------------------------
+!------ Save Vars To Memory ----------------------------------------
+!------ Pang-Wei Liu 2024.02.01 ----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%PL = PL
+      dssat48_struc(nest)%dssat48(t)%LAIW = LAIW
+      dssat48_struc(nest)%dssat48(t)%PLAIW = PLAIW
+      dssat48_struc(nest)%dssat48(t)%PDAM = PDAM
+      dssat48_struc(nest)%dssat48(t)%FSM = FSM
 
 !***********************************************************************
       RETURN

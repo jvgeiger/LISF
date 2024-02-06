@@ -15,7 +15,7 @@ C  01/24/2005 CHP Written
 !                 conservation of mass with tillage and compaction.
 C=====================================================================
 
-      SUBROUTINE SoilPi(CONTROL, ISWITCH, FLOODWAT,
+      SUBROUTINE SoilPi(CONTROL, ISWITCH, nest, t, FLOODWAT,
      &    FERTDATA, IMM, MNR, PUptake, SOILPROP,          !Input
      &    FracRts, SW, TillVals,                          !Input
      &    SPi_AVAIL, SPi_Labile, YREND)                   !Output
@@ -24,12 +24,14 @@ C-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModSoilMix
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*1  ISWPHO, RNMODE
       CHARACTER*17 SOILLAYERTYPE(NL)
 
+      INTEGER nest, t
       INTEGER DYNAMIC, FERTDAY, L, NLAYR, RUN, YRDOY, NBUND, YREND
       REAL FLOOD
       REAL FerLabFracRts, FerLabFracNoRts
@@ -155,7 +157,28 @@ C-----------------------------------------------------------------------
       SOILLAYERTYPE = SOILPROP % SOILLAYERTYPE
 
       FERTDAY = FERTDATA % FERTDAY
-
+!----------------------------------------------------------------------
+!     Pang: 2023.10.16 obtain variables from LIS memory for each pixel.
+      FracRtsY =  dssat48_struc(nest)%dssat48(t)%FracRtsY
+      FIRST = dssat48_struc(nest)%dssat48(t)%SOILPI_FIRST
+      PERROR = dssat48_struc(nest)%dssat48(t)%PERROR
+      CMINERP = dssat48_struc(nest)%dssat48(t)%CMINERP
+      CIMMOBP = dssat48_struc(nest)%dssat48(t)%CIMMOBP
+      FracPSoln = dssat48_struc(nest)%dssat48(t)%FracPSoln
+      SPiActRts = dssat48_struc(nest)%dssat48(t)%SPiActRts
+      SPiLabRts = dssat48_struc(nest)%dssat48(t)%SPiLabRts
+      SPiStaRts = dssat48_struc(nest)%dssat48(t)%SPiStaRts
+      SPiSolRts = dssat48_struc(nest)%dssat48(t)%SPiSolRts
+      PiActRts = dssat48_struc(nest)%dssat48(t)%PiActRts
+      PiStaRts = dssat48_struc(nest)%dssat48(t)%PiStaRts
+      SPi_Active = dssat48_struc(nest)%dssat48(t)%SPi_Active
+      !SPi_Labile = dssat48_struc(nest)%dssat48(t)%SPi_Labile
+      SPi_Stable = dssat48_struc(nest)%dssat48(t)%SPi_Stable
+      SPi_Soluble = dssat48_struc(nest)%dssat48(t)%SPi_Soluble
+      SPiActNoRts = dssat48_struc(nest)%dssat48(t)%SPiActNoRts
+      SPiLabNoRts = dssat48_struc(nest)%dssat48(t)%SPiLabNoRts
+      SPiStaNoRts = dssat48_struc(nest)%dssat48(t)%SPiStaNoRts
+      SPiSolNoRts = dssat48_struc(nest)%dssat48(t)%SPiSolNoRts
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -818,7 +841,28 @@ C     END OF DYNAMIC IF CONSTRUCT
 C***********************************************************************
       ENDIF
 C***********************************************************************
-
+!     Pang: 2023.10.16 assign variables to LIS memory for each pixel.
+      dssat48_struc(nest)%dssat48(t)%FracRtsY = FracRtsY
+      dssat48_struc(nest)%dssat48(t)%SOILPI_FIRST = FIRST
+      dssat48_struc(nest)%dssat48(t)%PERROR = PERROR
+      dssat48_struc(nest)%dssat48(t)%CMINERP = CMINERP
+      dssat48_struc(nest)%dssat48(t)%CIMMOBP = CIMMOBP
+      dssat48_struc(nest)%dssat48(t)%FracPSoln = FracPSoln
+      dssat48_struc(nest)%dssat48(t)%SPiActRts = SPiActRts
+      dssat48_struc(nest)%dssat48(t)%SPiLabRts = SPiLabRts
+      dssat48_struc(nest)%dssat48(t)%SPiStaRts = SPiStaRts
+      dssat48_struc(nest)%dssat48(t)%SPiSolRts = SPiSolRts
+      dssat48_struc(nest)%dssat48(t)%PiActRts = PiActRts
+      dssat48_struc(nest)%dssat48(t)%PiStaRts = PiStaRts
+      dssat48_struc(nest)%dssat48(t)%SPi_Active = SPi_Active
+      !dssat48_struc(nest)%dssat48(t)%SPi_Labile = SPi_Labile
+      dssat48_struc(nest)%dssat48(t)%SPi_Stable = SPi_Stable
+      dssat48_struc(nest)%dssat48(t)%SPi_Soluble = SPi_Soluble
+      dssat48_struc(nest)%dssat48(t)%SPiActNoRts = SPiActNoRts
+      dssat48_struc(nest)%dssat48(t)%SPiLabNoRts = SPiLabNoRts
+      dssat48_struc(nest)%dssat48(t)%SPiStaNoRts = SPiStaNoRts
+      dssat48_struc(nest)%dssat48(t)%SPiSolNoRts = SPiSolNoRts
+!-----------------------------------------------------------------------
       RETURN
       END SUBROUTINE SoilPi
 
