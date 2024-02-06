@@ -230,7 +230,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Read input parameters for weather routines
 C-----------------------------------------------------------------------
-      CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
+      CALL WEATHR(CONTROL, ISWITCH, nest, t, WEATHER, YREND)  !JE
 C-----------------------------------------------------------------------
 C     Read initial soil data 
 C-----------------------------------------------------------------------
@@ -283,7 +283,7 @@ C-----------------------------------------------------------------------
 C     Call WEATHR for initialization - reads first day of weather
 C     data for use in soil N and soil temp initialization.
 C-----------------------------------------------------------------------
-      CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
+      CALL WEATHR(CONTROL, ISWITCH, nest, t, WEATHER, YREND)
 
 C-----------------------------------------------------------------------
 C     Set planting date, adjust operations dates for seasonal or 
@@ -370,7 +370,7 @@ C     calculate hourly radiation and air temperature values
 C     Note: First day of weather has already been read by 
 C       initialization call to WEATHR.
 C-----------------------------------------------------------------------
-      CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
+      CALL WEATHR(CONTROL, ISWITCH, nest, t, WEATHER, YREND)
 
 C-----------------------------------------------------------------------
 C     Call Operations Management module to determine today's 
@@ -491,7 +491,7 @@ C     Daily Output
 C***********************************************************************
       ELSE IF (DYNAMIC .EQ. OUTPUT) THEN
 
-      CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
+      CALL WEATHR(CONTROL, ISWITCH, nest, t, WEATHER, YREND)
 
         CALL SOIL(CONTROL, ISWITCH, nest, t,              !Pang2023.09.19
      &    ES, FERTDATA, FracRts, HARVRES, IRRAMT,         !Input
@@ -541,7 +541,7 @@ C***********************************************************************
       ELSE IF (DYNAMIC .EQ. SEASEND) THEN
 
 C     Call WEATHER module to close current weather file 
-      CALL WEATHR(CONTROL, ISWITCH, WEATHER, YREND)
+      CALL WEATHR(CONTROL, ISWITCH, nest, t, WEATHER, YREND)
 
 C     Print seasonal summaries and close files.
       CALL SOIL(CONTROL, ISWITCH, nest, t,               !Pang2023.09.19

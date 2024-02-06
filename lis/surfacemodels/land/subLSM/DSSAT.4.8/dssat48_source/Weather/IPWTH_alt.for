@@ -20,12 +20,13 @@ C                   a sequence occurs on Jan 1.
 !  10/18/2016 CHP Read daily ozone values (ppb)
 !  05/28/2021 FO  Added code for LAT,LONG and ELEV output in Summary.OUT
 !  08/20/2021 FO  Added support for LAT, LONG and ELEV to NASA format files.
+!  10/05/2023 JE  Modify for ingesting forcing directly from LIS
 C-----------------------------------------------------------------------
 C  Called by: WEATHR
 C  Calls:     None
 C=======================================================================
 
-      SUBROUTINE IPWTH(CONTROL, SOURCE,
+      SUBROUTINE IPWTH(nest, t, CONTROL, SOURCE,
      &    CCO2, DCO2, FILEW, FILEWC, FILEWG, FILEWW,      !Output
      &    MEWTH, OZON7, PAR,                              !Output
      &    PATHWTC, PATHWTG, PATHWTW,                      !Output
@@ -39,6 +40,7 @@ C=======================================================================
       USE ModuleData
       USE Forecast
       USE SumModule
+      use dssat48_lsmMod !JE
 
       IMPLICIT NONE
       SAVE
@@ -57,6 +59,7 @@ C=======================================================================
       CHARACTER*92 FILEWW, WFile
       CHARACTER*120 LINE
 
+      INTEGER nest, t       !JE 
       INTEGER DOY, DYNAMIC, ERR, ErrCode, FOUND, INCYD, ISIM
       INTEGER LINWTH, LNUM, LUNIO, LUNWTH, MULTI, NYEAR
       INTEGER LUNWTHC, LUNWTHG
@@ -146,7 +149,7 @@ C     The components are copied into local variables for use here.
 !       NOTE for future enhancement: May also need a third weather file for short
 !         term forecast, but this would be expected to be in the experiment directory
 !         and the name is read from Simulation Options.
-        IF (RNMODE .EQ. 'Y') THEN
+         IF (RNMODE .EQ. 'Y') THEN
           SELECT CASE (MEWTH)
             CASE ('M')
             CASE ('G')
@@ -186,7 +189,6 @@ C     The components are copied into local variables for use here.
       ELSEIF (DYNAMIC == SEASINIT) THEN
       
       ErrCode = 0
-
 !-----------------------------------------------------------------------
 !     Don't re-initialize for sequence and seasonal runs
       IF (INDEX('FQ',RNMODE) > 0 .AND. RUN > 1) RETURN
@@ -310,36 +312,36 @@ C     The components are copied into local variables for use here.
 !     that correct century is read for files with 2-digit years
       IF (RNMODE .EQ. 'Y' .AND.           !Yield forecast mode
      &    SOURCE .EQ. "FORCST" .AND.      !Getting in-season data 
-!    &    INDEX('MG',MEWTH) .GT. 0 .AND.  !Measured or generated data 
-!    &    NYEAR .GT. 1 .AND.              !Multi-year weather file
+!      &    INDEX('MG',MEWTH) .GT. 0 .AND.  !Measured or generated data 
+!      &    NYEAR .GT. 1 .AND.              !Multi-year weather file
      &    CONTROL % ENDYRS .EQ. 1) THEN   !First year simulation
-        WFPASS = 0
-        CenturyWRecord = -99
+         WFPASS = 0
+         CenturyWRecord = -99
         CALL FCAST_ScanWeathData(CONTROL, FileWW, LunWth,CenturyWRecord)
-      ENDIF
+       ENDIF
 
-      WSTAT = WFile(1:8)
-      CALL PUT('WEATHER','WSTA',WSTAT)
+       WSTAT = WFile(1:8)
+       CALL PUT('WEATHER','WSTA',WSTAT)
 
 !     If this is the first of the forecast simulations, need to 
 !     re-read weather data so that metadata are available in WEATHR 
-      IF (RNMODE .EQ. 'Y' .AND. CONTROL % ENDYRS .EQ. 1) THEN
-        LastFileW = ''
-        CLOSE (LUNWTH)
-      ENDIF
+       IF (RNMODE .EQ. 'Y' .AND. CONTROL % ENDYRS .EQ. 1) THEN
+         LastFileW = ''
+         CLOSE (LUNWTH)
+       ENDIF
 
-      IF (WFile /= LastFileW) THEN 
+       IF (WFile /= LastFileW) THEN 
 !       NRecords = 0
-        YRDOY_WY = 0
-        LastWeatherDay  = 0
-        LINWTH = 0
-        LongFile = .FALSE.
+         YRDOY_WY = 0
+         LastWeatherDay  = 0
+         LINWTH = 0
+         LongFile = .FALSE.
 
-        INQUIRE(FILE=FILEWW,EXIST=FEXIST)
-        IF (.NOT. FEXIST) THEN
-          ErrCode = 30
+         INQUIRE(FILE=FILEWW,EXIST=FEXIST)
+         IF (.NOT. FEXIST) THEN
+           ErrCode = 30
           CALL WeatherError(CONTROL, ErrCode, FILEWW, 0, YRDOYWY, YREND)
-          RETURN
+           RETURN
         ENDIF
         OPEN (LUNWTH,FILE=FILEWW,STATUS='OLD',IOSTAT=ERR)
         IF (ERR /= 0) THEN
@@ -359,6 +361,12 @@ C     The components are copied into local variables for use here.
         REFHT = -99.
         WINDHT= -99.
         CCO2  = -99.
+
+        ! JE Use latitude, longitude, and elevation from LIS
+        PRINT*, "Assigning lat, lon, and elevation from LIS"
+        XLAT  = dssat48_struc(nest)%dssat48(t)%lat
+        XLONG = dssat48_struc(nest)%dssat48(t)%lon
+        XELEV = dssat48_struc(nest)%dssat48(t)%elev
 
 !       Look for 1st header line beginning with '@' in column 1 (ISECT = 3)
         DO WHILE (.TRUE.)   !.NOT. EOF(LUNWTH)
@@ -398,26 +406,27 @@ C     The components are copied into local variables for use here.
               CASE('INSI')
                 INSI = ADJUSTL(TEXT)
 
-              CASE('LAT','WTHLAT')
-                READ(LINE(C1:C2),*,IOSTAT=ERR) XLAT
-                READ(LINE(C1:C2),*,IOSTAT=ERR) CYCRD
-                IF (ERR .NE. 0) THEN
-                  XLAT = 0.0
-                  MSG(1) = 'Error reading latitude, value of zero'
-     &              //  ' will be used.'
-                  CALL WARNING(1, ERRKEY, MSG)
-                ENDIF
-
-              CASE('LONG','WTHLONG')
-                READ(LINE(C1:C2),*,IOSTAT=ERR) XLONG
-                READ(LINE(C1:C2),*,IOSTAT=ERR) CXCRD
-                IF (ERR .NE. 0) XLONG = -99.0
-
-              CASE('ELEV','WELEV')
-                READ(LINE(C1:C2),*,IOSTAT=ERR) XELEV
-                READ(LINE(C1:C2),*,IOSTAT=ERR) CELEV
-                IF (ERR .NE. 0) XELEV = -99.0
-
+! JE Comment out reads of latitude, longitude, elevation and replace with LIS above
+!              CASE('LAT','WTHLAT')
+!                READ(LINE(C1:C2),*,IOSTAT=ERR) XLAT
+!                READ(LINE(C1:C2),*,IOSTAT=ERR) CYCRD
+!                IF (ERR .NE. 0) THEN
+!                  XLAT = 0.0
+!                  MSG(1) = 'Error reading latitude, value of zero'
+!     &              //  ' will be used.'
+!                  CALL WARNING(1, ERRKEY, MSG)
+!                ENDIF
+!
+!              CASE('LONG','WTHLONG')
+!                READ(LINE(C1:C2),*,IOSTAT=ERR) XLONG
+!                READ(LINE(C1:C2),*,IOSTAT=ERR) CXCRD
+!                IF (ERR .NE. 0) XLONG = -99.0
+!
+!              CASE('ELEV','WELEV')
+!                READ(LINE(C1:C2),*,IOSTAT=ERR) XELEV
+!                READ(LINE(C1:C2),*,IOSTAT=ERR) CELEV
+!                IF (ERR .NE. 0) XELEV = -99.0
+!JE  We will need TAV and AMP from lis_input eventually; using defaults for now
               CASE('TAV')
                 READ(LINE(C1:C2),*,IOSTAT=ERR) TAV
                 IF (ERR .NE. 0) TAV = -99.0
@@ -478,7 +487,7 @@ C     The components are copied into local variables for use here.
 C       Substitute default values if REFHT or WINDHT are missing.
         IF (REFHT <= 0.) REFHT = 1.5
         IF (WINDHT <= 0.) WINDHT = 2.0
-
+        PRINT*, "WINDHT in IPWTH: ", WINDHT
         LastFileW = WFile
         
 !       10/27/2005 CHP The checks for TAV and TAMP were being done in the 
@@ -524,7 +533,7 @@ C       Substitute default values if REFHT or WINDHT are missing.
         ENDIF
 
 !       Found header line for daily weather data
-        CALL PARSE_HEADERS(LINE, MAXCOL, HEADER, ICOUNT, COL)
+         CALL PARSE_HEADERS(LINE, MAXCOL, HEADER, ICOUNT, COL)
         IF (ICOUNT .LT. 1) CALL ERROR (ERRKEY,10,WFile,LINWTH)
         CALL Check_Weather_Headers(
      &    COL, ICOUNT, FILEWW, HEADER, LINWTH)             !Input
@@ -612,16 +621,22 @@ C       Substitute default values if REFHT or WINDHT are missing.
       DCO2  = DCO2_A(I)
       OZON7 = OZON7_A(I)
 
+      PRINT*, "In IPWTH"
+      PRINT*, "SRAD, TMAX, TMIN, RAIN"
+      PRINT*, SRAD, TMAX, TMIN, RAIN
+
 !     Error checking
       CALL DailyWeatherCheck(CONTROL,
      &    "WTHINIT", FILEWW, RAIN, RecNum, RHUM,          !Input
      &    SRAD, TDEW, TMAX, TMIN, WINDSP, YRDOY,          !Input
      &    YREND)                                          !Output
-
+   
+      PRINT*, "YREND", YREND
       IF (YREND > 0) THEN
 !       Try again with next weather day (only for initialization)
         SRAD  = SRAD_A(I+1)
         TMAX  = TMAX_A(I+1)
+        PRINT*, "I", I, "TMIN_A(I+1)", TMIN_A(I+1)
         TMIN  = TMIN_A(I+1)
         RAIN  = RAIN_A(I+1)
         TDEW  = TDEW_A(I+1)
@@ -858,7 +873,7 @@ C         Read in weather file header.
 !     New weather routine can pick up where it left off if using
 !     Long format weather files (i.e., more than one year in a file).
 
-    !  CLOSE (LUNWTH)
+!  CLOSE (LUNWTH)
       INQUIRE(UNIT=LUNWTH,OPENED=FEXIST)
 
 !***********************************************************************
