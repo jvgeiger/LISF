@@ -306,7 +306,8 @@ module LIS_pluginIndices
         "Hydroweb water level"
    character*50, public,  parameter :: LIS_wusUCLAobsId        = &
         "Western U.S. UCLA snow"
-
+   character*50, public,  parameter :: LIS_ATL15GrISdhdtobsId  = &
+        "ICEsat2 ATL15 GrIS hight change"                         !MN
 !-------------------------------------------------------------------------
 ! Bias Estimation Algorithms
 !-------------------------------------------------------------------------
