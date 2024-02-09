@@ -42,6 +42,7 @@ subroutine Crocus81_main(n)
     real                 :: lat, lon
     integer              :: row, col
     integer              :: year, month, day, hour, minute, second
+    integer              :: ly , N_active_layer
     logical              :: alarmCheck
 
 !
@@ -162,6 +163,7 @@ subroutine Crocus81_main(n)
     REAL                 :: FPICE
     character*3        :: fnest ! MN Bug in toolkit (added to this code)
     real*8    :: tmp
+
     
     allocate( tmp_SNOWSWE( CROCUS81_struc(n)%nsnow ) )
     allocate( tmp_SNOWRHO( CROCUS81_struc(n)%nsnow ) )
@@ -334,6 +336,7 @@ subroutine Crocus81_main(n)
             tmp_minute = LIS_rc%mn
  
             ! get parameters 
+            tmp_n                                   = n
             tmp_nsnow                               = CROCUS81_struc(n)%nsnow                           
             tmp_nimpur                              = CROCUS81_struc(n)%nimpur                          
             tmp_SNOWRES_opt                         = CROCUS81_struc(n)%SNOWRES_opt                     
@@ -372,11 +375,26 @@ subroutine Crocus81_main(n)
             tmp_SNOWMAK_PROP_BOOL                   = CROCUS81_struc(n)%SNOWMAK_PROP_BOOL               
             tmp_PRODSNOWMAK_BOOL                    = CROCUS81_struc(n)%PRODSNOWMAK_BOOL                
             tmp_SLOPE_DIR                           = CROCUS81_struc(n)%crocus81(t)%SLOPE_DIR ! read from LDT output
-            tmp_SAND                                = CROCUS81_struc(n)%crocus81(t)%SAND                            
-            tmp_SILT                                = CROCUS81_struc(n)%crocus81(t)%SILT                            
-            tmp_CLAY                                = CROCUS81_struc(n)%crocus81(t)%CLAY                            
-            tmp_POROSITY                            = CROCUS81_struc(n)%crocus81(t)%POROSITY            
-
+            if (.not. CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL) then
+               tmp_SAND                                = CROCUS81_struc(n)%crocus81(t)%SAND                            
+               tmp_SILT                                = CROCUS81_struc(n)%crocus81(t)%SILT                            
+               tmp_CLAY                                = CROCUS81_struc(n)%crocus81(t)%CLAY                            
+               tmp_POROSITY                            = CROCUS81_struc(n)%crocus81(t)%POROSITY            
+            else !  set dummy values (crocus driver will not use that) 
+              tmp_SAND = 0.3 
+              tmp_SILT = 0.3
+              tmp_CLAY = 0.3
+              tmp_POROSITY = 0.32 
+            endif
+            ! In Crocus bottom layer is max_N_layers top layer is 1
+            N_active_layer = 0
+            do ly = 1,CROCUS81_struc(n)%nsnow
+               if (CROCUS81_struc(n)%crocus81(t)%SNOWDZ(ly) .gt. 0 ) then
+                  N_active_layer = N_active_layer + 1
+               endif
+            enddo
+            !print*, 'CROCUS81_struc(n)%crocus81(t)%SNOWDZ(ly) 1,10,49', CROCUS81_struc(n)%crocus81(t)%SNOWDZ(1), CROCUS81_struc(n)%crocus81(t)%SNOWDZ(10), CROCUS81_struc(n)%crocus81(t)%SNOWDZ(49)
+            !print*, 'N_active_layer' ,N_active_layer
             if(LIS_rc%lsm.ne."none") then
                tmp_TG                                  = CROCUS81_struc(n)%crocus81(t)%TG
                tmp_XWGI                                = CROCUS81_struc(n)%crocus81(t)%XWGI
@@ -386,7 +404,15 @@ subroutine Crocus81_main(n)
               tmp_XWGI = 0.0 ! MN set to zero 
               tmp_XWG  = tmp_POROSITY * 0.8 ! MN assume volumetric soil water content of the snow covered
                                             ! ground is 80% of POROSITY (For Col de Porte it is between 72-85)
-              tmp_TG   = 273.15             ! no energy exchange between snow and soil
+              ! tmp_TG = 273.15 ! no energy exchange between snow and soil
+              if (N_active_layer .eq. 0.) then 
+                 tmp_TG = 273.15
+              else
+              tmp_TG   = CROCUS81_struc(n)%crocus81(t)%SNOWTEMP(N_active_layer) ! no energy exchange between snow and soil
+              !if (N_active_layer .gt. 1) print*, 'tmp_TG(ly), ly-1 , ly+1', CROCUS81_struc(n)%crocus81(t)%SNOWTEMP(N_active_layer) ,&
+              !            CROCUS81_struc(n)%crocus81(t)%SNOWTEMP(N_active_layer-1),&
+              !            CROCUS81_struc(n)%crocus81(t)%SNOWTEMP(N_active_layer+1) 
+              endif
             endif
             ! get state variables
             tmp_SNOWSWE(:)    = CROCUS81_struc(n)%crocus81(t)%SNOWSWE(:)   
@@ -407,8 +433,11 @@ subroutine Crocus81_main(n)
             tmp_USTARSNOW     = CROCUS81_struc(n)%crocus81(t)%USTARSNOW 
             tmp_CHSNOW        = CROCUS81_struc(n)%crocus81(t)%CHSNOW    
             tmp_SNOWMAK_dz    = CROCUS81_struc(n)%crocus81(t)%SNOWMAK_dz
- 
 
+           ! if (CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL) then 
+           !    tmp_TG = CROCUS81_struc(n)%crocus81(t)%SNOWTEMP(N_active_layer)
+           ! endif   
+             
 ! Compute GLACIER_BOOL 
 ! TODO check the threshold value
 ! use a threshold value of 0.2  

@@ -64,83 +64,103 @@ subroutine Crocus81_setup()
 
 
         ! read: SLOPE
-        write(LIS_logunit,*) "Crocus81: reading parameter SLOPE from ", trim(LIS_rc%paramfile(n))
-        call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_SLOPE), placeholder)
-        do t = 1, LIS_rc%npatch(n, mtype)
-            col = LIS_surface(n, mtype)%tile(t)%col
-            row = LIS_surface(n, mtype)%tile(t)%row
-            CROCUS81_struc(n)%crocus81(t)%slope = placeholder(col, row)
-        enddo 
+        if(LIS_rc%useslopemap(n) .ne. 'none') then
+           write(LIS_logunit,*) "Crocus81: reading parameter SLOPE from ", trim(LIS_rc%paramfile(n))
+           call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_SLOPE), placeholder)
+           do t = 1, LIS_rc%npatch(n, mtype)
+               col = LIS_surface(n, mtype)%tile(t)%col
+               row = LIS_surface(n, mtype)%tile(t)%row
+               CROCUS81_struc(n)%crocus81(t)%slope = placeholder(col, row)
+           enddo 
+        endif
 
-        ! read: PERMSNOWFRAC
-        write(LIS_logunit,*) "Crocus81: reading parameter PERMSNOWFRAC from ", trim(LIS_rc%paramfile(n))
-        call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_PERMSNOWFRAC), placeholder)
-        do t = 1, LIS_rc%npatch(n, mtype)
-            col = LIS_surface(n, mtype)%tile(t)%col
-            row = LIS_surface(n, mtype)%tile(t)%row
-            CROCUS81_struc(n)%crocus81(t)%permsnowfrac = placeholder(col, row)
-        enddo
+        ! read: PERMSNOWFRAC (Glacier fraction)
+        if(LIS_rc%useGlacierFractionmap(n) .ne. 'none') then
+           write(LIS_logunit,*) "Crocus81: reading parameter PERMSNOWFRAC from ", trim(LIS_rc%paramfile(n))
+           call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_PERMSNOWFRAC), placeholder)
+           do t = 1, LIS_rc%npatch(n, mtype)
+              col = LIS_surface(n, mtype)%tile(t)%col
+              row = LIS_surface(n, mtype)%tile(t)%row
+              CROCUS81_struc(n)%crocus81(t)%permsnowfrac = placeholder(col, row)
+          enddo
+        endif
 
         ! read: SLOPE_DIR
-        write(LIS_logunit,*) "Crocus81: reading parameter SLOPE_DIR from ", trim(LIS_rc%paramfile(n))
-        call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_SLOPE_DIR), placeholder)
-        do t = 1, LIS_rc%npatch(n, mtype)
-            col = LIS_surface(n, mtype)%tile(t)%col
-            row = LIS_surface(n, mtype)%tile(t)%row
-            CROCUS81_struc(n)%crocus81(t)%slope_dir = placeholder(col, row)
-        enddo 
+        if(LIS_rc%useaspectmap(n) .ne. 'none') then
+           write(LIS_logunit,*) "Crocus81: reading parameter SLOPE_DIR from ", trim(LIS_rc%paramfile(n))
+           call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_SLOPE_DIR), placeholder)
+           do t = 1, LIS_rc%npatch(n, mtype)
+               col = LIS_surface(n, mtype)%tile(t)%col
+               row = LIS_surface(n, mtype)%tile(t)%row
+               CROCUS81_struc(n)%crocus81(t)%slope_dir = placeholder(col, row)
+           enddo 
+        endif
 
         ! read: SAND
-        write(LIS_logunit,*) "Crocus81: reading parameter SAND from ", trim(LIS_rc%paramfile(n))
-        call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_SAND), placeholder)
-        do t = 1, LIS_rc%npatch(n, mtype)
-            col = LIS_surface(n, mtype)%tile(t)%col
-            row = LIS_surface(n, mtype)%tile(t)%row
-            CROCUS81_struc(n)%crocus81(t)%sand = placeholder(col, row)
-        enddo 
-
+        if(LIS_rc%usesoilfractionmap(n) .eq. 'none' .and. .not. (CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL .eqv. .true.)  ) then
+          write(LIS_logunit,*) "Set Soil fraction data source: LDT" 
+          write(LIS_logunit, *) 'program stopping ...'
+          call LIS_endrun
+        endif
+        if(LIS_rc%usesoilfractionmap(n) .ne. 'none' .and. .not. (CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL .eqv. .true.) ) then
+           write(LIS_logunit,*) "Crocus81: reading parameter SAND from ", trim(LIS_rc%paramfile(n))
+           call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_SAND), placeholder)
+           do t = 1, LIS_rc%npatch(n, mtype)
+              col = LIS_surface(n, mtype)%tile(t)%col
+              row = LIS_surface(n, mtype)%tile(t)%row
+              CROCUS81_struc(n)%crocus81(t)%sand = placeholder(col, row)
+           enddo 
+        endif
+ 
         ! read: SILT
-        write(LIS_logunit,*) "Crocus81: reading parameter SILT from ", trim(LIS_rc%paramfile(n))
-        call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_SILT), placeholder)
-        do t = 1, LIS_rc%npatch(n, mtype)
-            col = LIS_surface(n, mtype)%tile(t)%col
-            row = LIS_surface(n, mtype)%tile(t)%row
-            CROCUS81_struc(n)%crocus81(t)%silt = placeholder(col, row)
-        enddo 
+        if(LIS_rc%usesoilfractionmap(n) .ne. 'none' .and. .not. (CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL .eqv. .true.)  ) then 
+           write(LIS_logunit,*) "Crocus81: reading parameter SILT from ", trim(LIS_rc%paramfile(n))
+           call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_SILT), placeholder)
+           do t = 1, LIS_rc%npatch(n, mtype)
+              col = LIS_surface(n, mtype)%tile(t)%col
+              row = LIS_surface(n, mtype)%tile(t)%row
+              CROCUS81_struc(n)%crocus81(t)%silt = placeholder(col, row)
+          enddo 
+        endif
 
         ! read: CLAY
-        write(LIS_logunit,*) "Crocus81: reading parameter CLAY from ", trim(LIS_rc%paramfile(n))
-        call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_CLAY), placeholder)
-        do t = 1, LIS_rc%npatch(n, mtype)
-            col = LIS_surface(n, mtype)%tile(t)%col
-            row = LIS_surface(n, mtype)%tile(t)%row
-            CROCUS81_struc(n)%crocus81(t)%clay = placeholder(col, row)
-        enddo 
+        if(LIS_rc%usesoilfractionmap(n) .ne. 'none' .and. .not. (CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL .eqv. .true.) ) then
+           write(LIS_logunit,*) "Crocus81: reading parameter CLAY from ", trim(LIS_rc%paramfile(n))
+           call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_CLAY), placeholder)
+           do t = 1, LIS_rc%npatch(n, mtype)
+              col = LIS_surface(n, mtype)%tile(t)%col
+              row = LIS_surface(n, mtype)%tile(t)%row
+              CROCUS81_struc(n)%crocus81(t)%clay = placeholder(col, row)
+          enddo 
+        endif
 
         ! read: POROSITY
-        write(LIS_logunit,*) "Crocus81: reading parameter POROSITY from ", trim(LIS_rc%paramfile(n))
-        call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_POROSITY), placeholder)
-        do t = 1, LIS_rc%npatch(n, mtype)
-            col = LIS_surface(n, mtype)%tile(t)%col
-            row = LIS_surface(n, mtype)%tile(t)%row
-            CROCUS81_struc(n)%crocus81(t)%porosity = placeholder(col, row)
-        enddo 
-
+        if(LIS_rc%useporositymap(n) .ne. 'none') then
+           write(LIS_logunit,*) "Crocus81: reading parameter POROSITY from ", trim(LIS_rc%paramfile(n))
+           call LIS_read_param(n, trim(CROCUS81_struc(n)%LDT_ncvar_POROSITY), placeholder)
+           do t = 1, LIS_rc%npatch(n, mtype)
+              col = LIS_surface(n, mtype)%tile(t)%col
+              row = LIS_surface(n, mtype)%tile(t)%row
+              CROCUS81_struc(n)%crocus81(t)%porosity = placeholder(col, row)
+           enddo 
+        endif
+ 
         !----------------------------------------------!
         ! MULTILEVEL reading spatial spatial parameters !
         !----------------------------------------------!
           ! read: ALB
-          write(LIS_logunit,*) "Crocus81: reading parameter ALB from ", trim(LIS_rc%paramfile(n))
-          do k = 1, 12
+        if(LIS_rc%usealbedomap(n) .ne. 'none') then
+           write(LIS_logunit,*) "Crocus81: reading parameter ALB from ", trim(LIS_rc%paramfile(n))
+           do k = 1, 12
               call CROCUS81_read_MULTILEVEL_param(n, CROCUS81_struc(n)%LDT_ncvar_ALB, k, placeholder)
               do t = 1, LIS_rc%npatch(n, mtype)
                   col = LIS_surface(n, mtype)%tile(t)%col
                   row = LIS_surface(n, mtype)%tile(t)%row
                   CROCUS81_struc(n)%crocus81(t)%alb(k) = placeholder(col, row)
               enddo 
-          enddo 
-          
-        deallocate(placeholder)
+           enddo 
+         endif 
+       deallocate(placeholder)
     enddo
 
 

@@ -305,6 +305,7 @@ subroutine LIS_readConfig()
   allocate(LIS_rc%usequartzmap(LIS_rc%nnest))
   allocate(LIS_rc%usesnowmap(LIS_rc%nnest))
   allocate(LIS_rc%snowsrc(LIS_rc%nnest))
+  allocate(LIS_rc%useGlacierFractionmap(LIS_rc%nnest))  
 
   LIS_rc%snowsrc = 0 
   LIS_rc%usemaskmap = "none" 
@@ -329,6 +330,7 @@ subroutine LIS_readConfig()
   LIS_rc%usebexpmap = "none" 
   LIS_rc%usequartzmap = "none" 
   LIS_rc%usesnowmap = 0  
+  LIS_rc%useGlacierFractionmap = "none"
 
   call ESMF_ConfigFindLabel(LIS_config,"LIS domain and parameter data file:",&
        rc=rc)
@@ -455,6 +457,12 @@ subroutine LIS_readConfig()
      call ESMF_ConfigGetAttribute(LIS_config,LIS_rc%useemissmap(i),rc=rc)
      call LIS_verify(rc,"Emissivity data source: not defined")
   enddo
+
+  call ESMF_ConfigFindLabel(LIS_config,"Glacier fraction data source:",rc=rc)
+  do i=1,LIS_rc%nnest    
+     call ESMF_ConfigGetAttribute(LIS_config,LIS_rc%useGlacierFractionmap(i),rc=rc)
+     call LIS_verify(rc,"Glacier fraction data source: not defined")  
+  enddo 
 
   LIS_rc%tbot_update_lag = 0
   call ESMF_ConfigFindLabel(LIS_config,"TBOT lag skin temperature update option:",rc=rc)
