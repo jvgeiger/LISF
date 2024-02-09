@@ -111,6 +111,7 @@ SUBROUTINE crocus_driver(n, &
                          usemonalb )
 
    USE LIS_coreMod, only: LIS_rc
+   USE  Crocus81_lsmMod , only: CROCUS81_struc
    !USE LIS_logMod,  only  : LIS_logunit, LIS_endrun
    !USEe LIS_timeMgrMod, only : LIS_date2time, LIS_tick
    USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME! MN: declaration of temporal types.  DATE_TIME%.... (YEAR, MONTH, DAY)
@@ -456,7 +457,7 @@ CONTAINS
       REAL*8, DIMENSION(1:KSIZE1) :: ZP_EXNAin          ! ZP_EXNA  = Exner function at lowest atmos level
       REAL*8, DIMENSION(1:KSIZE1) :: ZP_DIRCOSZWin ! ZP_DIRCOSZW = Cosinus of the angle between the
 !  normal to the surface and the vertical
-      REAL*8, DIMENSION(1:KSIZE1) :: SLOPEin !    ZP_SLOPE  = Slope (degree, from LDT )
+      REAL*8, DIMENSION(1:KSIZE1) :: SLOPEin !    ZP_SLOPE  = Slope (radians, from LDT )
       REAL*8, DIMENSION(1:KSIZE1) :: ZREFin          ! ZP_ZREF  = reference height of the first atmospheric level
       REAL*8, DIMENSION(1:KSIZE1) :: Z0NATin           ! Z0NAT (PZ0) = grid box average roughness length
       REAL*8, DIMENSION(1:KSIZE1) :: Z0EFFin          ! Z0EFF  = roughness length for momentum
@@ -813,10 +814,10 @@ CONTAINS
 
 ! Compute the effective illumination angle
 ! ----------------------------------------------------------------------------------
+      if (SLOPE_DIRin(1) .eq. -9999)  SLOPE_DIRin = 0. ! LDT set aspect of flat surface to -9999. For detail look at the matlab code used to generate param file
 ! ZP_ZENITH & ZP_AZIMSOL from SUBROUTINE SUNPOS
 ! SLOPE_DIR ! Note: in SURFEX is defined as the direction of S.S.O. (deg from N clockwise) 
 ! Here we use LDT output and ASPECT unit is in radians. So we need to edit the following equation
-
       ZP_ANGL_ILLUMin(1) = ACOS((COS(ZP_ZENITHin(1))*COS(ACOS(ZP_DIRCOSZWin(1)))) + &
                                 (SIN(ZP_ZENITHin(1))*SIN(ACOS(ZP_DIRCOSZWin(1))*COS(ZP_AZIMSOL(1) - (SLOPE_DIRin(1)))))) ! SLOPE_DIRin(1)*XPI/180 
 
@@ -867,6 +868,8 @@ CONTAINS
 
 !XSTEFAN = ( 2.* XPI**5 / 15. ) * ( (XBOLTZ / XPLANCK)* XBOLTZ ) * (XBOLTZ/(XLIGHTSPEED*XPLANCK))**2  ! use ini_csts.F90
 
+
+if (CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL .eq. .FALSE.) then 
 ! ___________________________________________ Thermal conductivity _________________________________________________
 ! First method (thrmcondz.F90 from SURFEX-Crocus)
 ! Compute thermal conductivity for dry soil (NOTE: for wet soil, we need to use SURFEX-Crocus soil.F90 in which needs LSM variables)
@@ -971,7 +974,10 @@ ZLOG_CONDWTR = LOG(XCONDWTR)
 ! Thermal conductivity of soil:
 !
       SOILCOND = ZKERSTENDF*(ZCONDSATDF-ZCONDDRYZ) + ZCONDDRYZ
-
+else ! if (.not. CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL) then 
+! set soil thermal conductivity to a typical values for ice at depth around 20 meters. 
+SOILCOND = 2.39 ! W/(m K) ice thermal conductivity @ -20 degree C 
+endif
 ! ---------------------------------------------------------------------
 ! ---------------------------------------------------------------------
 

@@ -188,6 +188,8 @@ module Crocus81_lsmMod
      LOGICAL            :: PRODSNOWMAK_BOOL
      !REAL               :: SLOPE_DIR 
      LOGICAL            :: Partition_total_precip_BOOL     
+     LOGICAL            :: Ice_Sheet_simulation_BOOL
+
      type(Crocus81dec), pointer :: crocus81(:)
   end type Crocus81_type_dec
   
