@@ -316,7 +316,11 @@ subroutine LIS_DAobs_plugin
 #if ( defined DA_OBS_HYDROWEBWL )
    use hydrowebWLobs_module,   only : hydrowebwlobs_setup
 #endif
-    
+!MN
+#if ( defined DA_OBS_ATL15GrIS )
+    use ATL15_GrISobs_module,         only : ATL15_GrISobs_setup
+#endif
+ 
 #if ( defined DA_OBS_SYNTHETICSM )
     external read_syntheticsmobs, write_syntheticsmobs
 #endif
@@ -423,6 +427,10 @@ subroutine LIS_DAobs_plugin
     external read_hydrowebWLobs, write_hydrowebWLobs
 #endif
 
+!MN
+#if ( defined DA_OBS_ATL15GrIS )
+    external read_ATL15_GrISobs, write_ATL15_GrISobs
+#endif
     
 #if 0 
    external read_WindSatsm, write_WindSatsmobs
@@ -997,6 +1005,14 @@ subroutine LIS_DAobs_plugin
    call registerdaobssetup(trim(LIS_hydrowebwlId)//char(0),hydrowebwlobs_setup)
    call registerreaddaobs(trim(LIS_hydrowebwlId)//char(0),read_hydrowebwlobs)
    call registerwritedaobs(trim(LIS_hydrowebwlId)//char(0),write_hydrowebwlobs)
+#endif
+
+#if ( defined DA_OBS_ATL15GrIS )
+!MN: ICESat2 ATL15 GrIS obs 
+    call registerdaobsclass(trim(LIS_ATL15GrISdhdtobsId),"LSM")
+    call registerdaobssetup(trim(LIS_ATL15GrISdhdtobsId)//char(0),ATL15_GrISobs_setup)
+    call registerreaddaobs(trim(LIS_ATL15GrISdhdtobsId)//char(0),read_ATL15_GrISobs)
+    call registerwritedaobs(trim(LIS_ATL15GrISdhdtobsId)//char(0),write_ATL15_GrISobs)
 #endif
 
 #if ( defined DA_OBS_WUSUCLA )
