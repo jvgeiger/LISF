@@ -307,6 +307,10 @@ subroutine LIS_metforcing_plugin
 #if ( defined MF_GALWEM_GE_FORECAST )
    use galwemge_forcingMod
 #endif
+!MN
+#if ( defined MF_MAR )
+   use MAR_forcingMod
+#endif
 
 #if ( defined MF_MOGREPS_G_FORECAST )
    use mogrepsg_forcingMod
@@ -684,6 +688,14 @@ subroutine LIS_metforcing_plugin
    external :: registerfinalmetforc
    external :: registerresetmetforc
 
+!MN
+#if ( defined MF_MAR )
+   external get_MAR
+   external timeinterp_MAR
+   external finalize_MAR
+   external reset_MAR
+#endif
+   
 #if ( defined MF_MET_TEMPLATE )
 ! - Meteorological Forcing Template:
    call registerinitmetforc(trim(LIS_metForcTemplateId)//char(0), &
@@ -1215,6 +1227,15 @@ subroutine LIS_metforcing_plugin
                                   timeinterp_galwemge)
    call registerfinalmetforc(trim(LIS_galwemgeId)//char(0),finalize_galwemge)
    call registerresetmetforc(trim(LIS_galwemgeId)//char(0),reset_galwemge)
+#endif
+!MN
+#if ( defined MF_MAR )
+   call registerinitmetforc(trim(LIS_MARId)//char(0),init_MAR)
+   call registerretrievemetforc(trim(LIS_MARId)//char(0),get_MAR)
+   call registertimeinterpmetforc(trim(LIS_MARId)//char(0), &
+                                  timeinterp_MAR)
+   call registerfinalmetforc(trim(LIS_MARId)//char(0),finalize_MAR)
+   call registerresetmetforc(trim(LIS_MARId)//char(0),reset_MAR)
 #endif
 
 #if ( defined MF_MOGREPS_G_FORECAST)
