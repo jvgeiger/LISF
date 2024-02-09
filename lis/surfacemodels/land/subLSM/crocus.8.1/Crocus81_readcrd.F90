@@ -28,7 +28,6 @@ subroutine Crocus81_readcrd()
     use LIS_timeMgrMod, only : LIS_parseTimeString
     use LIS_logMod, only     : LIS_logunit , LIS_verify
     use Crocus81_lsmMod, only       : CROCUS81_struc
-
 !
 ! !DESCRIPTION:
 !
@@ -42,7 +41,8 @@ subroutine Crocus81_readcrd()
     integer      :: n, i
     character*10 :: time 
     character*6  :: str_i
- 
+    !external     :: read_IC 
+
     write(LIS_logunit, *) "Start reading LIS configuration file for CROCUS81 model"
     
     call ESMF_ConfigFindLabel(LIS_config, "CROCUS81 model timestep:", rc = rc)
@@ -391,6 +391,18 @@ subroutine Crocus81_readcrd()
         call LIS_verify(rc, "CROCUS81 boolean option to partition total precip: not defined")
     enddo
 
+    Call ESMF_ConfigFindLabel(LIS_config, "CROCUS81 extract initial profile from MAR BOOL:", rc=rc)
+    do n=1, LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, CROCUS81_struc(n)%Init_Profile_from_MAR_BOOL, rc=rc)
+        call LIS_verify(rc, "CROCUS81 extract initial profile from MAR BOOL: not defined")
+    enddo
+
+    Call ESMF_ConfigFindLabel(LIS_config, "CROCUS81 for ice sheet simulation BOOL:", rc=rc)
+    do n=1, LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL, rc=rc)
+        call LIS_verify(rc, "CROCUS81 for ice sheet simulation BOOL: not defined")
+    enddo
+
     ! The following lines hard code the LDT NetCDF variable names. 
     do n=1, LIS_rc%nnest
         !CROCUS81_struc(n)%LDT_ncvar_GLACIER_BOOL = 'CROCUS81_GLACIER_BOOL'
@@ -410,6 +422,7 @@ subroutine Crocus81_readcrd()
     do n=1,LIS_rc%nnest
         CROCUS81_struc(n)%rformat = "netcdf"
     enddo
+
     ! restart run, read restart file
     if (trim(LIS_rc%startcode) == "restart") then 
         Call ESMF_ConfigFindLabel(LIS_config, "CROCUS81 restart file:", rc=rc)
@@ -424,7 +437,14 @@ subroutine Crocus81_readcrd()
             call LIS_verify(rc, "CROCUS81 restart file format: not defined")
         enddo
     ! cold start run, read initial state variables
-    else 
+    else
+    !print*, 'LIS_rc%nnest , n', LIS_rc%nnest, n
+    !  if (CROCUS81_struc(1)%Init_Profile_from_MAR_BOOL .eq. .TRUE.) then
+    !     do n=1,LIS_rc%nnest
+    !       !call init_Crocus81_IC(n) 
+    !       call read_IC(n)
+    !     enddo 
+    !  else       
         ! Snow layer(s) liquid Water Equivalent (SWE:kg m-2)
         call ESMF_ConfigFindLabel(LIS_config, "CROCUS81 initial SNOWSWE:", rc = rc)
         do n=1,LIS_rc%nnest
@@ -570,8 +590,8 @@ subroutine Crocus81_readcrd()
             call ESMF_ConfigGetAttribute(LIS_config, CROCUS81_struc(n)%init_SNOWMAK_dz, rc=rc)
             call LIS_verify(rc, "CROCUS81 initial SNOWMAK_dz: not defined")
         enddo
-
-    end if
+      !endif ! IC from MAR
+    end if ! restart or coldstart
      
     write(LIS_logunit, *) "Finish reading LIS configuration file for CROCUS81 model"
      
