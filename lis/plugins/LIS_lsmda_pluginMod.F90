@@ -34,6 +34,7 @@ module LIS_lsmda_pluginMod
 !  17 Feb 2020: Yeosang Yoon, added SNODEP & USAFSI Assimilation for Jules 5.x
 !  06 Jun 2022: Yonghwan Kwon, added SMAP_E_OPL soil moisture Assimilation
 !                              added GVF data assimilation
+!  24 Jan 2024: Mahdi Navari: added support for ICESat2 ATL15 GrIS height-change DA
 !
 !EOP
   implicit none
@@ -207,6 +208,12 @@ subroutine LIS_lsmda_plugin
    use noahmp401_daveg_Mod
 #endif
 
+#if ( defined SM_Crocus_8_1 )
+!#if ( defined DA_OBS_ATL15GrIS )
+   use Crocus81_da_dhdt_Mod
+   use Crocus81_dhdt_DAlogMod, only : Crocus81_dhdt_DAlog
+!#endif
+#endif 
 
 #if ( defined SM_CLSM_F2_5 )
    use clsmf25_tws_DAlogMod, only : clsmf25_tws_DAlog
@@ -739,6 +746,21 @@ subroutine LIS_lsmda_plugin
    external jules5x_qc_usafsiobs
 #endif
 #endif
+
+#if ( defined SM_Crocus_8_1 )
+!#if ( defined DA_OBS_ATL15GrIS ) 
+   external Crocus81_getdhdtvars
+   external Crocus81_setdhdt
+   external Crocus81_qcdhdt
+   external Crocus81_getdhdtpred
+   external Crocus81_scale_dhdt
+   external Crocus81_descale_dhdt
+   external Crocus81_updatedhdtvars
+   !external Crocus81_dhdt_DAlogMod 
+   external Crocus81_qc_dhdtobs
+   external Crocus81_setparticleweight
+!#endif
+#endif 
 
 #if ( defined SM_NOAH_2_7_1 )
 #if ( defined DA_OBS_SNODEP )
@@ -4174,6 +4196,33 @@ subroutine LIS_lsmda_plugin
         trim(LIS_usafsiobsId)//char(0),jules5x_qc_usafsiobs)
 #endif
 #endif 
+
+#if ( defined SM_Crocus_8_1 )
+!#if ( defined DA_OBS_ATL15GrIS ) 
+   call registerlsmdainit(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_da_dhdt_init)
+   call registerlsmdagetstatevar(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_getdhdtvars)
+   call registerlsmdasetstatevar(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_setdhdt)
+   call registerlsmdagetobspred(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_getdhdtpred)
+   call registerlsmdaqcstate(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_qcdhdt)
+   call registerlsmdascalestatevar(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_scale_dhdt)
+   call registerlsmdadescalestatevar(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_qc_dhdtobs)
+   call registerlsmdaupdatestate(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_updatedhdtvars)
+   call registerlsmdadiagnosevars(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_dhdt_DAlog) ! Crocus81_dhdt_DAlogMod)
+   call registerlsmdasetparticleweight(trim(LIS_Crocus81Id)//"+"//&
+        trim(LIS_ATL15GrISdhdtobsId)//char(0),Crocus81_setparticleweight)
+!#endif
+#endif 
+
+
 
 #endif  !endif for DA_DIRECT_INSERTION, DA_ENKS, or DA_ENKF
 

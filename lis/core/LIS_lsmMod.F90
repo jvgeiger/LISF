@@ -89,12 +89,15 @@ module LIS_lsmMod
   public :: LIS_lsm_DAmapObsToLSM
   public :: LIS_lsm_DAqcObsState
   public :: LIS_lsm_getlatlons
+  public :: LIS_lsm_DAsetParticleUpdates
+  public :: LIS_lsm_DAsetParticleWeight
 !-----------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !-----------------------------------------------------------------------------  
   public :: LIS_LSM_State
   public :: LIS_LSM_Pert_State
   public :: LIS_LSM_Incr_State
+  public :: LIS_LSM_particle_weight
 
   public :: LIS_LSM2SUBLSM_State
   public :: LIS_SUBLSM2LSM_State
@@ -107,7 +110,8 @@ module LIS_lsmMod
   
   type(ESMF_State), allocatable :: LIS_LSM_Incr_State(:,:)!ESMF State of LSM state
                                                  !increments
-
+  type(ESMF_State), allocatable :: LIS_LSM_particle_weight(:,:)!ESMF State of PBS particle weight
+                                              
 
   type(ESMF_State), allocatable :: LIS_LSM2SUBLSM_State(:,:)
   type(ESMF_State), allocatable :: LIS_SUBLSM2LSM_State(:,:)
@@ -175,11 +179,13 @@ contains
     type(ESMF_Field)     :: varField
     type(ESMF_Field)     :: varIncrField
     type(ESMF_Field)     :: pertField
+    type(ESMF_Field)     :: ParticleWeightField
     integer              :: max_index
     logical              :: name_found
     character*20         :: alglist(10)
     logical              :: LSM_DAvalid
     integer              :: rc
+    character*40         :: ParticleWeight
 
     TRACE_ENTER("lsm_init")
     call ESMF_ConfigGetAttribute(LIS_config,LIS_rc%lsm,&
@@ -256,7 +262,8 @@ contains
        if(LSM_DAvalid) then 
           allocate(LIS_LSM_State(LIS_rc%nnest, LIS_rc%nperts))
           allocate(LIS_LSM_Incr_State(LIS_rc%nnest, LIS_rc%nperts))
-          
+          allocate(LIS_LSM_particle_weight(LIS_rc%nnest, LIS_rc%nperts)) 
+
           do n=1,LIS_rc%nnest
              do k=1,LIS_rc%nperts
                 write(LIS_logunit,*) &
@@ -294,6 +301,12 @@ contains
                      '_'//caseid(1)//caseid(2)//caseid(3), rc=status)
                 call LIS_verify(status,&
                      "ESMF_StateCreate failed in LIS_lsm_init")
+
+                LIS_LSM_particle_weight(n,k) = ESMF_StateCreate(name="LSM Particle Weight"//&
+                     nestid(1)//nestid(2)// &
+                     '_'//caseid(1)//caseid(2)//caseid(3), rc=status)
+                call LIS_verify(status,&
+                     "ESMF_StateCreate failed in LIS_lsm_init")
                 
                 do i=1,LIS_rc%nstvars(k)
                    read(ftn,fmt='(a40)') vname(i)
@@ -310,7 +323,15 @@ contains
                         arrayspec=arrspec1,name=trim(vname(i)), rc=status)
                    call LIS_verify(status,&
                         "ESMF_FieldCreate failed in LIS_lsm_init")
-                   
+                  
+                   ! NOTE: The name "ParticleWeight" is hardcoded here. 
+                   ! LIS does not read that from the attribute file. 
+                   ParticleWeightField = ESMF_FieldCreate(grid=&
+                        LIS_vecPatch(n,LIS_rc%lsm_index),&
+                        arrayspec=arrspec1,name=trim(ParticleWeight), rc=status) ! 
+                   call LIS_verify(status,&
+                        "ESMF_FieldCreate failed in LIS_lsm_init")
+
                    call ESMF_AttributeSet(varField,"Max Value",stmax(i),rc=status)
                    call LIS_verify(status,&
                         "ESMF_AttribteSet failed in LIS_lsm_init")
@@ -336,6 +357,12 @@ contains
                         (/VarIncrField/), rc=status)
                    call LIS_verify(status,&
                         "ESMF_StateAdd failed in LIS_lsm_init")
+
+                   call ESMF_StateAdd(LIS_LSM_particle_weight(n,k), &
+                        (/ParticleWeightField/), rc=status)
+                   call LIS_verify(status,&
+                        "ESMF_StateAdd failed in LIS_lsm_init")
+
 !----------------------------------------------------------------------------
 ! Initially set the fresh increments available status to false. 
 !----------------------------------------------------------------------------
@@ -1346,6 +1373,40 @@ contains
 
   end subroutine LIS_lsm_DASetStateVar
 
+! MN PBS
+!BOP
+!
+!ROUTINE: LIS_lsm_DAsetParticleWeight
+! \label{LIS_lsm_DAsetParticleWeight}
+!         
+! !INTERFACE:
+  subroutine LIS_lsm_DAsetParticleWeight(n,k)
+                
+! !ARGUMENTS:
+    integer                :: n
+    integer                :: k
+                      
+!                        
+! !DESCRIPTION:
+!                        
+!  This interface invokes the land model to set the particle weight 
+!  used in data assimilation.
+!                     
+!  The arguments are:
+!  \begin{description}
+!   \item[n]    index of the nest
+!   \item[k]    index of the data assimilation instance   
+!  \end{description}
+!EOP
+
+    if(LIS_rc%LSM_DAinst_valid(k)) then
+       call lsmdasetparticleweight(trim(LIS_rc%lsm)//"+"//&
+            trim(LIS_rc%daset(k))//char(0), n, LIS_LSM_particle_weight(n,k))
+    endif
+
+  end subroutine LIS_lsm_DAsetParticleWeight
+
+
 !BOP
 !
 !ROUTINE: LIS_lsm_DAScaleStateVar
@@ -1705,6 +1766,78 @@ contains
        deallocate(lsm_state_objs)
     endif
   end subroutine LIS_lsm_DAsetAnlysisUpdates
+
+! MN PBS
+!BOP
+!
+!ROUTINE: LIS_lsm_DAsetParticleUpdates
+! \label{LIS_lsm_DAsetParticleUpdates}
+!
+! !INTERFACE: 
+  subroutine LIS_lsm_DAsetParticleUpdates(n,k,P_w_curr_ts) ! ens_id_SIR,
+
+! !ARGUMENTS:
+    integer                :: n
+    integer                :: k
+    !integer                :: state_size
+    !real                   :: ens_id_SIR(LIS_rc%nstvars(k),&
+    !     LIS_rc%npatch(n,LIS_rc%lsm_index))
+    real                   :: P_w_curr_ts(LIS_rc%npatch(n,LIS_rc%lsm_index))
+!
+! !DESCRIPTION:
+! 
+! This routine sets the weights into ESMF sate 
+! after assimilation 
+
+! 
+!  The arguments are: 
+!  \begin{description}
+!   \item[n]      index of the nest
+!   \item[k]      index of the data assimilation instance   
+!   \item[stvar]  state vector variables
+!   \item[stincr] state increments vector variables
+!  \end{description}
+!EOP
+
+    integer                :: status
+    integer                :: v,t
+    character*100,    allocatable     :: lsm_state_objs(:)
+    !type(ESMF_Field)                  :: lsm_ens_id_field(LIS_rc%nstvars(k))
+    type(ESMF_Field)                  :: lsm_weight_field(LIS_rc%nstvars(k))
+    !real,         pointer             :: ens_iddata(:)
+    real,         pointer             :: weightdata(:)
+
+    if(LIS_rc%LSM_DAinst_valid(k)) then
+       allocate(lsm_state_objs(LIS_rc%nstvars(k)))
+
+       call ESMF_StateGet(LIS_LSM_State(n,k),itemNameList=lsm_state_objs,&
+            rc=status)
+       call LIS_verify(status, &
+            "ESMF_StateGet failed in enkf_increments")
+
+       do v=1,LIS_rc%nstvars(k) 
+
+          call ESMF_StateGet(LIS_LSM_particle_weight(n,k),trim(lsm_state_objs(v)),&
+               lsm_weight_field(v),rc=status)
+          call LIS_verify(status, &
+               "ESMF_StateGet failed in enkf_increments")
+
+          call ESMF_FieldGet(lsm_weight_field(v),localDE=0,farrayPtr=weightdata,&
+               rc=status)
+          call LIS_verify(status, &
+               'ESMF_FieldGet failed in enkf_increments')
+
+          do t=1,LIS_rc%npatch(n,LIS_rc%lsm_index)
+             !stdata(t) =  stvar(v,t)
+             weightdata(t) = P_w_curr_ts(t) !P_w_curr_ts(v,t) ! NOTE: In PF and PBS, weights are assigned to the ensembles 
+                                            ! that means all state variables use the same weight
+          enddo
+
+       enddo
+
+       deallocate(lsm_state_objs)
+    endif
+  end subroutine LIS_lsm_DAsetParticleUpdates
 
   subroutine LIS_lsm_DAobsTransform(n,k)
 ! !ARGUMENTS:

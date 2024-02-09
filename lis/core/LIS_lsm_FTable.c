@@ -136,6 +136,15 @@ struct lsmdasetvarnode
 } ;
 struct lsmdasetvarnode* lsmdasetvar_table = NULL;
 
+struct lsmdasetPWnode
+{ 
+  char *name;
+  void (*func)(int*, void*);
+    
+  struct lsmdasetPWnode* next;
+} ; 
+struct lsmdasetPWnode* lsmdasetPW_table = NULL;
+
 struct lsmdaobstransformnode
 { 
   char *name;
@@ -1234,6 +1243,87 @@ void FTN(lsmdasetstatevar)(char *j,int *n, void *statevar, int len)
   }
   current->func(n,statevar); 
 }
+
+//BOP
+// !ROUTINE: registerlsmdasetparticleweight
+// \label{registerlsmdasetparticleweight}
+// 
+// !INTERFACE:
+void FTN(registerlsmdasetparticleweight)(char *j, void (*func)(int*, void*),int len)
+//  
+// !DESCRIPTION:
+//  Makes an entry in the registry for updating the specified
+//  state variable in a land surface model 
+//  (for data assimilation)
+// 
+//  \begin{description}
+//  \item[j]
+//   name of the LSM + DA instance
+//  \end{description}
+//EOP
+{ 
+  int len1;
+  struct lsmdasetPWnode* current;
+  struct lsmdasetPWnode* pnode;
+  // create node
+
+  len1 = len + 1; // ensure that there is space for terminating null
+//  pnode=(struct lsmdasetPWnode*) malloc(sizeof(struct lsmdasetPWnode));
+  pnode=(struct lsmdasetPWnode*) malloc(sizeof(struct lsmdasetPWnode)); 
+  pnode->name=(char*) calloc(len1,sizeof(char));
+  strncpy(pnode->name,j,len);
+  pnode->func = func;
+  pnode->next = NULL; 
+      
+  if(lsmdasetPW_table == NULL){
+    lsmdasetPW_table = pnode;
+  }
+  else{
+    current = lsmdasetPW_table;
+    while(current->next!=NULL){
+      current = current->next;
+    }
+    current->next = pnode;
+  }
+}
+//BOP
+// !ROUTINE: lsmdasetparticleweight
+// \label{lsmdasetparticleweight}
+// 
+// !INTERFACE:
+void FTN(lsmdasetparticleweight)(char *j,int *n, void *particleweight, int len)
+//  
+// !DESCRIPTION: 
+//  Invokes the routine from the registry for updating
+//  the specified state variable in a land surface model 
+//  (for data assimilation)
+// 
+//  \begin{description}
+//  \item[j]
+//   name of the LSM + DA instance
+//  \item[n]
+//   index of the nest
+//  \item[particleweight]
+//   pointer to the prognostic variable state
+//  \end{description}
+//EOP
+{
+  struct lsmdasetPWnode* current;
+
+  current = lsmdasetPW_table;
+  while(strcmp(current->name,j)!=0){
+    current = current->next;
+
+    if(current==NULL) {
+      printf("****************Error****************************\n");
+      printf("set LSM variable routine for LSM + DA instance %s is not defined\n",j);
+      printf("program will seg fault.....\n");
+      printf("****************Error****************************\n");
+    }
+  }
+  current->func(n,particleweight);
+}
+
 
 
 //BOP

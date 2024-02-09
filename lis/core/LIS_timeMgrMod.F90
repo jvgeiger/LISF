@@ -65,6 +65,7 @@ module LIS_timeMgrMod
   PUBLIC :: LIS_parseTimeString
   PUBLIC :: LIS_resetClockForTimeWindow
   PUBLIC :: LIS_mon3char
+  PUBLIC :: LIS_resetClockForPBSTimeWindow
 
   PUBLIC :: LIS_twStartTime
   PUBLIC :: LIS_twStopTime
@@ -450,6 +451,87 @@ contains
 
   end subroutine LIS_resetClockForTimeWindow
 
+!BOP
+! !ROUTINE: LIS_resetClockForPBSTimeWindow
+! \label{LIS_resetClockForPBSTimeWindow}
+!
+! !INTERFACE:
+  subroutine LIS_resetClockForPBSTimeWindow(LIS_rc)
+! !USES: 
+    implicit none
+! !ARGUMENTS: 
+    type(lisrcdec) :: LIS_rc
+! !DESCRIPTION:
+!
+! resets the time manager clock based on the time window. This 
+! routine is intended for the PBS DA where at the end of
+! each time window the code sets the start time (of the time window)
+! to be the previus end time and the stop time to be the 
+! new start time + time window interval. For e.g. if the routine is
+! invoked on July 1st and time window interval is 3 months, 
+! then the twStartTime will be set to July 1, 
+! and twStopTime would be around oct 1.
+!
+!  \begin{description}
+!   \item [LIS\_rc]
+!     instance of the {\tt lis\_module}
+!  \end{description}
+!
+!EOP
+    type(ESMF_Time)         :: tTime,stopTime
+    type(ESMF_TimeInterval) :: tw
+    integer                 :: yr,mo,da,hr,mn,ss,ms
+    integer                 :: status
+    type(lisalarmEntry), pointer :: alrmEntry, current
+
+    call ESMF_ClockGet(LIS_clock, stopTime=stopTime, rc=status)
+
+       yr = LIS_rc%yr 
+       mo = LIS_rc%mo
+       da = LIS_rc%da
+       hr = LIS_rc%hr
+       mn = LIS_rc%mn
+       ss = LIS_rc%ss
+
+       call ESMF_TimeIntervalSet(tw,s=nint(LIS_rc%twInterval),rc=status)
+
+       call ESMF_TimeSet(tTime, yy = yr, &
+            mm = mo, &
+            dd = da, &
+            h  = hr, &
+            m  = 0,&
+            s  = 0, &
+            calendar = LIS_calendar, &
+            rc = status)
+       call LIS_verify(status,&
+            "ESMF_TimeSet failed in LIS_resetClockForPBSTimeWindow")
+            
+       LIS_twStartTime = tTime
+       LIS_twStoptime = LIS_twStartTime + tw
+       
+       if(LIS_twStopTime.gt.stopTime) then
+          LIS_twStopTime = stopTime
+       endif
+
+       call ESMF_TimeGet(LIS_twStartTime, yy = yr, &
+            mm = mo, &
+            dd = da, &
+            h  = hr, &
+            m  = mn,&
+            s  = ss, &
+            calendar = LIS_calendar, &
+            rc = status)
+       write(LIS_logunit,*)'[INFO] Time Window start date = ',yr ,mo, da, hr 
+       call ESMF_TimeGet(LIS_twStoptime, yy = yr, &
+            mm = mo, &
+            dd = da, &
+            h  = hr, &
+            m  = mn,&
+            s  = ss, &
+            calendar = LIS_calendar, &
+            rc = status) 
+       write(LIS_logunit,*)'[INFO] Time Window end date = ',yr ,mo, da, hr 
+  end subroutine LIS_resetClockForPBSTimeWindow
 
 !BOP
 ! !ROUTINE: LIS_resetclock

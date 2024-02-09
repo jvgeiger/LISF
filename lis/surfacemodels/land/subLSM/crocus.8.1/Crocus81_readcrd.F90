@@ -402,6 +402,11 @@ subroutine Crocus81_readcrd()
         call ESMF_ConfigGetAttribute(LIS_config, CROCUS81_struc(n)%Ice_Sheet_simulation_BOOL, rc=rc)
         call LIS_verify(rc, "CROCUS81 for ice sheet simulation BOOL: not defined")
     enddo
+    !Call ESMF_ConfigFindLabel(LIS_config, "CROCUS81 number of obs in assimilation window (for PBS DA):", rc=rc)
+    !do n=1, LIS_rc%nnest
+    !    call ESMF_ConfigGetAttribute(LIS_config, CROCUS81_struc(n)%NumOfObsPerAssimWindow, rc=rc)
+    !    call LIS_verify(rc, "CROCUS81 number of obs in assimilation window (for PBS DA): not defined")
+    !enddo
 
     ! The following lines hard code the LDT NetCDF variable names. 
     do n=1, LIS_rc%nnest

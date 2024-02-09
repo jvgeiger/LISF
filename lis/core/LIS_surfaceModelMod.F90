@@ -66,7 +66,8 @@ module LIS_surfaceModelMod
   public :: LIS_surfaceModel_DAmapObsToModel
   public :: LIS_surfaceModel_DAqcObsState
   public :: LIS_surfaceModel_getlatlons
-
+  public :: LIS_surfaceModel_DAsetParticleUpdates
+  public :: LIS_surfaceModel_DAsetParticleWeight
 !BOP
 ! !ROUTINE: LIS_surfaceModel_setexport
 ! \label{LIS_surfaceModel_setexport}
@@ -921,6 +922,75 @@ contains
     enddo
 
   end subroutine LIS_surfaceModel_DAsetAnlysisUpdates
+
+!BOP
+!   
+! !ROUTINE: LIS_surfaceModel_DAsetParticleUpdates
+! \label{LIS_surfaceModel_DAsetParticleUpdates}
+!         
+! !INTERFACE:
+  subroutine LIS_surfaceModel_DAsetParticleUpdates(n,k,Nstate,state_size,P_w_curr_ts) !,&
+       !stvar,stincr)
+! 
+! !DESCRIPTION: 
+! This routine sets the weights to the ESMF state 
+! after assimilation 
+!
+!EOP
+    integer                :: n
+    integer                :: k
+    integer                :: Nstate
+    integer                :: state_size
+    real                   :: P_w_curr_ts(state_size)
+    integer                :: m
+
+    do m=1,LIS_rc%nsf_model_types
+       if(LIS_rc%sf_model_type_select(m).eq.LIS_rc%lsm_index) then
+          call LIS_lsm_DAsetParticleUpdates(n,k,P_w_curr_ts) !,ens_id_SIR,P_w_curr_ts)
+       elseif(LIS_rc%sf_model_type_select(m).eq.LIS_rc%lake_index) then
+
+       elseif(LIS_rc%sf_model_type_select(m).eq.LIS_rc%glacier_index) then
+
+       endif
+    enddo
+       
+  end subroutine LIS_surfaceModel_DAsetParticleUpdates
+
+
+!BOP
+! 
+! !ROUTINE: LIS_surfaceModel_DAsetParticleWeight
+! \label{LIS_surfaceModel_DAsetParticleWeight}
+! 
+! !INTERFACE:
+  subroutine LIS_surfaceModel_DAsetParticleWeight(n,k)
+! 
+! !DESCRIPTION:
+! 
+! This routine sets the Particle Weight to be used in SIR to 
+! replace the un-survived particles with particles that are 
+! close to the observations. 
+!  In the PF and PBS, we select particles close to Obs, and we do not need 
+!  to compute and pass the increments to the DA_SetStateVar) 
+! 
+!EOP
+    integer                :: n
+    integer                :: k
+    
+    integer                :: m
+  
+    do m=1,LIS_rc%nsf_model_types
+       if(LIS_rc%sf_model_type_select(m).eq.LIS_rc%lsm_index) then
+          call LIS_lsm_DAsetParticleWeight(n,k)
+       elseif(LIS_rc%sf_model_type_select(m).eq.LIS_rc%lake_index) then
+
+       elseif(LIS_rc%sf_model_type_select(m).eq.LIS_rc%glacier_index) then
+
+       endif
+    enddo
+  end subroutine LIS_surfaceModel_DAsetParticleWeight
+
+
 
 !BOP
 ! 
