@@ -50,7 +50,7 @@ C  Called from: SPAM
 C  Calls:       ETIND,ETINP,PGINP,PGIND,RADABS,ETPHR,ROOTWU,SOIL05,SWFACS
 C========================================================================
 
-      SUBROUTINE ETPHOT (CONTROL, ISWITCH,
+      SUBROUTINE ETPHOT (CONTROL, ISWITCH, nest, t, !Pang 2024.02.12
      &    PORMIN, PSTRES1, RLV, RWUMX, SOILPROP, ST, SW,  !Input
      &    WEATHER, XLAI,                                  !Input
      &    EOP, EP, ES, RWU, TRWUP)                        !Output
@@ -62,12 +62,13 @@ C         previous three output lines added by Bruce Kimball on 2DEC14
 C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
       USE ModuleData
-
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER FILEIO*30,ISWWAT*1,MEEVP*1,MEPHO*1,METEMP*1,
      &  TYPPGN*3,TYPPGL*3, CROP*2
+      INTEGER nest, t
       INTEGER DAS,DYNAMIC,H,I,NELAYR,NHOUR, DOY, YRDOY, YEAR,
      &  NLAYR,NR5, LUNIO, TSV2
 !         TSV2 = index for mid-day hour added by Bruce Kimball on 9JAN17
@@ -193,7 +194,7 @@ C         added by BAK on 10DEC2015
       Call GET('PLANT', 'RNITP',  RNITP) 
       Call GET('PLANT', 'SLAAD',  SLAAD) 
       Call GET('PLANT', 'XPOD',   XPOD)  
-      
+      YRDOY   = CONTROL % YRDOY   !Added by Pang 2024 .02.12
       CALL YR_DOY(YRDOY, YEAR, DOY) !LPM 04DEC12 for OPSTEMP
 C========================================================================
 C MEPHO  MEEVP
@@ -210,7 +211,67 @@ C     MEEVP reset on exit from ETPHOT to maintain input settings.
         METEMP = MEEVP
         MEEVP = 'N'
       ENDIF
-
+!----------------------------------------------------------------------
+!------ Obtain Vars From Memory ---------------------------------------
+!------ Pang 2024.02.12
+       TYPPGL = dssat48_struc(nest)%dssat48(t)%TYPPGL
+       TYPPGN = dssat48_struc(nest)%dssat48(t)%TYPPGN
+       PGPATH = dssat48_struc(nest)%dssat48(t)%PGPATH
+       AZIR = dssat48_struc(nest)%dssat48(t)%AZIR
+       BETN = dssat48_struc(nest)%dssat48(t)%BETN
+       CEC = dssat48_struc(nest)%dssat48(t)%CEC
+       DLAYR2 = dssat48_struc(nest)%dssat48(t)%DLAYR2
+       DUL2 = dssat48_struc(nest)%dssat48(t)%DUL2
+       DULE = dssat48_struc(nest)%dssat48(t)%DULE
+       LFANGD = dssat48_struc(nest)%dssat48(t)%LFANGD
+       LL2 = dssat48_struc(nest)%dssat48(t)%LL2
+       LLE = dssat48_struc(nest)%dssat48(t)%LLE
+       LWIDTH = dssat48_struc(nest)%dssat48(t)%LWIDTH
+       PALBW = dssat48_struc(nest)%dssat48(t)%PALBW
+       PHTHRS10 = dssat48_struc(nest)%dssat48(t)%PHTHRS10
+       RCUTIC = dssat48_struc(nest)%dssat48(t)%RCUTIC
+       ROWSPC = dssat48_struc(nest)%dssat48(t)%ROWSPC
+       SAT2 = dssat48_struc(nest)%dssat48(t)%SAT2
+       SCVIR = dssat48_struc(nest)%dssat48(t)%SCVIR
+       SCVP = dssat48_struc(nest)%dssat48(t)%SCVP
+       SWEF = dssat48_struc(nest)%dssat48(t)%SWEF
+       XSW = dssat48_struc(nest)%dssat48(t)%XSW
+       YSCOND = dssat48_struc(nest)%dssat48(t)%YSCOND
+       YSHCAP = dssat48_struc(nest)%dssat48(t)%YSHCAP
+       FNPGL = dssat48_struc(nest)%dssat48(t)%FNPGL
+       FNPGN = dssat48_struc(nest)%dssat48(t)%FNPGN
+       LMXREF = dssat48_struc(nest)%dssat48(t)%LMXREF
+       LNREF = dssat48_struc(nest)%dssat48(t)%LNREF
+       NSLOPE = dssat48_struc(nest)%dssat48(t)%NSLOPE
+       QEREF = dssat48_struc(nest)%dssat48(t)%QEREF
+       SLWREF = dssat48_struc(nest)%dssat48(t)%SLWREF
+       SLWSLO = dssat48_struc(nest)%dssat48(t)%SLWSLO
+       XLMAXT = dssat48_struc(nest)%dssat48(t)%XLMAXT
+       YLMAXT = dssat48_struc(nest)%dssat48(t)%YLMAXT
+       CCNEFF = dssat48_struc(nest)%dssat48(t)%CCNEFF
+       CICAD = dssat48_struc(nest)%dssat48(t)%CICAD
+       CMXSF = dssat48_struc(nest)%dssat48(t)%CMXSF
+       CQESF = dssat48_struc(nest)%dssat48(t)%CQESF
+       PCINPD = dssat48_struc(nest)%dssat48(t)%PCINPD
+       PG = dssat48_struc(nest)%dssat48(t)%PG
+       PGNOON = dssat48_struc(nest)%dssat48(t)%PGNOON
+       PCINPN = dssat48_struc(nest)%dssat48(t)%PCINPN
+       SLWSLN = dssat48_struc(nest)%dssat48(t)%SLWSLN
+       SLWSHN = dssat48_struc(nest)%dssat48(t)%SLWSHN
+       PNLSLN = dssat48_struc(nest)%dssat48(t)%PNLSLN
+       PNLSHN = dssat48_struc(nest)%dssat48(t)%PNLSHN
+       LMXSLN = dssat48_struc(nest)%dssat48(t)%LMXSLN
+       LMXSHN = dssat48_struc(nest)%dssat48(t)%LMXSLN
+       TSHR = dssat48_struc(nest)%dssat48(t)%TSHR
+       TEMPN = dssat48_struc(nest)%dssat48(t)%TEMPN
+       TSRF = dssat48_struc(nest)%dssat48(t)%TSRF
+       TSRFN = dssat48_struc(nest)%dssat48(t)%TSRFN
+       TAV = dssat48_struc(nest)%dssat48(t)%TAV
+       TAMP = dssat48_struc(nest)%dssat48(t)%TAMP
+       AGEFAC = dssat48_struc(nest)%dssat48(t)%AGEFAC
+       CUMSTR = dssat48_struc(nest)%dssat48(t)%CUMSTR
+       COLDSTR = dssat48_struc(nest)%dssat48(t)%COLDSTR
+       SWFAC = dssat48_struc(nest)%dssat48(t)%SWFAC
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -768,6 +829,68 @@ C       IF added by Bruce Kimball on 9MAR15
         WEATHER % TGRO   = TGRO     !I/O
         WEATHER % TGRODY = TGRODY
         ENDIF
+
+      !----------------------------------------------------------------------
+!------ Save Vars To Memory ---------------------------------------
+!------ Pang 2024.02.12
+       dssat48_struc(nest)%dssat48(t)%TYPPGL = TYPPGL
+       dssat48_struc(nest)%dssat48(t)%TYPPGN = TYPPGN
+       dssat48_struc(nest)%dssat48(t)%PGPATH = PGPATH
+       dssat48_struc(nest)%dssat48(t)%AZIR = AZIR
+       dssat48_struc(nest)%dssat48(t)%BETN = BETN
+       dssat48_struc(nest)%dssat48(t)%CEC = CEC
+       dssat48_struc(nest)%dssat48(t)%DLAYR2 = DLAYR2
+       dssat48_struc(nest)%dssat48(t)%DUL2 = DUL2
+       dssat48_struc(nest)%dssat48(t)%DULE = DULE
+       dssat48_struc(nest)%dssat48(t)%LFANGD = LFANGD
+       dssat48_struc(nest)%dssat48(t)%LL2 = LL2
+       dssat48_struc(nest)%dssat48(t)%LLE = LLE
+       dssat48_struc(nest)%dssat48(t)%LWIDTH = LWIDTH
+       dssat48_struc(nest)%dssat48(t)%PALBW = PALBW
+       dssat48_struc(nest)%dssat48(t)%PHTHRS10 = PHTHRS10
+       dssat48_struc(nest)%dssat48(t)%RCUTIC = RCUTIC
+       dssat48_struc(nest)%dssat48(t)%ROWSPC = ROWSPC
+       dssat48_struc(nest)%dssat48(t)%SAT2 = SAT2
+       dssat48_struc(nest)%dssat48(t)%SCVIR = SCVIR
+       dssat48_struc(nest)%dssat48(t)%SCVP = SCVP
+       dssat48_struc(nest)%dssat48(t)%SWEF = SWEF
+       dssat48_struc(nest)%dssat48(t)%XSW = XSW
+       dssat48_struc(nest)%dssat48(t)%YSCOND = YSCOND
+       dssat48_struc(nest)%dssat48(t)%YSHCAP = YSHCAP
+       dssat48_struc(nest)%dssat48(t)%FNPGL = FNPGL
+       dssat48_struc(nest)%dssat48(t)%FNPGN = FNPGN
+       dssat48_struc(nest)%dssat48(t)%LMXREF = LMXREF
+       dssat48_struc(nest)%dssat48(t)%LNREF = LNREF
+       dssat48_struc(nest)%dssat48(t)%NSLOPE = NSLOPE
+       dssat48_struc(nest)%dssat48(t)%QEREF = QEREF
+       dssat48_struc(nest)%dssat48(t)%SLWREF = SLWREF
+       dssat48_struc(nest)%dssat48(t)%SLWSLO = SLWSLO
+       dssat48_struc(nest)%dssat48(t)%XLMAXT = XLMAXT
+       dssat48_struc(nest)%dssat48(t)%YLMAXT = YLMAXT
+       dssat48_struc(nest)%dssat48(t)%CCNEFF = CCNEFF
+       dssat48_struc(nest)%dssat48(t)%CICAD = CICAD
+       dssat48_struc(nest)%dssat48(t)%CMXSF = CMXSF
+       dssat48_struc(nest)%dssat48(t)%CQESF = CQESF
+       dssat48_struc(nest)%dssat48(t)%PCINPD = PCINPD
+       dssat48_struc(nest)%dssat48(t)%PG = PG
+       dssat48_struc(nest)%dssat48(t)%PGNOON = PGNOON
+       dssat48_struc(nest)%dssat48(t)%PCINPN = PCINPN
+       dssat48_struc(nest)%dssat48(t)%SLWSLN = SLWSLN
+       dssat48_struc(nest)%dssat48(t)%SLWSHN = SLWSHN
+       dssat48_struc(nest)%dssat48(t)%PNLSLN = PNLSLN
+       dssat48_struc(nest)%dssat48(t)%PNLSHN = PNLSHN
+       dssat48_struc(nest)%dssat48(t)%LMXSLN = LMXSLN
+       dssat48_struc(nest)%dssat48(t)%LMXSLN = LMXSLN
+       dssat48_struc(nest)%dssat48(t)%TSHR = TSHR
+       dssat48_struc(nest)%dssat48(t)%TEMPN = TEMPN
+       dssat48_struc(nest)%dssat48(t)%TSRF = TSRF
+       dssat48_struc(nest)%dssat48(t)%TSRFN = TSRFN
+       dssat48_struc(nest)%dssat48(t)%TAV = TAV
+       dssat48_struc(nest)%dssat48(t)%TAMP = TAMP
+       dssat48_struc(nest)%dssat48(t)%AGEFAC = AGEFAC
+       dssat48_struc(nest)%dssat48(t)%CUMSTR = CUMSTR
+       dssat48_struc(nest)%dssat48(t)%COLDSTR = COLDSTR
+       dssat48_struc(nest)%dssat48(t)%SWFAC = SWFAC
 
       RETURN
       END SUBROUTINE ETPHOT

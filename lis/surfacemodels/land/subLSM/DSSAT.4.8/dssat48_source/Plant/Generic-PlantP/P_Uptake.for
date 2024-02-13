@@ -16,7 +16,7 @@
 !  Called by: P_CGRO, P_CERES, .....
 !  Calls:     None
 !=======================================================================
-      SUBROUTINE P_Uptake (DYNAMIC,  
+      SUBROUTINE P_Uptake (DYNAMIC,nest, t,       !Pang 2024.02.05 
      &    N2P_min, PCNVeg, PConc_Veg, PTotDem,            !Input
      &    RLV, SPi_AVAIL,                                 !Input
      &    N2P, PUptake, PUptakeProf)                      !Output
@@ -24,11 +24,13 @@
 !     ------------------------------------------------------------------
       USE ModuleDefs 
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !     ------------------------------------------------------------------
 !      CHARACTER*1  ISWPHO
       CHARACTER*78 MSG(3)
+      INTEGER nest, t
       INTEGER DYNAMIC, L, NLAYR   !, LUN
 
       REAL PTotDem, P_SUPPLYprof, PUptakeProf, WF_PHOS    !FracPUptake, 
@@ -44,6 +46,9 @@
 !      INTEGER ERRNUM, YEAR, DOY 
       REAL RLVTOT               
 
+!-----  Obtain Vars From Memory --------------------------------------------
+!-----  Pang 2024.02.05  -----------------------------------------------
+      WF_PHOS = dssat48_struc(nest)%dssat48(t)%WF_PHOS
 !***********************************************************************
 !***********************************************************************
 !     SEASONAL INITIALIZATION: run once per season.
@@ -224,6 +229,9 @@
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
+!-----  Save Vars To Memory --------------------------------------------
+!-----  Pang 2024.02.05  -----------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%WF_PHOS = WF_PHOS
 
       RETURN
       END SUBROUTINE P_Uptake

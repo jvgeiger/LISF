@@ -45,7 +45,7 @@ module dssat48_module
         ! spatial parameter
         !-------------------------------------------------------------------------
         !real               :: CDL
-        !real               :: NUKEY
+        CHARACTER*10 SLNO   !SOIL ID Pang 2024.02.07
         real                :: lat, lon, elev
         !-------------------------------------------------------------------------
         ! multilevel spatial parameter
@@ -81,27 +81,17 @@ module dssat48_module
         !  Pang 2023.09.29
         !------------------------------------------------------------------------
           REAL, DIMENSION(0:20) :: SomLitC
-          REAL, DIMENSION(20) :: SKi_Avail, SW
-          REAL                :: SNOW
-        !-------------------------------------------------------------------------
-        !  LAND - SPAM
-        !  Pang 2024.01.12
-        !------------------------------------------------------------------------
-          REAL :: ES
-          REAL, DIMENSION(20) :: ST, SWDELTX, UPFLOW
-        !-------------------------------------------------------------------------
-        !  LAND - Management
-        !  Pang 2024.01.17
-        !-------------------------------------------------------------------------
-          REAL IRRAMT     
-          REAL, DIMENSION(2) :: HARVFRAC
+          REAL, DIMENSION(0:20,3) :: SomLitE
+          REAL, DIMENSION(20) :: SKi_Avail, SW, NH4_plant, NO3_Plant, UPPM, SPi_AVAIL, SWDELTS
+          REAL                :: SNOW, WINF
         !-------------------------------------------------------------------------
         !  SOIL
         !  Pang 2023.10.03
         !-------------------------------------------------------------------------
-          REAL, DIMENSION(20) :: SomLit, SPi_Labile, NO3, NH4
-          REAL, DIMENSION(0:20) :: SSOMC
-          REAL                  :: TDFC
+          REAL, DIMENSION(20) :: SomLit, SPi_Labile, NO3, NH4, DRN
+          REAL, DIMENSION(0:20) :: SSOMC, LITC, newCO2
+          REAL, DIMENSION(0:20,3) :: IMM, MNR
+          REAL                  :: TDFC, DRAIN
           INTEGER               :: TDLNO
         !-------------------------------------------------------------------------
         !  SOIL - SOILDYN
@@ -192,6 +182,54 @@ module dssat48_module
         !------------------------------------------------------------------------
            REAL, DIMENSION(20) :: SKi_Tot
         !-------------------------------------------------------------------------
+        !  LAND - SPAM
+        !  Pang 2024.01.12
+        !------------------------------------------------------------------------
+          REAL :: EO, EOP, EOS, EP, ES, SRFTEMP, TRWU, TRWUP 
+          REAL, DIMENSION(20) :: RWU, ST, SWDELTX, UPFLOW, SWDELTU
+        !------------------------------------------------------------------------
+        !  In SPAM
+        !  Pang 2024.02.05
+        !-------------------------------------------------------------------------
+           REAL :: EF, CEF, EM, CEM, CEO, CEP, CES, CET, EVAP, CEVAP, ES_LYR(20), ET0(24)
+            !---------------------------------------------------------------------
+            !  SPAM -> In ETPHOT.for (Pang 2024.02.12)
+            !---------------------------------------------------------------------
+               CHARACTER TYPPGL*3
+               CHARACTER(len=2) PGPATH
+               REAL AZIR, BETN, CEC, DLAYR2(20), DUL2(20), DULE, LFANGD(3), LL2(20), LLE, &
+                    LWIDTH, PALBW, RCUTIC, SAT2(20), SCVIR, SCVP, &
+                    XSW(20,3), YSCOND(20,3), YSHCAP(20,3), FNPGL(4), &
+                    LMXREF, NSLOPE, QEREF, SLWREF, SLWSLO, XLMAXT(6), YLMAXT(6), &
+                    CCNEFF, CICAD, CMXSF, CQESF, PCINPD, PGNOON, PCINPN, SLWSLN, &
+                    SLWSHN, PNLSLN, PNLSHN, LMXSLN, LMXSHN, TSHR(20), TEMPN, TSRF(3), &
+                    TSRFN(3), TAV, TAMP, COLDSTR
+            !---------------------------------------------------------------------
+            !  SPAM -> In STEMPi_EPIC.for (Pang 2024.02.12)
+            !---------------------------------------------------------------------
+               INTEGER WetDay(30), NDays
+               REAL WFT, CV, BCV1, BCV2, BCV, X2_AVG
+            !---------------------------------------------------------------------
+            !  SPAM -> In STEMP.for (Pang 2024.02.12)
+            !---------------------------------------------------------------------
+               REAL, DIMENSION(20) :: SWI, DSI, DLI, DSMID
+               REAL HDAY, TBD, TLL, TSW, TDL, CUMDPT, PESW, ABD, FX, DP, WW, &
+                    ALBEDO, TMA(5), ATOT
+            !---------------------------------------------------------------------
+            !  SPAM -> In ROOTWU.for (Pang 2024.02.12)
+            !---------------------------------------------------------------------
+               REAL  SWCON2(20), ROOTWU_TSS(20)
+            !---------------------------------------------------------------------
+            !  SPAM -> In SOILEV.for (Pang 2024.02.12)
+            !---------------------------------------------------------------------
+               REAL SUMES1, SUMES2, T_prm
+        !-------------------------------------------------------------------------
+        !  LAND - Management
+        !  Pang 2024.01.17
+        !-------------------------------------------------------------------------
+          REAL IRRAMT     
+          REAL, DIMENSION(2) :: HARVFRAC
+        !-------------------------------------------------------------------------
         !  LAND - PLANT
         !  Pang 2024.01.17
         !-------------------------------------------------------------------------
@@ -279,7 +317,29 @@ module dssat48_module
                             RootMob, ShelMob, PShut_kg, PShel_kg, PSeed_kg
                     !----- IN MZ_GROSUB -> P_Ceres -> RootSoilVol.for
                            REAL PlantPop, ROOTRAD
-                           LOGICAL RootSoilVol_FIRST 
+                           LOGICAL RootSoilVol_FIRST
+                 !----- In MZ_GROSUB -> P_Ceres.for -> P_Plant
+                       REAL PRoot_kg
+                     !----- IN MZ_GROSUB -> P_Ceres -> IN P_Plant.for
+                           REAL PConc_Shut_opt, PConc_Root_opt, PConc_Shel_opt, PConc_Seed_opt, &
+                                PConc_Shut_min, PConc_Root_min, PConc_Shel_min, PConc_Seed_min, &
+                                PConc_Plant, PPlant_kg, PSTRESS_RATIO, Shut_kg, Plant_kg
+                     !----- P_IPPLNP
+                           REAL, DIMENSION(3) :: N2Pmax, N2Pmin
+                           REAL, DIMENSION(3) :: PCShutMin, PCLeafMin, PCStemMin, PCRootMin, PCShelMin, &
+                                                 PCSeedMin, PCShutOpt, PCLeafOpt, PCStemOpt, PCRootOpt, &
+                                                 PCShelOpt, PCSeedOpt
+                           LOGICAL UseShoots
+                           REAL :: FracPMobil, FracPUptake, SRATPHOTO, SRATPART
+                    !----- P_Demand
+                           REAL DeltPRoot, DeltPSeed, DeltPShel, DeltPShut, PRootDem, PSeedDem, PShelDem, &
+                                PShutDem, PTotDem
+                       !----- IN MZ_GROSUB -> P_Ceres -> P_Plant -> In PPlantSubs.for (P_Demand)
+                           REAL PShutMobPool, PRootMobPool, PShelMobPool, PSeedMobPool
+                    !----- P_Uptake
+                           REAL N2P, PUptakeProf
+                       !----- IN MZ_GROSUB -> P_Ceres -> P_Plant -> In P_Uptake.for
+                                REAL WF_PHOS
            !-----------------------------------------------------------------------
            ! PLANT - MZ_CERES - PEST
              REAL SDNO(300), SHELN(300), WTSHE(300), SDDES(300), WTSD(300)   !300 is NCOHORTS in DSSAT
@@ -321,7 +381,6 @@ module dssat48_module
         !---- Pang 2023.09.19 ---------------------------------------------------
         !------------------------------------------------------------------------
           LOGICAL :: doseasinit
-
     end type dssat48dec
           !INTEGER, PARAMETER :: &
           !Dynamic variable values

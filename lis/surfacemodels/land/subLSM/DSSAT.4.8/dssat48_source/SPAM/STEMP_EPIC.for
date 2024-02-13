@@ -21,14 +21,14 @@ C  Called : Main
 C  Calls  : SOILT
 C=======================================================================
 
-      SUBROUTINE STEMP_EPIC(CONTROL, ISWITCH,  
+      SUBROUTINE STEMP_EPIC(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12 
      &    SOILPROP, SW, TAVG, TMAX, TMIN, TAV, WEATHER,   !Input
      &    SRFTEMP, ST)                                    !Output
 
 C-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
-
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 
@@ -37,7 +37,7 @@ C-----------------------------------------------------------------------
       CHARACTER*6, PARAMETER :: ERRKEY = "EPIC STEMP"
       CHARACTER*30 FILEIO
       CHARACTER*78 MSG(3)
-
+      INTEGER nest, t
       INTEGER DOY, DYNAMIC, I, L, NLAYR
       INTEGER RUN, YRDOY, YEAR
       INTEGER ERRNUM, FOUND, LNUM, LUNIO
@@ -77,6 +77,32 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
       CALL YR_DOY(YRDOY, YEAR, DOY)
 
+!----------------------------------------------------------------------
+!------ Obtain Vars From Memory ---------------------------------------
+!------ Pang 2024.02.12  ----------------------------------------------
+       WetDay = dssat48_struc(nest)%dssat48(t)%WetDay
+       NDays = dssat48_struc(nest)%dssat48(t)%NDays
+       SWI = dssat48_struc(nest)%dssat48(t)%SWI
+       DSMID = dssat48_struc(nest)%dssat48(t)%DSMID
+       TBD = dssat48_struc(nest)%dssat48(t)%TBD
+       TLL = dssat48_struc(nest)%dssat48(t)%TLL
+       TSW = dssat48_struc(nest)%dssat48(t)%TSW
+       TDL = dssat48_struc(nest)%dssat48(t)%TDL
+       CUMDPT = dssat48_struc(nest)%dssat48(t)%CUMDPT
+       PESW = dssat48_struc(nest)%dssat48(t)%PESW
+       ABD = dssat48_struc(nest)%dssat48(t)%ABD
+       FX = dssat48_struc(nest)%dssat48(t)%FX
+       DP = dssat48_struc(nest)%dssat48(t)%DP
+       WW = dssat48_struc(nest)%dssat48(t)%WW
+       TMA = dssat48_struc(nest)%dssat48(t)%TMA
+       WFT = dssat48_struc(nest)%dssat48(t)%WFT
+       CV = dssat48_struc(nest)%dssat48(t)%CV
+       BCV1 = dssat48_struc(nest)%dssat48(t)%BCV1
+       BCV2 = dssat48_struc(nest)%dssat48(t)%BCV2
+       BCV = dssat48_struc(nest)%dssat48(t)%BCV
+       X2_AVG = dssat48_struc(nest)%dssat48(t)%X2_AVG
+       TAV = dssat48_struc(nest)%dssat48(t)%TAV
+       TAMP = dssat48_struc(nest)%dssat48(t)%TAMP
 !***********************************************************************
 !***********************************************************************
 !     Run initialization - run once per simulation
@@ -266,6 +292,31 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!------ Save Vars To Memory ---------------------------------------
+!------ Pang 2024.02.12  ----------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%WetDay = WetDay
+       dssat48_struc(nest)%dssat48(t)%NDays = NDays
+       dssat48_struc(nest)%dssat48(t)%SWI = SWI
+       dssat48_struc(nest)%dssat48(t)%DSMID = DSMID
+       dssat48_struc(nest)%dssat48(t)%TBD = TBD
+       dssat48_struc(nest)%dssat48(t)%TLL = TLL
+       dssat48_struc(nest)%dssat48(t)%TSW = TSW
+       dssat48_struc(nest)%dssat48(t)%TDL = TDL
+       dssat48_struc(nest)%dssat48(t)%CUMDPT = CUMDPT
+       dssat48_struc(nest)%dssat48(t)%PESW = PESW
+       dssat48_struc(nest)%dssat48(t)%ABD = ABD
+       dssat48_struc(nest)%dssat48(t)%FX = FX
+       dssat48_struc(nest)%dssat48(t)%DP = DP
+       dssat48_struc(nest)%dssat48(t)%WW = WW
+       dssat48_struc(nest)%dssat48(t)%TMA = TMA
+       dssat48_struc(nest)%dssat48(t)%WFT = WFT
+       dssat48_struc(nest)%dssat48(t)%CV = CV
+       dssat48_struc(nest)%dssat48(t)%BCV1 = BCV1
+       dssat48_struc(nest)%dssat48(t)%BCV2 = BCV2
+       dssat48_struc(nest)%dssat48(t)%BCV = BCV
+       dssat48_struc(nest)%dssat48(t)%X2_AVG = X2_AVG
+       dssat48_struc(nest)%dssat48(t)%TAV = TAV
+       dssat48_struc(nest)%dssat48(t)%TAMP = TAMP
       RETURN
       END SUBROUTINE STEMP_EPIC
 !=======================================================================

@@ -59,7 +59,13 @@ subroutine dssat48_main(n)
     INTEGER             :: NYRS, ENDYRS, MULTI, YRSIM
     INTEGER             :: DAS, DOY, TIMDIF, INCYD
     LOGICAL             :: doseasinit !Pang 2023.09.19
-!
+
+    CHARACTER*120 :: FILECTL
+    CHARACTER*30  :: FILEIO
+    CHARACTER*12  :: FILEX
+    CHARACTER*8   :: MODELARG
+    CHARACTER*80  :: PATHEX
+    INTEGER       :: ROTNUM, TRTNUM
 ! !DESCRIPTION:
 !  This is the entry point for calling the dssat48 physics.
 !  This routine calls XXXXXX routine that performs the
@@ -89,7 +95,7 @@ subroutine dssat48_main(n)
     alarmCheck = LIS_isAlarmRinging(LIS_rc, "DSSAT48 model alarm "// trim(fnest)) !MN  Bug in the toolkit 
     if (alarmCheck) Then
         do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-        !do t = 1, 1
+        !do  t = 1, 4
              
             dt = LIS_rc%ts
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
@@ -99,7 +105,7 @@ subroutine dssat48_main(n)
             elev = LIS_domain(n)%tile(t)%elev
 
             ! Spatial Information
-            PRINT*, "lat, lon, elev: ", lat, lon, elev
+            !PRINT*, "lat, lon, elev: ", lat, lon, elev
             dssat48_struc(n)%dssat48(t)%lat = lat
             dssat48_struc(n)%dssat48(t)%lon = lon
             dssat48_struc(n)%dssat48(t)%elev = elev
@@ -236,12 +242,24 @@ subroutine dssat48_main(n)
             !----- SEASONAL INITIALIZATION -------------------------------------------
             IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
                  !PRINT*, 'Im in seas init'
+                  !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
+                FILEIO = 'DSSAT48.INP' !PL 20240207
+                FILEX = dssat48_struc(n)%CONTROL(t)%filex !PL 20240207
+                ROTNUM = dssat48_struc(n)%CONTROL(t)%rotnum !PL 20240207
+                TRTNUM = dssat48_struc(n)%CONTROL(t)%trtnum !PL 20240207
+
                  NYRS = dssat48_struc(n)%CONTROL(t)%nyrs
                  ENDYRS = dssat48_struc(n)%CONTROL(t)%endyrs
                  MULTI = dssat48_struc(n)%CONTROL(t)%multi
                  RUN = dssat48_struc(n)%CONTROL(t)%run
                  YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
                  REPNO = dssat48_struc(n)%CONTROL(t)%repno
+                 
+                 CALL INPUT_SUB( n, t,                                  & !Pang 20240207
+                        FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
+                        RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input
+                        dssat48_struc(n)%ISWITCH(t), dssat48_struc(n)%CONTROL(t)) !Output
+
                  !CONDITIONS
                  !PRINT*, 'NYRS, ENDYRS, MULTI bf: ', NYRS, ENDYRS, MULTI
                  IF (NYRS .GT. 1) THEN

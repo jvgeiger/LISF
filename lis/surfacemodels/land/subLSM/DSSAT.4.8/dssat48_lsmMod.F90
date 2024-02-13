@@ -176,6 +176,7 @@ contains
     ! read configuation information from lis.config file
     call dssat48_readcrd()
     !PRINT*,'Im in dssat48_init'
+        
         do n=1, LIS_rc%nnest
             !Get  Dssat version # which is used to read dssat prms files
             WRITE(ModelVerTxt,'(I2.2,I1)') Version%Major, Version%Minor !Obtain Dssat version #
@@ -201,7 +202,6 @@ contains
             ! allocate memory for vector variables passed to model interfaces        
             ! TODO: check the following allocation statements carefully!
             !------------------------------------------------------------------------
-            
             ! allocate memory for state variables
             !do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
                 !allocate(dssat48_struc(n)%dssat48(t)%SNOWSWE(dssat48_struc(n)%XXXX))
@@ -221,9 +221,13 @@ contains
                 dssat48_struc(n)%dssat48(t)%swdown = 0.0
                 dssat48_struc(n)%dssat48(t)%psurf = 0.0
             enddo ! end of tile (t) loop
+                  !PRINT*, 'LIS_rc%npatch(n, LIS_rc%lsm_index): ', LIS_rc%npatch(n, LIS_rc%lsm_index)
+          
+            ! Call dssat48_setup to obtain mukey number before initialization
+               CALL dssat48_setup !Pang 2024.02.09 (This is used to obtain soil mukey)
 
             do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-                 PRINT*, 'LIS_rc%npatch(n, LIS_rc%lsm_index): ', LIS_rc%npatch(n, LIS_rc%lsm_index)
+            !do t=1,4
                  !These System Initial Values May Be Loaded From Config File
                  ! Start CSM 
                  !DONE =  .FALSE.  ! We don't use DONE to control run or not run
@@ -260,10 +264,11 @@ contains
              !------------------------------------------------------------------------------------------
              !------- This Section Is Needed When We Still Need To Use .SQX and .INP Files -------------
                 !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
-                CALL INPUT_SUB( &
+                 CALL INPUT_SUB( n, t,                               & !Pang 2024.02.08
                         FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
                         RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input
                         dssat48_struc(n)%ISWITCH(t), dssat48_struc(n)%CONTROL(t)) !Output
+                        !PRINT*, 'What is the mukey now: ', dssat48_struc(n)%dssat48(t)%SLNO
                 !Check to see if the temporary file exists
                 !Needed when we still use .INP file
                  INQUIRE (FILE = FILEIO,EXIST = FEXIST)

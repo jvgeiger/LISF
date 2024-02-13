@@ -78,7 +78,7 @@ C
 C  HDLAY  :
 C=======================================================================
 !      PROGRAM INPUT_PROGRAM
-      SUBROUTINE INPUT_SUB(
+      SUBROUTINE INPUT_SUB(nest,t, !Pang 2024.02.08
      &    FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       !Input
      &    RNMODE, ROTNUM, RUN, TRTNUM,                    !Input
      &    ISWITCH, CONTROL)                               !Output
@@ -107,7 +107,7 @@ C=======================================================================
       CHARACTER*120 INPUTX
       CHARACTER*120 WTHSTR, FILECTL
       CHARACTER*1000 ATLINE
-
+      INTEGER       nest, t !Pang 2024.02.08
       INTEGER       NLOOP,FROP,FTYPEN,RUN,IIRV(NAPPL)
       INTEGER       LUNIO,NYRS,ERRNUM,NSENS,YRIC
       INTEGER       IVRGRP,IPLT,ISIM,EXPP,EXPN,TRTN,TRTALL
@@ -138,7 +138,6 @@ C     Get argument from runtime module to determine path and run mode
 C-----------------------------------------------------------------------
 C   Fortran Compaq Visual Fortran
 C-----------------------------------------------------------------------
-      PRINT*, 'In Input SUb?'
 !      CALL GETARG (0,INPUTX)    !Pang: INPUTX is the command line
 !D      call path_adj(inputx)
 !      IPX = LEN_TRIM(INPUTX)
@@ -186,15 +185,16 @@ C-----------------------------------------------------------------------
 C     Call IPEXP
 C-----------------------------------------------------------------------
       !PRINT*, 'PATHEX,FILEX_P,FILECTL: ', PATHEX,FILEX_P
-      !PRINT*,"Before: ", MODEL,RUN,RNMODE,FILEX,PATHEX,FILEX_P,FILECTL
-      !PRINT*,'L2: ',SLNO,NYRS,VARNO,CROP,WMODI
+      PRINT*,"Before: "!, MODEL,RUN,RNMODE,FILEX,PATHEX,FILEX_P,FILECTL
+      PRINT*,'L2: ',SLNO,NYRS,VARNO,CROP,WMODI
       !PRINT*,'L3: ',FROP,TRTN,EXPP,EXPN,TITLET,TRTALL,TRTNUM,ROTNUM
       !!PRINT*,'L4: ',IIRV,FTYPEN,CHEXTR,NFORC,PLTFOR,NDOF,PMTYPE
       !PRINT*,'L5: ',LNSIM,LNCU,LNHAR,LNENV,LNTIL,LNCHE
       !PRINT*,'L6: ',LNFLD,LNSA,LNIC,LNPLT,LNIR,LNFER,LNRES
       !PRINT*,'L7: ', CONTROL, ISWITCH, UseSimCtr, MODELARG
 
-       CALL IPEXP (MODEL, RUN, RNMODE, FILEX,PATHEX,FILEX_P, FILECTL,
+       CALL IPEXP (nest,t, !Pang 2024.02.08
+     &     MODEL, RUN, RNMODE, FILEX,PATHEX,FILEX_P, FILECTL,
      &     SLNO,NYRS,VARNO,CROP,WMODI,
      &     FROP,TRTN,EXPP,EXPN,TITLET,TRTALL,TRTNUM,ROTNUM, 
      &     IIRV,FTYPEN,CHEXTR,NFORC,PLTFOR,NDOF,PMTYPE,
@@ -202,8 +202,8 @@ C-----------------------------------------------------------------------
      &     LNFLD,LNSA,LNIC,LNPLT,LNIR,LNFER,LNRES, 
      &     CONTROL, ISWITCH, UseSimCtr, MODELARG)
 
-      !PRINT*,"After: ", MODEL,RUN,RNMODE,FILEX,PATHEX,FILEX_P,FILECTL
-      !PRINT*,'L2: ',SLNO,NYRS,VARNO,CROP,WMODI
+      PRINT*,"After: "!, MODEL,RUN,RNMODE,FILEX,PATHEX,FILEX_P,FILECTL
+      PRINT*,'L2: ',SLNO,NYRS,VARNO,CROP,WMODI
       !PRINT*,'L3: ',FROP,TRTN,EXPP,EXPN,TITLET,TRTALL,TRTNUM,ROTNUM
       !!PRINT*,'L4: ',IIRV,FTYPEN,CHEXTR,NFORC,PLTFOR,NDOF,PMTYPE
       !PRINT*,'L5: ',LNSIM,LNCU,LNHAR,LNENV,LNTIL,LNCHE

@@ -31,7 +31,7 @@ C             SOILEV  (File SOILEV.for)
 C             TRANS   (File TRANS.for)
 C=======================================================================
 
-      SUBROUTINE SPAM(CONTROL, ISWITCH,
+      SUBROUTINE SPAM(CONTROL, ISWITCH, nest, t,     !Pang 2024.02.05
      &    CANHT, EORATIO, KSEVAP, KTRANS, MULCH,          !Input
      &    PSTRES1, PORMIN, RLV, RWUMX, SOILPROP, SW,      !Input
      &    SWDELTS, UH2O, WEATHER, WINF, XHLAI, XLAI,      !Input
@@ -43,7 +43,7 @@ C=======================================================================
       USE ModuleDefs 
       USE ModuleData
       USE FloodModule
-
+      USE dssat48_lsmMod !Pang 2024.02.05
       IMPLICIT NONE
       SAVE
 
@@ -54,7 +54,7 @@ C=======================================================================
 !      CHARACTER*78 MSG(2)
 
       INTEGER DYNAMIC, L, NLAYR
-
+      INTEGER nest, t
       REAL CANHT, CO2, SRAD, TAVG, 
      &    TMAX, TMIN, WINDSP, XHLAI, XLAI
       REAL CEF, CEM, CEO, CEP, CES, CET, CEVAP 
@@ -128,13 +128,27 @@ C=======================================================================
       XLAT   = WEATHER % XLAT  
 
 !***********************************************************************
+!----- Obtain Vars from Memory -----------------------------------------
+!-----  Pang: 2023.09.26 -------------------------------------------
+      EF = dssat48_struc(nest)%dssat48(t)%EF
+      CEF = dssat48_struc(nest)%dssat48(t)%CEF
+      EM = dssat48_struc(nest)%dssat48(t)%EM
+      CEM = dssat48_struc(nest)%dssat48(t)%CEM
+      CEO = dssat48_struc(nest)%dssat48(t)%CEO
+      CEP = dssat48_struc(nest)%dssat48(t)%CEP
+      CES = dssat48_struc(nest)%dssat48(t)%CES
+      CET = dssat48_struc(nest)%dssat48(t)%CET
+      EVAP = dssat48_struc(nest)%dssat48(t)%EVAP
+      CEVAP = dssat48_struc(nest)%dssat48(t)%CEVAP
+      ES_LYR = dssat48_struc(nest)%dssat48(t)%ES_LYR
+      ET0 = dssat48_struc(nest)%dssat48(t)%ET0
 !***********************************************************************
 !     Run Initialization - Called once per simulation
 !***********************************************************************
       IF (DYNAMIC .EQ. RUNINIT) THEN
 !-----------------------------------------------------------------------
       IF (MEPHO .EQ. 'L' .OR. MEEVP .EQ. 'Z') THEN
-        CALL ETPHOT(CONTROL, ISWITCH,
+        CALL ETPHOT(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12
      &    PORMIN, PSTRES1, RLV, RWUMX, SOILPROP, ST, SW,  !Input
      &    WEATHER, XLAI,                                  !Input
      &    EOP, EP, ES, RWU, TRWUP)                        !Output
@@ -169,18 +183,18 @@ C=======================================================================
       IF (meevp .NE.'Z') THEN   !LPM 02dec14 to use the values from ETPHOT
           SELECT CASE (METMP)
           CASE ('E')    !EPIC soil temperature routine
-            CALL STEMP_EPIC(CONTROL, ISWITCH,  
+            CALL STEMP_EPIC(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12 
      &        SOILPROP, SW, TAVG, TMAX, TMIN, TAV, WEATHER,   !Input
      &        SRFTEMP, ST)                                    !Output
           CASE DEFAULT  !DSSAT soilt temperature
-           CALL STEMP(CONTROL, ISWITCH,
+           CALL STEMP(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12
      &    SOILPROP, SRAD, SW, TAVG, TMAX, XLAT, TAV, TAMP,!Input
      &    SRFTEMP, ST)   !Output
         END SELECT
       ENDIF
 !     ---------------------------------------------------------
       IF (MEEVP .NE. 'Z') THEN
-        CALL ROOTWU(SEASINIT,
+        CALL ROOTWU(SEASINIT,nest, t,           !Pang 2024.02.12
      &      DLAYR, LL, NLAYR, PORMIN, RLV, RWUMX, SAT, SW,!Input
      &      RWU, TRWUP)                           !Output
 
@@ -188,7 +202,7 @@ C=======================================================================
         SELECT CASE (MESEV)
 !     ----------------------------
         CASE ('R')  !Original soil evaporation routine
-          CALL SOILEV(SEASINIT,
+          CALL SOILEV(SEASINIT, nest, t,     !Pang 2024.02.12
      &      DLAYR, DUL, EOS, LL, SW, SW_AVAIL(1),         !Input
      &      U, WINF,                                      !Input
      &      ES)                                           !Output
@@ -214,7 +228,7 @@ C=======================================================================
 !     ---------------------------------------------------------
       IF (CROP .NE. 'FA') THEN
         IF (MEPHO .EQ. 'L' .OR. MEEVP .EQ. 'Z') THEN
-          CALL ETPHOT(CONTROL, ISWITCH,
+          CALL ETPHOT(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12
      &    PORMIN, PSTRES1, RLV, RWUMX, SOILPROP, ST, SW,  !Input
      &    WEATHER, XLAI,                                 !Input
      &    EOP, EP, ES, RWU, TRWUP)                        !Output
@@ -255,13 +269,13 @@ C=======================================================================
       IF (meevp .NE.'Z') THEN  !LPM 02dec14 to use the values from ETPHOT
           SELECT CASE (METMP)
           CASE ('E')    !EPIC soil temperature routine
-            CALL STEMP_EPIC(CONTROL, ISWITCH,  
+            CALL STEMP_EPIC(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12 
      &        SOILPROP, SW, TAVG, TMAX, TMIN, TAV, WEATHER,   !Input
      &        SRFTEMP, ST)                                    !Output
           CASE DEFAULT  
 !     7/21/2016 - DSSAT method is default, per GH
 !     CASE ('D')  !DSSAT soil temperature
-        CALL STEMP(CONTROL, ISWITCH,
+        CALL STEMP(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12
      &    SOILPROP, SRAD, SW, TAVG, TMAX, XLAT, TAV, TAMP,!Input
      &    SRFTEMP, ST)                                    !Output
           END SELECT
@@ -281,7 +295,7 @@ C=======================================================================
 C       Calculate potential root water uptake rate for each soil layer
 C       and total potential water uptake rate.
           IF (XHLAI .GT. 0.0) THEN
-            CALL ROOTWU(RATE,
+            CALL ROOTWU(RATE, nest, t, !Pang 2024.02.12
      &          DLAYR, LL, NLAYR, PORMIN, RLV, RWUMX, SAT, SW,!Input
      &          RWU, TRWUP)                           !Output
           ELSE
@@ -357,7 +371,7 @@ C       and total potential water uptake rate.
               DO L = 1, NLAYR
                 SW_AVAIL(L) = MAX(0.0, SW(L) + SWDELTS(L) + SWDELTU(L))
               ENDDO
-              CALL SOILEV(RATE,
+              CALL SOILEV(RATE, nest, t, !Pang 2024.02.12
      &          DLAYR, DUL, EOS_SOIL, LL, SW,             !Input
      &          SW_AVAIL(1), U, WINF,                     !Input
      &          ES)                                       !Output
@@ -429,7 +443,7 @@ C       and total potential water uptake rate.
           !    (MEPHO = 'L' and MEEVP <> 'Z')
           !or for both photosynthesis and evapotranspiration
           !   (MEPHO = 'L' and MEEVP = 'Z').
-          CALL ETPHOT(CONTROL, ISWITCH,
+          CALL ETPHOT(CONTROL, ISWITCH, nest, t,  !Pang 2024.02.12
      &    PORMIN, PSTRES1, RLV, RWUMX, SOILPROP, ST, SW,  !Input
      &    WEATHER, XLAI,                                 !Input
      &    EOP, EP, ES, RWU, TRWUP)                        !Output
@@ -526,11 +540,11 @@ C-----------------------------------------------------------------------
       IF (meevp .NE.'Z') THEN  !LPM 02dec14 to use the values from ETPHOT
           SELECT CASE (METMP)
           CASE ('E')    !EPIC soil temperature routine
-            CALL STEMP_EPIC(CONTROL, ISWITCH,  
+            CALL STEMP_EPIC(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12 
      &        SOILPROP, SW, TAVG, TMAX, TMIN, TAV, WEATHER,   !Input
      &        SRFTEMP, ST)                                    !Output
           CASE DEFAULT  !DSSAT soilt temperature
-            CALL STEMP(CONTROL, ISWITCH,
+            CALL STEMP(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12
      &        SOILPROP, SRAD, SW, TAVG, TMAX, XLAT, TAV, TAMP,!Input
      &        SRFTEMP, ST)                                    !Output
           END SELECT
@@ -555,7 +569,7 @@ C-----------------------------------------------------------------------
      &    ES_LYR, SOILPROP)
 
       IF (CROP .NE. 'FA' .AND. MEPHO .EQ. 'L') THEN
-        CALL ETPHOT(CONTROL, ISWITCH,
+        CALL ETPHOT(CONTROL, ISWITCH,nest, t, !Pang 2024.02.12
      &    PORMIN, PSTRES1, RLV, RWUMX, SOILPROP, ST, SW,  !Input
      &    WEATHER, XLAI,                                 !Input
      &    EOP, EP, ES, RWU, TRWUP)                        !Output
@@ -578,18 +592,18 @@ C-----------------------------------------------------------------------
       IF (meevp .NE.'Z') THEN  !LPM 02dec14 to use the values from ETPHOT
           SELECT CASE (METMP)
           CASE ('E')    !EPIC soil temperature routine
-            CALL STEMP_EPIC(CONTROL, ISWITCH,  
+            CALL STEMP_EPIC(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12 
      &        SOILPROP, SW, TAVG, TMAX, TMIN, TAV, WEATHER,   !Input
      &        SRFTEMP, ST)                                    !Output
           CASE DEFAULT  !DSSAT soilt temperature
-            CALL STEMP(CONTROL, ISWITCH,
+            CALL STEMP(CONTROL, ISWITCH, nest, t, !Pang 2024.02.12
      &        SOILPROP, SRAD, SW, TAVG, TMAX, XLAT, TAV, TAMP,!Input
      &        SRFTEMP, ST)                                    !Output
           END SELECT
       ENDIF
 
       IF (MEPHO .EQ. 'L') THEN
-        CALL ETPHOT(CONTROL, ISWITCH,
+        CALL ETPHOT(CONTROL, ISWITCH,nest, t, !Pang 2024.02.12
      &    PORMIN, PSTRES1, RLV, RWUMX, SOILPROP, ST, SW,  !Input
      &    WEATHER, XLAI,                                 !Input
      &    EOP, EP, ES, RWU, TRWUP)                        !Output
@@ -613,6 +627,21 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
+!***********************************************************************
+!----- Save Vars To Memory -----------------------------------------
+!-----  Pang: 2023.09.26 -------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%EF = EF
+      dssat48_struc(nest)%dssat48(t)%CEF = CEF
+      dssat48_struc(nest)%dssat48(t)%EM = EM
+      dssat48_struc(nest)%dssat48(t)%CEM = CEM
+      dssat48_struc(nest)%dssat48(t)%CEO = CEO
+      dssat48_struc(nest)%dssat48(t)%CEP = CEP
+      dssat48_struc(nest)%dssat48(t)%CES = CES
+      dssat48_struc(nest)%dssat48(t)%CET = CET
+      dssat48_struc(nest)%dssat48(t)%EVAP = EVAP
+      dssat48_struc(nest)%dssat48(t)%CEVAP = CEVAP
+      dssat48_struc(nest)%dssat48(t)%ES_LYR = ES_LYR
+      dssat48_struc(nest)%dssat48(t)%ET0 = ET0
       RETURN
       END SUBROUTINE SPAM
 

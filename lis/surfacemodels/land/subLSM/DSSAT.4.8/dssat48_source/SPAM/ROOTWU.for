@@ -19,7 +19,7 @@ C-----------------------------------------------------------------------
 C Called by: SPAM, ETPHOT
 C Calls:     None
 C=======================================================================
-      SUBROUTINE ROOTWU(DYNAMIC,
+      SUBROUTINE ROOTWU(DYNAMIC,nest, t,           !Pang 2024.02.12
      &    DLAYR, LL, NLAYR, PORMIN, RLV, RWUMX, SAT, SW,  !Input
      &    RWU, TRWUP)                                     !Output
 
@@ -27,11 +27,13 @@ C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 C-----------------------------------------------------------------------
+      INTEGER nest, t
       INTEGER DYNAMIC
-
+     
       INTEGER L, NLAYR
 
       REAL SWEXF, TRWUP 
@@ -44,6 +46,11 @@ C-----------------------------------------------------------------------
       PARAMETER (SWCON3 = 7.01)
 
 !***********************************************************************
+!----------------------------------------------------------------------
+!------ Obtain Vars From Memory ---------------------------------------
+!------ Pang 2024.02.12  ----------------------------------------------
+       SWCON2 = dssat48_struc(nest)%dssat48(t)%SWCON2
+       TSS = dssat48_struc(nest)%dssat48(t)%ROOTWU_TSS
 !***********************************************************************
 !     Seasonal Initialization - Called once per season
 !***********************************************************************
@@ -127,6 +134,12 @@ C-----------------------------------------------------------------------
 !     END OF DYNAMIC IF CONSTRUCT
 !***********************************************************************
       ENDIF
+!----------------------------------------------------------------------
+!------ Save Vars To Memory ---------------------------------------
+!------ Pang 2024.02.12  ----------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%SWCON2 = SWCON2
+       dssat48_struc(nest)%dssat48(t)%ROOTWU_TSS = TSS
+
 !***********************************************************************
       RETURN
       END SUBROUTINE ROOTWU

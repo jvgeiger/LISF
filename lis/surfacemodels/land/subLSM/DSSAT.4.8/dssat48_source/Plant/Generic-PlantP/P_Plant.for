@@ -38,7 +38,7 @@
 !  Called by: CROPGRO, MZ_CERES, RI_CERES...
 !  Calls:     P_UPTAKE, OPPHOS
 !=======================================================================
-      SUBROUTINE P_Plant (DYNAMIC, ISWPHO,                !I Control
+      SUBROUTINE P_Plant (DYNAMIC, ISWPHO, nest, t,   !Pang 2024.02.05 !I Control
      &    CROP, FILECC, MDATE, YRPLT,                     !I Crop
      &    SPi_AVAIL,                                      !I Soils
      &    Leaf_kg, Stem_kg, Root_kg, Shel_kg, Seed_kg,    !I Mass
@@ -58,12 +58,14 @@
 !       (DYNAMIC=EMERG) within the integration section of CROPGRO.
 !     ------------------------------------------------------------------
       USE ModuleDefs
+      USE dssat48_lsmMod !Pang 2024.02.05
       IMPLICIT  NONE
       SAVE
 !     ------------------------------------------------------------------
 !     Interface variables
 !     ------------------------------------------------------------------
 !     INPUT
+      INTEGER      nest, t        !Pang 2024.02.05
       INTEGER      DYNAMIC        !Processing control
       CHARACTER*1  ISWPHO         !P switch (Y or N)
       CHARACTER*2  CROP           !2-character crop code
@@ -143,7 +145,55 @@
       REAL FracPMobil, FracPUptake
 
       Real PValue !Function
-
+!-----------------------------------------------------------------------
+!-----  Obtain Vars From Memory ----------------------------------------
+!-----  Pang 2024.02.05  -----------------------------------------------
+      PConc_Shut_opt = dssat48_struc(nest)%dssat48(t)%PConc_Shut_opt
+      PConc_Root_opt = dssat48_struc(nest)%dssat48(t)%PConc_Root_opt
+      PConc_Shel_opt = dssat48_struc(nest)%dssat48(t)%PConc_Shel_opt
+      PConc_Seed_opt = dssat48_struc(nest)%dssat48(t)%PConc_Seed_opt
+      PConc_Shut_min = dssat48_struc(nest)%dssat48(t)%PConc_Shut_min
+      PConc_Root_min = dssat48_struc(nest)%dssat48(t)%PConc_Root_min
+      PConc_Shel_min = dssat48_struc(nest)%dssat48(t)%PConc_Shel_min
+      PConc_Seed_min = dssat48_struc(nest)%dssat48(t)%PConc_Seed_min
+      PConc_Plant = dssat48_struc(nest)%dssat48(t)%PConc_Plant
+      PPlant_kg = dssat48_struc(nest)%dssat48(t)%PPlant_kg
+      PSTRESS_RATIO = dssat48_struc(nest)%dssat48(t)%PSTRESS_RATIO
+      Shut_kg = dssat48_struc(nest)%dssat48(t)%Shut_kg
+      Plant_kg = dssat48_struc(nest)%dssat48(t)%Plant_kg
+!-----  P_IPPLNT Pang 2024.02.05 --------------------------------------- 
+      N2Pmax = dssat48_struc(nest)%dssat48(t)%N2Pmax
+      N2Pmin = dssat48_struc(nest)%dssat48(t)%N2Pmin
+      PCShutMin = dssat48_struc(nest)%dssat48(t)%PCShutMin
+      PCLeafMin = dssat48_struc(nest)%dssat48(t)%PCLeafMin
+      PCStemMin = dssat48_struc(nest)%dssat48(t)%PCStemMin
+      PCRootMin = dssat48_struc(nest)%dssat48(t)%PCRootMin
+      PCShelMin = dssat48_struc(nest)%dssat48(t)%PCShelMin
+      PCSeedMin = dssat48_struc(nest)%dssat48(t)%PCSeedMin
+      PCShutOpt = dssat48_struc(nest)%dssat48(t)%PCShutOpt
+      PCLeafOpt = dssat48_struc(nest)%dssat48(t)%PCLeafOpt
+      PCStemOpt = dssat48_struc(nest)%dssat48(t)%PCStemOpt
+      PCRootOpt = dssat48_struc(nest)%dssat48(t)%PCRootOpt
+      PCShelOpt = dssat48_struc(nest)%dssat48(t)%PCShelOpt
+      PCSeedOpt = dssat48_struc(nest)%dssat48(t)%PCSeedOpt
+      FracPMobil = dssat48_struc(nest)%dssat48(t)%FracPMobil
+      FracPUptake = dssat48_struc(nest)%dssat48(t)%FracPUptake
+      SRATPHOTO = dssat48_struc(nest)%dssat48(t)%SRATPHOTO
+      SRATPART = dssat48_struc(nest)%dssat48(t)%SRATPART
+      UseShoots = dssat48_struc(nest)%dssat48(t)%UseShoots
+!-----  P_Demand ------------------------------------------------------
+      DeltPRoot = dssat48_struc(nest)%dssat48(t)%DeltPRoot
+      DeltPSeed = dssat48_struc(nest)%dssat48(t)%DeltPSeed
+      DeltPShel = dssat48_struc(nest)%dssat48(t)%DeltPShel
+      DeltPShut = dssat48_struc(nest)%dssat48(t)%DeltPShut
+      PRootDem = dssat48_struc(nest)%dssat48(t)%PRootDem
+      PSeedDem = dssat48_struc(nest)%dssat48(t)%PSeedDem
+      PShelDem = dssat48_struc(nest)%dssat48(t)%PShelDem
+      PShutDem = dssat48_struc(nest)%dssat48(t)%PShutDem
+      PTotDem = dssat48_struc(nest)%dssat48(t)%PTotDem
+!-----  P_Uptake  ------------------------------------------------------
+      N2P = dssat48_struc(nest)%dssat48(t)%N2P
+      PUptakeProf = dssat48_struc(nest)%dssat48(t)%PUptakeProf
 !***********************************************************************
 !***********************************************************************
 !     SEASONAL INITIALIZATION: RUN ONCE PER SEASON.
@@ -160,7 +210,7 @@
       ENDIF
 
 !     ------------------------------------------------------------------
-      Call P_Demand(DYNAMIC,
+      Call P_Demand(DYNAMIC, nest, t,             !Pang 2024.02.05
      &    PConc_Root, PConc_Root_min, PConc_Root_opt,     !Input
      &    PConc_Shel, PConc_Shel_min, PConc_Shel_opt,     !Input 
      &    PConc_Shut, PConc_Shut_min, PConc_Shut_opt,     !Input
@@ -173,7 +223,7 @@
 
 !     ------------------------------------------------------------------
 !     Initialize uptake variables - do this even if P not modelled.
-      CALL P_Uptake (DYNAMIC,  
+      CALL P_Uptake (DYNAMIC, nest, t, !Pang 2024.02.05 
      &    N2P_min, PCNVeg, PConc_Veg, PTotDem,            !Input
      &    RLV, SPi_AVAIL,                                 !Input
      &    N2P, PUptake, PUptakeProf)                      !Output
@@ -347,7 +397,7 @@
 
 !-----------------------------------------------------------------------
 !     CALCULATE DEMANDS in kg/ha
-      Call P_Demand(DYNAMIC,
+      Call P_Demand(DYNAMIC,nest,t,       !Pang 2024.02.05
      &    PConc_Root, PConc_Root_min, PConc_Root_opt,     !Input
      &    PConc_Shel, PConc_Shel_min, PConc_Shel_opt,     !Input 
      &    PConc_Shut, PConc_Shut_min, PConc_Shut_opt,     !Input
@@ -360,7 +410,7 @@
 
 !-----------------------------------------------------------------------
 !     P uptake
-      CALL P_Uptake (DYNAMIC,   
+      CALL P_Uptake (DYNAMIC,nest, t, 
      &    N2P_min, PCNVeg, PConc_Veg, PTotDem,            !Input
      &    RLV, SPi_AVAIL,                                 !Input
      &    N2P, PUptake, PUptakeProf)                      !Output
@@ -470,7 +520,55 @@ C     Calculate PStres2 (Partitioning)
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
-
+!-----------------------------------------------------------------------
+!-----  Save Vars To Memory --------------------------------------------
+!-----  Pang 2024.02.05  -----------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%PConc_Shut_opt = PConc_Shut_opt
+      dssat48_struc(nest)%dssat48(t)%PConc_Root_opt = PConc_Root_opt
+      dssat48_struc(nest)%dssat48(t)%PConc_Shel_opt = PConc_Shel_opt
+      dssat48_struc(nest)%dssat48(t)%PConc_Seed_opt = PConc_Seed_opt
+      dssat48_struc(nest)%dssat48(t)%PConc_Shut_min = PConc_Shut_min
+      dssat48_struc(nest)%dssat48(t)%PConc_Root_min = PConc_Root_min
+      dssat48_struc(nest)%dssat48(t)%PConc_Shel_min = PConc_Shel_min
+      dssat48_struc(nest)%dssat48(t)%PConc_Seed_min = PConc_Seed_min
+      dssat48_struc(nest)%dssat48(t)%PConc_Plant = PConc_Plant
+      dssat48_struc(nest)%dssat48(t)%PPlant_kg = PPlant_kg
+      dssat48_struc(nest)%dssat48(t)%PSTRESS_RATIO = PSTRESS_RATIO
+      dssat48_struc(nest)%dssat48(t)%Shut_kg = Shut_kg
+      dssat48_struc(nest)%dssat48(t)%Plant_kg = Plant_kg
+!-----  P_IPPLNT  --------------------------------------- 
+      dssat48_struc(nest)%dssat48(t)%N2Pmax = N2Pmax
+      dssat48_struc(nest)%dssat48(t)%N2Pmin = N2Pmin
+      dssat48_struc(nest)%dssat48(t)%PCShutMin = PCShutMin
+      dssat48_struc(nest)%dssat48(t)%PCLeafMin = PCLeafMin
+      dssat48_struc(nest)%dssat48(t)%PCStemMin = PCStemMin
+      dssat48_struc(nest)%dssat48(t)%PCRootMin = PCRootMin
+      dssat48_struc(nest)%dssat48(t)%PCShelMin = PCShelMin
+      dssat48_struc(nest)%dssat48(t)%PCSeedMin = PCSeedMin
+      dssat48_struc(nest)%dssat48(t)%PCShutOpt = PCShutOpt
+      dssat48_struc(nest)%dssat48(t)%PCLeafOpt = PCLeafOpt
+      dssat48_struc(nest)%dssat48(t)%PCStemOpt = PCStemOpt
+      dssat48_struc(nest)%dssat48(t)%PCRootOpt = PCRootOpt
+      dssat48_struc(nest)%dssat48(t)%PCShelOpt = PCShelOpt
+      dssat48_struc(nest)%dssat48(t)%PCSeedOpt = PCSeedOpt
+      dssat48_struc(nest)%dssat48(t)%FracPMobil = FracPMobil
+      dssat48_struc(nest)%dssat48(t)%FracPUptake = FracPUptake
+      dssat48_struc(nest)%dssat48(t)%SRATPHOTO = SRATPHOTO
+      dssat48_struc(nest)%dssat48(t)%SRATPART = SRATPART
+      dssat48_struc(nest)%dssat48(t)%UseShoots = UseShoots
+!-----  P_Demand ------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%DeltPRoot = DeltPRoot
+      dssat48_struc(nest)%dssat48(t)%DeltPSeed = DeltPSeed
+      dssat48_struc(nest)%dssat48(t)%DeltPShel = DeltPShel
+      dssat48_struc(nest)%dssat48(t)%DeltPShut = DeltPShut
+      dssat48_struc(nest)%dssat48(t)%PRootDem = PRootDem 
+      dssat48_struc(nest)%dssat48(t)%PSeedDem = PSeedDem
+      dssat48_struc(nest)%dssat48(t)%PShelDem = PShelDem
+      dssat48_struc(nest)%dssat48(t)%PShutDem = PShutDem
+      dssat48_struc(nest)%dssat48(t)%PTotDem = PTotDem
+!-----  P_Uptake  ------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%N2P = N2P
+      dssat48_struc(nest)%dssat48(t)%PUptakeProf = PUptakeProf
       RETURN
       END SUBROUTINE P_Plant
 C=======================================================================

@@ -27,7 +27,7 @@ C  03/30/2000 CHP Keep original value of WINF for export to soil N module
 !  Called by: SPAM
 !  Calls:     ESUP
 C=======================================================================
-      SUBROUTINE SOILEV(DYNAMIC,
+      SUBROUTINE SOILEV(DYNAMIC,nest, tile,           !Pang 2024.02.12
      &    DLAYR, DUL, EOS, LL, SW, SW_AVAIL, U, WINF,     !Input
      &    ES)                                             !Output
 
@@ -35,12 +35,13 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types,
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       !CHARACTER*6 ERRKEY
       !PARAMETER (ERRKEY = 'SOILEV')
-
+      INTEGER nest, tile
       INTEGER DYNAMIC
 
       REAL EOS, SWEF, U, SW_AVAIL, SWMIN
@@ -50,6 +51,13 @@ C=======================================================================
       REAL DLAYR(NL), DUL(NL), LL(NL), SW(NL)
 
 !***********************************************************************
+!----------------------------------------------------------------------
+!------ Obtain Vars From Memory ---------------------------------------
+!------ Pang 2024.02.12  ----------------------------------------------
+       SUMES1 = dssat48_struc(nest)%dssat48(tile)%SUMES1
+       SUMES2 = dssat48_struc(nest)%dssat48(tile)%SUMES2
+       T = dssat48_struc(nest)%dssat48(tile)%T_prm
+       SWEF = dssat48_struc(nest)%dssat48(tile)%SWEF
 !***********************************************************************
 !     Seasonal initialization - run once per season
 !***********************************************************************
@@ -169,6 +177,10 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+       dssat48_struc(nest)%dssat48(tile)%SUMES1 = SUMES1
+       dssat48_struc(nest)%dssat48(tile)%SUMES2 = SUMES2
+       dssat48_struc(nest)%dssat48(tile)%T_prm = T
+       dssat48_struc(nest)%dssat48(tile)%SWEF = SWEF
       RETURN
       END SUBROUTINE SOILEV
 !-----------------------------------------------------------------------

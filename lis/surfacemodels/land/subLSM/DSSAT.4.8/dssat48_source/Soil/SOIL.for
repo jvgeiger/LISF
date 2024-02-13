@@ -129,6 +129,13 @@ C=====================================================================
       TDFC = dssat48_struc(nest)%dssat48(t)%tdfc
       TDLNO = dssat48_struc(nest)%dssat48(t)%tdlno
       CH4_data = dssat48_struc(n)%CH4_data(t)
+!----- Added Pang 2024.02.13 -------------------------------------------
+      IMM = dssat48_struc(nest)%dssat48(t)%IMM
+      LITC = dssat48_struc(nest)%dssat48(t)%LITC
+      MNR = dssat48_struc(nest)%dssat48(t)%MNR
+      newCO2 = dssat48_struc(nest)%dssat48(t)%newCO2
+      DRAIN = dssat48_struc(nest)%dssat48(t)%DRAIN
+      DRN = dssat48_struc(nest)%dssat48(t)%DRN
 !***********************************************************************
 !     Call Soil Dynamics module 
 !      IF (DYNAMIC < OUTPUT) THEN
@@ -209,6 +216,13 @@ C=====================================================================
       dssat48_struc(nest)%dssat48(t)%tdfc = TDFC
       dssat48_struc(nest)%dssat48(t)%tdlno = TDLNO
       dssat48_struc(n)%CH4_data(t) = CH4_data
+!----- Added Pang 2024.02.13 -------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%IMM = IMM 
+      dssat48_struc(nest)%dssat48(t)%LITC = LITC
+      dssat48_struc(nest)%dssat48(t)%MNR = MNR
+      dssat48_struc(nest)%dssat48(t)%newCO2 =  newCO2
+      dssat48_struc(nest)%dssat48(t)%DRAIN = DRAIN
+      dssat48_struc(nest)%dssat48(t)%DRN = DRN
 !-----------------------------------------------------------------------
 
       RETURN
