@@ -226,8 +226,8 @@ contains
             ! Call dssat48_setup to obtain mukey number before initialization
                CALL dssat48_setup !Pang 2024.02.09 (This is used to obtain soil mukey)
 
-            !do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-            do t=1,4
+            do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+            !do t=1,4
                  !These System Initial Values May Be Loaded From Config File
                  ! Start CSM 
                  !DONE =  .FALSE.  ! We don't use DONE to control run or not run

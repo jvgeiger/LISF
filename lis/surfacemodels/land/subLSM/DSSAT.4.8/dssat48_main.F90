@@ -94,8 +94,8 @@ subroutine dssat48_main(n)
 
     alarmCheck = LIS_isAlarmRinging(LIS_rc, "DSSAT48 model alarm "// trim(fnest)) !MN  Bug in the toolkit 
     if (alarmCheck) Then
-        !do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-        do  t = 1, 4
+        do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+        !do  t = 1, 4
              
             dt = LIS_rc%ts
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
