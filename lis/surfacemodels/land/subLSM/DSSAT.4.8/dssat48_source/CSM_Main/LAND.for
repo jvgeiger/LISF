@@ -152,6 +152,14 @@ C     Transfer values from constructed data types into local variables.
       SNOW = dssat48_struc(nest)%dssat48(t)%SNOW
       SomLitC = dssat48_struc(nest)%dssat48(t)%SomLitC
       SKi_Avail = dssat48_struc(nest)%dssat48(t)%SKi_Avail
+      !----- SOIL ADDED ------------------------------------------------
+      SomLitE = dssat48_struc(nest)%dssat48(t)%SomLitE
+      NH4_plant = dssat48_struc(nest)%dssat48(t)%NH4_plant
+      NO3_Plant = dssat48_struc(nest)%dssat48(t)%NO3_Plant
+      UPPM = dssat48_struc(nest)%dssat48(t)%UPPM
+      SPi_AVAIL = dssat48_struc(nest)%dssat48(t)%SPi_AVAIL
+      SWDELTS = dssat48_struc(nest)%dssat48(t)%SWDELTS
+      WINF = dssat48_struc(nest)%dssat48(t)%WINF
       !PRINT*, 'SOILPROP bg LAND: ', SOILPROP
       !PRINT*, 'FLOODWAT bg LAND: ', FLOODWAT
       !PRINT*, 'FLOODN bg LAND: ', FLOODN
@@ -160,19 +168,22 @@ C     Transfer values from constructed data types into local variables.
       !PRINT*, 'SNOW bg LAND: ', SNOW
       !PRINT*, 'SomLitC bg LAND: ', SomLitC
       !PRINT*, 'Ski_Avail bg LAND: ', SKi_Avail
-      !---- Pang: 2024.01.12 -------------------------------------------
       !---- SPAM -------------------------------------------------------
+      !---- Pang: 2024.01.12 -------------------------------------------
       ES = dssat48_struc(nest)%dssat48(t)%ES
       ST = dssat48_struc(nest)%dssat48(t)%ST
       SWDELTX = dssat48_struc(nest)%dssat48(t)%SWDELTX
       UPFLOW = dssat48_struc(nest)%dssat48(t)%UPFLOW
-
-      !PRINT*, 'ES af LAND: ', ES
-      !PRINT*, 'ST af LAND: ', ST
-      !PRINT*, 'SWDELTX af LAND: ', SWDELTX
-      !PRINT*, 'UPFLOW af LAND: ', UPFLOW
-
-
+      !---- Pang: 2024.02.05 -------------------------------------------
+      EO = dssat48_struc(nest)%dssat48(t)%EO
+      EOP = dssat48_struc(nest)%dssat48(t)%EOP
+      EOS = dssat48_struc(nest)%dssat48(t)%EOS
+      EP = dssat48_struc(nest)%dssat48(t)%EP
+      SRFTEMP = dssat48_struc(nest)%dssat48(t)%SRFTEMP
+      TRWU = dssat48_struc(nest)%dssat48(t)%TRWU
+      TRWUP = dssat48_struc(nest)%dssat48(t)%TRWUP
+      RWU = dssat48_struc(nest)%dssat48(t)%RWU
+      SWDELTU = dssat48_struc(nest)%dssat48(t)%SWDELTU
       !---- Pang: 2024.01.17 -------------------------------------------
       !---- PLANT ------------------------------------------------------
       HARVRES = dssat48_struc(nest)%HARVRES(t)
@@ -246,7 +257,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Read initial soil-plant-atmosphere data
 C-----------------------------------------------------------------------
-      CALL SPAM(CONTROL, ISWITCH,
+      CALL SPAM(CONTROL, ISWITCH,nest, t,
      &    CANHT, EORATIO, KSEVAP, KTRANS, MULCH,          !Input
      &    PSTRES1, PORMIN, RLV, RWUMX, SOILPROP, SW,      !Input
      &    SWDELTS, UH2O, WEATHER, WINF, XHLAI, XLAI,      !Input
@@ -319,7 +330,7 @@ C     Seasonal initialization for soil-plant-atmosphere processes
 !     chp moved this before SOIL, so soil temp is available 
 !     update 2020-12-04 - order makes no difference
 C-----------------------------------------------------------------------
-      CALL SPAM(CONTROL, ISWITCH,
+      CALL SPAM(CONTROL, ISWITCH,nest, t,
      &    CANHT, EORATIO, KSEVAP, KTRANS, MULCH,          !Input
      &    PSTRES1, PORMIN, RLV, RWUMX, SOILPROP, SW,      !Input
      &    SWDELTS, UH2O, WEATHER, WINF, XHLAI, XLAI,      !Input
@@ -400,7 +411,7 @@ C-----------------------------------------------------------------------
 C     Call Soil-plant-atmosphere module to determine today's
 C     rates of evapotranspiration.
 C-----------------------------------------------------------------------
-      CALL SPAM(CONTROL, ISWITCH,
+      CALL SPAM(CONTROL, ISWITCH,nest, t,
      &    CANHT, EORATIO, KSEVAP, KTRANS, MULCH,          !Input
      &    PSTRES1, PORMIN, RLV, RWUMX, SOILPROP, SW,      !Input
      &    SWDELTS, UH2O, WEATHER, WINF, XHLAI, XLAI,      !Input
@@ -448,7 +459,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Compute cumulative totals for soil-plant-atmosphere processes
 C-----------------------------------------------------------------------
-      CALL SPAM(CONTROL, ISWITCH,
+      CALL SPAM(CONTROL, ISWITCH,nest, t,
      &    CANHT, EORATIO, KSEVAP, KTRANS, MULCH,          !Input
      &    PSTRES1, PORMIN, RLV, RWUMX, SOILPROP, SW,      !Input
      &    SWDELTS, UH2O, WEATHER, WINF, XHLAI, XLAI,      !Input
@@ -503,7 +514,7 @@ C***********************************************************************
      &    SPi_AVAIL, SOILPROP, SomLitC, SomLitE,          !Output
      &    SW, SWDELTS, SWDELTU, UPPM, WINF, YREND)        !Output
 
-        CALL SPAM(CONTROL, ISWITCH,
+        CALL SPAM(CONTROL, ISWITCH,nest, t,
      &    CANHT, EORATIO, KSEVAP, KTRANS, MULCH,          !Input
      &    PSTRES1, PORMIN, RLV, RWUMX, SOILPROP, SW,      !Input
      &    SWDELTS, UH2O, WEATHER, WINF, XHLAI, XLAI,      !Input
@@ -554,7 +565,7 @@ C     Print seasonal summaries and close files.
      &    SPi_AVAIL, SOILPROP, SomLitC, SomLitE,          !Output
      &    SW, SWDELTS, SWDELTU, UPPM, WINF, YREND)        !Output
 
-      CALL SPAM(CONTROL, ISWITCH,
+      CALL SPAM(CONTROL, ISWITCH,nest,t,
      &    CANHT, EORATIO, KSEVAP, KTRANS, MULCH,          !Input
      &    PSTRES1, PORMIN, RLV, RWUMX, SOILPROP, SW,      !Input
      &    SWDELTS, UH2O, WEATHER, WINF, XHLAI, XLAI,      !Input
@@ -661,6 +672,15 @@ C***********************************************************************
       dssat48_struc(nest)%dssat48(t)%SNOW = SNOW
       dssat48_struc(nest)%dssat48(t)%SomLitC = SomLitC
       dssat48_struc(nest)%dssat48(t)%SKi_Avail = SKi_Avail
+!----- SOIL ADDED ------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%SomLitE = SomLitE
+      dssat48_struc(nest)%dssat48(t)%NH4_plant = NH4_plant
+      dssat48_struc(nest)%dssat48(t)%NO3_Plant = NO3_Plant
+      dssat48_struc(nest)%dssat48(t)%UPPM = UPPM
+      dssat48_struc(nest)%dssat48(t)%SPi_AVAIL = SPi_AVAIL
+      dssat48_struc(nest)%dssat48(t)%SWDELTS = SWDELTS
+      dssat48_struc(nest)%dssat48(t)%WINF = WINF
+
       !PRINT*, 'SOILPROP af LAND: ', SOILPROP
       !PRINT*, 'FLOODWAT af LAND: ', FLOODWAT
       !PRINT*, 'FLOODN af LAND: ', FLOODN
@@ -669,16 +689,23 @@ C***********************************************************************
       !PRINT*, 'SNOW af LAND: ', SNOW
       !PRINT*, 'SomLitC af LAND: ', SomLitC
       !PRINT*, 'Ski_Avail af LAND: ', SKi_Avail
-!------ Pang: 2024.01.12 --------------------------------------------------
 !------ SPAM --------------------------------------------------------------
+!------ Pang: 2024.01.12 --------------------------------------------------
       dssat48_struc(nest)%dssat48(t)%ES = ES
       dssat48_struc(nest)%dssat48(t)%ST = ST
       dssat48_struc(nest)%dssat48(t)%SWDELTX = SWDELTX
       dssat48_struc(nest)%dssat48(t)%UPFLOW = UPFLOW
-      !PRINT*, 'ES af LAND: ', ES
-      !PRINT*, 'ST af LAND: ', ST
-      !PRINT*, 'SWDELTX af LAND: ', SWDELTX
-      !PRINT*, 'UPFLOW af LAND: ', UPFLOW
+!---- Pang: 2024.02.05 -------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%EO = EO
+      dssat48_struc(nest)%dssat48(t)%EOP = EOP
+      dssat48_struc(nest)%dssat48(t)%EOS = EOS
+      dssat48_struc(nest)%dssat48(t)%EP = EP
+      dssat48_struc(nest)%dssat48(t)%SRFTEMP =SRFTEMP
+      dssat48_struc(nest)%dssat48(t)%TRWU = TRWU
+      dssat48_struc(nest)%dssat48(t)%TRWUP = TRWUP
+      dssat48_struc(nest)%dssat48(t)%RWU = RWU
+      dssat48_struc(nest)%dssat48(t)%SWDELTU = SWDELTU
+
 !------ Pang: 2024.01.12 --------------------------------------------------
 !------ PLANT --------------------------------------------------------------
       dssat48_struc(nest)%HARVRES(t) = HARVRES

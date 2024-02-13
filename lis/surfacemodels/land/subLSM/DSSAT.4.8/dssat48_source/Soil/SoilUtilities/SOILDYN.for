@@ -220,6 +220,10 @@ C-----------------------------------------------------------------------
       LCRAIN = dssat48_struc(nest)%dssat48(t)%LCRAIN
       SUMKE = dssat48_struc(nest)%dssat48(t)%SUMKE
       KECHGE = dssat48_struc(nest)%dssat48(t)%KECHGE
+!------- Pang 2024.02.13 ----------------------------------------------
+      ISWWAT = ISWITCH % ISWWAT !Pang 2024.02.13
+      ISWTIL = ISWITCH % ISWTIL
+      NTIL = TILLVALS % NTIL
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -1293,7 +1297,7 @@ C  tillage and rainfall kinetic energy
       TotOrgN = SOILPROP % TotOrgN
 !---------------------------------------------------------------
 !----- These two are calculated at the Initilization phase
-!----  and could vary pixel to pixel -------------------------------------
+!----  and could vary pixel to pixel (Pang-wei liu)  -----------
       NLAYR = SOILPROP % NLAYR
       COARSE = SOILPROP % COARSE
 !-----------------------------------------------------------------------

@@ -66,7 +66,7 @@
 !-----------------------------------------------------------------------
 !  Called by: P_PLANT
 !=======================================================================
-      Subroutine P_Demand(DYNAMIC,
+      Subroutine P_Demand(DYNAMIC, nest, t,       !Pang 2024.02.05
      &    PConc_Root, PConc_Root_min, PConc_Root_opt,     !Input
      &    PConc_Shel, PConc_Shel_min, PConc_Shel_opt,     !Input 
      &    PConc_Shut, PConc_Shut_min, PConc_Shut_opt,     !Input
@@ -78,11 +78,12 @@
      &    PTotDem)                                        !Output
 
       USE ModuleDefs
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       Integer DYNAMIC
-
+      Integer nest, t
       Real Shut_kg, Root_kg, Shel_kg, Seed_kg
       Real PShut_kg, PRoot_kg, PShel_kg, PSeed_kg
       Real ShutMob, RootMob, ShelMob
@@ -97,6 +98,13 @@
       Real PShutMobToday, PRootMobToday, PShelMobToday
 
 !***********************************************************************
+!-----------------------------------------------------------------------
+!-----  Obtain Vars From Memory ----------------------------------------
+!-----  Pang 2024.02.05  -----------------------------------------------
+      PShutMobPool = dssat48_struc(nest)%dssat48(t)%PShutMobPool
+      PRootMobPool = dssat48_struc(nest)%dssat48(t)%PRootMobPool
+      PShelMobPool = dssat48_struc(nest)%dssat48(t)%PShelMobPool
+      PSeedMobPool = dssat48_struc(nest)%dssat48(t)%PSeedMobPool
 !***********************************************************************
 !     SEASONAL INITIALIZATION: RUN ONCE PER SEASON.
 !***********************************************************************
@@ -293,6 +301,14 @@
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!-----  Save Vars to Memory ----------------------------------------
+!-----  Pang 2024.02.05  -----------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%PShutMobPool = PShutMobPool
+      dssat48_struc(nest)%dssat48(t)%PRootMobPool = PRootMobPool
+      dssat48_struc(nest)%dssat48(t)%PShelMobPool = PShelMobPool
+      dssat48_struc(nest)%dssat48(t)%PSeedMobPool = PSeedMobPool
+
       Return
       End Subroutine P_Demand
 

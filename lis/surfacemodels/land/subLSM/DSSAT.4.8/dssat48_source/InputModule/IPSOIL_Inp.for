@@ -88,7 +88,6 @@ C** WDB end changes
       PARAMETER (LUNSL  = 12)
       PARAMETER (BLANK = ' ')
       
-     
       NLSOIL = 0
 !-----------------------------------------------------------------------
 !     No soil file read - default conditions
@@ -110,7 +109,6 @@ C** WDB end changes
          IF (ERR .NE. 0) THEN
             CALL ERROR(ERRKEY,ERR,FILES,0)
          END IF
-
 !-----------------------------------------------------------------------
 !     Sensitivity Analysis - soil selection
          IF (NSENS .EQ. 1 ) THEN
@@ -183,7 +181,6 @@ C
 
             REWIND (LUNSL)
          ENDIF     !End of sensitivity selection
-
 !-----------------------------------------------------------------------
 !     Set default values for soil parameters
       SLTXS  = '-99  '
@@ -271,6 +268,7 @@ C
 !WDB      
 !-----------------------------------------------------------------------
 !     Find correct soil within soil file
+ 5023    CONTINUE !Pang 2024.02.09(If no soil type in soil file, redo search)
          I = 0
  5024    CONTINUE
          I = I + 1
@@ -298,6 +296,12 @@ C
 !              NLAYR = 1
 !              RETURN
 !            ELSE
+             !----- Go around the missing soil Pang 2024.02.09 ------------
+              OPEN (LUNSL, FILE = FILESS,STATUS = 'OLD',IOSTAT=ERR)
+              SLNO = 'LC00401983' !Pang Randomly select a soil type to replace.
+              LINSOL = 0          !Pang
+              GO TO 5023          !Pang
+              !------------------------------------------------------------
               MSG(1) = "Soil profile missing from file."
               WRITE(MSG(2),'("Soil ID: ",A)') SLNO
               WRITE(MSG(3),'("File: ",A)') FILESS(1:72)
@@ -305,21 +309,20 @@ C
               CALL ERROR (ERRKEY,4,FILES,LINSOL)
 !            ENDIF
          ENDIF
+
          IF (C255(1:1) .NE. '*') GO TO 5025
          IF (C255(2:5) .EQ. 'SOIL') GO TO 5025
          READ (C255,5030,IOSTAT=ERR) PEDON,SLSOUR,SLTXS,SLDP,SLDESC
-
 !        chp 5/23/2013 - ignore error in file if this is not the profile of interest
          IF (ERR .NE. 0) THEN
            WRITE(MSG(1),'("Error in soil file on line ",I6)') LINSOL
-           MSG(2) = 
+           MSG(2) =                                                  
      &         "Model will continue to search for a valid soil profile."
            CALL WARNING(2,ERRKEY,MSG)
          ENDIF
 
          IF (PEDON .NE. SLNO .AND. NSENS .EQ. 0) GO TO 5024
          IF (I .LT. NLSOIL .AND. NSENS .EQ. 1) GO TO 5024
-
 !        If there was an error reading the profile and this is the profile of interest, then
 !        call an error and stop model run.
          IF (ERR .NE. 0) CALL ERROR (ERRKEY,ERR,FILES,LINSOL)
@@ -771,7 +774,6 @@ c     Adjust SHF(I) in hard pan layer
 !WDB 2/16/2022
 !----------------------------------------------------------------------
   
-
       RETURN
 
 C-----------------------------------------------------------------------

@@ -129,17 +129,17 @@ C=======================================================================
 !JE     &    RUNINIT)
 
       MEWTH = 'M'                 !JE Use LIS data
-      PRINT*, 'FILEW: ', FILEW
-      PRINT*, 'BF WTHMOD: '
-      PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
-      PRINT*, 'FILEWW, XLAT, YYDDD'
-      PRINT*, FILEWW, XLAT, YYDDD
-      PRINT*, 'CO2, DAYL, PAR, RAIN, SRAD, TDEW'
-      PRINT*, CO2, DAYL, PAR, RAIN, SRAD, TDEW
-      PRINT*, 'TMAX, TMIN, TWILEN, WINDSP'
-      PRINT*, TMAX, TMIN, TWILEN, WINDSP
-      PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
-      PRINT*, DEC, NEV, SNUP, SNDN, YREND
+      !PRINT*, 'FILEW: ', FILEW
+      !PRINT*, 'BF WTHMOD: '
+      !PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
+      !PRINT*, 'FILEWW, XLAT, YYDDD'
+      !PRINT*, FILEWW, XLAT, YYDDD
+      !PRINT*, 'CO2, DAYL, PAR, RAIN, SRAD, TDEW'
+      !PRINT*, CO2, DAYL, PAR, RAIN, SRAD, TDEW
+      !PRINT*, 'TMAX, TMIN, TWILEN, WINDSP'
+      !PRINT*, TMAX, TMIN, TWILEN, WINDSP
+      !PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
+      !PRINT*, DEC, NEV, SNUP, SNDN, YREND
 
       CALL WTHMOD(RUNINIT,
      &    CONTROL, FILEWW, XLAT, YYDDD,                   !Input
@@ -148,18 +148,18 @@ C=======================================================================
      &    DEC, NEV, SNUP, SNDN, YREND)                    !Output
 
       FYRDOY = 0
-      PRINT*, 'AF WTHMOD: '
-      PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
-      PRINT*, 'FILEWW, XLAT, YYDDD'
-      PRINT*, FILEWW, XLAT, YYDDD
-      PRINT*, 'CO2, DAYL, PAR, RAIN, SRAD, TDEW'
-      PRINT*, CO2, DAYL, PAR, RAIN, SRAD, TDEW
-      PRINT*, 'TMAX, TMIN, TWILEN, WINDSP'
-      PRINT*, TMAX, TMIN, TWILEN, WINDSP
-      PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
-      PRINT*, DEC, NEV, SNUP, SNDN, YREND
+      !PRINT*, 'AF WTHMOD: '
+      !PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
+      !PRINT*, 'FILEWW, XLAT, YYDDD'
+      !PRINT*, FILEWW, XLAT, YYDDD
+      !PRINT*, 'CO2, DAYL, PAR, RAIN, SRAD, TDEW'
+      !PRINT*, CO2, DAYL, PAR, RAIN, SRAD, TDEW
+      !PRINT*, 'TMAX, TMIN, TWILEN, WINDSP'
+      !PRINT*, TMAX, TMIN, TWILEN, WINDSP
+      !PRINT*, 'DEC, NEV, SNUP, SNDN, YREND'
+      !PRINT*, DEC, NEV, SNUP, SNDN, YREND
 
-      PRINT*, "RUN INIT Assigning lat, lon, and elevation from LIS"
+      !PRINT*, "RUN INIT Assigning lat, lon, and elevation from LIS"
       XLAT  = dssat48_struc(nest)%dssat48(t)%lat
       XLONG = dssat48_struc(nest)%dssat48(t)%lon
       XELEV = dssat48_struc(nest)%dssat48(t)%elev
@@ -193,7 +193,7 @@ C=======================================================================
         IF (WINDHT <= 0.) WINDHT = 2.0
 
         !JE
-        PRINT*, "SEAS INIT Initializing with values from LIS: "
+        !PRINT*, "SEAS INIT Initializing with values from LIS: "
         XLAT  = dssat48_struc(nest)%dssat48(t)%lat
         XLONG = dssat48_struc(nest)%dssat48(t)%lon
         XELEV = dssat48_struc(nest)%dssat48(t)%elev
@@ -203,10 +203,10 @@ C=======================================================================
         TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
         RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip
         SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
-        PRINT*,'TMAX, TMIN, TDEW, WINDSP'
-        PRINT*, TMAX, TMIN, TDEW, WINDSP
-        PRINT*,'RAIN, RHUM, SRAD'
-        PRINT*, RAIN, RHUM, SRAD
+        !PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+        !PRINT*, TMAX, TMIN, TDEW, WINDSP
+        !PRINT*,'RAIN, RHUM, SRAD'
+        !RINT*, RAIN, RHUM, SRAD
 
 !       Initialize read from file for 'M', 'G' weather options and also for
 !         RNMODE = 'Y' (yield forecast mode) regardless of weather option
@@ -224,22 +224,22 @@ C=======================================================================
         ENDIF
 
         !JE
-        PRINT*,'Season Init'
-        PRINT*,'TMAX, TMIN, TDEW, WINDSP'
-        PRINT*, TMAX, TMIN, TDEW, WINDSP
-        PRINT*,'RAIN, RHUM, SRAD'
-        PRINT*, RAIN, RHUM, SRAD
-        PRINT*,'Replace with LIS'
+        !PRINT*,'Season Init'
+        !PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+        !PRINT*, TMAX, TMIN, TDEW, WINDSP
+        !PRINT*,'RAIN, RHUM, SRAD'
+        !PRINT*, RAIN, RHUM, SRAD
+        !PRINT*,'Replace with LIS'
         TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
         TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
         WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
         TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
         RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip 
         SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
-        PRINT*,'TMAX, TMIN, TDEW, WINDSP'
-        PRINT*, TMAX, TMIN, TDEW, WINDSP
-        PRINT*,'RAIN, RHUM, SRAD'
-        PRINT*, RAIN, RHUM, SRAD
+        !PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+        !PRINT*, TMAX, TMIN, TDEW, WINDSP
+        !PRINT*,'RAIN, RHUM, SRAD'
+        !PRINT*, RAIN, RHUM, SRAD
 
         IF (MEWTH .EQ. 'S' .OR. MEWTH .EQ. 'W') THEN
 C       Set default values FOR REFHT AND WINDHT
@@ -310,10 +310,10 @@ C     Calculate day length, sunrise and sunset.
      &    DOY, XLAT,                                      !Input
      &    DAYL, DEC, SNDN, SNUP)                          !Output
     
-      print*, 'Input to DAYLEN'     !JE
-      print*, DOY, XLAT             !JE
-      print*, 'Output from DAYLEN'  !JE
-      print*, DAYL, DEC, SNDN, SNUP !JE
+      !print*, 'Input to DAYLEN'     !JE
+      !print*, DOY, XLAT             !JE
+      !print*, 'Output from DAYLEN'  !JE
+      !print*, DAYL, DEC, SNDN, SNUP !JE
 
 !     Subroutine to determine daily CO2
       CALL CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2)
@@ -344,7 +344,7 @@ C     Adjust wind speed from reference height to 2m height.
       WINDRUN = WINDSP
       IF (WINDSP > 0.0) THEN
 !       WINDSP = WINDSP * (2.0 / WINDHT) ** 2.0
-        PRINT*, 'WINDHT in weathr.for: ', WINDHT  !JE
+        !PRINT*, 'WINDHT in weathr.for: ', WINDHT  !JE
         WINDSP = WINDSP * (2.0 / WINDHT) ** 0.2   !chp 8/28/13
       ELSE
         WINDSP = 86.4   ! Equivalent to average of 1.0 m/s
@@ -399,7 +399,7 @@ C     Compute daily normal temperature.
 !       Get weather data by normal means    
 !-----------------------------------------------------------------------
 C       Read new weather record.
-        PRINT*, 'MEWTH', MEWTH
+        !PRINT*, 'MEWTH', MEWTH
         IF (MEWTH .EQ. 'M' .OR. MEWTH .EQ. 'G' ) THEN
 !JE Remove external read to weather files
 !JE          CALL IPWTH(nest, t, CONTROL2, ERRKEY,
@@ -412,22 +412,22 @@ C       Read new weather record.
 !JE     &      RATE)
 
             !JE 
-            PRINT*,'Rate Calculation'
-            PRINT*,'TMAX, TMIN, TDEW, WINDSP'
-            PRINT*, TMAX, TMIN, TDEW, WINDSP
-            PRINT*,'RAIN, RHUM, SRAD'
-            PRINT*, RAIN, RHUM, SRAD
-            PRINT*,'Replace with LIS'
+            !PRINT*,'Rate Calculation'
+            !PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+            !PRINT*, TMAX, TMIN, TDEW, WINDSP
+            !PRINT*,'RAIN, RHUM, SRAD'
+            !PRINT*, RAIN, RHUM, SRAD
+            !PRINT*,'Replace with LIS'
             TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
             TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
             WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
             TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
             RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip
             SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
-            PRINT*,'TMAX, TMIN, TDEW, WINDSP'
-            PRINT*, TMAX, TMIN, TDEW, WINDSP
-            PRINT*,'RAIN, RHUM, SRAD'
-            PRINT*, RAIN, RHUM, SRAD
+            !PRINT*,'TMAX, TMIN, TDEW, WINDSP'
+            !PRINT*, TMAX, TMIN, TDEW, WINDSP
+            !PRINT*,'RAIN, RHUM, SRAD'
+            !PRINT*, RAIN, RHUM, SRAD
 
           IF (YREND == YRDOY) RETURN
         
@@ -592,21 +592,21 @@ C-----------------------------------------------------------------------
       WEATHER % TGRO   = TGRO  
       WEATHER % WINDHR = WINDHR
 
-      PRINT*, "WEATHER STRUCTURE"
-      PRINT*, "DAILY DATA"
-      PRINT*, "TA: ", WEATHER%TA, "TAVG: ",WEATHER%TAVG
-      PRINT*, "TDAY: ", WEATHER%TDAY, "TDEW: ", WEATHER%TDEW
-      PRINT*, "TGROAV: ", WEATHER%TGROAV, "TGRODY: ", WEATHER%TGRODY
-      PRINT*, "TMAX: ", WEATHER%TMAX, "TMIN: ", WEATHER%TMIN
-      PRINT*, "TWILEN: ", WEATHER%TWILEN, "WINDRUN: ", WEATHER%WINDRUN
-      PRINT*, "WINDSP: ", WEATHER%WINDSP, "VAPR: ", WEATHER%VAPR
+      !PRINT*, "WEATHER STRUCTURE"
+      !PRINT*, "DAILY DATA"
+      !PRINT*, "TA: ", WEATHER%TA, "TAVG: ",WEATHER%TAVG
+      !PRINT*, "TDAY: ", WEATHER%TDAY, "TDEW: ", WEATHER%TDEW
+      !PRINT*, "TGROAV: ", WEATHER%TGROAV, "TGRODY: ", WEATHER%TGRODY
+      !PRINT*, "TMAX: ", WEATHER%TMAX, "TMIN: ", WEATHER%TMIN
+      !PRINT*, "TWILEN: ", WEATHER%TWILEN, "WINDRUN: ", WEATHER%WINDRUN
+      !PRINT*, "WINDSP: ", WEATHER%WINDSP, "VAPR: ", WEATHER%VAPR
 
-      PRINT*, "HOURLY DATA"
-      PRINT*, "RADHR: ", WEATHER%RADHR
-      PRINT*, "RHUMHR: ", WEATHER%RHUMHR
-      PRINT*, "TAIRHR: ", WEATHER%TAIRHR
-      PRINT*, "TGRO: ", WEATHER%TGRO
-      PRINT*, "WINDHR: ", WEATHER%WINDHR
+      !PRINT*, "HOURLY DATA"
+      !PRINT*, "RADHR: ", WEATHER%RADHR
+      !PRINT*, "RHUMHR: ", WEATHER%RHUMHR
+      !PRINT*, "TAIRHR: ", WEATHER%TAIRHR
+      !PRINT*, "TGRO: ", WEATHER%TGRO
+      !PRINT*, "WINDHR: ", WEATHER%WINDHR
 
       CALL OPSTRESS(CONTROL, WEATHER=WEATHER)
 

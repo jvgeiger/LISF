@@ -57,7 +57,8 @@ C
 C  HDLAY  :
 C=======================================================================
 
-      SUBROUTINE IPEXP (MODEL,RUN,RNMODE,FILEX,PATHEX,FILEX_P, FILECTL,
+      SUBROUTINE IPEXP (nest,t,      !Pang 2024.02.08
+     &           MODEL,RUN,RNMODE,FILEX,PATHEX,FILEX_P, FILECTL,
      &           SLNO,NYRS,VARNO, 
      &           CROP,WMODI,FROP,TRTN,EXPP,EXPN,TITLET,TRTALL,
      &           TRTNUM,ROTNUM, IIRV,FTYPEN,CHEXTR,
@@ -91,7 +92,7 @@ C=======================================================================
       CHARACTER*80 CHARTEST,PATHEX
       CHARACTER*92 FILEX_P,FILETMP
       CHARACTER*120 FILECTL, WTHSTR
-
+      INTEGER nest, t !Pang 2024.02.08
       INTEGER I,L,NLOOP,LINF,ISECT,LUNEXP,LUNLST
       INTEGER LNFLD,LNSA,LNIC,LNPLT,LNIR,LNFER,LNRES,LNCHE,LNCU
       INTEGER LNHAR,LNENV,LNTIL,LNSIM,LINEXP
@@ -566,7 +567,8 @@ C-----------------------------------------------------------------------
 !     Skip soils field and soils input for sequence mode
       IF (INDEX('FQ',RNMODE) .LE. 0 .OR. RUN == 1) THEN
 
-        CALL IPFLD (LUNEXP,FILEX,LNFLD,FLDNAM,WSTA,WSTA1,SLNO,
+        CALL IPFLD (nest,t, !Pang 2024.02.08
+     &     LUNEXP,FILEX,LNFLD,FLDNAM,WSTA,WSTA1,SLNO,
      &     SLTX,FLST,SLOPE,DFDRN,FLDD,SFDRN,FLOB,SLDP,
      &     XCRD,YCRD,ELEV,AREA,SLEN,FLWR,SLAS,FldHist, FHDur)
 
@@ -1086,11 +1088,13 @@ C
 C  HDLAY  :
 C=======================================================================
 
-      SUBROUTINE IPFLD (LUNEXP,FILEX,LNFLD,FLDNAM,WSTA,WSTA1,SLNO,
+      SUBROUTINE IPFLD (nest, t, !Pang 2024.02.08
+     &            LUNEXP,FILEX,LNFLD,FLDNAM,WSTA,WSTA1,SLNO,
      &           SLTX,FLST,SLOPE,DFDRN,FLDD,SFDRN,FLOB,SLDP,
      &           XCRD,YCRD,ELEV,AREA,SLEN,FLWR,SLAS,FldHist, FHDUR)
 
       USE ModuleData
+      USE dssat48_lsmMod !Pang 2024.02.08
       IMPLICIT NONE
 
       CHARACTER*1  UPCASE
@@ -1103,7 +1107,7 @@ C=======================================================================
       CHARACTER*12 FILEX
       CHARACTER*15 CXCRD, CYCRD
       CHARACTER*92 CHARTEST
-
+      INTEGER nest, t
       INTEGER LUNEXP,LNFLD,LN,LINEXP,ISECT,IFIND,ERRNUM,I, FHDUR
 
       REAL    FLDD,SFDRN,FLOB,SLDP,SLOPE
@@ -1128,6 +1132,11 @@ C=======================================================================
        ELSE
          CALL ERROR (ERRKEY,2,FILEX,LINEXP)
       ENDIF
+      !----- Replace SLNO from LDT Mukey Value
+      PRINT*, 'Inside IPFLD'
+      PRINT*, 'Before replace SLNO: ', SLNO
+      SLNO = dssat48_struc(nest)%dssat48(t)%SLNO
+      PRINT*, 'After replace SLNO: ', SLNO
       IF (LN .NE. LNFLD) GO TO 50
       DO I = 1, 4
         WSTA(I:I)  = UPCASE(WSTA(I:I))

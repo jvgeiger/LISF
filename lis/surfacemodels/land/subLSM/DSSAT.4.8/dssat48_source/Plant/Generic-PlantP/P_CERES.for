@@ -103,6 +103,8 @@
       PShut_kg = dssat48_struc(nest)%dssat48(t)%PShut_kg
       PShel_kg = dssat48_struc(nest)%dssat48(t)%PShel_kg
       PSeed_kg = dssat48_struc(nest)%dssat48(t)%PSeed_kg
+!----- P_Plant --------------------------------------------------------
+      PRoot_kg = dssat48_struc(nest)%dssat48(t)%PRoot_kg
 !***********************************************************************
 !***********************************************************************
       IF (DYNAMIC == SEASINIT) THEN
@@ -205,7 +207,7 @@
       PhFrac1 = VegFrac
       PhFrac2 = SeedFrac
       
-      CALL P_Plant (DYNAMIC, ISWPHO,                      !I Control
+      CALL P_Plant (DYNAMIC, ISWPHO, nest, t,  !pang 2024.02.05 !I Control
      &    CROP, FILECC, MDATE, YRPLT,                     !I Crop
      &    SPi_AVAIL,                                      !I Soils
      &    Leaf_kg, Stem_kg, Root_kg, Shel_kg, Seed_kg,    !I Mass
@@ -239,7 +241,7 @@
       dssat48_struc(nest)%dssat48(t)%PShut_kg = PShut_kg
       dssat48_struc(nest)%dssat48(t)%PShel_kg = PShel_kg
       dssat48_struc(nest)%dssat48(t)%PSeed_kg = PSeed_kg
-
+      dssat48_struc(nest)%dssat48(t)%PRoot_kg = PRoot_kg
       RETURN
       END SUBROUTINE P_Ceres
 C=======================================================================

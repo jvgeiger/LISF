@@ -363,7 +363,7 @@ C     The components are copied into local variables for use here.
         CCO2  = -99.
 
         ! JE Use latitude, longitude, and elevation from LIS
-        PRINT*, "Assigning lat, lon, and elevation from LIS"
+        !PRINT*, "Assigning lat, lon, and elevation from LIS"
         XLAT  = dssat48_struc(nest)%dssat48(t)%lat
         XLONG = dssat48_struc(nest)%dssat48(t)%lon
         XELEV = dssat48_struc(nest)%dssat48(t)%elev
@@ -487,7 +487,7 @@ C     The components are copied into local variables for use here.
 C       Substitute default values if REFHT or WINDHT are missing.
         IF (REFHT <= 0.) REFHT = 1.5
         IF (WINDHT <= 0.) WINDHT = 2.0
-        PRINT*, "WINDHT in IPWTH: ", WINDHT
+        !PRINT*, "WINDHT in IPWTH: ", WINDHT
         LastFileW = WFile
         
 !       10/27/2005 CHP The checks for TAV and TAMP were being done in the 
@@ -621,9 +621,9 @@ C       Substitute default values if REFHT or WINDHT are missing.
       DCO2  = DCO2_A(I)
       OZON7 = OZON7_A(I)
 
-      PRINT*, "In IPWTH"
-      PRINT*, "SRAD, TMAX, TMIN, RAIN"
-      PRINT*, SRAD, TMAX, TMIN, RAIN
+      !PRINT*, "In IPWTH"
+      !PRINT*, "SRAD, TMAX, TMIN, RAIN"
+      !PRINT*, SRAD, TMAX, TMIN, RAIN
 
 !     Error checking
       CALL DailyWeatherCheck(CONTROL,
@@ -631,12 +631,12 @@ C       Substitute default values if REFHT or WINDHT are missing.
      &    SRAD, TDEW, TMAX, TMIN, WINDSP, YRDOY,          !Input
      &    YREND)                                          !Output
    
-      PRINT*, "YREND", YREND
+      !PRINT*, "YREND", YREND
       IF (YREND > 0) THEN
 !       Try again with next weather day (only for initialization)
         SRAD  = SRAD_A(I+1)
         TMAX  = TMAX_A(I+1)
-        PRINT*, "I", I, "TMIN_A(I+1)", TMIN_A(I+1)
+        !PRINT*, "I", I, "TMIN_A(I+1)", TMIN_A(I+1)
         TMIN  = TMIN_A(I+1)
         RAIN  = RAIN_A(I+1)
         TDEW  = TDEW_A(I+1)
