@@ -521,6 +521,14 @@ module LIS_histDataMod
   integer :: LIS_MOC_JULES_FWETL = -9999 
   integer :: LIS_MOC_JULES_ESOIL = -9999 
 
+  !  DSSAT Outputs
+  public :: LIS_MOC_DSSAT_LAI
+  public :: LIS_MOC_GWAD
+  public :: LIS_MOC_SMD1
+  public :: LIS_MOC_SMD2
+  public :: LIS_MOC_SMD3
+  public :: LIS_MOC_SMD4
+
   ! AWRAL
   public :: LIS_MOC_SR
   public :: LIS_MOC_SG
@@ -1010,6 +1018,14 @@ module LIS_histDataMod
     integer :: LIS_MOC_LWDOWNFORC_SM = -9999
     integer :: LIS_MOC_EWINDFORC_SM = -9999
     integer :: LIS_MOC_NWINDFORC_SM = -9999
+
+! DSSAT outputs
+    integer :: LIS_MOC_DSSAT_LAI = -9999
+    integer :: LIS_MOC_GWAD = -9999
+    integer :: LIS_MOC_SMD1 = -9999
+    integer :: LIS_MOC_SMD2 = -9999
+    integer :: LIS_MOC_SMD3 = -9999
+    integer :: LIS_MOC_SMD4 = -9999
 ! .......
 
 
@@ -5462,6 +5478,98 @@ contains
     endif
 
 ! .........
+
+! DSSAT Outputs
+
+    !integer :: LIS_MOC_DSSAT_LAI = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_LAI:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_LAI",&
+         "dssat_lai",&
+         "DSSAT leaf area index",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_DSSAT_LAI,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m2/m2"/),& 
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+    !integer :: LIS_MOC_GWAD = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_GWAD:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_GWAD",&
+         "dssat_gwad",&
+         "DSSAT grain weight",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_GWAD,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"kg/ha"/),&  
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+    !integer :: LIS_MOC_SM_DAY = -9999
+
+    !integer :: LIS_MOC_SMD1 = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SMD1:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SMD1",&
+         "dssat_smd1",&
+         "DSSAT soil moisture layer 1",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SMD1,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m3/m3"/),&   
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif 
+
+    !integer :: LIS_MOC_SMD2 = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SMD2:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SMD2",&
+         "dssat_smd2",&
+         "DSSAT soil moisture layer 2",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SMD2,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m3/m3"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+    !integer :: LIS_MOC_SMD3 = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SMD3:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SMD3",&
+         "dssat_smd3",&
+         "DSSAT soil moisture layer 3",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SMD3,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m3/m3"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+    !integer :: LIS_MOC_SMD4 = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SMD4:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SMD4",&
+         "dssat_smd4",&
+         "DSSAT soil moisture layer 4",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SMD4,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m3/m3"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+
+
+! End DSSAT Outputs
 
 
     !<- RUC addition ->

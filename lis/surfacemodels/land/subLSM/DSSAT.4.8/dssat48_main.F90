@@ -279,6 +279,37 @@ subroutine dssat48_main(n)
                 CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
 
+                 !JE Write variables to LIS_HIST file
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD1, &
+                    value=dssat48_struc(n)%dssat48(t)%SW(1),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD2, &
+                    value=dssat48_struc(n)%dssat48(t)%SW(2),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD3, &
+                    value=dssat48_struc(n)%dssat48(t)%SW(3),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD4, &
+                    value=dssat48_struc(n)%dssat48(t)%SW(4),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_DSSAT_LAI, &
+                    value=dssat48_struc(n)%dssat48(t)%XLAI,&
+                    vlevel=1,unit="m2/m2",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
+                    value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                    vlevel=1,unit="kg/ha",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
                 dssat48_struc(n)%dssat48(t)%doseasinit = .FALSE. !Pnng 2023.09.19
                 
                 !PRINT*, 'YREND in seas: ', YREND, YRDOY
@@ -314,6 +345,7 @@ subroutine dssat48_main(n)
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
                 !PRINT*, 'YREND in Integr: ', YREND, YRDOY
                 !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
+
                !*********************************************************************** 
                !     OUTPUT
                !*********************************************************************** 
@@ -322,6 +354,38 @@ subroutine dssat48_main(n)
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
                !PRINT*, 'YREND in Output: ', YREND, YRDOY
                !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
+
+               !JE Write variables to LIS_HIST file
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD1, &
+                  value=dssat48_struc(n)%dssat48(t)%SW(1),&
+                  vlevel=1,unit="m^3 m-3",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD2, &
+                  value=dssat48_struc(n)%dssat48(t)%SW(2),&
+                  vlevel=1,unit="m^3 m-3",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD3, &
+                  value=dssat48_struc(n)%dssat48(t)%SW(3),&
+                  vlevel=1,unit="m^3 m-3",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD4, &
+                  value=dssat48_struc(n)%dssat48(t)%SW(4),&
+                  vlevel=1,unit="m^3 m-3",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_DSSAT_LAI, &
+                  value=dssat48_struc(n)%dssat48(t)%XLAI,&
+                  vlevel=1,unit="m2/m2",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
+                  value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                  vlevel=1,unit="kg/ha",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
                !-----------------------------------------------------------------------
 
                 IF (YRDOY.EQ.YREND) THEN
@@ -333,8 +397,39 @@ subroutine dssat48_main(n)
                 !*********************************************************************** 
                  dssat48_struc(n)%CONTROL(t)%dynamic = 6 !6: End Season
 
-                     CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
-                          YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
+                 CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
+                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
+
+                 !JE Write variables to LIS_HIST file
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD1, &
+                    value=dssat48_struc(n)%dssat48(t)%SW(1),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+               
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD2, &
+                    value=dssat48_struc(n)%dssat48(t)%SW(2),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD3, &
+                    value=dssat48_struc(n)%dssat48(t)%SW(3),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD4, &
+                    value=dssat48_struc(n)%dssat48(t)%SW(4),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_DSSAT_LAI, &
+                    value=dssat48_struc(n)%dssat48(t)%XLAI,&
+                    vlevel=1,unit="m2/m2",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
+                    value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                    vlevel=1,unit="kg/ha",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
 
                       dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
                 !Pang: DO THIS at the end of the season
