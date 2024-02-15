@@ -110,15 +110,18 @@ module dssat48_module
         !  Pang 2023.10.11
         !-------------------------------------------------------------------------
           REAL :: ICWD_INIT !(IPWBAL modeul)
-          REAL :: WB_CRAIN,TDRAIN, TRUNOF !(WBSUM)
-          REAL, DIMENSION(20) :: DLAYR_YEST
+          REAL :: WB_CRAIN,TDRAIN, TRUNOF, TSWINI!TSW !(WBSUM)
+          REAL :: WTDEP, TDFD, WATAVL
+          REAL, DIMENSION(20) :: DLAYR_YEST, SWDELTT, SWDELTL
         !-------------------------------------------------------------------------
         !  SOIL - SoilOrg
         !  Pang 2023.10.05
         !-------------------------------------------------------------------------
           REAL :: SEN_AM, SEN_PRCEL, SEN_PRCHO, SEN_PRLIG,SEN_EXTFAC, SEN_WATFAC
-          REAL :: SWEF, CUMSENWT, CUMSENN , CUMSENP
+          REAL :: SWEF, CUMSENWT, CUMSENN , CUMSENP, RDCHO, RDCEL, RDLIG, DMINR, DSNC
+          REAL :: PRCEL, PRCHO, PRLIG, AM, EXTFAC, WATFAC
           REAL :: FOM(20), FON(20), FOP(20), FPOOL(20,3), SSOME(0:20,3)
+          REAL :: CNRAT(20)
           REAL :: ACCCO2(0:1)
           CHARACTER(LEN=2) :: PREV_CROP
         !------------------------------------------------------------------------
@@ -152,6 +155,7 @@ module dssat48_module
         !  Pang 2023.10.05
         !------------------------------------------------------------------------
           REAL :: Buffer(20,2), CH4Stored_Y, CumNewCO2, lamda_rho
+          LOGICAL FirstTime
         !------------------------------------------------------------------------
         !  SOIL - SoilNi
         !  Pang 2023.10.12

@@ -89,7 +89,7 @@ C ***********************************************************************
 	  REAL h,Lz,lamda_rho,difference1,TSubstrate
 	  LOGICAL FirstTime
 	  DATA oxy%ID,meth%ID/2,4/
-	  DATA FirstTime/.TRUE./
+	  !DATA FirstTime/.TRUE./ !Pang 2024.02.14 Correct it to be consistent with 4.8.2
 	END MODULE MethaneVariables
 
 C ***********************************************************************
@@ -191,7 +191,7 @@ c      write(29,'(i4,a5,51f6.3)') Iterations1,' CH4 ',(yy(ch4,i),i=1,51)
 	  CALL store(yy,oldyy)           
         DO s=o2,ch4                       
           CALL Pseudo(s,yy)                  
-        ENDDO                         			 
+        ENDDO                         
         CALL compare (yy,oldyy,difference1)
 c	write(29,'(f15.10)') difference1
 
@@ -240,6 +240,7 @@ C ***********************************************************************
 	DO WHILE (.NOT. finished)
 	  olderror = error
         CALL replace (s,w,oldw)
+        !PRINT*, 'Im here 3' !Pang for checking
         CALL NewtonRaphson (s,w,dv)
         CALL add (s,dv,w)
 	  CALL squash(s,w)
@@ -256,7 +257,6 @@ c        finished = ((error.LE.0.01).OR.(iterations2.ge.100))
 	    error = olderror
 	  endif
 	ENDDO
-
 	RETURN
 	END
 C ***********************************************************************
@@ -362,9 +362,9 @@ C ***********************************************************************
       CALL get_d (s,y,d)
       CALL getNR_b (s,y,NR_b)
       CALL getNR_d (s,y,a,b,c,d,NR_d)
-
+      !PRINT*, 'Im here 3.7' !Pang for checking
       CALL Thomas (a,NR_b,c,NR_d,dv)
-	
+
       RETURN
 	END
 C ***********************************************************************
@@ -922,18 +922,19 @@ C Thomas algorithm - solves tridiagonal matrices
 	IMPLICIT NONE
 	INTEGER i
 	REAL a(51),b(51),c(51),d(51),mu(51),nu(51),e(51)
- 
       mu(1) = b(1)
       nu(1) = -d(1)
       DO i = 2,steps
          mu (i) = b (i) - a (i) * c (i-1) / mu (i-1)
          nu (i) = -d (i) - a (i) * nu (i-1) / mu (i-1)
       ENDDO
+       !PRINT*, 'Im here 3.7.3' !for checking
       e (steps) = nu (steps) / mu (steps)
+       !PRINT*, 'Im here 3.7.4' !for checking
       DO i = steps-1,1,-1
          e (i) = (nu (i) - c (i) * e (i+1)) / mu (i)
 	ENDDO
-	
+
 	RETURN
 	END
 C ***********************************************************************

@@ -455,7 +455,7 @@ C  12/05/93 NBP Made into subroutine
 !  Called by: WATBAL
 !  Calls:     None
 C=======================================================================
-      SUBROUTINE WBSUM(DYNAMIC, nest, t,
+      SUBROUTINE WBSUM(DYNAMIC,
      &    NLAYR, DRAIN, RAIN, RUNOFF, DLAYR, SW,          !Input
      &    CRAIN, TDRAIN, TRUNOF, TSW, TSWINI)             !Output
 
@@ -474,9 +474,9 @@ C=======================================================================
 !-----------------------------------------------------------------------
 !----- Obtain Vars From Memory -----------------------------------------
 !----- Pang 2023.10.11 -------------------------------------------------
-      CRAIN = dssat48_struc(nest)%dssat48(t)%WB_CRAIN
-      TDRAIN = dssat48_struc(nest)%dssat48(t)%TDRAIN
-      TRUNOF = dssat48_struc(nest)%dssat48(t)%TRUNOF
+      !CRAIN = dssat48_struc(nest)%dssat48(t)%WB_CRAIN !Pang 2024.02.15
+      !TDRAIN = dssat48_struc(nest)%dssat48(t)%TDRAIN  !Define in upper layer
+      !TRUNOF = dssat48_struc(nest)%dssat48(t)%TRUNOF
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -518,9 +518,9 @@ C     Increment summation variables.
 !-----------------------------------------------------------------------
 !----- Assign Vars To Memory -----------------------------------------
 !----- Pang 2023.10.11 -------------------------------------------------
-      dssat48_struc(nest)%dssat48(t)%WB_CRAIN = CRAIN
-      dssat48_struc(nest)%dssat48(t)%TDRAIN = TDRAIN
-      dssat48_struc(nest)%dssat48(t)%TRUNOF = TRUNOF
+      !dssat48_struc(nest)%dssat48(t)%WB_CRAIN = CRAIN
+      !dssat48_struc(nest)%dssat48(t)%TDRAIN = TDRAIN
+      !dssat48_struc(nest)%dssat48(t)%TRUNOF = TRUNOF
 !***********************************************************************
       RETURN
       END SUBROUTINE WBSUM

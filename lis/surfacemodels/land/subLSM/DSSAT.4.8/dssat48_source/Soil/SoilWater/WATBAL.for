@@ -146,6 +146,23 @@ C=======================================================================
 !----- Obtain Vars From Memory -----------------------------------------
 !----- Pang 2023.10.11 -------------------------------------------------
       DLAYR_YEST= dssat48_struc(nest)%dssat48(t)%DLAYR_YEST
+!----- Added Pang 2024.02.15 -------------------------------------------
+      ISWWAT = ISWITCH % ISWWAT
+      MEINF  = ISWITCH % MEINF
+      MESEV  = ISWITCH % MESEV
+      MEEVP  = ISWITCH % MEEVP
+      RUNOFF = FLOODWAT % RUNOFF
+
+      CRAIN = dssat48_struc(nest)%dssat48(t)%WB_CRAIN
+      TDRAIN = dssat48_struc(nest)%dssat48(t)%TDRAIN
+      TRUNOF = dssat48_struc(nest)%dssat48(t)%TRUNOF
+      TSW = dssat48_struc(nest)%dssat48(t)%TSW
+      TSWINI = dssat48_struc(nest)%dssat48(t)%TSWINI
+      WTDEP = dssat48_struc(nest)%dssat48(t)%WTDEP
+      TDFD = dssat48_struc(nest)%dssat48(t)%TDFD
+      WATAVL = dssat48_struc(nest)%dssat48(t)%WATAVL
+      SWDELTT = dssat48_struc(nest)%dssat48(t)%SWDELTT
+      SWDELTL = dssat48_struc(nest)%dssat48(t)%SWDELTL
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -188,7 +205,7 @@ C=======================================================================
       ENDIF
 
 !     Initialize summary variables
-      CALL WBSUM(SEASINIT, nest, t,
+      CALL WBSUM(SEASINIT,
      &    NLAYR, DRAIN, RAIN, RUNOFF, DLAYR, SW,          !Input
      &    CRAIN, TDRAIN, TRUNOF, TSW, TSWINI)             !Output
 
@@ -475,7 +492,7 @@ C       extraction (based on yesterday's values) for each soil layer.
 !       DIFFSW = SWTOT2 - SWTOT1
 
 !       Perform daily summation of water balance variables.
-        CALL WBSUM(INTEGR, nest, t,
+        CALL WBSUM(INTEGR,
      &    NLAYR, DRAIN, RAIN, RUNOFF, DLAYR, SW,          !Input
      &    CRAIN, TDRAIN, TRUNOF, TSW, TSWINI)             !Output
 
@@ -554,7 +571,16 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
-
+      dssat48_struc(nest)%dssat48(t)%WB_CRAIN = CRAIN
+      dssat48_struc(nest)%dssat48(t)%TDRAIN = TDRAIN
+      dssat48_struc(nest)%dssat48(t)%TRUNOF = TRUNOF
+      dssat48_struc(nest)%dssat48(t)%TSW = TSW
+      dssat48_struc(nest)%dssat48(t)%TSWINI = TSWINI
+      dssat48_struc(nest)%dssat48(t)%WTDEP = WTDEP
+      dssat48_struc(nest)%dssat48(t)%TDFD = TDFD
+      dssat48_struc(nest)%dssat48(t)%WATAVL = WATAVL
+      dssat48_struc(nest)%dssat48(t)%SWDELTT = SWDELTT
+      dssat48_struc(nest)%dssat48(t)%SWDELTL = SWDELTL
       RETURN
       END SUBROUTINE WATBAL
 
