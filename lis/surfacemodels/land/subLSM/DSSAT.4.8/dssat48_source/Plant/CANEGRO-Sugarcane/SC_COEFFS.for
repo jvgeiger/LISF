@@ -411,7 +411,7 @@ c                 These are still in a single string, and need to be parsed.
 !                 CHP 4/1/2010 Read cultivar info directly from INH file
                   I = LEN(TRIM(CONTROL % FILEIO))
                   FILEIOH = CONTROL % FILEIO
-                  WRITE(FILEIOH(I:I),'(A1)') 'H'
+                  WRITE(FILEIOH(I+1:I+1),'(A1)') 'H' !JE Don't overwrite processor number
 
                   OPEN(LUNIO,FILE=FILEIOH,STATUS='OLD',IOSTAT=ERRNUM)
                   IF (ERRNUM .NE. 0) CALL ERROR(ERRKEY,ERRNUM,FILEIOH,0)

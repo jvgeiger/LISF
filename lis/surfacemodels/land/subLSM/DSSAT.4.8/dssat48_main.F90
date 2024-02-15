@@ -62,6 +62,8 @@ subroutine dssat48_main(n)
 
     CHARACTER*120 :: FILECTL
     CHARACTER*30  :: FILEIO
+    CHARACTER*30  :: TEMPFILE !JE
+    CHARACTER*4   :: EXT      !JE
     CHARACTER*12  :: FILEX
     CHARACTER*8   :: MODELARG
     CHARACTER*80  :: PATHEX
@@ -243,7 +245,10 @@ subroutine dssat48_main(n)
             IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
                  !PRINT*, 'Im in seas init'
                   !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
-                FILEIO = 'DSSAT48.INP' !PL 20240207
+                TEMPFILE = trim(LIS_rc%dfile)                 !JE One INP file per processor
+                EXT = TEMPFILE(len(TEMPFILE)-4:len(TEMPFILE)) !JE
+                FILEIO = 'DSSAT48.INP.'//EXT !PL 20240207     !JE
+
                 FILEX = dssat48_struc(n)%CONTROL(t)%filex !PL 20240207
                 ROTNUM = dssat48_struc(n)%CONTROL(t)%rotnum !PL 20240207
                 TRTNUM = dssat48_struc(n)%CONTROL(t)%trtnum !PL 20240207

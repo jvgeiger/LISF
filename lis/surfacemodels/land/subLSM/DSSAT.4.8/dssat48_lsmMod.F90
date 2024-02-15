@@ -46,6 +46,7 @@ module dssat48_lsmMod
 
 ! !USES:
   use dssat48_module
+  use LIS_coreMod
   use LIS_constantsMod, only : LIS_CONST_PATH_LEN
   USE ModuleDefs, only: ControlType,SwitchType,SoilType, &
                         MulchType, OxLayerType,ResidueType, &
@@ -155,6 +156,8 @@ contains
     CHARACTER*8   :: MODELARG
     CHARACTER*12  :: FILEX
     CHARACTER*30  :: FILEIO
+    CHARACTER*30  :: TEMPFILE !JE
+    CHARACTER*4   :: EXT      !JE
     CHARACTER*80  :: PATHEX
     CHARACTER*120 :: FILECTL
     INTEGER       :: ROTNUM, TRTNUM, YRSIM, YRDOY, MULTI, YRDIF
@@ -233,7 +236,14 @@ contains
                  !DONE =  .FALSE.  ! We don't use DONE to control run or not run
                  !YRDOY_END = 9999999 !Can be removed
                  RNMODE = 'Q'
-                 FILEIO = 'DSSAT48.INP'
+                 !JE Add one .INP file per processor
+                 print*, LIS_rc%dfile
+                 TEMPFILE = trim(LIS_rc%dfile)
+                 print*, TEMPFILE
+                 EXT = TEMPFILE(len(TEMPFILE)-4:len(TEMPFILE))
+                 print*, EXT
+                 FILEIO = 'DSSAT48.INP.'//EXT
+                 print*, FILEIO
                  ROTNUM = 1
                  TRTNUM = 1
                  FILEX = 'NASA2019.SQX'
