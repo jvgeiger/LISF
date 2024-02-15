@@ -268,6 +268,7 @@ C
 !WDB      
 !-----------------------------------------------------------------------
 !     Find correct soil within soil file
+
  5023    CONTINUE !Pang 2024.02.09(If no soil type in soil file, redo search)
          I = 0
  5024    CONTINUE
@@ -330,7 +331,7 @@ C
            PEDON(P1:P1) = UPCASE(PEDON(P1:P1))
            SLNO(P1:P1)  = UPCASE(SLNO(P1:P1))
          END DO
-
+   
 !-----------------------------------------------------------------------
 !        Found correct soil
 !-----------------------------------------------------------------------
@@ -541,15 +542,20 @@ C** WDB End Changes
               CALL WARNING(2,ERRKEY,MSG)
             ENDIF
          ENDIF
-
          IF (ISWITCH%ISWWAT .NE. 'N') THEN
            ERR = 0
            DO J = 1, NLAYRI
              IF ((DUL(J) - SAT(J)) .GT. 1.E-4) THEN
-                CALL ERROR (ERRKEY,7,FILES,LINSOL_1+J-1)
+                 SAT(J) = DUL(J)+0.02 !Pang 2024.02.12
+                 IF ((DUL(J) - SAT(J)) .GT. 1.E-4) THEN !Pang
+                    CALL ERROR (ERRKEY,7,FILES,LINSOL_1+J-1)
+                 ENDIF !Pang
               ENDIF
               IF ((LL(J) - DUL(J)) .GT. 1.E-4) THEN
+                   DUL(J) = LL(J)+0.02 !Pang 2024.02.13
+                IF ((LL(J) - DUL(J)) .GT. 1.E-4) THEN !Pang 2024.02.13
                  CALL ERROR (ERRKEY,8,FILES,LINSOL_1+J-1)
+                ENDIF !Pang 2024.02.13
               ENDIF
               IF (DUL(J) .LT. 1.E-3) THEN
                  CALL ERROR (ERRKEY,13,FILES,LINSOL_1+J-1)
@@ -559,7 +565,7 @@ C** WDB End Changes
               ENDIF
               IF (ABS(DUL(J) -  LL(J)) .LT. 1.E-2) THEN
                  LL(J) = DUL(J) - 0.01
-              ENDIF  
+              ENDIF
               IF (SHF(J) .LT. -1.E-6) THEN
                  WRITE(MSG(1),'(A,A72)') 'File: ',FILESS
                  
@@ -571,7 +577,6 @@ C** WDB End Changes
                  CALL WARNING(5,ERRKEY,MSG)
                  CALL ERROR(ERRKEY,14,FILES,LINSOL_1+J-1)
               ENDIF
-
              IF (SWCN(J) < 1.E-4) THEN
                SWCN(J) = -99.
                ERR = ERR + 1
@@ -666,8 +671,6 @@ C** WDB End Changes
 
   
 
-       
-
 
 !-----------------------------------------------------------------------      
 !WDB 2/16/2022  Read Optimizer Files and Overwrite Soil Parameters
@@ -675,7 +678,7 @@ C** WDB End Changes
 
          INQUIRE (FILE = 'PARAM.DAT',EXIST = FEXIST)
 	   IF(.NOT.FEXIST) GOTO 557
-        
+
          OPEN (88,FILE='PARAM.DAT',STATUS='UNKNOWN')
          READ(88,*) OP1   !SCS curve number
          READ(88,*) OP2   !drainage rate coefficient (used when ksat not defined)
@@ -766,20 +769,19 @@ c     Adjust SHF(I) in hard pan layer
        IF(KSAT.GT.0) THEN
          SWCN(NLAYR) = KSAT
        ENDIF
-      
+ 
 557      CONTINUE
 
 !----------------------------------------------------------------------
 ! End of Optimizer Adjustments
 !WDB 2/16/2022
 !----------------------------------------------------------------------
-  
+
       RETURN
 
 C-----------------------------------------------------------------------
 C     Format Strings
 C-----------------------------------------------------------------------
-
 !  950 FORMAT (/,5X,' SOIL ',A10,' is not in the SOIL file SOIL.SOL !')
   950 FORMAT (/,5X,' SOIL ',A10,' is not in the SOIL file:',/,A92)
  5000 FORMAT (/, '  More.... press < ENTER > key ')

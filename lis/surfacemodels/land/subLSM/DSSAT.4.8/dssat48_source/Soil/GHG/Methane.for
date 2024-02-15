@@ -82,7 +82,7 @@ C=======================================================================
       CH4Stored_Y = dssat48_struc(nest)%dssat48(t)%CH4Stored_Y
       CumNewCO2 = dssat48_struc(nest)%dssat48(t)%CumNewCO2
       lamda_rho = dssat48_struc(nest)%dssat48(t)%lamda_rho
-
+      FirstTime = dssat48_struc(nest)%dssat48(t)%FirstTime
       CH4Stored = CH4_data % CH4Stored
       CumCO2Emission = CH4_data % CumCO2Emission
       CumCH4Emission = CH4_data % CumCH4Emission
@@ -94,6 +94,7 @@ C    Input and Initialization
 C***********************************************************************
       IF (DYNAMIC .EQ. INIT) THEN
 C-----------------------------------------------------------------------
+      FirstTime = .TRUE. !Pang 2024.02.14 Make it to be consistent with version 4.8.2
       TCO2 = 0.0
       TCH4 = 0.0
       newCO2Tot = 0.0
@@ -366,6 +367,7 @@ C***********************************************************************
       dssat48_struc(nest)%dssat48(t)%buffer = Buffer
       dssat48_struc(nest)%dssat48(t)%CH4Stored_Y = CH4Stored_Y
       dssat48_struc(nest)%dssat48(t)%CumNewCO2 = CumNewCO2
+      dssat48_struc(nest)%dssat48(t)%FirstTime = FirstTime
 !-----------------------------------------------------------------------
       RETURN
       END

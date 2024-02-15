@@ -94,8 +94,8 @@ subroutine dssat48_main(n)
 
     alarmCheck = LIS_isAlarmRinging(LIS_rc, "DSSAT48 model alarm "// trim(fnest)) !MN  Bug in the toolkit 
     if (alarmCheck) Then
-        do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-        !do  t = 1, 4
+        !do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+        do  t = 7201, 7202
              
             dt = LIS_rc%ts
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
@@ -254,7 +254,7 @@ subroutine dssat48_main(n)
                  RUN = dssat48_struc(n)%CONTROL(t)%run
                  YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
                  REPNO = dssat48_struc(n)%CONTROL(t)%repno
-                 
+                 PRINT*, 'main, t: ', t 
                  CALL INPUT_SUB( n, t,                                  & !Pang 20240207
                         FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
                         RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input

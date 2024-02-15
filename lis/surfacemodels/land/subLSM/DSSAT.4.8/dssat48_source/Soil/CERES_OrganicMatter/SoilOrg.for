@@ -181,7 +181,6 @@
 !-----------------------------------------------------------------------
 !----- Obtain Vars From Memory -----------------------------------------
 !----- Oang 2023.10.05 -------------------------------------------------
-
       SEN_AM = dssat48_struc(nest)%dssat48(t)%sen_am
       SEN_EXTFAC = dssat48_struc(nest)%dssat48(t)%sen_extfac
       SEN_WATFAC = dssat48_struc(nest)%dssat48(t)%sen_watfac
@@ -202,6 +201,20 @@
 
       ACCCO2 = dssat48_struc(nest)%dssat48(t)%accco2
       PREV_CROP = dssat48_struc(nest)%dssat48(t)%PREV_CROP
+!----- Added Pang 2024.02.14 -------------------------------------------
+      RDCHO = dssat48_struc(nest)%dssat48(t)%RDCHO
+      RDCEL = dssat48_struc(nest)%dssat48(t)%RDCEL
+      RDLIG = dssat48_struc(nest)%dssat48(t)%RDLIG
+      DMINR = dssat48_struc(nest)%dssat48(t)%DMINR
+      DSNC = dssat48_struc(nest)%dssat48(t)%DSNC
+      SOM1C = dssat48_struc(nest)%dssat48(t)%SOM1C 
+      PRCEL = dssat48_struc(nest)%dssat48(t)%PRCEL
+      PRCHO = dssat48_struc(nest)%dssat48(t)%PRCHO
+      PRLIG = dssat48_struc(nest)%dssat48(t)%PRLIG
+      AM = dssat48_struc(nest)%dssat48(t)%AM
+      EXTFAC = dssat48_struc(nest)%dssat48(t)%EXTFAC
+      WATFAC = dssat48_struc(nest)%dssat48(t)%WATFAC
+      CNRAT = dssat48_struc(nest)%dssat48(t)%CNRAT
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -949,6 +962,21 @@ C***********************************************************************
       dssat48_struc(nest)%dssat48(t)%ssome = SSOME
 
       dssat48_struc(nest)%dssat48(t)%accco2 = ACCCO2
+      !----- Added Pang 2024.02.14 -------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%RDCHO = RDCHO
+      dssat48_struc(nest)%dssat48(t)%RDCEL = RDCEL
+      dssat48_struc(nest)%dssat48(t)%RDLIG = RDLIG
+      dssat48_struc(nest)%dssat48(t)%DMINR = DMINR
+      dssat48_struc(nest)%dssat48(t)%DSNC = DSNC
+      dssat48_struc(nest)%dssat48(t)%SOM1C = SOM1C
+      dssat48_struc(nest)%dssat48(t)%PRCEL = PRCEL
+      dssat48_struc(nest)%dssat48(t)%PRCHO = PRCHO
+      dssat48_struc(nest)%dssat48(t)%PRLIG = PRLIG
+      dssat48_struc(nest)%dssat48(t)%AM = AM
+      dssat48_struc(nest)%dssat48(t)%EXTFAC = EXTFAC
+      dssat48_struc(nest)%dssat48(t)%WATFAC = WATFAC
+      dssat48_struc(nest)%dssat48(t)%CNRAT = CNRAT
+
 C-----------------------------------------------------------------------
       RETURN
       END SUBROUTINE SoilOrg
