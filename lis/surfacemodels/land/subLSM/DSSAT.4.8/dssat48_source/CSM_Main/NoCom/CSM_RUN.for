@@ -225,7 +225,8 @@ C-----------------------------------------------------------------------
         ENDIF
         LN = LEN(TRIM(FILEIO))
         FILEIOH = FILEIO
-        WRITE(FILEIOH(LN:LN),'(A1)') 'H'
+        WRITE(FILEIOH(LN+1:LN+1),'(A1)') 'H' !JE Append 'H' so we don't overwrite processor number 
+
         INQUIRE (FILE = FILEIOH,EXIST = FEXIST)
         IF (FEXIST) THEN
           OPEN (LUNIO, FILE = FILEIOH,STATUS = 'UNKNOWN',IOSTAT=ERRNUM)
