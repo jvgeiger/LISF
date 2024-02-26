@@ -329,7 +329,7 @@ subroutine dssat48_main(n)
                     surface_type=LIS_rc%lsm_index)
 
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
-                    value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                    value=dssat48_struc(n)%dssat48(t)%SDWT*10.0,&
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
@@ -405,7 +405,7 @@ subroutine dssat48_main(n)
                   surface_type=LIS_rc%lsm_index)
 
                call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
-                  value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                  value=dssat48_struc(n)%dssat48(t)%SDWT*10.0,&
                   vlevel=1,unit="kg/ha",direction="-",&
                   surface_type=LIS_rc%lsm_index)
 
@@ -450,7 +450,7 @@ subroutine dssat48_main(n)
                     surface_type=LIS_rc%lsm_index)
 
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
-                    value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                    value=dssat48_struc(n)%dssat48(t)%SDWT*10.0,&
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
