@@ -115,6 +115,8 @@ subroutine dssat48_setup()
           !CALL DSSAT48_read_EXTERNAL_param(n, 'MUKEY', placeholder)
           ! open NetCDF parameter file
           ios = nf90_open(path=trim('lis_input_IAcounty_merged.nc'), mode=NF90_NOWRITE, ncid=nid)
+          !ios = nf90_open(path=trim('lis_input_smallcnty.nc'), mode=NF90_NOWRITE, ncid=nid)          
+          !ios = nf90_open(path=trim('lis_input_lrgcnty.nc'), mode=NF90_NOWRITE, ncid=nid)
           call LIS_verify(ios, 'Error in nf90_open in dssat48_setup')
 
           ! inquire the ID of east-west dimension

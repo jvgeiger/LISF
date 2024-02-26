@@ -110,9 +110,13 @@ module dssat48_module
         !  Pang 2023.10.11
         !-------------------------------------------------------------------------
           REAL :: ICWD_INIT !(IPWBAL modeul)
-          REAL :: WB_CRAIN,TDRAIN, TRUNOF, TSWINI!TSW !(WBSUM)
+          REAL :: WB_CRAIN,TDRAIN, TRUNOF, TSWINI, WB_TSW !(WBSUM)
           REAL :: WTDEP, TDFD, WATAVL
           REAL, DIMENSION(20) :: DLAYR_YEST, SWDELTT, SWDELTL
+           !----------------------------------------------------------------------
+           !  SOIL - WATBAL -> MULCHWATER.for ------------------------------------
+           !----------------------------------------------------------------------
+             REAL CNRAIN, NRAIN, MULWATADD, RESWATADD
         !-------------------------------------------------------------------------
         !  SOIL - SoilOrg
         !  Pang 2023.10.05

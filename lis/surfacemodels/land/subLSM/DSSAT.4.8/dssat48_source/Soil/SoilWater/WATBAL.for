@@ -156,8 +156,8 @@ C=======================================================================
       CRAIN = dssat48_struc(nest)%dssat48(t)%WB_CRAIN
       TDRAIN = dssat48_struc(nest)%dssat48(t)%TDRAIN
       TRUNOF = dssat48_struc(nest)%dssat48(t)%TRUNOF
-      TSW = dssat48_struc(nest)%dssat48(t)%TSW
       TSWINI = dssat48_struc(nest)%dssat48(t)%TSWINI
+      TSW = dssat48_struc(nest)%dssat48(t)%WB_TSW
       WTDEP = dssat48_struc(nest)%dssat48(t)%WTDEP
       TDFD = dssat48_struc(nest)%dssat48(t)%TDFD
       WATAVL = dssat48_struc(nest)%dssat48(t)%WATAVL
@@ -215,7 +215,7 @@ C=======================================================================
      &    SNOW, WATAVL)                                   !Output
 
 !     Initialize mulch water
-      CALL MULCHWATER(CONTROL, ISWITCH,
+      CALL MULCHWATER(CONTROL, ISWITCH,nest,t, !Pang 2024.02.16
      &    WATAVL, MULCH)
 
 !     Initialize tile drainage
@@ -339,7 +339,7 @@ C     Conflict with CERES-Wheat
 !         Water first absorbed by mulch, if present
 !         IF (INDEX('RSN',MEINF) .LE. 0) THEN
           IF (INDEX('RSM',MEINF) > 0) THEN   
-            CALL MULCHWATER(CONTROL, ISWITCH,
+            CALL MULCHWATER(CONTROL, ISWITCH,nest, t,
      &            WATAVL, MULCH)
           ENDIF
 
@@ -484,7 +484,7 @@ C       extraction (based on yesterday's values) for each soil layer.
         !Update mulch water content
 !       IF (INDEX('RSN',MEINF) .LE. 0) THEN
         IF (INDEX('RSM',MEINF) > 0) THEN   
-          CALL MULCHWATER(CONTROL, ISWITCH,
+          CALL MULCHWATER(CONTROL, ISWITCH,nest, t,
      &    WATAVL, MULCH)
         ENDIF
 
@@ -535,7 +535,7 @@ C-----------------------------------------------------------------------
 
 !     IF (INDEX('RSN',MEINF) .LE. 0) THEN
       IF (INDEX('RSM',MEINF) > 0) THEN   
-        CALL MULCHWATER(CONTROL, ISWITCH,
+        CALL MULCHWATER(CONTROL, ISWITCH,nest,t,
      &    WATAVL, MULCH)
       ENDIF
 
@@ -561,7 +561,7 @@ C-----------------------------------------------------------------------
 
 !     IF (INDEX('RSN',MEINF) .LE. 0) THEN
       IF (INDEX('RSM',MEINF) > 0) THEN   
-        CALL MULCHWATER(CONTROL, ISWITCH,
+        CALL MULCHWATER(CONTROL, ISWITCH,nest, t,
      &    WATAVL, MULCH)
       ENDIF
 
@@ -574,7 +574,7 @@ C-----------------------------------------------------------------------
       dssat48_struc(nest)%dssat48(t)%WB_CRAIN = CRAIN
       dssat48_struc(nest)%dssat48(t)%TDRAIN = TDRAIN
       dssat48_struc(nest)%dssat48(t)%TRUNOF = TRUNOF
-      dssat48_struc(nest)%dssat48(t)%TSW = TSW
+      dssat48_struc(nest)%dssat48(t)%WB_TSW = TSW
       dssat48_struc(nest)%dssat48(t)%TSWINI = TSWINI
       dssat48_struc(nest)%dssat48(t)%WTDEP = WTDEP
       dssat48_struc(nest)%dssat48(t)%TDFD = TDFD

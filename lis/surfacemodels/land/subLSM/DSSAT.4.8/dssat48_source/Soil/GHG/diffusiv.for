@@ -23,6 +23,8 @@
       real, dimension(NL) :: dul, bd, poros
       real, dimension(NL) :: dD0_fc, dD0_DayCent, ratio
       real POROSer
+      REAL PFC, VFRAC, THETA_V, THETA_P, THETA_A, S_WAT, SW_P !Pang: Consistent w/ 4.8.2
+      REAL TP1, TP2, TP3, TP4, TP5, TP6, TP7, TP8
 
       BD    = SOILPROP % BD
       DUL   = SOILPROP % DUL

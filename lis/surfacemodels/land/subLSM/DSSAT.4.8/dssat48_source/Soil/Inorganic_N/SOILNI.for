@@ -72,6 +72,11 @@ C=======================================================================
       USE ModSoilMix
       USE dssat48_lsmMod
       IMPLICIT  NONE
+      EXTERNAL DENIT_CERES, INCDAT, YR_DOY, OPSOILNI,
+     &  SOILNI_INIT, NCHECK_INORG, FLOOD_CHEM, OXLAYER, DENIT_DAYCENT,
+     &  NOX_PULSE, INCYD, DAYCENT_DIFFUSIVITY, NFLUX
+
+     !Pang TEST including EXTERNAL
       SAVE
 !-----------------------------------------------------------------------
       CHARACTER*1 ISWNIT, MEGHG
