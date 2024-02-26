@@ -64,6 +64,7 @@ subroutine dssat48_main(n)
     CHARACTER*30  :: FILEIO
     CHARACTER*30  :: TEMPFILE !JE
     CHARACTER*4   :: EXT      !JE
+    CHARACTER*4   :: fproc      !JE
     CHARACTER*12  :: FILEX
     CHARACTER*8   :: MODELARG
     CHARACTER*80  :: PATHEX
@@ -96,8 +97,8 @@ subroutine dssat48_main(n)
 
     alarmCheck = LIS_isAlarmRinging(LIS_rc, "DSSAT48 model alarm "// trim(fnest)) !MN  Bug in the toolkit 
     if (alarmCheck) Then
-        !do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-        do  t = 7201, 7202
+        do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+        !do  t = 7201, 7204
              
             dt = LIS_rc%ts
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
@@ -244,11 +245,13 @@ subroutine dssat48_main(n)
             !----- SEASONAL INITIALIZATION -------------------------------------------
             IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
                  !PRINT*, 'Im in seas init'
-                  !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
-                TEMPFILE = trim(LIS_rc%dfile)                 !JE One INP file per processor
-                EXT = TEMPFILE(len(TEMPFILE)-4:len(TEMPFILE)) !JE
-                FILEIO = 'DSSAT48.INP.'//EXT !PL 20240207     !JE
-
+                !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
+                !TEMPFILE = trim(LIS_rc%dfile)                 !JE One INP file per processor
+                !EXT = TEMPFILE(len(TEMPFILE)-3:len(TEMPFILE)) !JE
+                !FILEIO = 'DSSAT48.INP.'//EXT !PL 20240207     !JE
+                !JE Add one .INP file per processor
+                 write(unit=fproc,fmt='(i4.4)') LIS_localPet
+                 FILEIO = 'DSSAT48.INP.'//fproc
                 FILEX = dssat48_struc(n)%CONTROL(t)%filex !PL 20240207
                 ROTNUM = dssat48_struc(n)%CONTROL(t)%rotnum !PL 20240207
                 TRTNUM = dssat48_struc(n)%CONTROL(t)%trtnum !PL 20240207
@@ -329,7 +332,7 @@ subroutine dssat48_main(n)
                     surface_type=LIS_rc%lsm_index)
 
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
-                    value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                    value=dssat48_struc(n)%dssat48(t)%SDWT*10.0,&
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
@@ -405,7 +408,7 @@ subroutine dssat48_main(n)
                   surface_type=LIS_rc%lsm_index)
 
                call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
-                  value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                  value=dssat48_struc(n)%dssat48(t)%SDWT*10,&
                   vlevel=1,unit="kg/ha",direction="-",&
                   surface_type=LIS_rc%lsm_index)
 
@@ -450,7 +453,7 @@ subroutine dssat48_main(n)
                     surface_type=LIS_rc%lsm_index)
 
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_GWAD, &
-                    value=dssat48_struc(n)%dssat48(t)%GRNWT,&
+                    value=dssat48_struc(n)%dssat48(t)%SDWT*10,&
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 

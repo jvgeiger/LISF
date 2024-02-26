@@ -10,17 +10,18 @@ C  05/22/2003 CHP Added mulch routine to current model.
 C  12/11/2021 FO  Initialized local variables for MULCHWAT Integr.
 C=======================================================================
 
-      SUBROUTINE MULCHWATER(CONTROL, ISWITCH,
+      SUBROUTINE MULCHWATER(CONTROL, ISWITCH, nest, t, !Pang 2024.02.16
      &    WATAVL, MULCH)
 
 C-----------------------------------------------------------------------
       USE ModuleDefs
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*1 RNMODE, MEINF
       INTEGER RUN, DYNAMIC
-
+      INTEGER nest, t
       REAL CNRAIN, NRAIN, WATAVL
       REAL DEFICIT
       REAL MULCHCOVER, MULCHEVAP, MULCHMASS, MULCHSAT, MULCHWAT
@@ -39,6 +40,12 @@ C-----------------------------------------------------------------------
       MULCHEVAP  = MULCH % MULCHEVAP
       WATFAC     = MULCH % MUL_WATFAC
 
+!----- Obtain Vars From Memory ----------------------------------------
+      MULCHWAT = MULCH % MULCHWAT
+      CNRAIN = dssat48_struc(nest)%dssat48(t)%CNRAIN
+      NRAIN = dssat48_struc(nest)%dssat48(t)%NRAIN
+      MULWATADD = dssat48_struc(nest)%dssat48(t)%MULWATADD 
+      RESWATADD = dssat48_struc(nest)%dssat48(t)%RESWATADD 
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -181,6 +188,10 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+      dssat48_struc(nest)%dssat48(t)%CNRAIN = CNRAIN
+      dssat48_struc(nest)%dssat48(t)%NRAIN = NRAIN
+      dssat48_struc(nest)%dssat48(t)%MULWATADD = MULWATADD
+      dssat48_struc(nest)%dssat48(t)%RESWATADD = RESWATADD
       RETURN
       END SUBROUTINE MULCHWATER
 
