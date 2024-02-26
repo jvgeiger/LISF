@@ -156,8 +156,7 @@ contains
     CHARACTER*8   :: MODELARG
     CHARACTER*12  :: FILEX
     CHARACTER*30  :: FILEIO
-    CHARACTER*30  :: TEMPFILE !JE
-    CHARACTER*4   :: EXT      !JE
+    CHARACTER*4   :: fproc      !JE
     CHARACTER*80  :: PATHEX
     CHARACTER*120 :: FILECTL
     INTEGER       :: ROTNUM, TRTNUM, YRSIM, YRDOY, MULTI, YRDIF
@@ -229,21 +228,19 @@ contains
             ! Call dssat48_setup to obtain mukey number before initialization
                CALL dssat48_setup !Pang 2024.02.09 (This is used to obtain soil mukey)
 
-            !do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-            do t=7201, 7202
+            do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+            !do t=7201, 7202
                  !These System Initial Values May Be Loaded From Config File
                  ! Start CSM 
                  !DONE =  .FALSE.  ! We don't use DONE to control run or not run
                  !YRDOY_END = 9999999 !Can be removed
                  RNMODE = 'Q'
+
                  !JE Add one .INP file per processor
-                 print*, LIS_rc%dfile
-                 TEMPFILE = trim(LIS_rc%dfile)
-                 print*, TEMPFILE
-                 EXT = TEMPFILE(len(TEMPFILE)-4:len(TEMPFILE))
-                 print*, EXT
-                 FILEIO = 'DSSAT48.INP.'//EXT
-                 print*, FILEIO
+                 write(unit=fproc,fmt='(i4.4)') LIS_localPet
+                 FILEIO = 'DSSAT48.INP.'//fproc
+                 !print*, FILEIO
+
                  ROTNUM = 1
                  TRTNUM = 1
                  FILEX = 'NASA2019.SQX'
