@@ -61,7 +61,23 @@ subroutine dssat48_readcrd()
         call LIS_verify(rc,"DSSAT48 restart output interval: not defined")
         call LIS_parseTimeString(time, dssat48_struc(n)%rstInterval)
     enddo
- 
+
+    !JE Coupling Options 
+    call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 soil moisture coupling:", rc = rc)
+    do n=1,LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%sm_coupling, rc = rc)
+        call LIS_verify(rc,"DSSAT48 soil moisture coupling: not defined")
+        if ((dssat48_struc(n)%sm_coupling.ne.0).AND.(dssat48_struc(n)%sm_coupling.ne.1)) then
+           write(LIS_logunit,*) "[ERR] Valid options for DSSAT soil moisture coupling are 0=No or 1=Yes"
+           call LIS_endrun()
+        endif
+        write(LIS_logunit,*) "SM Coupling Flag ", dssat48_struc(n)%sm_coupling
+        if (dssat48_struc(n)%sm_coupling .eq. 1) then
+          write(LIS_logunit,*) "LIS - DSSAT Soil Moisture Coupling ON"
+        else
+         write(LIS_logunit,*) "LIS - DSSAT Soil Moisture Coupling OFF"
+        endif
+    enddo 
     
     
     !---------------------------!

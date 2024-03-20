@@ -30,7 +30,9 @@ subroutine dssat48_main(n)
     use LIS_timeMgrMod, only : LIS_isAlarmRinging
     use LIS_logMod, only     : LIS_logunit, LIS_endrun
     use LIS_FORC_AttributesMod 
+    use LIS_surfaceModelDataMod, only : LIS_sfmodel_struc
     use dssat48_lsmMod
+    use NoahMP401_lsmMod ! will need to generalize JE
     USE ModuleDefs, only: MonthTxt !From DSSAT
    !use other modules
   
@@ -39,6 +41,7 @@ subroutine dssat48_main(n)
     integer, intent(in)  :: n
     integer              :: t
     integer              :: i
+    integer              :: l
     real                 :: dt
     real                 :: lat, lon, elev
     integer              :: row, col
@@ -230,6 +233,15 @@ subroutine dssat48_main(n)
             !endif
             ! get state variables
             !tmp_SNOWSWE(:)    = CROCUS81_struc(n)%crocus81(t)%SNOWSWE(:)   
+
+            ! JE Add options for tight coupling
+            ! Add model flag
+
+            IF (dssat48_struc(n)%sm_coupling.eq.1) THEN
+               do l=0, LIS_sfmodel_struc(n)%nsm_layers
+                  dssat48_struc(n)%dssat48(t)%LIS_sm(l) = NOAHMP401_struc(n)%noahmp401(t)%smc(l)
+               end do
+            ENDIF
 
 !-------------------------------------------------------------------------------------
 ! call model physics

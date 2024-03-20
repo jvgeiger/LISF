@@ -472,8 +472,32 @@ C       extraction (based on yesterday's values) for each soil layer.
           SW_mm_NEW(L) = SW_mm(L) + SWDELTS_mm(L) + SWDELTU_mm(L) 
      &        + SWDELTL_mm(L) + SWDELTX_mm(L) + SWDELTT_mm(L)
 
-!         Convert to volumetric content based on today's layer thickness
-          SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10.
+!JE !         Convert to volumetric content based on today's layer thickness
+!JE          SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10.
+
+!JE Tight coupling soil moisture exchange
+          PRINT*, "Coupling Flag: ", dssat48_struc(nest)%sm_coupling
+          IF (dssat48_struc(nest)%sm_coupling .EQ. 1) THEN
+             IF (dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 0) THEN 
+                IF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .LT. 
+     &             LL(L) ) THEN
+                   PRINT*, "Replacing with LL ", LL(L)
+                   SW(L) = LL(L)
+                ELSEIF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 
+     &             SAT(L) ) THEN
+                   PRINT*, "Replacing with SAT ", SAT(L)
+                   SW(L) = SAT(L)
+                ELSE
+                   PRINT*, 'Replacing ', SW(L), 'with LIS '
+                   PRINT*, dssat48_struc(nest)%dssat48(t)%LIS_sm(L) 
+                   SW(L) = dssat48_struc(nest)%dssat48(t)%LIS_sm(L)
+                ENDIF 
+             ELSE
+                SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10. ! default
+             ENDIF
+             ELSE
+                SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10. ! default 
+          ENDIF
 
 !         Round SW to 5 decimal places
           NewSW = ANINT(SW(L) * 1.e6)/ 1.e6
