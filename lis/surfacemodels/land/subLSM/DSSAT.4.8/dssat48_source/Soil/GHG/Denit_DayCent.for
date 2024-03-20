@@ -12,13 +12,14 @@ C  Calls  : Fert_Place, IPSOIL, NCHECK, NFLUX, RPLACE,
 C           SOILNI, YR_DOY, FLOOD_CHEM, OXLAYER
 C=======================================================================
 
-      SUBROUTINE Denit_DayCent (CONTROL, ISWNIT, 
+      SUBROUTINE Denit_DayCent (CONTROL, ISWNIT, nest, t, !Pang 2024.03.04 
      &    dD0, newCO2, NO3, SNO3, SOILPROP, SW,       !Input
      &    DLTSNO3,                                    !I/O
      &    CNOX, TNOXD, N2O_data)                      !Output
 !-----------------------------------------------------------------------
       USE GHG_mod 
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !-----------------------------------------------------------------------
@@ -26,7 +27,7 @@ C=======================================================================
 
       INTEGER DOY, DYNAMIC, L, YEAR, YRDOY
       INTEGER NLAYR
-
+      INTEGER nest, t
       REAL FLOOD, WFDENIT, XMIN
       REAL SNO3_AVAIL
       REAL DLTSNO3(NL)   
@@ -64,7 +65,14 @@ C=======================================================================
       DYNAMIC = CONTROL % DYNAMIC
       YRDOY   = CONTROL % YRDOY
       CALL YR_DOY(YRDOY, YEAR, DOY)
+!------ Obtain Vars from Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+       A = dssat48_struc(nest)%dssat48(t)%A
+       min_nitrate = dssat48_struc(nest)%dssat48(t)%min_nitrate
+       DD_layer = dssat48_struc(nest)%dssat48(t)%DD_layer
 
+       CN2Odenit = N2O_data % CN2Odenit
+       CN2 = N2O_data % CN2
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -351,6 +359,11 @@ C       Calculate N2O
       N2O_data % DENITRIF = DENITRIF
       N2O_data % n2odenit = n2odenit
       N2O_data % N2FLUX   = N2FLUX
+!------ Save Vars to Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%A = A
+      dssat48_struc(nest)%dssat48(t)%min_nitrate = min_nitrate
+      dssat48_struc(nest)%dssat48(t)%DD_layer = DD_layer
 
       RETURN
       END SUBROUTINE Denit_DayCent

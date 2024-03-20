@@ -128,7 +128,7 @@ C=====================================================================
       SPi_Labile = dssat48_struc(nest)%dssat48(t)%spi_labile
       TDFC = dssat48_struc(nest)%dssat48(t)%tdfc
       TDLNO = dssat48_struc(nest)%dssat48(t)%tdlno
-      CH4_data = dssat48_struc(n)%CH4_data(t)
+      CH4_data = dssat48_struc(nest)%CH4_data(t)
 !----- Added Pang 2024.02.13 -------------------------------------------
       IMM = dssat48_struc(nest)%dssat48(t)%IMM
       LITC = dssat48_struc(nest)%dssat48(t)%LITC
@@ -215,7 +215,7 @@ C=====================================================================
       dssat48_struc(nest)%dssat48(t)%spi_labile = SPi_Labile
       dssat48_struc(nest)%dssat48(t)%tdfc = TDFC
       dssat48_struc(nest)%dssat48(t)%tdlno = TDLNO
-      dssat48_struc(n)%CH4_data(t) = CH4_data
+      dssat48_struc(nest)%CH4_data(t) = CH4_data
 !----- Added Pang 2024.02.13 -------------------------------------------
       dssat48_struc(nest)%dssat48(t)%IMM = IMM 
       dssat48_struc(nest)%dssat48(t)%LITC = LITC

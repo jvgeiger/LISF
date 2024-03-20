@@ -11,7 +11,7 @@ C  05/29/2002 CHP Rewrote for modular CSM model
 C  09/05/2003 CHP Added option for reported irrigation in DAP
 C=======================================================================
 
-      SUBROUTINE FLOOD_IRRIG (DYNAMIC, 
+      SUBROUTINE FLOOD_IRRIG (DYNAMIC, nest, t,   !Pang 2024.03.11
      &    BUND, COND, CONDAT, IBDAT, IIRRCV, IIRRI,       !Input
      &    IPDAT, IPERC, JULWTB, NBUND, NCOND, NPERC,      !Input
      &    NPUD, NTBL, PUDDAT, PUDDLED, PWAT, RAIN,        !Input
@@ -21,6 +21,7 @@ C=======================================================================
 
       USE ModuleDefs
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -29,7 +30,7 @@ C=======================================================================
       CHARACTER*78, DIMENSION(3) :: MSG
       INTEGER  DYNAMIC, J,K,L, YRDOY, YRPLT
       REAL     DEPIR,TDSW,RAIN
-
+      INTEGER nest, t
       INTEGER INCDAT, NBUND, NCOND, NLAYR, NPERC, NTBL, NPUD
       INTEGER IBDAT(NAPPL), BUNDDAT(NAPPL), IIRRCV(NAPPL)
       INTEGER CONDAT(NAPPL), IRRDAT(NAPPL), PUDDAT(NAPPL), PUDAT(NAPPL)
@@ -50,7 +51,16 @@ C=======================================================================
       INFILT= FLOODWAT % INFILT
       EF    = FLOODWAT % EF
       FLOOD = FLOODWAT % FLOOD
- 
+
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.11  ---------------------------------------------------
+      BUNDED = FLOODWAT % BUNDED
+      PERC = FLOODWAT % PERC
+      PUDPERC = FLOODWAT % PUDPERC
+
+      CONVERTED = dssat48_struc(nest)%dssat48(t)%CONVERTED
+      APWAT = dssat48_struc(nest)%dssat48(t)%APWAT
+      PERMW = dssat48_struc(nest)%dssat48(t)%PERMW
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -267,7 +277,11 @@ C-----------------------------------------------------------------------
       FLOODWAT % ABUND   = ABUND    !mm
       FLOODWAT % PUDPERC = PUDPERC
       FLOODWAT % PERC    = PERC
-      
+!----- Save Vars to Memory --------------------------------------------
+!----- Pang 2024.03.11  -----------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CONVERTED = CONVERTED
+      dssat48_struc(nest)%dssat48(t)%APWAT = APWAT
+      dssat48_struc(nest)%dssat48(t)%PERMW = PERMW
       RETURN
       END SUBROUTINE FLOOD_IRRIG
 

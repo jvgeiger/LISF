@@ -32,7 +32,7 @@ C  08/01/2002 CHP Merged RUNINIT and SEASINIT into INIT section
 !                 RPLACE_C in Century)
 C=====================================================================
 
-      SUBROUTINE MGMTOPS(CONTROL, ISWITCH, 
+      SUBROUTINE MGMTOPS(CONTROL, ISWITCH,nest, t, !Pang 2024.03.06 
      &    FLOODWAT, HARVRES, SOILPROP, ST,                !Input 
      &    STGDOY, SW, WEATHER,                            !Input
      &    YREND, FERTDATA, HARVFRAC, IRRAMT,              !Output
@@ -41,6 +41,7 @@ C=====================================================================
 C-----------------------------------------------------------------------
       USE ModuleDefs
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -48,7 +49,7 @@ C-----------------------------------------------------------------------
       CHARACTER*1  IDETO, ISWTIL, ISWWAT
       CHARACTER*2  CROP
       CHARACTER*6, PARAMETER :: ERRKEY = 'MGMTOP'
-
+      INTEGER nest, t
       INTEGER DAP, DYNAMIC   
       INTEGER YREND, IDATE, ISIM          
       INTEGER NAP, NCHEM, NLAYR, TILLNO          
@@ -112,6 +113,18 @@ C-----------------------------------------------------------------------
       FLOOD = FLOODWAT % FLOOD
       RAIN  = WEATHER  % RAIN
 
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.06  ---------------------------------------------------
+      NTIL = TILLVALS % NTIL
+      NBUND = FLOODWAT % NBUND
+
+      HDATE = dssat48_struc(nest)%dssat48(t)%HDATE
+      NHAR = dssat48_struc(nest)%dssat48(t)%NHAR
+      TILLNO = dssat48_struc(nest)%dssat48(t)%TILLNO
+      NAP = dssat48_struc(nest)%dssat48(t)%NAP
+      TIL_IRR = dssat48_struc(nest)%dssat48(t)%TIL_IRR
+      TOTIR = dssat48_struc(nest)%dssat48(t)%TOTIR
+      NCHEM = dssat48_struc(nest)%dssat48(t)%NCHEM
 C***********************************************************************
 C***********************************************************************
 C    Input and Initialization 
@@ -146,14 +159,14 @@ C         YRDIF based on HDATE
 C-----------------------------------------------------------------------
 C     Call modules to modify dates for seasonal or sequenced runs.
 C-----------------------------------------------------------------------
-      CALL AUTPLT (CONTROL, ISWWAT,
+      CALL AUTPLT (CONTROL, ISWWAT, nest, t, !Pang 2024.03.08
      &    DLAYR, DUL, FLOOD, IDETO, IPLTI, LL, ST, SW,    !Input
      &    MDATE, YRPLT)                                   !Output
 C-----------------------------------------------------------------------
 C     Adjust harvest dates for seasonal or sequenced runs.
 C     For potato, sets harvest date.
 C-----------------------------------------------------------------------
-      CALL AUTHAR(CONTROL, ISWWAT,
+      CALL AUTHAR(CONTROL, ISWWAT, nest, t, !Pang 2024.03.08
      &    DLAYR, DUL, IDETO, IHARI, LL, STGDOY,           !Input
      &    SW, MDATE, YRPLT,                               !Input
      &    YREND, HARVFRAC, HDATE, NHAR)                   !Output
@@ -162,31 +175,31 @@ C-----------------------------------------------------------------------
         CALL Chemical(CONTROL, ISWITCH, NCHEM)
       ENDIF
 
-      CALL Fert_Place (CONTROL, ISWITCH, 
+      CALL Fert_Place (CONTROL, ISWITCH, nest, t, !Pang 2024.03.11 
      &  DLAYR, DS, FLOOD, NLAYR, YRPLT,           !Input
      &  FERTDATA)                                 !Output
 
-      CALL OM_Place (CONTROL, ISWITCH, 
+      CALL OM_Place (CONTROL, ISWITCH, nest, t, !Pang 2024.03.11 
      &    DLAYR, NLAYR, YRPLT,                            !Input
      &    OMAData)                                        !Output
 
       IF (INDEX('YR',ISWTIL) > 0) THEN
-        CALL TILLAGE(CONTROL, ISWITCH, SOILPROP,          !Input
+        CALL TILLAGE(CONTROL, ISWITCH, nest, t, SOILPROP, !Input Pang 2024.03.11
      &    TILLVALS, TILLNO)                               !Output
         NTIL = TILLVALS % NTIL
       ENDIF
 
-      CALL IRRIG(CONTROL, ISWITCH,
+      CALL IRRIG(CONTROL, ISWITCH, nest, t,     !Pang 2024.03.11
      &    RAIN, SOILPROP, SW, MDATE, YRPLT, STGDOY,       !Input
      &    FLOODWAT, IIRRI, IRRAMT, NAP, TIL_IRR, TOTIR)   !Output
 
       NBUND = FLOODWAT % NBUND
 !     initialize flood management variables.
-      CALL PADDY_MGMT (CONTROL, ISWITCH,
+      CALL PADDY_MGMT (CONTROL, ISWITCH, nest, t,  !Pang 2024.03.12
      &    IRRAMT, RAIN,                                   !Input
      &    FLOOD, FLOODWAT, FLOODN)                        !Output 
 
-      CALL OpMgmt(CONTROL, ISWITCH,
+      CALL OpMgmt(CONTROL, ISWITCH, nest, t,  !Pang 2024.03.12
      &    FERTDATA, HARVRES, IIRRI, IRRAMT, NAP, OMADATA, 
      &    SOILPROP, TILLNO, TILLVALS, TOTIR, YRPLT)
 
@@ -206,27 +219,27 @@ C-----------------------------------------------------------------------
 
       IF (DAP .EQ. 0 .AND. INDEX('AF', IPLTI) /= 0 .AND. CROP .NE. 'FA')
      & THEN
-        CALL AUTPLT (CONTROL, ISWWAT,
+        CALL AUTPLT (CONTROL, ISWWAT, nest, t, !Pang 2024.03.08
      &    DLAYR, DUL, FLOOD, IDETO, IPLTI, LL, ST, SW,    !Input
      &    MDATE, YRPLT)                                   !Output
       ENDIF
 
-      CALL Fert_Place (CONTROL, ISWITCH, 
+      CALL Fert_Place (CONTROL, ISWITCH, nest, t, !Pang2024.03.11 
      &  DLAYR, DS, FLOOD, NLAYR, YRPLT,           !Input
      &  FERTDATA)                                 !Output
 
-      CALL OM_Place (CONTROL, ISWITCH, 
+      CALL OM_Place (CONTROL, ISWITCH, nest, t, !Pang 2024.03.11 
      &    DLAYR, NLAYR, YRPLT,                            !Input
      &    OMAData)                                        !Output
 
       IF (INDEX('YR',ISWTIL) > 0 .AND. NTIL .GT. 0) THEN
-        CALL TILLAGE(CONTROL, ISWITCH, SOILPROP,          !Input
+        CALL TILLAGE(CONTROL, ISWITCH, nest, t, SOILPROP, !Input Pang 2024.03.11
      &    TILLVALS, TILLNO)                               !Output
       ENDIF
 
       IF (INDEX('AFRDPWET',IIRRI) .GT. 0 .AND. ISWWAT .EQ. 'Y') THEN
 !       Calculate irrigation depth for today
-        CALL IRRIG(CONTROL, ISWITCH,
+        CALL IRRIG(CONTROL, ISWITCH, nest, t, !Pang 2024.03.11
      &    RAIN, SOILPROP, SW, MDATE, YRPLT, STGDOY,       !Input
      &    FLOODWAT, IIRRI, IRRAMT, NAP, TIL_IRR, TOTIR)   !Output
         TILLVALS % TIL_IRR = TIL_IRR
@@ -250,19 +263,19 @@ C     determine YREND
 C-----------------------------------------------------------------------
 !     Calculate cumulative irrigation
       IF (INDEX('AFRDPWET',IIRRI) .GT. 0 .AND. ISWWAT .EQ. 'Y') THEN
-        CALL IRRIG(CONTROL, ISWITCH,
+        CALL IRRIG(CONTROL, ISWITCH, nest, t,  !Pang 2024.03.11
      &    RAIN, SOILPROP, SW, MDATE, YRPLT, STGDOY,       !Input
      &    FLOODWAT, IIRRI, IRRAMT, NAP, TIL_IRR, TOTIR)   !Output
       ENDIF
 
       IF (NBUND .GT. 0) THEN
 !       Determine flood depth today.
-        CALL PADDY_MGMT (CONTROL, ISWITCH,
+        CALL PADDY_MGMT (CONTROL, ISWITCH, nest, t, !Pang 2024.03.12
      &    IRRAMT, RAIN,                            !Input
      &    FLOOD, FLOODWAT, FLOODN)                        !Output 
       ENDIF
 
-      CALL AUTHAR(CONTROL, ISWWAT, 
+      CALL AUTHAR(CONTROL, ISWWAT, nest, t, !Pang 2024.03.08 
      &    DLAYR, DUL, IDETO, IHARI, LL, STGDOY,           !Input
      &    SW, MDATE, YRPLT,                               !Input
      &    YREND, HARVFRAC, HDATE, NHAR)                   !Output
@@ -273,12 +286,12 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. OUTPUT) THEN
 !-----------------------------------------------------------------------
-      CALL OpMgmt(CONTROL, ISWITCH,
+      CALL OpMgmt(CONTROL, ISWITCH, nest, t, !Pang 2024.03.12
      &    FERTDATA, HARVRES, IIRRI, IRRAMT, NAP, OMADATA, 
      &    SOILPROP, TILLNO, TILLVALS, TOTIR, YRPLT)
 
       IF (NBUND .GT. 0) THEN
-        CALL PADDY_MGMT (CONTROL, ISWITCH,
+        CALL PADDY_MGMT (CONTROL, ISWITCH, nest, t, !Pang 2024.03.12
      &    IRRAMT, RAIN,                                   !Input
      &    FLOOD, FLOODWAT, FLOODN)                        !Output 
       ENDIF
@@ -290,11 +303,11 @@ C-----------------------------------------------------------------------
       ELSEIF (DYNAMIC .EQ. SEASEND) THEN
 C-----------------------------------------------------------------------
 
-      CALL OM_Place (CONTROL, ISWITCH, 
+      CALL OM_Place (CONTROL, ISWITCH, nest, t, !Pang 2024.03.11 
      &    DLAYR, NLAYR, YRPLT,                    !Input
      &    OMAData)                                !Output
 
-      CALL OpMgmt(CONTROL, ISWITCH,
+      CALL OpMgmt(CONTROL, ISWITCH, nest, t, !Pang 2024.03.12
      &    FERTDATA, HARVRES, IIRRI, IRRAMT, NAP, OMADATA, 
      &    SOILPROP, TILLNO, TILLVALS, TOTIR, YRPLT)
 
@@ -319,7 +332,15 @@ C     END OF DYNAMIC IF CONSTRUCT
 C***********************************************************************
       ENDIF
 C***********************************************************************
-
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.06  ---------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%HDATE = HDATE
+      dssat48_struc(nest)%dssat48(t)%NHAR = NHAR
+      dssat48_struc(nest)%dssat48(t)%TILLNO = TILLNO
+      dssat48_struc(nest)%dssat48(t)%NAP = NAP
+      dssat48_struc(nest)%dssat48(t)%TIL_IRR = TIL_IRR
+      dssat48_struc(nest)%dssat48(t)%TOTIR = TOTIR
+      dssat48_struc(nest)%dssat48(t)%NCHEM = NCHEM
       RETURN
       END SUBROUTINE MGMTOPS
 
@@ -342,7 +363,7 @@ C-----------------------------------------------------------------------
 C  Called from:   MgmtOps
 C  Calls:         None
 C=======================================================================
-      SUBROUTINE OpMgmt(CONTROL, ISWITCH,
+      SUBROUTINE OpMgmt(CONTROL, ISWITCH, nest, t, !Pang 2024.03.12
      &    FERTDATA, HARVRES, IIRRI, IRRAMT, NAP, OMADATA, 
      &    SOILPROP, TILLNO, TILLVALS, TOTIR, YRPLT)
 
@@ -350,6 +371,7 @@ C=======================================================================
       USE ModuleDefs
       USE ModuleData
       USE SumModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -363,6 +385,7 @@ C=======================================================================
       CHARACTER*12, Date_Txt
       CHARACTER*13, PARAMETER :: OUTM2= 'MgmtEvent.OUT'
 
+      INTEGER nest, t
       INTEGER DAP, DAS, DLUN, DLUN2, DOY, DYNAMIC, ERRNUM, FROP, I
       INTEGER NDAY, RUN, YEAR, YRDOY, YRPLT
       INTEGER L, NAP, TIMDIF, NAPFER(NELEM), NAPRes
@@ -407,6 +430,9 @@ C     ModuleDefs.for.
       ISWPHO = ISWITCH % ISWPHO
       ISWPOT = ISWITCH % ISWPOT
 
+!------ Obtain Vars from Memory ---------------------------------------
+!------ Pang 2024.03.08 -----------------------------------------------
+      DPRINT = dssat48_struc(nest)%dssat48(t)%DPRINT
 !***********************************************************************
 !***********************************************************************
 !     Input and Initialization
@@ -747,6 +773,10 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!------ Save Vars to Memory ---------------------------------------
+!------ Pang 2024.03.08 -----------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%DPRINT = DPRINT
+
       RETURN
       END SUBROUTINE OpMgmt
 !***********************************************************************

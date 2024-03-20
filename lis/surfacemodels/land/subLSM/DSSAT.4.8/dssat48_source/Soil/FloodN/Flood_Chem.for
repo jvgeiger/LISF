@@ -10,7 +10,7 @@ C-----------------------------------------------------------------------
 ! Called by: NTRANS_inorg
 ! Calls:     FCHEM, PERC_N, NRUNOFF, DRYUP, FLOODI
 C=======================================================================
-      SUBROUTINE FLOOD_CHEM(CONTROL, ISWITCH, 
+      SUBROUTINE FLOOD_CHEM(CONTROL, ISWITCH, nest, t, !Pang 2024.03.01
      &    FLOODWat, LFD10, SOILPROP, SNO3, SNH4, UREA,    !Input
      &    SRAD, SW, TMAX, TMIN, XHLAI,                    !Input
      &    DLTSNH4, DLTSNO3, DLTUREA, FLOODN, OXLAYR,      !I/O
@@ -18,10 +18,12 @@ C=======================================================================
  
       USE ModuleDefs
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*1 ISWNIT
+      INTEGER nest, t
       INTEGER DYNAMIC, L, LFD10, IBP
       INTEGER NDAT, NLAYR, NSWITCH, NBUND
       INTEGER YRDOY, YRDRY, YRWET
@@ -98,7 +100,23 @@ C=======================================================================
       OXH4     = OXLAYR % OXH4
       OXN3     = OXLAYR % OXN3
       OXLT     = OXLAYR % OXLT
+!------ Obtain Vars from Memory ----------------------------------------
+!------ Pang 2024.03.01 ------------------------------------------------
+      FLDH4C = FLOODN % FLDH4C
+      FLDN3C = FLOODN % FLDN3C
+      FLDU = FLOODN % FLDU
+      FLDH4 = FLOODN % FLDH4
+      FLDN3 = FLOODN % FLDN3
+      ALGACT = OXLAYR % ALGACT
 
+      FNI = dssat48_struc(nest)%dssat48(t)%FNI
+      BD2 = dssat48_struc(nest)%dssat48(t)%BD2
+      OXFAC = dssat48_struc(nest)%dssat48(t)%OXFAC
+      CUMPERCN = dssat48_struc(nest)%dssat48(t)%CUMPERCN
+      CUMFNU = dssat48_struc(nest)%dssat48(t)%CUMFNU
+      ALI =dssat48_struc(nest)%dssat48(t)%ALI
+      AKILL = dssat48_struc(nest)%dssat48(t)%AKILL
+      IMMOBIL = dssat48_struc(nest)%dssat48(t)%IMMOBIL
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -140,7 +158,7 @@ C  FLDU   : Floodwater urea (kg N/ha)
       DLTFNH4  = 0.0
 
       IF (NBUND > 0) THEN
-        CALL FCHEM(CONTROL, ISWITCH,
+        CALL FCHEM(CONTROL, ISWITCH, nest, t, !Pang 2024.03.04
      &    BD1, SURCEC, DLAYR, EF, FLDH4, FLDN3, FLDU,     !Input
      &    FLOOD, LFD10, NSWITCH, OC, OXMIN3, OXMIN4,      !Input
      &    OXU, OXH4, OXN3, OXLT, PH, SNH4, SNO3, SRAD,    !Input
@@ -252,7 +270,7 @@ C  FLDU   : Floodwater urea (kg N/ha)
       ENDIF
 
       IF (FLOOD .GT. 0.0) THEN
-        CALL FCHEM(CONTROL, ISWITCH,
+        CALL FCHEM(CONTROL, ISWITCH, nest, t, !Pang 2024.03.04
      &    BD1, SURCEC, DLAYR, EF, FLDH4, FLDN3, FLDU,     !Input
      &    FLOOD, LFD10, NSWITCH, OC, OXMIN3, OXMIN4,      !Input
      &    OXU, OXH4, OXN3, OXLT, PH, SNH4, SNO3, SRAD,    !Input
@@ -300,7 +318,7 @@ C  FLDU   : Floodwater urea (kg N/ha)
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. OUTPUT) THEN
 !-----------------------------------------------------------------------
-      CALL FCHEM(CONTROL, ISWITCH,
+      CALL FCHEM(CONTROL, ISWITCH, nest, t, !Pang 2024,03.04
      &    BD1, SURCEC, DLAYR, EF, FLDH4, FLDN3, FLDU,     !Input
      &    FLOOD, LFD10, NSWITCH, OC, OXMIN3, OXMIN4,      !Input
      &    OXU, OXH4, OXN3, OXLT, PH, SNH4, SNO3, SRAD,    !Input
@@ -347,6 +365,17 @@ C  FLDU   : Floodwater urea (kg N/ha)
       OXLAYR % OXLT     = OXLT
 
 !***********************************************************************
+!------ Obtain Vars from Memory ----------------------------------------
+!------ Pang 2024.03.01 ------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%FNI = FNI
+      dssat48_struc(nest)%dssat48(t)%BD2 = BD2
+      dssat48_struc(nest)%dssat48(t)%OXFAC = OXFAC
+      dssat48_struc(nest)%dssat48(t)%CUMPERCN = CUMPERCN
+      dssat48_struc(nest)%dssat48(t)%CUMFNU = CUMFNU
+      dssat48_struc(nest)%dssat48(t)%ALI = ALI
+      dssat48_struc(nest)%dssat48(t)%AKILL = AKILL
+      dssat48_struc(nest)%dssat48(t)%IMMOBIL = IMMOBIL
+
       RETURN
       END SUBROUTINE FLOOD_CHEM
 C=======================================================================

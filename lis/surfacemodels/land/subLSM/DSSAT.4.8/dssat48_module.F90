@@ -76,6 +76,16 @@ module dssat48_module
         !  LAND
         !------------------------------------------------------------------------
          INTEGER            :: YRPLT, MDATE, YREND        
+        !------------------------------------------------------------------------
+        ! WEATHER
+        ! Pang 2024.03.14
+        !------------------------------------------------------------------------
+          INTEGER NEV
+        !------------------------------------------------------------------------
+        ! WEATHER - CO2VAL
+        !------------------------------------------------------------------------
+          INTEGER NVals, INDX
+          REAL CO2BAS
         !-------------------------------------------------------------------------
         !  LAND - SOIL
         !  Pang 2023.09.29
@@ -133,8 +143,8 @@ module dssat48_module
         !  Pang 2023.10.10
         !------------------------------------------------------------------------
           !NELEM = 3
-          REAL, DIMENSION(3) :: CEDAM, CES21T, CES23T, CES3M, CES3T
-          REAL, DIMENSION(3) :: CES3X, CESTR, FRDAE
+          REAL, DIMENSION(3) :: CEDAM, CES21T, CES23T, CES3M, CES3T, CES3X, CESTR, FRDAE
+          REAL, DIMENSION(3) :: TLITE, TMETABE, TSOM1E, TSOM2E, TSOM23E, TSOM3E, TSOME, TSTRUCE
           REAL, DIMENSION(0:0,3) :: CES21I
           REAL, DIMENSION(0:1,3) :: CES1M, CES1T, CES1X, CES21M, CES21S
           REAL, DIMENSION(0:1,3) :: CES21X, CES23LM
@@ -142,18 +152,19 @@ module dssat48_module
           REAL, DIMENSION(0:1,3) :: CES2LI, CES2LM, CES2LS, CES2LX
           REAL, DIMENSION(0:1) :: CO2MET, DECMET, DECS1, DECSTR, LIGSTR
           REAL :: DECS2(1), DECS3(1), METABE(0:20,3)
-          REAL :: SOM1E(0:20,3),SOM23E(20,3), SOM2E(20,3), SOM3E(20,3)
-          REAL :: STRUCE(0:20,3)
+          REAL :: SOM1E(0:20,3),SOM23E(20,3), SOM2E(20,3), SOM3E(20,3), AMINRL(20,3), CES2(20,3), CES3(20,3)
+          REAL :: STRUCE(0:20,3), ACCMNR(0:20,3), CES1(0:20,3), LITE(0:20,3)
           REAL :: CO2S2, CO2S3, CULMETQ, CULS1Q, CULS2Q, CULS3Q, CULSTRQ
           REAL :: FRMETI, FRMETS, RESDAX, SENESSUMC, SENESSUMN, SENESSUMP
           REAL, DIMENSION(0:20) :: FRLSTR, CO2S1, LIGC, METABC, SOM1C
           REAL, DIMENSION(0:20) :: STRUCC
           REAL, DIMENSION(20) :: S1S3, S2S3, SOM23C, SOM2C, SOM3C, TXS1
-          INTEGER DISTURBENDMAX, DISTURBNUM
-          REAL :: DISTURBDEPTHMAX
-          INTEGER, DIMENSION(9000*3) :: DISTURBEND  !Do we really need 9000*3?
-          REAL, DIMENSION(9000*3) :: DISTURBDEPTH
+          INTEGER DISTURBENDMAX, DISTURBNUM, DNUM
+          REAL :: DISTURBDEPTHMAX, TLITC, TMETABC, TSOM1C, TSOM2C, TSOM3C, TSOMC, TSTRUCC
+          INTEGER, DIMENSION(9000*3) :: DISTURBEND, DEND  !Do we really need 9000*3?
+          REAL, DIMENSION(9000*3) :: DISTURBDEPTH, DDEP
           REAL, DIMENSION(0:1,2) :: CO2STR(0:1,2)
+          LOGICAL :: DOCULT(0:20), ADDMETABEFLAG, FRMETFLAG
         !------------------------------------------------------------------------
         !  SOIL - SoilOrg/CENTURY - MethaneDynamics
         !  Pang 2023.10.05
@@ -165,13 +176,53 @@ module dssat48_module
         !  Pang 2023.10.12
         !------------------------------------------------------------------------
            LOGICAL :: IUON
-           INTEGER :: LFD10
+           INTEGER :: IUOF, LFD10
            REAL :: TNOM, CMINERN, CIMMOBN, WTNUP, CumSumFert
-           REAL :: CLeach, CNTILEDR !(NFLUX)
+           REAL :: CLeach, CNTILEDR, CNETMINRN, CNUPTAKE !(NFLUX)
+           REAL :: ALI, nox_puls, TNH4, TNO3, TUREA, TN2OnitrifD, TNH4NO3
            !REAL :: CNITRIFY, CN2Onitrif, CNOflux !(N2O_data)
-           REAL :: TFNITY(20), SNH4(20), SNO3(20), UREA(20)
-           REAL :: ALGFIX, CUMFNRO, TOTAML !(FLOOD_CHEM)
+           REAL :: TFNITY(20), SNH4(20), SNO3(20), UREA(20), dD0(20), DENITRIF(20)
+           REAL :: ALGFIX, CUMFNRO, TOTAML,BD1,TOTFLOODN !(FLOOD_CHEM)
            REAL :: CNOX, TNOXD !(Denit)
+           !------------------------------------------------------------------------
+           !  SOIL - SoilNi - FLOOD_CHEM
+           !  Pang 2024.03.01
+           !------------------------------------------------------------------------
+              REAL :: FNI, BD2, OXFAC
+              REAL :: CUMPERCN, CUMFNU, ALI_CHEM
+              LOGICAL AKILL, IMMOBIL
+              !------------------------------------------------------------------------
+              !  SOIL - SoilNi - FLOOD_CHEM - FCHEM
+              !  Pang 2024.03.04
+              !------------------------------------------------------------------------
+                 REAL :: FPI, YALGA, ALGACT_FCHEM, FTI, FPH
+           !------------------------------------------------------------------------
+           !  SOIL - SoilNi - OXLAYER
+           !  Pang 2024.03.04
+           !------------------------------------------------------------------------
+              REAL :: OXNI, ALGACT_OXLAYR, OXPH
+           !------------------------------------------------------------------------
+           !  SOIL - SoilNi - Denit_DayCent
+           !  Pang 2024.03.04
+           !------------------------------------------------------------------------
+              REAL :: A(4), min_nitrate
+              INTEGER :: DD_layer
+           !------------------------------------------------------------------------
+           !  SOIL - SoilNi - Denit_Ceres
+           !  Pang 2024.03.04
+           !------------------------------------------------------------------------
+              REAL :: DLAG(20)
+           !------------------------------------------------------------------------
+           !  SOIL - SoilNi - N2Oemit
+           !  Pang 2024.03.04
+           !------------------------------------------------------------------------
+              REAL :: n2o_soil(20), no_soil(20), n2_soil(20)
+           !------------------------------------------------------------------------
+           !  SOIL - SoilNi - nox_pulse
+           !  Pang 2024.03.04
+           !------------------------------------------------------------------------
+              REAL cumppt(0:15-1), pl_nox(0:2-1), pm(0:6-1), ph(0:13-1), mtplr(0:13-1)
+              INTEGER npl, npm, nph, nppt, mptr, pflag
         !------------------------------------------------------------------------
         !  SOIL - SoilPi
         !  Pang 2023.10.16
@@ -184,11 +235,16 @@ module dssat48_module
            REAL, DIMENSION(20) :: PiActRts, PiStaRts, FracPSoln
            REAL :: CMINERP, CIMMOBP, PERROR
            LOGICAL :: SOILPI_FIRST
+           REAL, DIMENSION(20) :: FracNoRts, PiLabRts, PiSolRts, PiActive
+           REAL, DIMENSION(20) :: PiLabile, PiStable, SPi_Total
+           REAL :: TMINERP, TIMMOBP, SPiAvlProf, SPiLabProf, SPiActProf, SPiStaProf, SPiSolProf
+           REAL :: SPiTotProf, SPiLabRtsProf, SPiLabNoRtsProf, SPiSolRtsProf, SPiSolNoRtsProf
         !------------------------------------------------------------------------
         !  SOIL - SoilKi
         !  Pang 2023.10.16
         !------------------------------------------------------------------------
-           REAL, DIMENSION(20) :: SKi_Tot
+           REAL, DIMENSION(20) :: SKi_Tot, Ki_Avail, DLTSKiAvail
+           REAL :: SKiAvlProf, SKiTotProf
         !-------------------------------------------------------------------------
         !  LAND - SPAM
         !  Pang 2024.01.12
@@ -213,7 +269,7 @@ module dssat48_module
                     SLWSHN, PNLSLN, PNLSHN, LMXSLN, LMXSHN, TSHR(20), TEMPN, TSRF(3), &
                     TSRFN(3), TAV, TAMP, COLDSTR
             !---------------------------------------------------------------------
-            !  SPAM -> In STEMPi_EPIC.for (Pang 2024.02.12)
+            !  SPAM -> In STEMP_EPIC.for (Pang 2024.02.12)
             !---------------------------------------------------------------------
                INTEGER WetDay(30), NDays
                REAL WFT, CV, BCV1, BCV2, BCV, X2_AVG
@@ -237,6 +293,75 @@ module dssat48_module
         !-------------------------------------------------------------------------
           REAL IRRAMT     
           REAL, DIMENSION(2) :: HARVFRAC
+        !-------------------------------------------------------------------------
+        !  In MGMTOPS
+        !  Pang 2024.03.06
+        !-------------------------------------------------------------------------
+          INTEGER HDATE(3), NHAR, TILLNO, NAP, TIL_IRR, TOTIR, NCHEM
+        !-------------------------------------------------------------------------
+           !-------------------------------------------------------------------------
+           !  In MGMTOPS -> AUTPLT
+           !  Pang 2024.03.08
+           !-------------------------------------------------------------------------
+             CHARACTER*1  PLME
+             CHARACTER*2  CROP_MGM
+             REAL PTX, PTTN, SWPLTL, SWPLTH, SWPLTD
+             INTEGER PWDINF, PWDINL
+           !-------------------------------------------------------------------------
+           !  In MGMTOPS -> AUTHAR
+           !  Pang 2024.03.08
+           !-------------------------------------------------------------------------
+             INTEGER HDLAY, HLATE, HSTG(3)
+           !-------------------------------------------------------------------------
+           !  In MGMTOPS -> Fert_Place
+           !  Pang 2024.03.11
+           !-------------------------------------------------------------------------
+             CHARACTER*5  FERMET(9000), FERTYPE_CDE(9000) !NAPPL=9000
+             INTEGER NFERT, NSR
+             REAL AMTFER(3)    !NELEM = 3
+             INTEGER FDAY(9000), FERTYP(9000), FERDEP(9000), ANFER(9000), APFER(9000)
+             INTEGER AKFER(9000), NAPFER(3)
+           !-------------------------------------------------------------------------
+           !  In MGMTOPS -> OM_Place
+           !  Pang 2024.03.11
+           !-------------------------------------------------------------------------
+             CHARACTER*5  RESTYP(9000)
+             INTEGER NRESDL, NRESAP, RESDAY(9000), NAPRes
+             REAL RESLIGNIN(9000), DRESMG, RESIDUE(9000), RESN(9000), RESP(9000), RIP(9000), RESDEP(9000)
+           !-------------------------------------------------------------------------
+           !  In MGMTOPS -> Tillage
+           !  Pang 2024.03.11
+           !-------------------------------------------------------------------------
+             INTEGER NTIL, TILLDATE(9000), NLYRS(9000)
+             REAL, DIMENSION(9000) :: CNP, RINP, MIXT, TDEP
+             REAL, DIMENSION(9000, 20) :: DEP, BDP, SWCNP
+           !-------------------------------------------------------------------------
+           !  In MGMTOPS -> IRRIG
+           !  Pang 2024.03.11
+           !-------------------------------------------------------------------------
+             LOGICAL SeasonalWL
+             INTEGER NAPW, NTBL, NCOND, NPERC, NPUD, DaysSinceIrrig, AIRRCOD, IRON(20)
+             INTEGER IFREQ(20), NGSIrrigs, IRINC, NDAYS_DRY
+             REAL TOTEFFIRR, GSWatUsed, ACCUM_ET, DSOIL, THETAC, THETAU, AIRAMT, EFFIRR
+             REAL IMDEP(20), ITHRL(20), ITHRU(20), IRAMT(20), IREFF(20), AVWATI(20), AVWAT
+             INTEGER, DIMENSION(9000) :: IRRCOD, CONDAT, IBDAT, IIRRCV, IPDAT, JULAPL, JULWTB, PUDDAT
+             REAL, DIMENSION(9000) :: AMIR, BUND, COND, IPERC, PWAT
+              !-------------------------------------------------------------------------
+              !  In MGMTOPS -> IRRIG -> Flood_Irrig
+              !  Pang 2024.03.11
+              !-------------------------------------------------------------------------
+                 LOGICAL CONVERTED
+                 REAL APWAT, PERMW
+           !-------------------------------------------------------------------------
+           !  In MGMTOPS -> PADDY_MGMT
+           !  Pang 2024.03.12
+           !-------------------------------------------------------------------------
+             INTEGER NDRY
+           !-------------------------------------------------------------------------
+           !  In MGMTOPS -> OpMgmt
+           !  Pang 2024.03.12
+           !-------------------------------------------------------------------------
+             LOGICAL DPRINT
         !-------------------------------------------------------------------------
         !  LAND - PLANT
         !  Pang 2024.01.17
@@ -401,5 +526,37 @@ module dssat48_module
           !  INTEGR   = 4, & 
           !  OUTPUT   = 5, & 
           !  SEASEND  = 6, &
-          !  ENDRUN   = 7    
+          !  ENDRUN   = 7   
+
+    !  Added to go around recurring use od GHG_mod 
+
+     ! TYPE,public :: N2O_type
+!            Daily        Cumul        Layer         
+      !  REAL TNOXD,       CNOX,        DENITRIF(20)  ![N] Denitrified
+!       REAL TN2OdenitD,  CN2Odenit,   N2Odenit(NL)  !N2O[N] from denit
+      !  REAL TN2OdenitD,  CN2Odenit,   N2Odenit(20)
+      !  REAL TN2OnitrifD, CN2Onitrif,  N2ONitrif(20) !N2O[N] from nitr
+
+      !  REAL TN2D,        CN2,         N2flux(20)    !N2[N] from denit
+!                                      N2Oflux = N2Odenit + N2ONitrif
+      !  REAL                           N2OFLUX(20)
+      !  REAL TNOfluxD,    CNOflux,     NOflux(20)    !NO flux from nitr
+
+      !  REAL TNITRIFY,    CNITRIFY,    NITRIF(20)    ![N] Nitrified 
+
+      !  REAL N2_emitted,  CN2_emitted                !N2[N] emitted
+      !  REAL N2O_emitted, CN2O_emitted               !N2O[N] emitted
+      !  REAL NO_emitted,  CNO_emitted                !NO[N] emitted
+
+      !  REAL TNGSoil  !N2, N2O, and NO in soil
+
+      !  REAL, DIMENSION(20) :: WFPS
+      !END TYPE N2O_type
+
+      !TYPE,public :: CH4_type
+      !  REAL CH4Consumption, CH4Emission, CH4Leaching, CH4Stored
+      !  REAL CumCH4Consumpt, CumCH4Emission, CumCH4Leaching
+      !  REAL CO2emission, CumCO2Emission
+      !END TYPE CH4_type
+
 end module dssat48_module

@@ -62,7 +62,12 @@ C-----------------------------------------------------------------------
       FERTDAY = FERTDATA % FERTDAY
 !----------------------------------------------------------------------
 !     Pang: 2023.10.16 obtain variables from LIS memory for each pixel.
-      SKi_Tot =  dssat48_struc(nest)%dssat48(t)%SKi_Tot
+      SKi_Tot = dssat48_struc(nest)%dssat48(t)%SKi_Tot
+!     Added 2024.03.05
+      Ki_Avail = dssat48_struc(nest)%dssat48(t)%Ki_Avail
+      DLTSKiAvail = dssat48_struc(nest)%dssat48(t)%DLTSKiAvail
+      SKiAvlProf = dssat48_struc(nest)%dssat48(t)%SKiAvlProf
+      SKiTotProf = dssat48_struc(nest)%dssat48(t)%SKiTotProf
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -179,7 +184,11 @@ C***********************************************************************
 !----------------------------------------------------------------------
 !     Pang: 2023.10.16 assign variables to LIS memory for each pixel.
       dssat48_struc(nest)%dssat48(t)%SKi_Tot = SKi_Tot
-
+!     Added 2024.03.05
+      dssat48_struc(nest)%dssat48(t)%Ki_Avail = Ki_Avail
+      dssat48_struc(nest)%dssat48(t)%DLTSKiAvail = DLTSKiAvail
+      dssat48_struc(nest)%dssat48(t)%SKiAvlProf = SKiAvlProf
+      dssat48_struc(nest)%dssat48(t)%SKiTotProf = SKiTotProf
       RETURN
       END SUBROUTINE SoilKi
 

@@ -52,7 +52,7 @@ module dssat48_lsmMod
                         MulchType, OxLayerType,ResidueType, &
                         TillType, FertType, OrgMatAppType !From DSSAT
   USE FloodModule !From DSSAT
-  USE GHG_mod, only: CH4_type, N2O_type !From DSSAT
+  USE GHG_types_mod, only: CH4_type, N2O_type !From DSSAT
   implicit none
   
   PRIVATE
@@ -91,11 +91,7 @@ module dssat48_lsmMod
      !REAL               :: init_SNOWALB
      !-------------------------------------------------------------------------
      ! Constant Parameter
-     !-------------------------------------------------------------------------
-     !integer            :: nsnow
-     
-     ! for each grid cell in the driver using PERMSNOWFRAC    
-     !LOGICAL            :: PRODSNOWMAK_BOOL 
+     !------------------------------------------------------------------------- 
      type(dssat48dec), pointer :: dssat48(:)
      TYPE (ControlType),pointer ::  CONTROL(:) !Use from DSSAT ModuleDefs
      TYPE (SwitchType), pointer ::  ISWITCH(:) !Use from DSSAT ModuleDefs
@@ -108,9 +104,9 @@ module dssat48_lsmMod
      TYPE (OrgMatAppType), pointer :: OMADATA(:) !Use from DSSAT ModuleDefs
      TYPE (FloodWatType), pointer :: FLOODWAT(:) !Use from DSSAT FloodModule
      TYPE (FloodNType), pointer :: FLOODN(:) !Use from DSSAT FloodModule
-     TYPE (CH4_type), pointer :: CH4_data(:) !Use from DSSAT GHG_mod
-     TYPE (N2O_type), pointer :: N2O_data(:) !Use from DSSAT GHG_mod
-     TYPE (OxLayerType), pointer :: OXLAYR(:) !Use from DSSAT GHG_mod
+     TYPE (CH4_type), pointer :: CH4_data(:) !Use from DSSAT GHG_mod/dssat48_module
+     TYPE (N2O_type), pointer :: N2O_data(:) !Use from DSSAT GHG_mod/dssat48_module
+     TYPE (OxLayerType), pointer :: OXLAYR(:) !Use from DSSAT ModuleDefs
   end type dssat48_type_dec
   
   type(dssat48_type_dec), allocatable :: dssat48_struc(:)
@@ -130,7 +126,7 @@ contains
     use LIS_timeMgrMod
     use LIS_surfaceModelDataMod
     use LIS_lsmMod
-    USE ModuleDefs, only: ModelVerTxt !From DSSAT
+    USE ModuleDefs, only: ModelVerTxt, MonthTxt !From DSSAT
     USE CSMVersion
 ! !DESCRIPTION:
 !
@@ -151,6 +147,7 @@ contains
     integer  :: status   
     type(ESMF_ArraySpec) :: arrspec1
     type(ESMF_Field)     :: smField
+    integer              :: tmp_year, tmp_month, tmp_day, tmp_hour, tmp_minute
     ! DEFINITION FOR DSSAT INIT
     CHARACTER*1   :: RNMODE
     CHARACTER*8   :: MODELARG
@@ -162,7 +159,7 @@ contains
     INTEGER       :: ROTNUM, TRTNUM, YRSIM, YRDOY, MULTI, YRDIF
     INTEGER       :: ERRCODE, RUNINIT, YREND, EXPNO, TRTALL, NYRS, ENDYRS
     INTEGER       :: RUN, YRDOY_END, NREPS, REPNO, TRTREP, YRPLT, MDATE
-    INTEGER       :: ERRNUM
+    INTEGER       :: ERRNUM, JULIAN
     LOGICAL       :: FEXIST
     !CHARACTER(LEN=3)  ModelVerTxt
 
@@ -228,8 +225,13 @@ contains
             ! Call dssat48_setup to obtain mukey number before initialization
                CALL dssat48_setup !Pang 2024.02.09 (This is used to obtain soil mukey)
 
-            do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-            !do t=7201, 7202
+            !do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+            do t=1, 1
+                 tmp_year   = LIS_rc%yr
+                 tmp_month  = LIS_rc%mo
+                 tmp_day    = LIS_rc%da
+                 tmp_hour   = LIS_rc%hr
+                 tmp_minute = LIS_rc%mn
                  !These System Initial Values May Be Loaded From Config File
                  ! Start CSM 
                  !DONE =  .FALSE.  ! We don't use DONE to control run or not run
@@ -242,6 +244,7 @@ contains
                  !print*, FILEIO
 
                  ROTNUM = 1
+                 !TRTREP = 1 !Not used in CSM
                  TRTNUM = 1
                  FILEX = 'NASA2019.SQX'
                !----------------------------------------------------------------------------------------
@@ -290,7 +293,10 @@ contains
                  TRTALL = 999
                  NYRS = 1
                  NREPS = 1
-                 YRSIM = 2019110 !Day of Simulation
+                 !YRSIM = 2019110 !Day of Simulation
+                 YRSIM = tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year) +2 
+                 !PL: YRSIM +2 Due to 2 day shift between LIS and DSSAT
+                 PRINT*, 'YRSIM: ', YRSIM
                  YRDOY_END = (INT(YRSIM/1000)+NYRS-1)*1000 + YRSIM-INT(YRSIM/1000.0)*1000 - 1 
                  YRDOY = YRSIM !YRDOY is initialized as same as YRSIM
                  MULTI = 0
@@ -314,7 +320,7 @@ contains
                  dssat48_struc(n)%dssat48(t)%trtall= TRTALL
                  dssat48_struc(n)%dssat48(t)%nreps = NREPS
                  dssat48_struc(n)%dssat48(t)%yrdoy_end = YRDOY_END
-
+             PRINT*, 'INIT YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%yrdoy
              !-------------------- LAND INITIALIZATION ---------------------------------------------------
                 CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                   YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles

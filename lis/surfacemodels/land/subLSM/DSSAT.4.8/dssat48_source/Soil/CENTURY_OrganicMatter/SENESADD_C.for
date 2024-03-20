@@ -18,7 +18,7 @@
 !  Calls : PARTIT_C
 !***********************************************************************
 
-      SUBROUTINE SENESADD_C (DYNAMIC, 
+      SUBROUTINE SENESADD_C (DYNAMIC, nest, t, !Pang 2024.03.01
      &  AMINRL, CEDAM, CESTR, CROP, DLAYR, FRDAE, FRMETI, !Input
      &  FRMETS, N_ELEMS, NLAYR, RESDAX, SENESCE,          !Input
      &  ADDMETABEFLAG, DLTLIGC, DLTMETABC, DLTMETABE,     !Output
@@ -29,14 +29,14 @@
       USE ModuleDefs 
       USE ModuleData
       USE Interface_IpSoil
-
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       LOGICAL ADDMETABEFLAG, FRMETFLAG
 
       CHARACTER*2  CROP
-
+      INTEGER nest, t   !Pang 2024.03.01
       INTEGER DYNAMIC, L, LAYER, N_ELEMS, NLAYR 
       INTEGER, PARAMETER :: SRFC = 0  !, N = 1, P = 2
 
@@ -54,6 +54,11 @@
       TYPE (ControlType) CONTROL
       TYPE (MulchType)   MULCH
 
+!----- Obtain Vars from Memory -----------------------------------------
+!---- Oang 2024.03.01 -------------------------------------------------
+      SEN_AM = dssat48_struc(nest)%dssat48(t)%SEN_AM
+      SEN_EXTFAC = dssat48_struc(nest)%dssat48(t)%SEN_EXTFAC
+      SEN_WATFAC = dssat48_struc(nest)%dssat48(t)%SEN_WATFAC
 !***********************************************************************
 !***********************************************************************
 !     RUN INITIALIZATION - CALLED ONCE PER SIMULATION
@@ -236,6 +241,12 @@
       SENESCE % CumResWt   = SENESSUMC / 0.40
       IF (N_ELEMS > 0) SENESCE % CumResE(N) = SENESSUMN
       IF (N_ELEMS > 1) SENESCE % CumResE(P) = SENESSUMP
+
+!----- Sabe Vars to Memory -----------------------------------------
+!---- Pang 2024.03.01 -------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%SEN_AM = SEN_AM
+      dssat48_struc(nest)%dssat48(t)%SEN_EXTFAC = SEN_EXTFAC
+      dssat48_struc(nest)%dssat48(t)%SEN_WATFAC = SEN_WATFAC
 
       RETURN
       END Subroutine SENESADD_C

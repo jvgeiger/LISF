@@ -51,11 +51,13 @@
 !**    max3 - return the maximum of three input values
 !**
 !*****************************************************************************/
-      Subroutine nox_pulse (dynamic, rain, snow, nox_puls)
+      Subroutine nox_pulse (dynamic, rain, snow, nox_puls, nest, t) !Pang 2024.03.04
       use ModuleDefs
+      use dssat48_lsmMod
       save
 
       integer, intent(in) :: dynamic
+      integer nest, t
       real, intent(in) :: rain, snow
       real, intent(out) :: nox_puls
 
@@ -64,7 +66,7 @@
           PLDAYS = 2,         &
           PMDAYS = 6,         &
           PHDAYS = 13 
-
+      
       real cumppt(0:PPTDAYS-1)    !0:14
       real pl(0:PLDAYS-1)         !0:1         
       real pm(0:PMDAYS-1)         !0:5
@@ -76,6 +78,19 @@
 
       real sumppt
       integer ii, indx
+!------ Obtain Vars from Memory -----------------------------------
+!------ Pang 2024.03.04 -------------------------------------------
+       cumppt = dssat48_struc(nest)%dssat48(t)%cumppt 
+       pl = dssat48_struc(nest)%dssat48(t)%pl_nox
+       pm = dssat48_struc(nest)%dssat48(t)%pm
+       ph = dssat48_struc(nest)%dssat48(t)%ph
+       mtplr = dssat48_struc(nest)%dssat48(t)%mtplr
+       npl = dssat48_struc(nest)%dssat48(t)%npl
+       npm = dssat48_struc(nest)%dssat48(t)%npm
+       nph = dssat48_struc(nest)%dssat48(t)%nph
+       nppt = dssat48_struc(nest)%dssat48(t)%nppt
+       mptr = dssat48_struc(nest)%dssat48(t)%mptr
+       pflag = dssat48_struc(nest)%dssat48(t)%pflag
 
 ! =================================================================
       select case (dynamic)
@@ -172,7 +187,19 @@
 ! =================================================================
       end select
 ! =================================================================
-
+!------ Save Vars to Memory -----------------------------------
+!------ Pang 2024.03.04 -------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%cumppt = cumppt
+       dssat48_struc(nest)%dssat48(t)%pl_nox = pl
+       dssat48_struc(nest)%dssat48(t)%pm = pm
+       dssat48_struc(nest)%dssat48(t)%ph = ph
+       dssat48_struc(nest)%dssat48(t)%mtplr = mtplr
+       dssat48_struc(nest)%dssat48(t)%npl = npl
+       dssat48_struc(nest)%dssat48(t)%npm = npm
+       dssat48_struc(nest)%dssat48(t)%nph = nph
+       dssat48_struc(nest)%dssat48(t)%nppt = nppt
+       dssat48_struc(nest)%dssat48(t)%mptr = mptr
+       dssat48_struc(nest)%dssat48(t)%pflag = pflag
       return
       end subroutine nox_pulse
 !=======================================================================

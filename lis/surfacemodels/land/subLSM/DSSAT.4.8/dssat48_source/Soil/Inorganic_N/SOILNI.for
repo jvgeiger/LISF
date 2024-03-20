@@ -200,8 +200,8 @@ C=======================================================================
       RAIN = WEATHER % RAIN
 !----------------------------------------------------------------------
 !     Pang: 2023.10.13 obtain variables from LIS memory for each pixel.
-      TNOM =  dssat48_struc(nest)%dssat48(t)%TNOM
-      CMINERN =  dssat48_struc(nest)%dssat48(t)%CMINERN
+      TNOM = dssat48_struc(nest)%dssat48(t)%TNOM
+      CMINERN = dssat48_struc(nest)%dssat48(t)%CMINERN
       CIMMOBN = dssat48_struc(nest)%dssat48(t)%CIMMOBN
       WTNUP = dssat48_struc(nest)%dssat48(t)%WTNUP
       CumSumFert = dssat48_struc(nest)%dssat48(t)%CumSumFert
@@ -223,7 +223,22 @@ C=======================================================================
       TOTAML = dssat48_struc(nest)%dssat48(t)%TOTAML
       CNOX = dssat48_struc(nest)%dssat48(t)%CNOX
       TNOXD = dssat48_struc(nest)%dssat48(t)%TNOXD
-
+!----- Added Pang 2024.03.01 -------------------------------------------
+      CNETMINRN = dssat48_struc(nest)%dssat48(t)%CNETMINRN
+      CNUPTAKE = dssat48_struc(nest)%dssat48(t)%CNUPTAKE
+      SWEF = dssat48_struc(nest)%dssat48(t)%SWEF
+      BD1 = dssat48_struc(nest)%dssat48(t)%BD1
+      TOTFLOODN = dssat48_struc(nest)%dssat48(t)%TOTFLOODN
+      ALI = dssat48_struc(nest)%dssat48(t)%ALI
+      nox_puls = dssat48_struc(nest)%dssat48(t)%nox_puls
+      TNH4 = dssat48_struc(nest)%dssat48(t)%TNH4
+      TNO3 = dssat48_struc(nest)%dssat48(t)%TNO3
+      TUREA = dssat48_struc(nest)%dssat48(t)%TUREA
+      TN2OnitrifD = dssat48_struc(nest)%dssat48(t)%TN2OnitrifD
+      TNH4NO3 = dssat48_struc(nest)%dssat48(t)%TNH4NO3
+      dD0 = dssat48_struc(nest)%dssat48(t)%dD0
+      DENITRIF = dssat48_struc(nest)%dssat48(t)%DENITRIF
+      IUOF = dssat48_struc(nest)%dssat48(t)%IUOF
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -296,14 +311,14 @@ C=======================================================================
         SWEF = 0.9-0.00038*(DLAYR(1)-30.)**2
 
 !       Initialize flooded N if flooding is a possibility.
-        CALL FLOOD_CHEM(CONTROL, ISWITCH, 
+        CALL FLOOD_CHEM(CONTROL, ISWITCH,nest, t,  !Pang 2024.03.01 
      &    FLOODWat, LFD10, SOILPROP, SNO3, SNH4, UREA,    !Input
      &    SRAD, SW, TMAX, TMIN, XHLAI,                    !Input
      &    DLTSNH4, DLTSNO3, DLTUREA, FLOODN, OXLAYR,      !I/O
      &    ALGFIX, BD1, CUMFNRO, TOTAML, TOTFLOODN)        !Output
 
 !       Initialize TOTAML
-        CALL OXLAYER(CONTROL,
+        CALL OXLAYER(CONTROL,nest,t, !Pang 2024.03.04
      &    BD1, ES, FERTDATA, FLOODWAT, LFD10,             !Input
      &    NSWITCH, SNH4, SNO3, SOILPROP, SRAD, ST,        !Input
      &    SW, TMAX, TMIN, UREA, XHLAI,                    !Input
@@ -314,27 +329,28 @@ C=======================================================================
 
         SELECT CASE(MEGHG)
         CASE("1")
-          CALL Denit_DayCent (CONTROL, ISWNIT, 
+          CALL Denit_DayCent (CONTROL, ISWNIT, nest, t, !Pang 2024.03.04 
      &    dD0, newCO2, NO3, SNO3, SOILPROP, SW,       !Input
      &    DLTSNO3,                                    !I/O
      &    CNOX, TNOXD, N2O_data)                      !Output
 
         CASE DEFAULT
-          CALL Denit_Ceres (CONTROL, ISWNIT, 
+          CALL Denit_Ceres (CONTROL, ISWNIT, nest, t, !Pang 2024.03.04 
      &    DUL, FLOOD, KG2PPM, LITC, NLAYR, NO3, SAT,  !Input
      &    SSOMC, SNO3, ST, SW,                        !Input
      &    DLTSNO3,                                    !I/O
      &    CNOX, TNOXD, N2O_data)                      !Output
         END SELECT
 
-      CALL N2Oemit(CONTROL, ISWITCH, dD0, SOILPROP, N2O_DATA) 
+      CALL N2Oemit(CONTROL, ISWITCH, dD0, SOILPROP, N2O_DATA,
+     &    nest, t)  !Pang 2024.03.04
 
       CALL OpN2O(CONTROL, ISWITCH, SOILPROP, N2O_DATA) 
 
       CALL OPGHG(CONTROL, ISWITCH, N2O_data, CH4_data)
 
       IF (CONTROL%RUN .EQ. 1 .OR. INDEX('QF',CONTROL%RNMODE) .LE. 0)THEN
-        call nox_pulse (dynamic, rain, snow, nox_puls)
+        call nox_pulse (dynamic, rain, snow, nox_puls, nest, t) !Pang 2024.03.04
       ENDIF
 
 !***********************************************************************
@@ -413,7 +429,7 @@ C=======================================================================
 !     Calculate rates of change of flood N components and interaction
 !         with top soil layer.
       IF (NBUND > 0) THEN
-        CALL FLOOD_CHEM(CONTROL, ISWITCH, 
+        CALL FLOOD_CHEM(CONTROL, ISWITCH, nest, t, !Pang 2024.03.01 
      &    FLOODWat, LFD10, SOILPROP, SNO3, SNH4, UREA,    !Input
      &    SRAD, SW, TMAX, TMIN, XHLAI,                    !Input
      &    DLTSNH4, DLTSNO3, DLTUREA, FLOODN, OXLAYR,      !I/O
@@ -422,7 +438,7 @@ C=======================================================================
       
 !     This needs to be called from NTRANS for upland cases, too.
       IF (FLOOD .LE. 0.0) THEN
-        CALL OXLAYER(CONTROL,
+        CALL OXLAYER(CONTROL, nest, t, !Pang 2024.03.04
      &    BD1, ES, FERTDATA, FLOODWAT, LFD10,             !Input
      &    NSWITCH, SNH4, SNO3, SOILPROP, SRAD, ST,        !Input
      &    SW, TMAX, TMIN, UREA, XHLAI,                    !Input
@@ -448,7 +464,7 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
 !     NOx pulse multiplier from DayCent
-      call nox_pulse (dynamic, rain, snow, nox_puls)
+      call nox_pulse (dynamic, rain, snow, nox_puls, nest, t) !Pang 2024.03.04
       krainNO = nox_puls
 
 !     Diffusivity rate calculation from DayCent
@@ -750,13 +766,13 @@ C=======================================================================
 
         SELECT CASE(MEGHG)
         CASE("1","2")
-          CALL Denit_DayCent (CONTROL, ISWNIT, 
+          CALL Denit_DayCent (CONTROL, ISWNIT, nest, t, !Pang 2024.03.04 
      &    dD0, newCO2, NO3, SNO3, SOILPROP, SW,       !Input
      &    DLTSNO3,                                    !I/O
      &    CNOX, TNOXD, N2O_data)                      !Output
 
         CASE DEFAULT
-          CALL Denit_Ceres (CONTROL, ISWNIT, 
+          CALL Denit_Ceres (CONTROL, ISWNIT, nest, t, !Pang 2024.03.04 
      &    DUL, FLOOD, KG2PPM, LITC, NLAYR, NO3, SAT,  !Input
      &    SSOMC, SNO3, ST, SW,                        !Input
      &    DLTSNO3,                                    !I/O
@@ -850,7 +866,8 @@ C=======================================================================
 !     ------------------------------------------------------------------
 !     N emissions to atmosphere
 !     ------------------------------------------------------------------
-      CALL N2Oemit(CONTROL, ISWITCH, dD0, SOILPROP, N2O_DATA) 
+      CALL N2Oemit(CONTROL, ISWITCH, dD0, SOILPROP, N2O_DATA,
+     &     nest, t) !Pang 2024.03.04 
 
 !     ------------------------------------------------------------------
 !     Downward and upward N movement with the water flow.
@@ -897,7 +914,7 @@ C=======================================================================
       IF (DYNAMIC .EQ. INTEGR) THEN
 !       Update flood N components.
         IF (NBUND > 0) THEN
-          CALL FLOOD_CHEM(CONTROL, ISWITCH, 
+          CALL FLOOD_CHEM(CONTROL, ISWITCH,nest, t, !Pang 2024.03.01 
      &    FLOODWat, LFD10, SOILPROP, SNO3, SNH4, UREA,    !Input
      &    SRAD, SW, TMAX, TMIN, XHLAI,                    !Input
      &    DLTSNH4, DLTSNO3, DLTUREA, FLOODN, OXLAYR,      !I/O
@@ -905,7 +922,7 @@ C=======================================================================
         ENDIF
       
         !Update oxidation layer variables
-        CALL OXLAYER(CONTROL,
+        CALL OXLAYER(CONTROL, nest, t, !Pang 2024.03.04
      &    BD1, ES, FERTDATA, FLOODWAT, LFD10,              !Input
      &    NSWITCH, SNH4, SNO3, SOILPROP, SRAD, ST,        !Input
      &    SW, TMAX, TMIN, UREA, XHLAI,                    !Input
@@ -1016,7 +1033,7 @@ C     Write daily output
      &    CLeach, CNTILEDR, TNH4, TNH4NO3, TNO3, TUREA, CNOX, TOTAML)
 
       IF (NBUND > 0) THEN
-        CALL FLOOD_CHEM(CONTROL, ISWITCH, 
+        CALL FLOOD_CHEM(CONTROL, ISWITCH,nest, t, !Pang 2024.03.01 
      &    FLOODWat, LFD10, SOILPROP, SNO3, SNH4, UREA,    !Input
      &    SRAD, SW, TMAX, TMIN, XHLAI,                    !Input
      &    DLTSNH4, DLTSNO3, DLTUREA, FLOODN, OXLAYR,      !I/O
@@ -1060,6 +1077,24 @@ C-----------------------------------------------------------------------
       dssat48_struc(nest)%dssat48(t)%TOTAML = TOTAML
       dssat48_struc(nest)%dssat48(t)%CNOX = CNOX 
       dssat48_struc(nest)%dssat48(t)%TNOXD = TNOXD
+
+!----- Added Pang 2024.03.01 -------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CNETMINRN = CNETMINRN
+      dssat48_struc(nest)%dssat48(t)%CNUPTAKE = CNUPTAKE
+      dssat48_struc(nest)%dssat48(t)%SWEF = SWEF
+      dssat48_struc(nest)%dssat48(t)%BD1 = BD1
+      dssat48_struc(nest)%dssat48(t)%TOTFLOODN = TOTFLOODN
+      dssat48_struc(nest)%dssat48(t)%ALI = ALI
+      dssat48_struc(nest)%dssat48(t)%nox_puls = nox_puls
+      dssat48_struc(nest)%dssat48(t)%TNH4 = TNH4
+      dssat48_struc(nest)%dssat48(t)%TNO3 = TNO3
+      dssat48_struc(nest)%dssat48(t)%TUREA = TUREA
+      dssat48_struc(nest)%dssat48(t)%TN2OnitrifD = TN2OnitrifD
+      dssat48_struc(nest)%dssat48(t)%TNH4NO3 = TNH4NO3
+      dssat48_struc(nest)%dssat48(t)%dD0 = dD0
+      dssat48_struc(nest)%dssat48(t)%DENITRIF = DENITRIF
+      dssat48_struc(nest)%dssat48(t)%IUOF = IUOF
+
       RETURN
       END SUBROUTINE SoilNi
 

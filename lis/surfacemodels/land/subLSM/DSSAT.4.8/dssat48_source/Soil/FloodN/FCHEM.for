@@ -14,7 +14,7 @@ C-----------------------------------------------------------------------
 ! Calls:     OPFLOODN, EQUIL2
 C=======================================================================
 
-      SUBROUTINE FCHEM (CONTROL, ISWITCH,
+      SUBROUTINE FCHEM (CONTROL, ISWITCH, nest, t, !Pang 2024.03.04
      &    BD1, SURCEC, DLAYR, EF, FLDH4, FLDN3, FLDU,     !Input
      &    FLOOD, LFD10, NSWITCH, OC, OXMIN3, OXMIN4,      !Input
      &    OXU, OXH4, OXN3, OXLT, PH, SNH4, SNO3, SRAD,    !Input
@@ -26,9 +26,10 @@ C=======================================================================
 
       USE ModuleDefs
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
       INTEGER NSWITCH, YRDRY, DYNAMIC
       REAL    BD1, FLDU, FLDH4,FLDH4C,FLDN3,FLDN3C
       REAL    FLDNI,FLDNC,FPI,FLDH3C
@@ -66,6 +67,13 @@ C=======================================================================
 
       DYNAMIC = CONTROL % DYNAMIC
 
+!------ Obtain Vars from Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+       FPI = dssat48_struc(nest)%dssat48(t)%FPI
+       YALGA = dssat48_struc(nest)%dssat48(t)%YALGA
+       ALGACT = dssat48_struc(nest)%dssat48(t)%ALGACT_FCHEM
+       FTI = dssat48_struc(nest)%dssat48(t)%FTI
+       FPH = dssat48_struc(nest)%dssat48(t)%FPH
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -393,6 +401,14 @@ C=======================================================================
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!------ Save Vars to Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%FPI = FPI
+       dssat48_struc(nest)%dssat48(t)%YALGA = YALGA
+       dssat48_struc(nest)%dssat48(t)%ALGACT_FCHEM = ALGACT
+       dssat48_struc(nest)%dssat48(t)%FTI = FTI
+       dssat48_struc(nest)%dssat48(t)%FPH = FPH
+
       RETURN
       END SUBROUTINE FCHEM
 

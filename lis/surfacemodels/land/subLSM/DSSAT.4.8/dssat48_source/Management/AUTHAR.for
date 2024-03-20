@@ -15,7 +15,7 @@ C  08/20/2002 GH  Modified for Y2K
 !  12/16/2004 CHP Added defaults for HPC and HBPC
 C=======================================================================
 
-      SUBROUTINE AUTHAR(CONTROL, ISWWAT,
+      SUBROUTINE AUTHAR(CONTROL, ISWWAT,nest, t,    !Pang 2024.03.08
      &    DLAYR, DUL, IDETO, IHARI, LL, STGDOY,           !Input
      &    SW, MDATE, YRPLT,                               !Input
      &    YREND, HARVFRAC, HDATE, NHAR)                   !Output
@@ -24,13 +24,14 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*1 IHARI, IDETO, ISWWAT, RNMODE
       CHARACTER*6, PARAMETER :: ERRKEY = 'AUTHAR'
       CHARACTER*78 MESSAGE(10)    !Up to 10 lines of text to be output
-
+      INTEGER nest, t
       INTEGER YREND, HDLAY, HEARLY, HLATE, I
       INTEGER NHAR, YR, IDATE, DEARLY, YREARLY
       INTEGER MULTI, TIMDIF, YRPLT, YRDIF, YRSIM
@@ -58,6 +59,14 @@ C=======================================================================
       YRDIF   = CONTROL % YRDIF
       RNMODE  = CONTROL % RNMODE
       RUN     = CONTROL % RUN
+!------ Obtain Vars from Memory ---------------------------------------
+!------ Pang 2024.03.08 -----------------------------------------------
+      HDLAY = dssat48_struc(nest)%dssat48(t)%HDLAY
+      HLATE = dssat48_struc(nest)%dssat48(t)%HLATE
+      HSTG = dssat48_struc(nest)%dssat48(t)%HSTG
+      SWPLTL = dssat48_struc(nest)%dssat48(t)%SWPLTL
+      SWPLTH = dssat48_struc(nest)%dssat48(t)%SWPLTH
+      SWPLTD = dssat48_struc(nest)%dssat48(t)%SWPLTD
 
 C***********************************************************************
 C***********************************************************************
@@ -255,7 +264,14 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
-
+!------ Save Vars to Memory ---------------------------------------
+!------ Pang 2024.03.08 -----------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%HDLAY = HDLAY
+      dssat48_struc(nest)%dssat48(t)%HLATE = HLATE
+      dssat48_struc(nest)%dssat48(t)%HSTG = HSTG
+      dssat48_struc(nest)%dssat48(t)%SWPLTL = SWPLTL
+      dssat48_struc(nest)%dssat48(t)%SWPLTH = SWPLTH
+      dssat48_struc(nest)%dssat48(t)%SWPLTD = SWPLTD
       RETURN
       END SUBROUTINE AUTHAR
 

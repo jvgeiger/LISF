@@ -33,13 +33,14 @@ C  AVGSW : Average soil moisture percent to depth SWPLTD
 C  YRPLT : Computed planting date
 C=====================================================================
 
-      SUBROUTINE AUTPLT (CONTROL, ISWWAT,
+      SUBROUTINE AUTPLT (CONTROL, ISWWAT, nest, t,  !Pang 2024.03.08
      &    DLAYR, DUL, FLOOD, IDETO, IPLTI, LL, ST, SW,    !Input
      &    MDATE, YRPLT)                                   !Output
 
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -47,7 +48,7 @@ C=====================================================================
       CHARACTER*2  CROP
       CHARACTER*6, PARAMETER :: ERRKEY = 'AUTPLT'
       CHARACTER*78 MESSAGE(10)    !Up to 10 lines of text to be output
-
+      INTEGER nest, t
       INTEGER DOY, I, IPLT, MULTI, NOUTDO, PWDINF, PWDINL
       INTEGER YEAR, YR, YRDOY, MDATE, YRPLT, IDATE, YRSIM, YRDIF
       INTEGER DYNAMIC,YRO,ISIM, PWDPLT,PWDYR, MNUM
@@ -74,6 +75,17 @@ C=====================================================================
       YRDOY   = CONTROL % YRDOY
       YRSIM   = CONTROL % YRSIM
 
+!----- Obtain Vars from Memory ----------------------------------------
+!----- Pang 2024.03.08 ------------------------------------------------
+      PLME = dssat48_struc(nest)%dssat48(t)%PLME
+      CROP = dssat48_struc(nest)%dssat48(t)%CROP_MGM
+      PTX = dssat48_struc(nest)%dssat48(t)%PTX
+      PTTN = dssat48_struc(nest)%dssat48(t)%PTTN
+      SWPLTL = dssat48_struc(nest)%dssat48(t)%SWPLTL
+      SWPLTH = dssat48_struc(nest)%dssat48(t)%SWPLTH
+      SWPLTD = dssat48_struc(nest)%dssat48(t)%SWPLTD
+      PWDINF = dssat48_struc(nest)%dssat48(t)%PWDINF
+      PWDINL = dssat48_struc(nest)%dssat48(t)%PWDINL
 C***********************************************************************
 C***********************************************************************
 C    Input and Initialization 
@@ -184,7 +196,19 @@ C-----------------------------------------------------------------------
             !YRPLT = PWDINF
            ENDIF
           ENDIF
-      
+
+!----- Save Vars from Memory ----------------------------------------
+!----- Pang 2024.03.08 ----------------------------------------------
+!----- Save Once at INIT --------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%PLME = PLME
+      dssat48_struc(nest)%dssat48(t)%CROP_MGM = CROP
+      dssat48_struc(nest)%dssat48(t)%PTX = PTX
+      dssat48_struc(nest)%dssat48(t)%PTTN = PTTN
+      dssat48_struc(nest)%dssat48(t)%SWPLTL = SWPLTL
+      dssat48_struc(nest)%dssat48(t)%SWPLTH = SWPLTH
+      dssat48_struc(nest)%dssat48(t)%SWPLTD = SWPLTD
+      dssat48_struc(nest)%dssat48(t)%PWDINF = PWDINF
+      dssat48_struc(nest)%dssat48(t)%PWDINL = PWDINL      
 C***********************************************************************
 C***********************************************************************
 C     Rate Calculations 
