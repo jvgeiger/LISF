@@ -226,8 +226,7 @@ contains
             ! Call dssat48_setup to obtain mukey number before initialization
                CALL dssat48_setup !Pang 2024.02.09 (This is used to obtain soil mukey)
 
-            !do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-            do t=1, 1
+            do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
                  tmp_year   = LIS_rc%yr
                  tmp_month  = LIS_rc%mo
                  tmp_day    = LIS_rc%da
