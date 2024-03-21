@@ -111,7 +111,7 @@ C       Calculate sun angles and hourly weather variables.
         ENDIF
 
       ENDDO
-      
+
       TAVG = TAVG / REAL(TS)
       TDAY = TDAY / REAL(NDAY)
 

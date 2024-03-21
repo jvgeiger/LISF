@@ -8,8 +8,11 @@ C  06/15/2014 CHP Written
       MODULE GHG_mod
 !     Contains data definitions for N2O generation routines in SOILNI
       USE ModuleDefs
-
+      USE GHG_types_mod
 !     Data construct for control variables
+
+#if 0
+! Moved into GHG_types_mod.for to be shared with dssat48_lsmMod.F90 (JG)
       TYPE N2O_type
 !            Daily        Cumul        Layer         
         REAL TNOXD,       CNOX,        DENITRIF(NL)  ![N] Denitrified
@@ -38,7 +41,7 @@ C  06/15/2014 CHP Written
         REAL CumCH4Consumpt, CumCH4Emission, CumCH4Leaching
         REAL CO2emission, CumCO2Emission                      
       END TYPE CH4_type
-
+#endif
       CONTAINS
 
 C=======================================================================
@@ -50,7 +53,9 @@ C  09/18/2015 CHP Written, based on PG code.
 !  05/30/2016 CHP remove diffusion model
 !=======================================================================
 
-      SUBROUTINE N2Oemit(CONTROL, ISWITCH, dD0, SOILPROP, N2O_DATA) 
+      SUBROUTINE N2Oemit(CONTROL, ISWITCH, dD0, SOILPROP, N2O_DATA,
+     &  nest, t) !Pang 2024.03.04
+      USE dssat48_lsmMod
 !-------------------------------------------------------------------
       IMPLICIT NONE
       SAVE
@@ -66,7 +71,7 @@ C  09/18/2015 CHP Written, based on PG code.
       CHARACTER*10, PARAMETER :: OUTGHG = 'N2O.OUT'
 
       INTEGER DAS, DYNAMIC, L, NLAYR, YRDOY
-
+      INTEGER nest, t
       REAL N2flux(NL)                !N2
       real N2Oflux(nl), NOflux(nl)  
       REAL N2Odenit(NL)              !N2O from denitrification
@@ -97,7 +102,23 @@ C  09/18/2015 CHP Written, based on PG code.
       N2flux   = N2O_data % N2flux   
       NOflux   = N2O_data % NOflux   
       WFPS     = N2O_data % WFPS  
+!------ Obtain Vars from Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+      IDETN  = ISWITCH % IDETN
+      ISWWAT = ISWITCH % ISWWAT
+      ISWNIT = ISWITCH % ISWNIT
+      NLAYR   = SOILPROP % NLAYR
 
+      n2o_emitted = N2O_data % n2o_emitted
+      n2_emitted = N2O_data % n2_emitted
+      no_emitted = N2O_data % no_emitted
+      CN2O_emitted = N2O_data % CN2O_emitted
+      CN2_emitted = N2O_data % CN2_emitted
+      CNO_emitted = N2O_data % CNO_emitted
+
+      n2o_soil = dssat48_struc(nest)%dssat48(t)%n2o_soil
+      no_soil = dssat48_struc(nest)%dssat48(t)%no_soil
+      n2_soil = dssat48_struc(nest)%dssat48(t)%n2_soil
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -201,7 +222,11 @@ C-----------------------------------------------------------------------
       N2O_data % N2flux       = N2flux
       N2O_data % NOflux       = NOflux
       N2O_data % TNGSoil      = TNGSoil
-
+!------ Save Vars to Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%n2o_soil = n2o_soil
+      dssat48_struc(nest)%dssat48(t)%no_soil = no_soil
+      dssat48_struc(nest)%dssat48(t)%n2_soil = n2_soil
       RETURN
       END SUBROUTINE N2Oemit
 C-------------------------------------------------------------------

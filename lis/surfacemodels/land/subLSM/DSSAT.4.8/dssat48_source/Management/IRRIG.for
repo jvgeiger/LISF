@@ -31,7 +31,7 @@ C-----------------------------------------------------------------------
 C  Called by: WATBAL
 C  Calls  : None
 C=======================================================================
-      SUBROUTINE IRRIG(CONTROL, ISWITCH,
+      SUBROUTINE IRRIG(CONTROL, ISWITCH, nest, t,  !Pang 2024.03.11
      &    RAIN, SOILPROP, SW, MDATE, YRPLT , STGDOY,       !Input
      &    FLOODWAT, IIRRI, IRRAMT, NAP, TIL_IRR, TOTIR)   !Output
 
@@ -39,6 +39,7 @@ C=======================================================================
       USE ModuleDefs 
       USE ModuleData
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 !-----------------------------------------------------------------------
@@ -52,7 +53,7 @@ C=======================================================================
       CHARACTER*30 FILEIO
       CHARACTER*90 CHAR
       CHARACTER*78 MSG(10)
-
+      INTEGER nest, t
       INTEGER AIRRCOD, DAP, DYNAMIC, DAS, ERRNUM, FOUND, I, IDATE
       INTEGER LUNIO, LINC, LNUM
       INTEGER MULTI, NAP, NAPW, JIRR, NLAYR, NTBL, NMSG
@@ -129,7 +130,52 @@ C=======================================================================
 
       DAS = CONTROL % DAS
 
-
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.06  ---------------------------------------------------
+      YRSIM = CONTROL % YRSIM
+      NBUND = FLOODWAT % NBUND
+    
+      SeasonalWL = dssat48_struc(nest)%dssat48(t)%SeasonalWL
+      NAPW = dssat48_struc(nest)%dssat48(t)%NAPW
+      NTBL = dssat48_struc(nest)%dssat48(t)%NTBL
+      NCOND = dssat48_struc(nest)%dssat48(t)%NCOND
+      NPERC = dssat48_struc(nest)%dssat48(t)%NPERC
+      NPUD = dssat48_struc(nest)%dssat48(t)%NPUD
+      DaysSinceIrrig = dssat48_struc(nest)%dssat48(t)%DaysSinceIrrig
+      AIRRCOD = dssat48_struc(nest)%dssat48(t)%AIRRCOD
+      IRON = dssat48_struc(nest)%dssat48(t)%IRON
+      IFREQ = dssat48_struc(nest)%dssat48(t)%IFREQ
+      NGSIrrigs = dssat48_struc(nest)%dssat48(t)%NGSIrrigs
+      IRINC = dssat48_struc(nest)%dssat48(t)%IRINC
+      NDAYS_DRY = dssat48_struc(nest)%dssat48(t)%NDAYS_DRY
+      TOTEFFIRR = dssat48_struc(nest)%dssat48(t)%TOTEFFIRR
+      GSWatUsed = dssat48_struc(nest)%dssat48(t)%GSWatUsed
+      ACCUM_ET = dssat48_struc(nest)%dssat48(t)%ACCUM_ET
+      DSOIL = dssat48_struc(nest)%dssat48(t)%DSOIL
+      THETAC = dssat48_struc(nest)%dssat48(t)%THETAC
+      THETAU = dssat48_struc(nest)%dssat48(t)%THETAU 
+      AIRAMT = dssat48_struc(nest)%dssat48(t)% AIRAMT
+      EFFIRR = dssat48_struc(nest)%dssat48(t)%EFFIRR
+      IMDEP = dssat48_struc(nest)%dssat48(t)%IMDEP
+      ITHRL = dssat48_struc(nest)%dssat48(t)%ITHRL
+      ITHRU = dssat48_struc(nest)%dssat48(t)%ITHRU
+      IRAMT = dssat48_struc(nest)%dssat48(t)%IRAMT
+      IREFF = dssat48_struc(nest)%dssat48(t)%IREFF
+      AVWATI = dssat48_struc(nest)%dssat48(t)%AVWATI
+      AVWAT = dssat48_struc(nest)%dssat48(t)%AVWAT
+      IRRCOD = dssat48_struc(nest)%dssat48(t)%IRRCOD
+      CONDAT = dssat48_struc(nest)%dssat48(t)%CONDAT
+      IBDAT = dssat48_struc(nest)%dssat48(t)%IBDAT
+      IIRRCV = dssat48_struc(nest)%dssat48(t)%IIRRCV
+      IPDAT = dssat48_struc(nest)%dssat48(t)%IPDAT
+      JULAPL = dssat48_struc(nest)%dssat48(t)%JULAPL
+      JULWTB = dssat48_struc(nest)%dssat48(t)%JULWTB
+      PUDDAT = dssat48_struc(nest)%dssat48(t)%PUDDAT
+      AMIR = dssat48_struc(nest)%dssat48(t)%AMIR
+      BUND = dssat48_struc(nest)%dssat48(t)%BUND
+      COND = dssat48_struc(nest)%dssat48(t)%COND
+      IPERC = dssat48_struc(nest)%dssat48(t)%IPERC
+      PWAT = dssat48_struc(nest)%dssat48(t)%PWAT
 C***********************************************************************
 C***********************************************************************
 C    Input and Initialization 
@@ -597,7 +643,7 @@ C-----------------------------------------------------------------------
       NAP = 0
 
 !      IF (NBUND .GT. 0) THEN
-        CALL FLOOD_IRRIG (SEASINIT, 
+        CALL FLOOD_IRRIG (SEASINIT, nest, t,   !Pang 2024.03.11 
      &    BUND, COND, CONDAT, IBDAT, IIRRCV, IIRRI,       !Input
      &    IPDAT, IPERC, JULWTB, NBUND, NCOND, NPERC,      !Input
      &    NPUD, NTBL, PUDDAT, PUDDLED, PWAT, RAIN,        !Input
@@ -639,7 +685,7 @@ C-----------------------------------------------------------------------
 !     Check to see if flood irrigation is done today
 !-----------------------------------------------------------------------
       IF (NBUND .GT. 0) THEN
-        CALL FLOOD_IRRIG (RATE, 
+        CALL FLOOD_IRRIG (RATE, nest, t, !Pang 2024.03.11 
      &    BUND, COND, CONDAT, IBDAT, IIRRCV, IIRRI,       !Input
      &    IPDAT, IPERC, JULWTB, NBUND, NCOND, NPERC,      !Input
      &    NPUD, NTBL, PUDDAT, PUDDLED, PWAT, RAIN,        !Input
@@ -944,7 +990,51 @@ C-----------------------------------------------------------------------
 !     END OF DYNAMIC IF CONSTRUCT
 !***********************************************************************
       FLOODWAT % PUDDLED = PUDDLED
-      
+
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.11  ---------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%SeasonalWL = SeasonalWL
+      dssat48_struc(nest)%dssat48(t)%NAPW = NAPW
+      dssat48_struc(nest)%dssat48(t)%NTBL = NTBL
+      dssat48_struc(nest)%dssat48(t)%NCOND = NCOND
+      dssat48_struc(nest)%dssat48(t)%NPERC = NPERC
+      dssat48_struc(nest)%dssat48(t)%NPUD = NPUD
+      dssat48_struc(nest)%dssat48(t)%DaysSinceIrrig = DaysSinceIrrig
+      dssat48_struc(nest)%dssat48(t)%AIRRCOD = AIRRCOD
+      dssat48_struc(nest)%dssat48(t)%IRON = IRON
+      dssat48_struc(nest)%dssat48(t)%IFREQ = IFREQ
+      dssat48_struc(nest)%dssat48(t)%NGSIrrigs = NGSIrrigs
+      dssat48_struc(nest)%dssat48(t)%IRINC = IRINC
+      dssat48_struc(nest)%dssat48(t)%NDAYS_DRY = NDAYS_DRY
+      dssat48_struc(nest)%dssat48(t)%TOTEFFIRR = TOTEFFIRR
+      dssat48_struc(nest)%dssat48(t)%GSWatUsed = GSWatUsed
+      dssat48_struc(nest)%dssat48(t)%ACCUM_ET = ACCUM_ET
+      dssat48_struc(nest)%dssat48(t)%DSOIL = DSOIL
+      dssat48_struc(nest)%dssat48(t)%THETAC = THETAC
+      dssat48_struc(nest)%dssat48(t)%THETAU = THETAU
+      dssat48_struc(nest)%dssat48(t)%AIRAMT = AIRAMT
+      dssat48_struc(nest)%dssat48(t)%EFFIRR = EFFIRR
+      dssat48_struc(nest)%dssat48(t)%IMDEP = IMDEP
+      dssat48_struc(nest)%dssat48(t)%ITHRL = ITHRL
+      dssat48_struc(nest)%dssat48(t)%ITHRU = ITHRU
+      dssat48_struc(nest)%dssat48(t)%IRAMT = IRAMT
+      dssat48_struc(nest)%dssat48(t)%IREFF = IREFF
+      dssat48_struc(nest)%dssat48(t)%AVWATI = AVWATI
+      dssat48_struc(nest)%dssat48(t)%AVWAT = AVWAT
+      dssat48_struc(nest)%dssat48(t)%IRRCOD = IRRCOD
+      dssat48_struc(nest)%dssat48(t)%CONDAT = CONDAT
+      dssat48_struc(nest)%dssat48(t)%IBDAT = IBDAT
+      dssat48_struc(nest)%dssat48(t)%IIRRCV = IIRRCV
+      dssat48_struc(nest)%dssat48(t)%IPDAT = IPDAT
+      dssat48_struc(nest)%dssat48(t)%JULAPL = JULAPL
+      dssat48_struc(nest)%dssat48(t)%JULWTB = JULWTB
+      dssat48_struc(nest)%dssat48(t)%PUDDAT = PUDDAT
+      dssat48_struc(nest)%dssat48(t)%AMIR = AMIR
+      dssat48_struc(nest)%dssat48(t)%BUND = BUND
+      dssat48_struc(nest)%dssat48(t)%COND = COND
+      dssat48_struc(nest)%dssat48(t)%IPERC = IPERC
+      dssat48_struc(nest)%dssat48(t)%PWAT = PWAT
+ 
       RETURN
       END SUBROUTINE IRRIG
 C=======================================================================

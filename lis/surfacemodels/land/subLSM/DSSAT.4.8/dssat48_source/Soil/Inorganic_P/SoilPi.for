@@ -159,7 +159,7 @@ C-----------------------------------------------------------------------
       FERTDAY = FERTDATA % FERTDAY
 !----------------------------------------------------------------------
 !     Pang: 2023.10.16 obtain variables from LIS memory for each pixel.
-      FracRtsY =  dssat48_struc(nest)%dssat48(t)%FracRtsY
+      FracRtsY = dssat48_struc(nest)%dssat48(t)%FracRtsY
       FIRST = dssat48_struc(nest)%dssat48(t)%SOILPI_FIRST
       PERROR = dssat48_struc(nest)%dssat48(t)%PERROR
       CMINERP = dssat48_struc(nest)%dssat48(t)%CMINERP
@@ -179,6 +179,26 @@ C-----------------------------------------------------------------------
       SPiLabNoRts = dssat48_struc(nest)%dssat48(t)%SPiLabNoRts
       SPiStaNoRts = dssat48_struc(nest)%dssat48(t)%SPiStaNoRts
       SPiSolNoRts = dssat48_struc(nest)%dssat48(t)%SPiSolNoRts
+!  Added 2024.03.05
+      FracNoRts = dssat48_struc(nest)%dssat48(t)%FracNoRts
+      PiLabRts = dssat48_struc(nest)%dssat48(t)%PiLabRts
+      PiSolRts = dssat48_struc(nest)%dssat48(t)%PiSolRts
+      PiActive = dssat48_struc(nest)%dssat48(t)%PiActive
+      PiLabile = dssat48_struc(nest)%dssat48(t)%PiLabile
+      PiStable = dssat48_struc(nest)%dssat48(t)%PiStable
+      SPi_Total = dssat48_struc(nest)%dssat48(t)%SPi_Total
+      TMINERP = dssat48_struc(nest)%dssat48(t)%TMINERP
+      TIMMOBP = dssat48_struc(nest)%dssat48(t)%TIMMOBP
+      SPiAvlProf = dssat48_struc(nest)%dssat48(t)%SPiAvlProf
+      SPiLabProf = dssat48_struc(nest)%dssat48(t)%SPiLabProf
+      SPiActProf = dssat48_struc(nest)%dssat48(t)%SPiActProf
+      SPiStaProf = dssat48_struc(nest)%dssat48(t)%SPiStaProf
+      SPiSolProf = dssat48_struc(nest)%dssat48(t)%SPiSolProf
+      SPiTotProf = dssat48_struc(nest)%dssat48(t)%SPiTotProf
+      SPiLabRtsProf = dssat48_struc(nest)%dssat48(t)%SPiLabRtsProf
+      SPiLabNoRtsProf = dssat48_struc(nest)%dssat48(t)%SPiLabNoRtsProf
+      SPiSolRtsProf = dssat48_struc(nest)%dssat48(t)%SPiSolRtsProf
+      SPiSolNoRtsProf = dssat48_struc(nest)%dssat48(t)%SPiSolNoRtsProf
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -862,6 +882,26 @@ C***********************************************************************
       dssat48_struc(nest)%dssat48(t)%SPiLabNoRts = SPiLabNoRts
       dssat48_struc(nest)%dssat48(t)%SPiStaNoRts = SPiStaNoRts
       dssat48_struc(nest)%dssat48(t)%SPiSolNoRts = SPiSolNoRts
+!  Added 2024.03.05
+      dssat48_struc(nest)%dssat48(t)%FracNoRts = FracNoRts
+      dssat48_struc(nest)%dssat48(t)%PiLabRts = PiLabRts
+      dssat48_struc(nest)%dssat48(t)%PiSolRts = PiSolRts
+      dssat48_struc(nest)%dssat48(t)%PiActive = PiActive
+      dssat48_struc(nest)%dssat48(t)%PiLabile = PiLabile
+      dssat48_struc(nest)%dssat48(t)%PiStable = PiStable
+      dssat48_struc(nest)%dssat48(t)%SPi_Total = SPi_Total
+      dssat48_struc(nest)%dssat48(t)%TMINERP = TMINERP
+      dssat48_struc(nest)%dssat48(t)%TIMMOBP = TIMMOBP
+      dssat48_struc(nest)%dssat48(t)%SPiAvlProf = SPiAvlProf
+      dssat48_struc(nest)%dssat48(t)%SPiLabProf = SPiLabProf
+      dssat48_struc(nest)%dssat48(t)%SPiActProf = SPiActProf
+      dssat48_struc(nest)%dssat48(t)%SPiStaProf = SPiStaProf
+      dssat48_struc(nest)%dssat48(t)%SPiSolProf = SPiSolProf
+      dssat48_struc(nest)%dssat48(t)%SPiTotProf = SPiTotProf
+      dssat48_struc(nest)%dssat48(t)%SPiLabRtsProf = SPiLabRtsProf
+      dssat48_struc(nest)%dssat48(t)%SPiLabNoRtsProf = SPiLabNoRtsProf
+      dssat48_struc(nest)%dssat48(t)%SPiSolRtsProf = SPiSolRtsProf
+      dssat48_struc(nest)%dssat48(t)%SPiSolNoRtsProf = SPiSolNoRtsProf
 !-----------------------------------------------------------------------
       RETURN
       END SUBROUTINE SoilPi

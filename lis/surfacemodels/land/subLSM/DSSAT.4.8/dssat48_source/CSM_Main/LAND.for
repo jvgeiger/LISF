@@ -300,7 +300,7 @@ C-----------------------------------------------------------------------
 C     Set planting date, adjust operations dates for seasonal or 
 C     sequenced runs.
 C-----------------------------------------------------------------------
-      CALL MGMTOPS(CONTROL, ISWITCH, 
+      CALL MGMTOPS(CONTROL, ISWITCH, nest, t, !Pang 2024.03.11
      &    FLOODWAT, HARVRES, SOILPROP, ST,                !Input 
      &    STGDOY, SW, WEATHER,                            !Input
      &    YREND, FERTDATA, HARVFRAC, IRRAMT,              !Output
@@ -387,7 +387,7 @@ C-----------------------------------------------------------------------
 C     Call Operations Management module to determine today's 
 C     applications of irrigation, tillage, etc.
 C-----------------------------------------------------------------------
-      CALL MGMTOPS(CONTROL, ISWITCH, 
+      CALL MGMTOPS(CONTROL, ISWITCH,nest, t, !Pang 2024.03.11 
      &    FLOODWAT, HARVRES, SOILPROP, ST,                !Input 
      &    STGDOY, SW, WEATHER,                            !Input
      &    YREND, FERTDATA, HARVFRAC, IRRAMT,              !Output
@@ -490,7 +490,7 @@ C-----------------------------------------------------------------------
 C     Call Operations Management module to check for harvest end, 
 C     accumulate variables.
 C-----------------------------------------------------------------------
-      CALL MGMTOPS(CONTROL, ISWITCH, 
+      CALL MGMTOPS(CONTROL, ISWITCH, nest, t, !Pang 2024.03.11
      &    FLOODWAT, HARVRES, SOILPROP, ST,                !Input 
      &    STGDOY, SW, WEATHER,                            !Input
      &    YREND, FERTDATA, HARVFRAC, IRRAMT,              !Output
@@ -539,7 +539,7 @@ C-----------------------------------------------------------------------
      &    STGDOY, FracRts, UH2O, UNH4, UNO3, XHLAI, XLAI) !Output
         ENDIF
 
-        CALL MGMTOPS(CONTROL, ISWITCH, 
+        CALL MGMTOPS(CONTROL, ISWITCH, nest, t,  !Pang 2024.03.11 
      &    FLOODWAT, HARVRES, SOILPROP, ST,                !Input 
      &    STGDOY, SW, WEATHER,                            !Input
      &    YREND, FERTDATA, HARVFRAC, IRRAMT,              !Output
@@ -586,7 +586,7 @@ C     Print seasonal summaries and close files.
      &    STGDOY, FracRts, UH2O, UNH4, UNO3, XHLAI, XLAI) !Output
 
 !     Call management operations module for seasonal printout.
-      CALL MGMTOPS(CONTROL, ISWITCH, 
+      CALL MGMTOPS(CONTROL, ISWITCH, nest, t,  !Pang 2024.03.11 
      &    FLOODWAT, HARVRES, SOILPROP, ST,                !Input 
      &    STGDOY, SW, WEATHER,                            !Input
      &    YREND, FERTDATA, HARVFRAC, IRRAMT,              !Output

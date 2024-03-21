@@ -98,8 +98,8 @@ subroutine dssat48_main(n)
 
     alarmCheck = LIS_isAlarmRinging(LIS_rc, "DSSAT48 model alarm "// trim(fnest)) !MN  Bug in the toolkit 
     if (alarmCheck) Then
-        do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-        !do  t = 7201, 7202
+        !do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+        do  t = 1, 1
              
             dt = LIS_rc%ts
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
@@ -256,7 +256,7 @@ subroutine dssat48_main(n)
             IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
                  !PRINT*, 'Im in seas init'
                   !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
-
+               PRINT*, 'SEAS YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%YRDOY
                  !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
                  FILEIO = 'DSSAT48.INP.'//fproc
@@ -264,13 +264,14 @@ subroutine dssat48_main(n)
                 FILEX = dssat48_struc(n)%CONTROL(t)%filex !PL 20240207
                 ROTNUM = dssat48_struc(n)%CONTROL(t)%rotnum !PL 20240207
                 TRTNUM = dssat48_struc(n)%CONTROL(t)%trtnum !PL 20240207
-
+   
                  NYRS = dssat48_struc(n)%CONTROL(t)%nyrs
                  ENDYRS = dssat48_struc(n)%CONTROL(t)%endyrs
                  MULTI = dssat48_struc(n)%CONTROL(t)%multi
                  RUN = dssat48_struc(n)%CONTROL(t)%run
                  YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
                  REPNO = dssat48_struc(n)%CONTROL(t)%repno
+                 dssat48_struc(n)%CONTROL(t) % YRDOY   = YRDOY !PL 20240318
                  PRINT*, 'main, t: ', t 
                  CALL INPUT_SUB( n, t,                                  & !Pang 20240207
                         FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
@@ -359,10 +360,11 @@ subroutine dssat48_main(n)
                 YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
                 CALL YR_DOY(YRDOY,YEAR,DOY)
                 DAS   = MAX(0,TIMDIF(INCYD(YRSIM,-1),YRDOY))
-                dssat48_struc(n)%CONTROL(t) % yrdoy = YRDOY
+                dssat48_struc(n)%CONTROL(t) % YRDOY = YRDOY
                 dssat48_struc(n)%CONTROL(t) % das = DAS
                  !PRINT*, 'DAS2: ', DAS, YRDOY, DOY
                  !PRINT*, 'DAS3: ', dssat48_struc(n)%CONTROL(t) % das
+               PRINT*, 'RATES YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t) % YRDOY
                !-----------------------------------------------------------------------
                !*********************************************************************** 
                !     RATE CALCULATIONS

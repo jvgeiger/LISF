@@ -61,12 +61,13 @@
 !     1. Need to add IRESI = "F" option
 !=======================================================================
 
-      SUBROUTINE OM_Place (CONTROL, ISWITCH, 
+      SUBROUTINE OM_Place (CONTROL, ISWITCH, nest, t, !Pang 2024.03.11 
      &    DLAYR, NLAYR, YRPLT,                    !Input
      &    OMAData)                                !Output
 !-----------------------------------------------------------------------
       USE ModuleDefs  
       USE Interface_IpSoil
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 
@@ -80,7 +81,7 @@
       PARAMETER (ERRKEY = 'RPLACE')
 
       INTEGER, PARAMETER :: SRFC = 0  !Surface layer
-
+      INTEGER nest, t
       INTEGER DAP, DYNAMIC, ERRNUM, FOUND, I, IDATE,
      &  L, LINC, LNUM, LUNIO, MULTI, 
      &  NLAYR, NRESAP, NRESDL, RUN, TIMDIF, YR,
@@ -141,7 +142,25 @@
 !     R = On reported dates                                            
 !     D = As reported, in DAP                                          
 !     F = Auto, with fixed amounts 
-
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.06  ---------------------------------------------------
+      CumResWt = OMAData % CumResWt
+      CumResE = OMAData % CumResE
+      RESDEPTH = OMAData % RESDEPTH
+      ResMixPerc = OMAData % ResMixPerc
+   
+      RESTYP = dssat48_struc(nest)%dssat48(t)%RESTYP
+      NRESDL = dssat48_struc(nest)%dssat48(t)%NRESDL
+      NRESAP = dssat48_struc(nest)%dssat48(t)%NRESAP
+      RESDAY = dssat48_struc(nest)%dssat48(t)%RESDAY
+      NAPRes = dssat48_struc(nest)%dssat48(t)%NAPRes
+      RESLIGNIN = dssat48_struc(nest)%dssat48(t)%RESLIGNIN
+      DRESMG = dssat48_struc(nest)%dssat48(t)%DRESMG
+      RESIDUE = dssat48_struc(nest)%dssat48(t)%RESIDUE
+      RESN = dssat48_struc(nest)%dssat48(t)%RESN
+      RESP = dssat48_struc(nest)%dssat48(t)%RESP
+      RIP = dssat48_struc(nest)%dssat48(t)%RIP
+      RESDEP = dssat48_struc(nest)%dssat48(t)%RESDEP
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -492,7 +511,20 @@ C-----------------------------------------------------------------------
 !        REAL, DIMENSION(NELEM) :: CumResE     !cumulative kg[E]/ha
 !      END TYPE OrgMatAppType
 !======================================================================
-
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.06  ---------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%RESTYP = RESTYP
+      dssat48_struc(nest)%dssat48(t)%NRESDL = NRESDL
+      dssat48_struc(nest)%dssat48(t)%NRESAP = NRESAP
+      dssat48_struc(nest)%dssat48(t)%RESDAY = RESDAY
+      dssat48_struc(nest)%dssat48(t)%NAPRes = NAPRes
+      dssat48_struc(nest)%dssat48(t)%RESLIGNIN = RESLIGNIN
+      dssat48_struc(nest)%dssat48(t)%DRESMG = DRESMG
+      dssat48_struc(nest)%dssat48(t)%RESIDUE = RESIDUE
+      dssat48_struc(nest)%dssat48(t)%RESN = RESN
+      dssat48_struc(nest)%dssat48(t)%RESP = RESP
+      dssat48_struc(nest)%dssat48(t)%RIP = RIP
+      dssat48_struc(nest)%dssat48(t)%RESDEP = RESDEP
   300 RETURN
       END SUBROUTINE OM_Place
 

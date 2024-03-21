@@ -39,14 +39,14 @@ C                 single day with different fertilizer types and depths.
 !  Calls  : Function IDLAYR
 C=======================================================================
 
-      SUBROUTINE Fert_Place (CONTROL, ISWITCH, 
+      SUBROUTINE Fert_Place (CONTROL, ISWITCH, nest, t, !Pang 2024.03.11
      &  DLAYR, DS, FLOOD, NLAYR, YRPLT,           !Input
      &  FERTDATA)                                 !Output
 
 !     ------------------------------------------------------------------
       USE FertType_mod
       USE ModuleData
-
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !     ------------------------------------------------------------------
@@ -60,7 +60,7 @@ C=======================================================================
       CHARACTER*78 MSG(10)
       CHARACTER*90 CHAR
       CHARACTER*6, PARAMETER :: ERRKEY = 'FPLACE'
-
+      INTEGER nest, t
       INTEGER DAP, DYNAMIC, ERRNUM, FERTDAY, FERTYPE,
      &  FOUND, FTYPEN, I, IDATE,    
      &  LINC, LNUM, LUNIO, MULTI, NAPFER(NELEM), 
@@ -144,7 +144,20 @@ C=======================================================================
 
       DYNAMIC = CONTROL % DYNAMIC
       YRDOY   = CONTROL % YRDOY
-
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.11  ---------------------------------------------------
+      FERMET = dssat48_struc(nest)%dssat48(t)%FERMET
+      FERTYPE_CDE = dssat48_struc(nest)%dssat48(t)%FERTYPE_CDE
+      NFERT = dssat48_struc(nest)%dssat48(t)%NFERT
+      NSR = dssat48_struc(nest)%dssat48(t)%NSR
+      AMTFER = dssat48_struc(nest)%dssat48(t)%AMTFER
+      FDAY = dssat48_struc(nest)%dssat48(t)%FDAY
+      FERTYP = dssat48_struc(nest)%dssat48(t)%FERTYP
+      FERDEP = dssat48_struc(nest)%dssat48(t)%FERDEP
+      ANFER = dssat48_struc(nest)%dssat48(t)%ANFER
+      APFER = dssat48_struc(nest)%dssat48(t)%APFER
+      AKFER = dssat48_struc(nest)%dssat48(t)%AKFER
+      NAPFER = dssat48_struc(nest)%dssat48(t)%NAPFER
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -636,11 +649,23 @@ C-----------------------------------------------------------------------
 
 !     Transfer data to ModuleData
       CALL PUT('MGMT','FERNIT',AMTFER(N))
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.11  ---------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%FERMET = FERMET
+      dssat48_struc(nest)%dssat48(t)%FERTYPE_CDE = FERTYPE_CDE
+      dssat48_struc(nest)%dssat48(t)%NFERT = NFERT
+      dssat48_struc(nest)%dssat48(t)%NSR = NSR
+      dssat48_struc(nest)%dssat48(t)%AMTFER = AMTFER
+      dssat48_struc(nest)%dssat48(t)%FDAY = FDAY
+      dssat48_struc(nest)%dssat48(t)%FERTYP = FERTYP
+      dssat48_struc(nest)%dssat48(t)%FERDEP = FERDEP
+      dssat48_struc(nest)%dssat48(t)%ANFER = ANFER
+      dssat48_struc(nest)%dssat48(t)%APFER = APFER
+      dssat48_struc(nest)%dssat48(t)%AKFER = AKFER
+      dssat48_struc(nest)%dssat48(t)%NAPFER = NAPFER
 
       RETURN
       END SUBROUTINE Fert_Place
-
-
 C=======================================================================
 C  FertLayers, Subroutine
 C

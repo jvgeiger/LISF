@@ -17,13 +17,14 @@ C  Called : MgmtOps
 C  Calls  : 
 C=======================================================================
 
-      SUBROUTINE TILLAGE(CONTROL, ISWITCH, SOILPROP,      !Input
+      SUBROUTINE TILLAGE(CONTROL, ISWITCH, nest, t, SOILPROP, !Input
      &    TILLVALS, TILLNO)                               !Output
-
+                                                         !Pang2024.03.11
 C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -38,12 +39,12 @@ C-----------------------------------------------------------------------
       CHARACTER*80 PATHSD
       CHARACTER*90 CHAR
       CHARACTER*92 TILFILE
-
+      INTEGER nest, t
       INTEGER DYNAMIC, ERRNUM, FOUND, I, IDATE, J, L, PFLAG
       INTEGER MULTI, NTIL, YR, YRDIF, YRDOY, YRSIM, RUN, NLAYR
       INTEGER, DIMENSION(NAPPL) :: TILLDATE, NLYRS
       INTEGER LUNIO, LUNTIL, LNUM, ISECT, TILLNO, NTil_today
-
+     
       REAL FACTOR, TILDEP, TILMIX, TILRESINC
       REAL, DIMENSION(NAPPL) :: CNP, RINP, MIXT, HPAN, TDEP, SSDT
       REAL, DIMENSION(NAPPL, NL) :: DEP, BDP, SWCNP
@@ -63,7 +64,18 @@ C-----------------------------------------------------------------------
       YRDOY   = CONTROL % YRDOY
 
       NLAYR = SOILPROP % NLAYR
-
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.11  ---------------------------------------------------
+      NTIL = dssat48_struc(nest)%dssat48(t)%NTIL
+      TILLDATE = dssat48_struc(nest)%dssat48(t)%TILLDATE
+      NLYRS = dssat48_struc(nest)%dssat48(t)%NLYRS
+      CNP = dssat48_struc(nest)%dssat48(t)%CNP
+      RINP = dssat48_struc(nest)%dssat48(t)%RINP
+      MIXT = dssat48_struc(nest)%dssat48(t)%MIXT
+      TDEP = dssat48_struc(nest)%dssat48(t)%TDEP
+      DEP = dssat48_struc(nest)%dssat48(t)%DEP
+      BDP = dssat48_struc(nest)%dssat48(t)%BDP
+      SWCNP = dssat48_struc(nest)%dssat48(t)%SWCNP
 C***********************************************************************
 C***********************************************************************
 C    Input and Initialization 
@@ -315,6 +327,18 @@ C     END OF DYNAMIC IF CONSTRUCT
 C***********************************************************************
       ENDIF
 C***********************************************************************
+!----- Save Vars from Memory --------------------------------------------
+!----- Pang 2024.03.11  ---------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%NTIL = NTIL
+      dssat48_struc(nest)%dssat48(t)%TILLDATE = TILLDATE
+      dssat48_struc(nest)%dssat48(t)%NLYRS = NLYRS
+      dssat48_struc(nest)%dssat48(t)%CNP = CNP
+      dssat48_struc(nest)%dssat48(t)%RINP = RINP
+      dssat48_struc(nest)%dssat48(t)%MIXT = MIXT
+      dssat48_struc(nest)%dssat48(t)%TDEP = TDEP
+      dssat48_struc(nest)%dssat48(t)%DEP = DEP
+      dssat48_struc(nest)%dssat48(t)%BDP = BDP
+      dssat48_struc(nest)%dssat48(t)%SWCNP = SWCNP
       RETURN
       END SUBROUTINE TILLAGE
 

@@ -10,7 +10,7 @@ C  03/29/2002 CHP modular format
 !                 water effects on albedo)
 C=======================================================================
 
-      SUBROUTINE OXLAYER (CONTROL,
+      SUBROUTINE OXLAYER (CONTROL, nest, t,   !Pang 2024.03.04
      &    BD1, ES, FERTDATA, FLOODWAT, LFD10,             !Input
      &    NSWITCH, SNH4, SNO3, SOILPROP, SRAD, ST,        !Input
      &    SW, TMAX, TMIN, UREA, XHLAI,                    !Input
@@ -19,11 +19,12 @@ C=======================================================================
 
       USE ModuleDefs
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*1 RNMODE
-
+      INTEGER  nest,t
       INTEGER  NSWITCH, YRDOY, YRDRY, DYNAMIC
       INTEGER  RUN
 
@@ -110,7 +111,12 @@ C=======================================================================
       FERTYPE = FERTDATA % FERTYPE
 !      LFD10   = FERTDATA % LFD10
       UNINCO  = FERTDATA % UNINCO
-
+!------ Obtain Vars from Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+       FPI = dssat48_struc(nest)%dssat48(t)%FPI
+       OXNI = dssat48_struc(nest)%dssat48(t)%OXNI
+       ALGACT = dssat48_struc(nest)%dssat48(t)%ALGACT_OXLAYR
+       OXPH = dssat48_struc(nest)%dssat48(t)%OXPH
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -462,6 +468,12 @@ C=======================================================================
       OXLAYR % OXH4 = OXH4
       OXLAYR % OXN3 = OXN3
       OXLAYR % IBP  = IBP
+!------ Save Vars to Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%FPI = FPI
+       dssat48_struc(nest)%dssat48(t)%OXNI = OXNI
+       dssat48_struc(nest)%dssat48(t)%ALGACT_OXLAYR = ALGACT
+       dssat48_struc(nest)%dssat48(t)%OXPH = OXPH
 
       RETURN
       END SUBROUTINE OXLAYER

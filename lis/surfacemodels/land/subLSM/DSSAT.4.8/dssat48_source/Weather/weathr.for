@@ -111,7 +111,14 @@ C=======================================================================
       REPNO   = CONTROL % REPNO  
       YRDOY   = CONTROL % YRDOY   
       YRSIM   = CONTROL % YRSIM   
-
+!----------------------------------------------------------------------
+!----- Obtain Vars from Memory ----------------------------------------
+      MEWTH = 'M'      !JE Use LIS data (Hard Code MEWTH for use M only)
+      XLAT  = dssat48_struc(nest)%dssat48(t)%lat !PL
+      XLONG = dssat48_struc(nest)%dssat48(t)%lon
+      XELEV = dssat48_struc(nest)%dssat48(t)%elev 
+      
+      NEV = dssat48_struc(nest)%dssat48(t)%NEV
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -128,7 +135,7 @@ C=======================================================================
 !JE     &    WINDSP, XELEV, XLAT, XLONG, YREND,              !Output
 !JE     &    RUNINIT)
 
-      MEWTH = 'M'                 !JE Use LIS data
+      !MEWTH = 'M'                 !JE Use LIS data
       !PRINT*, 'FILEW: ', FILEW
       !PRINT*, 'BF WTHMOD: '
       !PRINT*, 'RUNINT CONTROL: ', RUNINIT, CONTROL
@@ -160,9 +167,9 @@ C=======================================================================
       !PRINT*, DEC, NEV, SNUP, SNDN, YREND
 
       !PRINT*, "RUN INIT Assigning lat, lon, and elevation from LIS"
-      XLAT  = dssat48_struc(nest)%dssat48(t)%lat
-      XLONG = dssat48_struc(nest)%dssat48(t)%lon
-      XELEV = dssat48_struc(nest)%dssat48(t)%elev
+      !XLAT  = dssat48_struc(nest)%dssat48(t)%lat
+      !XLONG = dssat48_struc(nest)%dssat48(t)%lon
+      !XELEV = dssat48_struc(nest)%dssat48(t)%elev
 
 !***********************************************************************
 !***********************************************************************
@@ -189,20 +196,19 @@ C=======================================================================
         ENDIF
 
         !JE Check values for WINDSP and REFHT (copied from IPWTH)
-        IF (REFHT <= 0.) REFHT = 1.5
+        IF (REFHT <= 0.) REFHT = 2.0 !REFHT = 1.5
         IF (WINDHT <= 0.) WINDHT = 2.0
-
         !JE
         !PRINT*, "SEAS INIT Initializing with values from LIS: "
-        XLAT  = dssat48_struc(nest)%dssat48(t)%lat
-        XLONG = dssat48_struc(nest)%dssat48(t)%lon
-        XELEV = dssat48_struc(nest)%dssat48(t)%elev
-        TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
-        TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
-        WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
-        TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
-        RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip
-        SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
+        !XLAT  = dssat48_struc(nest)%dssat48(t)%lat
+        !XLONG = dssat48_struc(nest)%dssat48(t)%lon
+        !XELEV = dssat48_struc(nest)%dssat48(t)%elev
+        !PL, TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
+        !PL, TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
+        !PL, WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
+        !PL, TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
+        !PL, RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip
+        !PL, SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
         !PRINT*,'TMAX, TMIN, TDEW, WINDSP'
         !PRINT*, TMAX, TMIN, TDEW, WINDSP
         !PRINT*,'RAIN, RHUM, SRAD'
@@ -220,6 +226,18 @@ C=======================================================================
 !JE     &      TAMP, TAV, TDEW, TMAX, TMIN, VAPR, WINDHT,    !Output
 !JE     &      WINDSP, XELEV, XLAT, XLONG, YREND,            !Output
 !JE     &      SEASINIT)
+          !MEWTH=M using forcings from LIS
+            TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
+            TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
+            WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
+            TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
+            RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip
+            SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
+            OZON7 = -99 !PL
+            PAR = -99   !PL
+            RHUM = -99  !PL
+            VAPR = -99  !PL
+
           IF (YREND == CONTROL2 % YRDOY) RETURN
         ENDIF
 
@@ -230,12 +248,12 @@ C=======================================================================
         !PRINT*,'RAIN, RHUM, SRAD'
         !PRINT*, RAIN, RHUM, SRAD
         !PRINT*,'Replace with LIS'
-        TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
-        TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
-        WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
-        TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
-        RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip 
-        SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
+        !TMAX = dssat48_struc(nest)%dssat48(t)%forc_tmax
+        !TMIN = dssat48_struc(nest)%dssat48(t)%forc_tmin
+        !WINDSP = dssat48_struc(nest)%dssat48(t)%forc_wind
+        !TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
+        !RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip 
+        !SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
         !PRINT*,'TMAX, TMIN, TDEW, WINDSP'
         !PRINT*, TMAX, TMIN, TDEW, WINDSP
         !PRINT*,'RAIN, RHUM, SRAD'
@@ -316,7 +334,7 @@ C     Calculate day length, sunrise and sunset.
       !print*, DAYL, DEC, SNDN, SNUP !JE
 
 !     Subroutine to determine daily CO2
-      CALL CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2)
+      CALL CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2, nest, t) !PL
 
 C     Adjust daily weather data, if weather modification requested.
 C     Effective DEC calculated if DAYL is changed.
@@ -333,10 +351,10 @@ C     Calculate daily solar parameters.
      &    DAYL, DEC, SRAD, XLAT,                          !Input
      &    CLOUDS, ISINB, S0N)                             !Output
 
-      print*, 'Input to SOLAR'            !JE
-      print*,  DAYL,  DEC, SRAD, XLAT     !JE
-      print*, 'Output from SOLAR'         !JE
-      print*, CLOUDS, ISINB, S0N          !JE 
+      !print*, 'Input to SOLAR'            !JE
+      !print*,  DAYL,  DEC, SRAD, XLAT     !JE
+      !print*, 'Output from SOLAR'         !JE
+      !print*, CLOUDS, ISINB, S0N          !JE 
 !     Windspeed adjustment and initialization moved ahead
 !     of Call to HMET on 27MAR14 by BAK
 
@@ -424,6 +442,10 @@ C       Read new weather record.
             TDEW = dssat48_struc(nest)%dssat48(t)%forc_tdew
             RAIN = dssat48_struc(nest)%dssat48(t)%forc_precip
             SRAD = dssat48_struc(nest)%dssat48(t)%forc_swrad
+            OZON7 = -99 !PL
+            PAR = -99   !PL
+            RHUM = -99  !PL
+            VAPR = -99  !Pl
             !PRINT*,'TMAX, TMIN, TDEW, WINDSP'
             !PRINT*, TMAX, TMIN, TDEW, WINDSP
             !PRINT*,'RAIN, RHUM, SRAD'
@@ -458,7 +480,7 @@ C        rice and maize routines.
       CALL TWILIGHT(DOY, XLAT, TWILEN) 
 
 !     Subroutine to determine daily CO2
-      CALL CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2)
+      CALL CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2, nest, t) !PL
 
 C     Adjust daily weather data, if weather modification requested.
 C     Effective DEC calculated if DAYL is changed.

@@ -12,7 +12,7 @@ C  Calls  : Fert_Place, IPSOIL, NCHECK, NFLUX, RPLACE,
 C           SOILNI, YR_DOY, FLOOD_CHEM, OXLAYER
 C=======================================================================
 
-      SUBROUTINE Denit_Ceres (CONTROL, ISWNIT,  
+      SUBROUTINE Denit_Ceres (CONTROL, ISWNIT, nest, t, !Pang 2024.03.04 
      &    DUL, FLOOD, KG2PPM, LITC, NLAYR, NO3, SAT,  !Input
      &    SSOMC, SNO3, ST, SW,                        !Input
      &    DLTSNO3,                                    !I/O
@@ -21,13 +21,14 @@ C=======================================================================
 !-----------------------------------------------------------------------
       USE GHG_mod 
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !-----------------------------------------------------------------------
       CHARACTER*1 ISWNIT
 
       INTEGER DYNAMIC, L, NLAYR
-
+      INTEGER nest, t
       REAL CW, FLOOD, XMIN
       REAL TFDENIT, WFDENIT
       REAL ST(NL), SNO3_AVAIL
@@ -51,7 +52,12 @@ C=======================================================================
       YRDOY   = CONTROL % YRDOY
 
       wfps = n2o_data % wfps
-      
+!------ Obtain Vars from Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+       DLAG = dssat48_struc(nest)%dssat48(t)%DLAG
+
+       CN2Odenit = N2O_data % CN2Odenit
+       CN2 = N2O_data % CN2     
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -65,6 +71,8 @@ C=======================================================================
 
       NDAYS_WET = 0.0
 
+      !CHP added 2023-03-21 (Pang: added to meet with 4.8.2 version)
+      DLAG = 0.0
 !***********************************************************************
 !***********************************************************************
 !     DAILY RATE CALCULATIONS 
@@ -275,6 +283,10 @@ C         Compute the N2:N2O Ratio
       N2O_data % DENITRIF = DENITRIF
       N2O_data % n2odenit  = n2odenit
       N2O_data % N2FLUX   = N2FLUX
+
+!------ Save Vars to Memory ----------------------------------------
+!------ Pang 2024.03.04 ------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%DLAG = DLAG
 
       RETURN
       END SUBROUTINE Denit_Ceres

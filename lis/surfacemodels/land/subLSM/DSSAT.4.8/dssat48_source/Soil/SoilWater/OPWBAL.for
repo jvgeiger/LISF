@@ -155,7 +155,8 @@ C-----------------------------------------------------------------------
         END IF   ! VSH
         
         YRSTART = YRDOY
-        CALL YR_DOY(INCDAT(YRSTART,-1),YEAR,DOY)
+        !CALL YR_DOY(INCDAT(YRSTART,-1),YEAR,DOY) !PL
+         CALL YR_DOY(INCDAT(YRSTART,0),YEAR,DOY) !PL: To accomodate LIS
 
         IF (ISWWAT .EQ. 'Y') THEN
           CALL SUMSW(NLAYR, DLAYR, SW, TSW)

@@ -16,10 +16,10 @@
 !  Called by: WEATHR
 !=======================================================================
 
-      SUBROUTINE CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2)
+      SUBROUTINE CO2VAL(CONTROL, ISWITCH, CCO2, DCO2, CO2, nest, t) !PL
 !-----------------------------------------------------------------------
       USE ModuleDefs  
- 
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -36,6 +36,7 @@
       CHARACTER*80 CHARTEST, PATHSD
       CHARACTER*92 FILECO2
 
+      INTEGER nest, t
       INTEGER DOY, DYNAMIC, ERR, FOUND, I, INDX
       INTEGER LINE, LNUM, LUNCO2, NVals, PFLAG, YEAR
 
@@ -55,7 +56,11 @@
       INTEGER COL(MAXCOL,2), COUNT, C1, C2, ISECT
 
       DYNAMIC = CONTROL % DYNAMIC
-
+!----- Obtain Vars from Memory ----------------------------------------
+      ICO2 = ISWITCH % ICO2 !PL
+      NVals = dssat48_struc(nest)%dssat48(t)%NVals !PL
+      INDX = dssat48_struc(nest)%dssat48(t)%INDX !PL
+      CO2BAS = dssat48_struc(nest)%dssat48(t)%CO2BAS !PL
 !-----------------------------------------------------------------------
       IF (DYNAMIC == SEASINIT) THEN
 !-----------------------------------------------------------------------
@@ -245,6 +250,10 @@
 !-----------------------------------------------------------------------
       ENDIF   !END OF DYNAMIC BLOCK
 !-----------------------------------------------------------------------
+!----- Save Vars to Memory ----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%NVals = NVals   !PL
+      dssat48_struc(nest)%dssat48(t)%INDX = INDX     !PL
+      dssat48_struc(nest)%dssat48(t)%CO2BAS = CO2BAS !PL
       RETURN
       END SUBROUTINE CO2VAL
 

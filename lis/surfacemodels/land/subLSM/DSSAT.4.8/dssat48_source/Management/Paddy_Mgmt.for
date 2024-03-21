@@ -9,16 +9,18 @@ C  01/01/1989 JR  Written
 !                 now reside in the Management Operations module.
 C=======================================================================
 
-      SUBROUTINE PADDY_MGMT (CONTROL, ISWITCH,
+      SUBROUTINE PADDY_MGMT (CONTROL, ISWITCH, nest, t,   !Pang 2024.03.12
      &    IRRAMT, RAIN,                                   !Input
      &    FLOOD, FLOODWAT, FLOODN)                        !Output 
 
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 
+      INTEGER nest, t
       INTEGER DYNAMIC, INCYD, NDAT, NDRY, NBUND
       INTEGER YRDRY, YRWET, YRDOY
 
@@ -49,6 +51,15 @@ C=======================================================================
       PUDDLED= FLOODWAT % PUDDLED
       NBUND  = FLOODWAT % NBUND
 
+!----- Obtain Vars from Memory --------------------------------------------
+!----- Pang 2024.03.12  ---------------------------------------------------
+      CEF = FLOODWAT % CEF
+      FRUNOFF = FLOODWAT % FRUNOFF
+      TOTBUNDRO = FLOODWAT % TOTBUNDRO
+      YRDRY = FLOODWAT % YRDRY
+      YRWET = FLOODWAT % YRWET
+  
+      NDRY = dssat48_struc(nest)%dssat48(t)%NDRY
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -175,6 +186,9 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
+!----- Save Vars to Memory --------------------------------------------
+!----- Pang 2024.03.12  ---------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%NDRY = NDRY
 
       RETURN
       END SUBROUTINE PADDY_MGMT

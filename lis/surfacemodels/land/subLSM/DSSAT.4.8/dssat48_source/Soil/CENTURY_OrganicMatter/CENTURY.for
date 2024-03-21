@@ -269,7 +269,39 @@
       SENESSUMC = dssat48_struc(nest)%dssat48(t)%SENESSUMC
       SENESSUMN = dssat48_struc(nest)%dssat48(t)%SENESSUMN
       SENESSUMP = dssat48_struc(nest)%dssat48(t)%SENESSUMP
-
+!------ Added 2024.02.29 ----------------------------------------------
+      ISWWAT = ISWITCH % ISWWAT
+      N_ELEMS = CONTROL % N_ELEMS
+     
+      DSNC = dssat48_struc(nest)%dssat48(t)%DSNC
+      SSOME = dssat48_struc(nest)%dssat48(t)%SSOME
+      TLITC = dssat48_struc(nest)%dssat48(t)%TLITC
+      TMETABC = dssat48_struc(nest)%dssat48(t)%TMETABC
+      TSOM1C = dssat48_struc(nest)%dssat48(t)%TSOM1C
+      TSOM2C = dssat48_struc(nest)%dssat48(t)%TSOM2C
+      TSOM3C = dssat48_struc(nest)%dssat48(t)%TSOM3C
+      TSOMC = dssat48_struc(nest)%dssat48(t)%TSOMC
+      TSTRUCC = dssat48_struc(nest)%dssat48(t)%TSTRUCC
+      TLITE = dssat48_struc(nest)%dssat48(t)%TLITE
+      TMETABE = dssat48_struc(nest)%dssat48(t)%TMETABE
+      TSOM1E = dssat48_struc(nest)%dssat48(t)%TSOM1E
+      TSOM2E = dssat48_struc(nest)%dssat48(t)%TSOM2E
+      TSOM23E = dssat48_struc(nest)%dssat48(t)%TSOM23E
+      TSOM3E = dssat48_struc(nest)%dssat48(t)%TSOM3E
+      TSOME = dssat48_struc(nest)%dssat48(t)%TSOME
+      TSTRUCE =dssat48_struc(nest)%dssat48(t)%TSTRUCE
+      ACCMNR = dssat48_struc(nest)%dssat48(t)%ACCMNR
+      CES1 = dssat48_struc(nest)%dssat48(t)%CES1
+      LITE = dssat48_struc(nest)%dssat48(t)%LITE
+      AMINRL = dssat48_struc(nest)%dssat48(t)%AMINRL
+      CES2 = dssat48_struc(nest)%dssat48(t)%CES2
+      CES3 = dssat48_struc(nest)%dssat48(t)%CES3
+      DDEP = dssat48_struc(nest)%dssat48(t)%DDEP
+      DNUM = dssat48_struc(nest)%dssat48(t)%DNUM
+      DEND = dssat48_struc(nest)%dssat48(t)%DEND
+      DOCULT = dssat48_struc(nest)%dssat48(t)%DOCULT
+      ADDMETABEFLAG = dssat48_struc(nest)%dssat48(t)%ADDMETABEFLAG
+      FRMETFLAG = dssat48_struc(nest)%dssat48(t)%FRMETFLAG
 !***********************************************************************
 !***********************************************************************
 !     RUN INITIALIZATION - CALLED ONCE PER SIMULATION
@@ -384,7 +416,7 @@
      &  TSOM1C, TSOM1E, TSOM2C, TSOM2E, TSOM23E,          !Input
      &  TSOM3C, TSOM3E, TSOMC, TSOME, TSTRUCC, TSTRUCE)   !Input
 
-      CALL SENESADD_C (SEASINIT, 
+      CALL SENESADD_C (SEASINIT,nest, t, !Pang 2024.03.01 
      &  AMINRL, CEDAM, CESTR, CROP, DLAYR, FRDAE,         !Input
      &  FRMETI, FRMETS, N_ELEMS, NLAYR, RESDAX,           !Input
      &  SENESCE,                                          !Input
@@ -569,7 +601,7 @@
       ENDIF   !End of IF block on ResDat == YRDOY
 
 !     Add the senesced plant material to the soil as residues.
-      CALL SENESADD_C (RATE,
+      CALL SENESADD_C (RATE, nest, t, !Pang 2024.03.01
      &  AMINRL, CEDAM, CESTR, CROP, DLAYR, FRDAE,         !Input
      &  FRMETI, FRMETS, N_ELEMS, NLAYR, RESDAX,           !Input
      &  SENESCE,                                          !Input
@@ -1107,6 +1139,38 @@
       dssat48_struc(nest)%dssat48(t)%SENESSUMC = SENESSUMC
       dssat48_struc(nest)%dssat48(t)%SENESSUMN = SENESSUMN
       dssat48_struc(nest)%dssat48(t)%SENESSUMP = SENESSUMP
+
+!------ Added 2024.02.29 ----------------------------------------------
+
+      dssat48_struc(nest)%dssat48(t)%DSNC = DSNC
+      dssat48_struc(nest)%dssat48(t)%SSOME = SSOME
+      dssat48_struc(nest)%dssat48(t)%TLITC = TLITC
+      dssat48_struc(nest)%dssat48(t)%TMETABC = TMETABC
+      dssat48_struc(nest)%dssat48(t)%TSOM1C = TSOM1C
+      dssat48_struc(nest)%dssat48(t)%TSOM2C = TSOM2C
+      dssat48_struc(nest)%dssat48(t)%TSOM3C = TSOM3C
+      dssat48_struc(nest)%dssat48(t)%TSOMC = TSOMC
+      dssat48_struc(nest)%dssat48(t)%TSTRUCC = TSTRUCC
+      dssat48_struc(nest)%dssat48(t)%TLITE = TLITE
+      dssat48_struc(nest)%dssat48(t)%TMETABE = TMETABE
+      dssat48_struc(nest)%dssat48(t)%TSOM1E = TSOM1E
+      dssat48_struc(nest)%dssat48(t)%TSOM2E = TSOM2E
+      dssat48_struc(nest)%dssat48(t)%TSOM23E = TSOM23E
+      dssat48_struc(nest)%dssat48(t)%TSOM3E = TSOM3E
+      dssat48_struc(nest)%dssat48(t)%TSOME = TSOME
+      dssat48_struc(nest)%dssat48(t)%TSTRUCE = TSTRUCE
+      dssat48_struc(nest)%dssat48(t)%ACCMNR = ACCMNR
+      dssat48_struc(nest)%dssat48(t)%CES1 = CES1
+      dssat48_struc(nest)%dssat48(t)%LITE = LITE
+      dssat48_struc(nest)%dssat48(t)%AMINRL = AMINRL
+      dssat48_struc(nest)%dssat48(t)%CES2 = CES2
+      dssat48_struc(nest)%dssat48(t)%CES3 = CES3
+      dssat48_struc(nest)%dssat48(t)%DDEP = DDEP
+      dssat48_struc(nest)%dssat48(t)%DNUM = DNUM
+      dssat48_struc(nest)%dssat48(t)%DEND = DEND
+      dssat48_struc(nest)%dssat48(t)%DOCULT = DOCULT
+      dssat48_struc(nest)%dssat48(t)%ADDMETABEFLAG = ADDMETABEFLAG
+      dssat48_struc(nest)%dssat48(t)%FRMETFLAG = FRMETFLAG
       RETURN
       END   SUBROUTINE Century
 
