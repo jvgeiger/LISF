@@ -67,11 +67,14 @@ module dssat48_module
         ! Pang 2023.09.29
         !-------------------------------------------------------------------------
          INTEGER            :: EXPNO, TRTALL
-         INTEGER            :: NREPS, YRDOY_END
+         INTEGER            :: NREPS
          CHARACTER*1        :: RNMODE
-         CHARACTER*80       :: PATHEX
-         CHARACTER*92       :: FILEX_P
-         CHARACTER*120      :: FILECTL
+         !CHARACTER*80       :: PATHEX
+        !------------------------------------------------------------------------
+        !  CSM
+        !------------------------------------------------------------------------
+           LOGICAL :: DONE
+           INTEGER :: YRDOY_END
         !------------------------------------------------------------------------
         !  LAND
         !------------------------------------------------------------------------
@@ -530,36 +533,5 @@ module dssat48_module
           !  OUTPUT   = 5, & 
           !  SEASEND  = 6, &
           !  ENDRUN   = 7   
-
-    !  Added to go around recurring use od GHG_mod 
-
-     ! TYPE,public :: N2O_type
-!            Daily        Cumul        Layer         
-      !  REAL TNOXD,       CNOX,        DENITRIF(20)  ![N] Denitrified
-!       REAL TN2OdenitD,  CN2Odenit,   N2Odenit(NL)  !N2O[N] from denit
-      !  REAL TN2OdenitD,  CN2Odenit,   N2Odenit(20)
-      !  REAL TN2OnitrifD, CN2Onitrif,  N2ONitrif(20) !N2O[N] from nitr
-
-      !  REAL TN2D,        CN2,         N2flux(20)    !N2[N] from denit
-!                                      N2Oflux = N2Odenit + N2ONitrif
-      !  REAL                           N2OFLUX(20)
-      !  REAL TNOfluxD,    CNOflux,     NOflux(20)    !NO flux from nitr
-
-      !  REAL TNITRIFY,    CNITRIFY,    NITRIF(20)    ![N] Nitrified 
-
-      !  REAL N2_emitted,  CN2_emitted                !N2[N] emitted
-      !  REAL N2O_emitted, CN2O_emitted               !N2O[N] emitted
-      !  REAL NO_emitted,  CNO_emitted                !NO[N] emitted
-
-      !  REAL TNGSoil  !N2, N2O, and NO in soil
-
-      !  REAL, DIMENSION(20) :: WFPS
-      !END TYPE N2O_type
-
-      !TYPE,public :: CH4_type
-      !  REAL CH4Consumption, CH4Emission, CH4Leaching, CH4Stored
-      !  REAL CumCH4Consumpt, CumCH4Emission, CumCH4Leaching
-      !  REAL CO2emission, CumCO2Emission
-      !END TYPE CH4_type
 
 end module dssat48_module

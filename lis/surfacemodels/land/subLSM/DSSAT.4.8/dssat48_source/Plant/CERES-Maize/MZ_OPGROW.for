@@ -259,7 +259,7 @@ C-------------------------------------------------------------------
       ELSEIF ((DYNAMIC .EQ. SEASEND) 
      & .AND. (FMOPT == 'A' .OR. FMOPT == ' ')) THEN
         !Close daily output files.
-        CLOSE (NOUTDG)
+        !CLOSE (NOUTDG) PL: Comment to enable mutiple pixel output at the end of season
 
       ENDIF
 

@@ -52,16 +52,18 @@ subroutine dssat48_main(n)
     real                 :: tmp_LAT                ! Latitude in decimal degree  (latitude (degrees +North)) [degrees]
     real                 :: tmp_LON                ! Longitude in decimal year    (longitude (degrees +East)) [degrees]
     integer              :: tmp_year, tmp_month, tmp_day, tmp_hour, tmp_minute
+    integer              :: year_end, month_end, day_end
     real                 :: tmp_pres, tmp_precip, tmp_tmax, tmp_tmin, tmp_tdew   ! Weather Forcing
     real                 :: tmp_swrad, tmp_wind                                  ! Weather Forcing
     character*3          :: fnest ! MN Bug in toolkit (added to this code)
 ! CONTRO
-    integer             :: RUN, REPNO
+    INTEGER             :: RUN, REPNO, EXPNO, TRTALL, NREPS
     CHARACTER*1         :: RNMODE
     INTEGER             :: YREND, MDATE, YRPLT, YRDOY, JULIAN
-    INTEGER             :: NYRS, ENDYRS, MULTI, YRSIM
-    INTEGER             :: DAS, DOY, TIMDIF, INCYD
-    LOGICAL             :: doseasinit !Pang 2023.09.19
+    INTEGER             :: YRDOY_END, YRDIF, YRSIM_SAVE
+    INTEGER             :: NYRS, ENDYRS, MULTI, YRSIM, YR, ISIM
+    INTEGER             :: DAS, DOY, TIMDIF, INCYD, YR0, ISIM0
+    LOGICAL             :: doseasinit, FEXIST, DONE
 
     CHARACTER*120 :: FILECTL
     CHARACTER*30  :: FILEIO
@@ -98,8 +100,9 @@ subroutine dssat48_main(n)
 
     alarmCheck = LIS_isAlarmRinging(LIS_rc, "DSSAT48 model alarm "// trim(fnest)) !MN  Bug in the toolkit 
     if (alarmCheck) Then
+
         do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-             
+        !do t=1, 1 !PL for testing code     
             dt = LIS_rc%ts
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
             col = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%col
@@ -247,38 +250,141 @@ subroutine dssat48_main(n)
             YREND = dssat48_struc(n)%dssat48(t)%yrend
             MDATE = dssat48_struc(n)%dssat48(t)%mdate
             YRPLT = dssat48_struc(n)%dssat48(t)%yrplt
+
             RNMODE = dssat48_struc(n)%CONTROL(t)%rnmode
             YRDOY= tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year)
-            !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
-            !PRINT*, 'RNMODE: ', RNMODE
-            !----- SEASONAL INITIALIZATION -------------------------------------------
-            IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
-                 !PRINT*, 'Im in seas init'
-                  !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
-               PRINT*, 'SEAS YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%YRDOY
-                 !JE Add one .INP file per processor
+            DONE = dssat48_struc(n)%dssat48(t)%DONE
+            RUN = dssat48_struc(n)%CONTROL(t)%run
+            FILEX = dssat48_struc(n)%CONTROL(t)%filex
+            ROTNUM = dssat48_struc(n)%CONTROL(t)%rotnum 
+            TRTNUM = dssat48_struc(n)%CONTROL(t)%trtnum
+            YRDOY_END = dssat48_struc(n)%dssat48(t)%yrdoy_end
+            YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
+            NYRS = dssat48_struc(n)%CONTROL(t)%nyrs
+            ENDYRS = dssat48_struc(n)%CONTROL(t)%endyrs
+            MULTI = dssat48_struc(n)%CONTROL(t)%multi
+            !------ CSM INITIALIZATION -----------------------------------------------
+            IF (.NOT.DONE) THEN
+                PRINT*, 'Im in INIT'
+                !PRINT*, 'RUN: ', RUN
+                year_end = LIS_rc%eyr
+                month_end = LIS_rc%emo
+                day_end = LIS_rc%eda
+
+                YREND = -99
+                RUN = RUN + 1
+                dssat48_struc(n)%CONTROL(t) % RUN = RUN
+                dssat48_struc(n)%CONTROL(t) % YRDOY = 0
+
+                !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
                  FILEIO = 'DSSAT48.INP.'//fproc
-
-                FILEX = dssat48_struc(n)%CONTROL(t)%filex !PL 20240207
-                ROTNUM = dssat48_struc(n)%CONTROL(t)%rotnum !PL 20240207
-                TRTNUM = dssat48_struc(n)%CONTROL(t)%trtnum !PL 20240207
-   
-                 NYRS = dssat48_struc(n)%CONTROL(t)%nyrs
-                 ENDYRS = dssat48_struc(n)%CONTROL(t)%endyrs
-                 MULTI = dssat48_struc(n)%CONTROL(t)%multi
-                 RUN = dssat48_struc(n)%CONTROL(t)%run
-                 YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
-                 REPNO = dssat48_struc(n)%CONTROL(t)%repno
-                 dssat48_struc(n)%CONTROL(t) % YRDOY   = YRDOY !PL 20240318
-                 PRINT*, 'main, t: ', t 
-                 CALL INPUT_SUB( n, t,                                  & !Pang 20240207
+                 !print*, 'FILEIO, RUN: ', FILEIO, RUN
+                 TRTNUM = 1 !Initialization
+                 ROTNUM = 1 !Initialization
+                 dssat48_struc(n)%CONTROL(t)%fileio = FILEIO
+                 !dssat48_struc(n)%CONTROL(t)%filex  = FILEX
+                 !dssat48_struc(n)%CONTROL(t)%rnmode = RNMODE
+                 dssat48_struc(n)%CONTROL(t)%rotnum = ROTNUM
+                 dssat48_struc(n)%CONTROL(t)%trtnum = TRTNUM
+                 dssat48_struc(n)%CONTROL(t)%errcode = 0
+                !------------------------------------------------------------------------------------------
+                !------- This Section Is Needed When We Still Need To Use .SQX and .INP Files -------------
+                !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
+                 CALL INPUT_SUB( n, t,                               & !Pang 2024.02.08
                         FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
                         RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input
                         dssat48_struc(n)%ISWITCH(t), dssat48_struc(n)%CONTROL(t)) !Output
+                        !PRINT*, 'What is the mukey now: ', dssat48_struc(n)%dssat48(t)%SLNO
+                !Check to see if the temporary file exists
+                !Needed when we still use .INP file
+                 INQUIRE (FILE = FILEIO,EXIST = FEXIST)
+                 IF (.NOT. FEXIST) THEN
+                     !CALL ERROR(ERRKEY,2,FILEIO,LUNIO)
+                     PRINT*, FILEIO, ' Does Not Exist!'
+                     CALL EXIT
+                 ENDIF
+                !--------------------------------------------------------------------------------------------
+                  EXPNO = 1 !Always 1; doesn't really need this
+                  TRTALL = 999 !Always 9999
+                  NYRS = 1 !Always 1 for Q mode
+                  NREPS = 1 !Always 1
+                  YRSIM = tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year) +1
+                  !PL: YRSIM +1 Due to 1 day shift between LIS and DSSAT
+                  !PRINT*, 'YRSIM: ', YRSIM
+                  !YRDOY_END = (INT(YRSIM/1000)+NYRS-1)*1000 + YRSIM-INT(YRSIM/1000.0)*1000 - 1 !Can we obtain this from config. 
+                  YRDOY_END = year_end*1000 + JULIAN (day_end,MonthTxt(month_end),year_end)
+                  !IF (RUN.EQ.1) THEN
+                  !    YRDOY = YRSIM !YRDOY is initialized as same as YRSIM
+                  !ENDIF !PL: We don't need to do this
 
-                 !CONDITIONS
-                 !PRINT*, 'NYRS, ENDYRS, MULTI bf: ', NYRS, ENDYRS, MULTI
+                  MULTI = 0
+                  YRDIF = 0
+                  ENDYRS = 0 
+                  !PRINT*, 'YRSIM, YRDOY_END, YRDOY: ', YRSIM, YRDOY_END, YRDOY
+                  IF (RUN .GT. 1) THEN
+                      YRSIM = INCYD(YRDOY,0)
+                      CALL YR_DOY(YRSIM_SAVE, YR0, ISIM0)
+                      CALL YR_DOY(YRSIM,      YR,  ISIM)
+                      YRDIF = YR - YR0
+                      dssat48_struc(n)%CONTROL(t)%YRDIF = YRDIF
+                  ENDIF
+                  !PRINT*, 'YRDIF, YRSIM: ', YRDIF, YRSIM
+                  !dssat48_struc(n)%CONTROL(t)%filex  = FILEX
+                  dssat48_struc(n)%CONTROL(t)%multi = MULTI
+                  dssat48_struc(n)%CONTROL(t)%run = RUN
+                  dssat48_struc(n)%CONTROL(t)%trtnum = TRTNUM
+                  dssat48_struc(n)%CONTROL(t)%yrdif = YRDIF
+                  dssat48_struc(n)%CONTROL(t)%nyrs = NYRS
+                  dssat48_struc(n)%CONTROL(t)%yrdoy = YRDOY !For Q Model; Run=1
+                  dssat48_struc(n)%CONTROL(t)%yrsim = YRSIM
+                  dssat48_struc(n)%CONTROL(t)%endyrs = ENDYRS
+                  dssat48_struc(n)%CONTROL(t)%dynamic = 1 !1: RUNINIT
+
+                  dssat48_struc(n)%dssat48(t)%yrend = YREND
+                  dssat48_struc(n)%dssat48(t)%expno = EXPNO
+                  dssat48_struc(n)%dssat48(t)%trtall= TRTALL
+                  dssat48_struc(n)%dssat48(t)%nreps = NREPS
+                  dssat48_struc(n)%dssat48(t)%yrdoy_end = YRDOY_END
+             !-------------------- LAND INITIALIZATION ---------------------------------------------------
+                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
+                 YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
+                 dssat48_struc(n)%dssat48(t)%yrend = YREND
+                 dssat48_struc(n)%dssat48(t)%mdate = MDATE
+                 dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
+                 dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
+                 dssat48_struc(n)%dssat48(t)%DONE = .TRUE.
+            ENDIF
+
+
+            !----- SEASONAL INITIALIZATION -------------------------------------------
+            IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
+                !PRINT*, 'In SEAS INIT'
+                  !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
+                !PRINT*, 'SEAS YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%YRDOY
+                 !JE Add one .INP file per processor
+                 !write(unit=fproc,fmt='(i4.4)') LIS_localPet
+                 !FILEIO = 'DSSAT48.INP.'//fproc
+
+                 !FILEX = dssat48_struc(n)%CONTROL(t)%filex !Obtain in front of the loop
+                 !ROTNUM = dssat48_struc(n)%CONTROL(t)%rotnum !Obtain in front of the loop
+                 !TRTNUM = dssat48_struc(n)%CONTROL(t)%trtnum !Obtain in from of the loop
+   
+                 !NYRS = dssat48_struc(n)%CONTROL(t)%nyrs !Obtain in front of the loop
+                 !ENDYRS = dssat48_struc(n)%CONTROL(t)%endyrs !Obtain in front of the loop
+                 !MULTI = dssat48_struc(n)%CONTROL(t)%multi !Obtain in front of the loop
+                 !RUN = dssat48_struc(n)%CONTROL(t)%run !Obtain in front of the loop
+                 !YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim !Obtain in front of the loop
+                 REPNO = dssat48_struc(n)%CONTROL(t)%repno !May not really needed for Q mode
+                 !dssat48_struc(n)%CONTROL(t) % YRDOY   = YRDOY !Put back later
+                 
+                 !CALL INPUT_SUB( n, t,                                  & !Pang 20240207
+                 !       FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
+                 !       RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input
+                 !       dssat48_struc(n)%ISWITCH(t), dssat48_struc(n)%CONTROL(t)) !Output
+
+                 !!CONDITIONS
+                 !!PRINT*, 'NYRS, ENDYRS, MULTI bf: ', NYRS, ENDYRS, MULTI
                  IF (NYRS .GT. 1) THEN
                      ENDYRS = ENDYRS + 1
                      IF (RNMODE .NE. 'Y') THEN
@@ -288,31 +394,21 @@ subroutine dssat48_main(n)
                      MULTI = 1
                      ENDYRS = 1
                  ENDIF
-                 !PRINT*, 'NYRS, ENDYRS, MULTI AF: ', NYRS, ENDYRS, MULTI
-                 !IF (MULTI .GT. 1) THEN
-                 !   RUN   = RUN + 1
-                 !   CALL MULTIRUN(RUN, 0)  !Pang: don't need this
-                 !--- Pang: Update YRSIM for the next season -------
-                 !   YRSIM = YRSIM_SAVE     !
-                 !   CALL YR_DOY(YRSIM,YR,ISIM)
-                 !   YRSIM = (YR + MULTI - 1) * 1000 + ISIM
-                 !   YREND = -99
-                 !--------------------------------------------------
-                 !   IF (CONTROL%ErrCode /= 0) THEN
-                 !       CONTROL%ErrCode = 0
-                 !       IF (INDEX('QY',RNMODE) > 0) EXIT SEAS_LOOP
-                 !   ENDIF
+                 !Note: NYRS, ENDYRS, and ENDYRS are always 1 for Q mode
+                 !IF (RUN.GT.1) THEN
+                 !   YRDOY = dssat48_struc(n)%CONTROL(t)%yrsim !We have done yrsim = yrdoy for RUN>1
                  !ENDIF
-                dssat48_struc(n)%CONTROL(t) % DAS     = 0
-                dssat48_struc(n)%CONTROL(t) % RUN     = RUN
-                dssat48_struc(n)%CONTROL(t) % YRSIM   = YRSIM  !Starting Day of simulation(from config file)
-                dssat48_struc(n)%CONTROL(t) % YRDOY   = YRDOY  !The day of simulation
-                dssat48_struc(n)%CONTROL(t) % MULTI   = MULTI
-                dssat48_struc(n)%CONTROL(t) % DYNAMIC = 2   !SEASINIT
-                dssat48_struc(n)%CONTROL(t) % ENDYRS  = ENDYRS
-                dssat48_struc(n)%CONTROL(t) % REPNO   = REPNO
-                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
-                   YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
+                 dssat48_struc(n)%CONTROL(t) % DAS     = 0
+                 dssat48_struc(n)%CONTROL(t) % RUN     = RUN
+                 dssat48_struc(n)%CONTROL(t) % YRSIM   = YRSIM  !Starting Day of simulation(from config file)
+                 dssat48_struc(n)%CONTROL(t) % YRDOY   = YRDOY  !The day of simulation
+                 dssat48_struc(n)%CONTROL(t) % MULTI   = MULTI
+                 dssat48_struc(n)%CONTROL(t) % DYNAMIC = 2   !SEASINIT
+                 dssat48_struc(n)%CONTROL(t) % ENDYRS  = ENDYRS
+                 dssat48_struc(n)%CONTROL(t) % REPNO   = REPNO
+                 DAS = dssat48_struc(n)%CONTROL(t) % DAS
+                 CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
+                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
 
                  !JE Write variables to LIS_HIST file
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD1, &
@@ -346,24 +442,22 @@ subroutine dssat48_main(n)
                     surface_type=LIS_rc%lsm_index)
 
                 dssat48_struc(n)%dssat48(t)%doseasinit = .FALSE. !Pnng 2023.09.19
-                
+             ENDIF   
                 !PRINT*, 'YREND in seas: ', YREND, YRDOY
                 !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
             !----- DAILY  ------------------------------------------------------------
-            ELSE
+            IF ((.NOT.dssat48_struc(n)%dssat48(t)%doseasinit).AND.(YRDOY.GE.YRSIM)) THEN
                !PRINT*, 'Im in seas daily rate'
                !-----------------------------------------------------------------------
                !     Calculate days after simulation (DAS) 
                !-----------------------------------------------------------------------
                 !PRINT*, 'DAS1: ', DAS, YRDOY, DOY
-                YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim
+                !YRSIM = dssat48_struc(n)%CONTROL(t)%yrsim !Obtain infront of the loop
                 CALL YR_DOY(YRDOY,YEAR,DOY)
                 DAS   = MAX(0,TIMDIF(INCYD(YRSIM,-1),YRDOY))
                 dssat48_struc(n)%CONTROL(t) % YRDOY = YRDOY
                 dssat48_struc(n)%CONTROL(t) % das = DAS
-                 !PRINT*, 'DAS2: ', DAS, YRDOY, DOY
-                 !PRINT*, 'DAS3: ', dssat48_struc(n)%CONTROL(t) % das
-               PRINT*, 'RATES YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t) % YRDOY
+               !PRINT*, 'RATES YRDOY DAS: ', YRDOY, dssat48_struc(n)%CONTROL(t) % YRDOY, DAS
                !-----------------------------------------------------------------------
                !*********************************************************************** 
                !     RATE CALCULATIONS
@@ -371,7 +465,6 @@ subroutine dssat48_main(n)
                dssat48_struc(n)%CONTROL(t)%dynamic = 3 !3: DAILY RATE
                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-                !PRINT*, 'YREND in Rate: ', YREND, YRDOY
                 !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
                !*********************************************************************** 
                !     INTEGRATION 
@@ -379,7 +472,6 @@ subroutine dssat48_main(n)
                dssat48_struc(n)%CONTROL(t)%dynamic = 4 !4: DAILY INTEGR
                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-                !PRINT*, 'YREND in Integr: ', YREND, YRDOY
                 !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
 
                !*********************************************************************** 
@@ -388,7 +480,6 @@ subroutine dssat48_main(n)
                dssat48_struc(n)%CONTROL(t)%dynamic = 5 !5: DAILY OUTPUT IF NEEDED
                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-               !PRINT*, 'YREND in Output: ', YREND, YRDOY
                !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
 
                !JE Write variables to LIS_HIST file
@@ -466,11 +557,26 @@ subroutine dssat48_main(n)
                     value=dssat48_struc(n)%dssat48(t)%SDWT*10.0,&
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
-
-                      dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
+              
+                 dssat48_struc(n)%dssat48(t)%DONE = .FALSE. !Return back to INIT
+                !dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
                 !Pang: DO THIS at the end of the season
-                !YRSIM_SAVE = YRSIM
-                !
+                !YRSIM_SAVE = YRSIM !We don't really need to use YRSIM_SAVE
+                
+                !--- Check If Need to Go To INIT --------------------------------------
+                     IF (YRDOY .GE. YRDOY_END) THEN
+                         PRINT*, 'YRDOY IS GREATER THEN YRDOY_END'
+                         EXIT
+                         !REPNO = dssat48_struc(n)%CONTROL(t)%repno
+                         !REPNO = REPNO+1
+                         !dssat48_struc(n)%CONTROL(t)%repno = REPNO
+                         !IF (REPNO.GT.NREPS) THEN
+                         !   DONE= .TRUE.
+                         !ELSE
+                         !   RUN = 0
+                         !ENDIF
+                     ENDIF
+
                 ENDIF
             ENDIF
 

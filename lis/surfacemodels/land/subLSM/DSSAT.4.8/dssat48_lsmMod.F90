@@ -150,17 +150,18 @@ contains
     type(ESMF_Field)     :: smField
     integer              :: tmp_year, tmp_month, tmp_day, tmp_hour, tmp_minute
     ! DEFINITION FOR DSSAT INIT
-    CHARACTER*1   :: RNMODE
-    CHARACTER*8   :: MODELARG
-    CHARACTER*12  :: FILEX
+    !CHARACTER*1   :: RNMODE
+    !CHARACTER*8   :: MODELARG
+    !CHARACTER*12  :: FILEX
     CHARACTER*30  :: FILEIO
     CHARACTER*4   :: fproc      !JE
-    CHARACTER*80  :: PATHEX
-    CHARACTER*120 :: FILECTL
-    INTEGER       :: ROTNUM, TRTNUM, YRSIM, YRDOY, MULTI, YRDIF
-    INTEGER       :: ERRCODE, RUNINIT, YREND, EXPNO, TRTALL, NYRS, ENDYRS
-    INTEGER       :: RUN, YRDOY_END, NREPS, REPNO, TRTREP, YRPLT, MDATE
-    INTEGER       :: ERRNUM, JULIAN
+    !CHARACTER*80  :: PATHEX
+    !CHARACTER*120 :: FILECTL
+    !INTEGER       :: ROTNUM, TRTNUM, YRSIM, YRDOY, MULTI, YRDIF
+    !INTEGER       :: ERRCODE, RUNINIT, YREND, EXPNO, TRTALL, NYRS, ENDYRS
+    !INTEGER       :: RUN, YRDOY_END, NREPS, REPNO, TRTREP, YRPLT, MDATE
+    INTEGER       :: RUN, REPNO, ROTNUM, TRTNUM, ERRNUM
+    !INTEGER       :: ERRNUM, JULIAN
     LOGICAL       :: FEXIST
     !CHARACTER(LEN=3)  ModelVerTxt
 
@@ -175,8 +176,6 @@ contains
     
     ! read configuation information from lis.config file
     call dssat48_readcrd()
-    !PRINT*,'Im in dssat48_init'
-        
         do n=1, LIS_rc%nnest
             !Get  Dssat version # which is used to read dssat prms files
             WRITE(ModelVerTxt,'(I2.2,I1)') Version%Major, Version%Minor !Obtain Dssat version #
@@ -227,114 +226,34 @@ contains
                CALL dssat48_setup !Pang 2024.02.09 (This is used to obtain soil mukey)
 
             do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-                 tmp_year   = LIS_rc%yr
-                 tmp_month  = LIS_rc%mo
-                 tmp_day    = LIS_rc%da
-                 tmp_hour   = LIS_rc%hr
-                 tmp_minute = LIS_rc%mn
-                 !These System Initial Values May Be Loaded From Config File
-                 ! Start CSM 
-                 !DONE =  .FALSE.  ! We don't use DONE to control run or not run
-                 !YRDOY_END = 9999999 !Can be removed
-                 RNMODE = 'Q'
+            !do t=1,1 !PL for testing code
+                 !Start CSM 
+                 dssat48_struc(n)%dssat48(t)%DONE =  .FALSE.  !PL: Control code to run DSSAT48 or NOT
+                 dssat48_struc(n)%dssat48(t)%YRDOY_END = 9999999 !PL: Initial YRDOY_END
+                 dssat48_struc(n)%CONTROL(t)%rnmode = 'Q' !run mode is fixed for LIS-DSSAT
 
-                 !JE Add one .INP file per processor
+                 RUN = 0
+                 REPNO = 1
+                 dssat48_struc(n)%CONTROL(t)%repno = REPNO
+                 dssat48_struc(n)%CONTROL(t)%run = RUN
+ 
+                 ROTNUM = 0
+                 TRTNUM = 0
+                 dssat48_struc(n)%CONTROL(t)%rotnum = ROTNUM
+                 dssat48_struc(n)%CONTROL(t)%trtnum = TRTNUM
+                 dssat48_struc(n)%CONTROL(t)%filex  = 'NASA2019.SQX' !This can be set in config file
+                !----------------------------------------------------------------------------------------
+                !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
                  FILEIO = 'DSSAT48.INP.'//fproc
                  !print*, FILEIO
 
-                 ROTNUM = 1
-                 !TRTREP = 1 !Not used in CSM
-                 TRTNUM = 1
-                 FILEX = 'NASA2019.SQX'
-               !----------------------------------------------------------------------------------------
-               ! Check If There is FILEIO and Delete It  
+                 !Check If There is FILEIO and Delete It  
                  INQUIRE (FILE = FILEIO,EXIST = FEXIST)
                  IF (FEXIST) THEN
                      OPEN (21, FILE = FILEIO,STATUS = 'UNKNOWN',IOSTAT=ERRNUM)
                      CLOSE (21,STATUS = 'DELETE')
                  ENDIF
-               !----------------------------------------------------------------------------------------
-               ! Initialization CSM
-                 YREND = -99
-                 YRPLT = 0 !Initialization, Pang
-                 MDATE = 0 !Initialization, Pang
-                 RUN = 1
-                 REPNO = 1
-                 !PATHEX = ""
-                 dssat48_struc(n)%CONTROL(t)%repno = REPNO
-                 dssat48_struc(n)%CONTROL(t)%run = RUN
-                 dssat48_struc(n)%CONTROL(t)%yrdoy = 0 !YRDOY is initialized
-                 dssat48_struc(n)%CONTROL(t)%fileio = FILEIO
-                 dssat48_struc(n)%CONTROL(t)%filex  = FILEX
-                 dssat48_struc(n)%CONTROL(t)%rnmode = RNMODE
-                 dssat48_struc(n)%CONTROL(t)%rotnum = ROTNUM
-                 dssat48_struc(n)%CONTROL(t)%trtnum = TRTNUM
-                 dssat48_struc(n)%CONTROL(t)%errcode = 0
-             !------------------------------------------------------------------------------------------
-             !------- This Section Is Needed When We Still Need To Use .SQX and .INP Files -------------
-                !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
-                 PRINT*, 'lsmMod, t: ', t
-                 CALL INPUT_SUB( n, t,                               & !Pang 2024.02.08
-                        FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
-                        RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input
-                        dssat48_struc(n)%ISWITCH(t), dssat48_struc(n)%CONTROL(t)) !Output
-                        !PRINT*, 'What is the mukey now: ', dssat48_struc(n)%dssat48(t)%SLNO
-                !Check to see if the temporary file exists
-                !Needed when we still use .INP file
-                 INQUIRE (FILE = FILEIO,EXIST = FEXIST)
-                 IF (.NOT. FEXIST) THEN
-                     !CALL ERROR(ERRKEY,2,FILEIO,LUNIO)
-                     PRINT*, FILEIO, ' Does Not Exist!'
-                     CALL EXIT
-                 ENDIF
-              !---------------------------------------------------------------------------------------------
-                 EXPNO = 1
-                 TRTALL = 999
-                 NYRS = 1
-                 NREPS = 1
-                 !YRSIM = 2019110 !Day of Simulation
-                 YRSIM = tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year) +2 
-                 !PL: YRSIM +2 Due to 2 day shift between LIS and DSSAT
-                 PRINT*, 'YRSIM: ', YRSIM
-                 YRDOY_END = (INT(YRSIM/1000)+NYRS-1)*1000 + YRSIM-INT(YRSIM/1000.0)*1000 - 1 
-                 YRDOY = YRSIM !YRDOY is initialized as same as YRSIM
-                 MULTI = 0
-                 YRDIF = 0
-                 ENDYRS = 0
-
-                 dssat48_struc(n)%CONTROL(t)%filex  = FILEX
-                 dssat48_struc(n)%CONTROL(t)%multi = MULTI
-                 dssat48_struc(n)%CONTROL(t)%run = RUN
-                 dssat48_struc(n)%CONTROL(t)%trtnum = TRTNUM
-                 dssat48_struc(n)%CONTROL(t)%yrdif = YRDIF
-                 dssat48_struc(n)%CONTROL(t)%nyrs = NYRS
-                 dssat48_struc(n)%CONTROL(t)%yrdoy = YRDOY !For Q Model; Run=1
-                 dssat48_struc(n)%CONTROL(t)%yrsim = YRSIM
-                 dssat48_struc(n)%CONTROL(t)%endyrs = ENDYRS
-                 dssat48_struc(n)%CONTROL(t)%dynamic = 1 !1: RUNINIT
-
-
-                 dssat48_struc(n)%dssat48(t)%yrend = YREND
-                 dssat48_struc(n)%dssat48(t)%expno = EXPNO
-                 dssat48_struc(n)%dssat48(t)%trtall= TRTALL
-                 dssat48_struc(n)%dssat48(t)%nreps = NREPS
-                 dssat48_struc(n)%dssat48(t)%yrdoy_end = YRDOY_END
-             PRINT*, 'INIT YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%yrdoy
-             !-------------------- LAND INITIALIZATION ---------------------------------------------------
-                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
-                  YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-                dssat48_struc(n)%dssat48(t)%yrend = YREND
-                dssat48_struc(n)%dssat48(t)%mdate = MDATE
-                dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
-                dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
-                !PRINT*, 'SOILPROP af LAND in lsmMod: ', dssat48_struc(n)%SOILPROP(t)
-                !PRINT*, 'ISWITCH af LAND in lsmMod: ', dssat48_struc(n)%ISWITCH(t)
-                !PRINT*, 'CONTROL af LAND in lsmMod lsmMod2: ', dssat48_struc(n)%CONTROL(t)
-                !PRINT*, 'YRPLT, MDATE, YREND', YRPLT, MDATE, YREND
-                !PRINT*, 'dssat48_struc(ens)%dssat48(t)%BD_INIT: ', dssat48_struc(n)%dssat48(t)%BD_INIT
-                !PRINT*, 'SOILPROP%BD: ', dssat48_struc(n)%SOILPROP(t)%BD.
-             !---------------------------------------------------------------------------------------------
             enddo
 
             !------------------------------------------------------------------------

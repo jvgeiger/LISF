@@ -163,6 +163,7 @@ C=======================================================================
       WATAVL = dssat48_struc(nest)%dssat48(t)%WATAVL
       SWDELTT = dssat48_struc(nest)%dssat48(t)%SWDELTT
       SWDELTL = dssat48_struc(nest)%dssat48(t)%SWDELTL
+
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -476,7 +477,7 @@ C       extraction (based on yesterday's values) for each soil layer.
 !JE          SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10.
 
 !JE Tight coupling soil moisture exchange
-          PRINT*, "Coupling Flag: ", dssat48_struc(nest)%sm_coupling
+          !PRINT*, "Coupling Flag: ", dssat48_struc(nest)%sm_coupling
           IF (dssat48_struc(nest)%sm_coupling .EQ. 1) THEN
              IF (dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 0) THEN 
                 IF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .LT. 

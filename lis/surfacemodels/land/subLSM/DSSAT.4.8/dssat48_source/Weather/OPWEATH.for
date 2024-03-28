@@ -155,7 +155,7 @@ C       Generate output for file Weather.OUT
         IF ((DYNAMIC .EQ. SEASEND)
      &    .AND. (FMOPT == 'A'.OR. FMOPT == ' '))THEN
           !Close daily output files.
-          CLOSE (LUN)
+          !CLOSE (LUN) !PL: Comment out to enable mutiple pixel outputs
         ENDIF
 
 !***********************************************************************
