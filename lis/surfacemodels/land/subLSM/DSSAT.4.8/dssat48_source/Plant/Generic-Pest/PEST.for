@@ -146,7 +146,7 @@ C** WDB 1/2022 Added Target LAI from remote sensing observations (TLAI)
 !------ Pang-Wei Liu 2024.01.31 ----------------------------------------
 !------ IPPEST, IPPARM, IPPROG -----------------------------------------
       FILET = dssat48_struc(nest)%dssat48(t)%FILET
-      PATHEX = dssat48_struc(nest)%dssat48(t)%PATHEX
+      !PATHEX = dssat48_struc(nest)%dssat48(t)%PATHEX
       PHTHRS8 = dssat48_struc(nest)%dssat48(t)%PHTHRS8
       TRTNUM = dssat48_struc(nest)%dssat48(t)%TRTNUM
       PCPID = dssat48_struc(nest)%dssat48(t)%PCPID
@@ -465,7 +465,7 @@ C-----------------------------------------------------------------------
 !------ Pang-Wei Liu 2024.01.31 ----------------------------------------
 !------ IPPEST, IPPARM, IPPROG -----------------------------------------
       dssat48_struc(nest)%dssat48(t)%FILET = FILET
-      dssat48_struc(nest)%dssat48(t)%PATHEX = PATHEX
+      !dssat48_struc(nest)%dssat48(t)%PATHEX = PATHEX
       dssat48_struc(nest)%dssat48(t)%PHTHRS8 = PHTHRS8
       dssat48_struc(nest)%dssat48(t)%TRTNUM = TRTNUM
       dssat48_struc(nest)%dssat48(t)%PCPID = PCPID

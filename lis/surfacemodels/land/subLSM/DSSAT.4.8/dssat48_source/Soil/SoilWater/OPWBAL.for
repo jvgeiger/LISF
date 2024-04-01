@@ -156,8 +156,7 @@ C-----------------------------------------------------------------------
         
         YRSTART = YRDOY
         !CALL YR_DOY(INCDAT(YRSTART,-1),YEAR,DOY) !PL
-         CALL YR_DOY(INCDAT(YRSTART,0),YEAR,DOY) !PL: To accomodate LIS
-
+        CALL YR_DOY(INCDAT(YRSTART,0),YEAR,DOY) !PL: To accomodate LIS
         IF (ISWWAT .EQ. 'Y') THEN
           CALL SUMSW(NLAYR, DLAYR, SW, TSW)
           CALL SUMSW(NLAYR, DLAYR, LL, TLL)
@@ -258,7 +257,9 @@ C-----------------------------------------------------------------------
 !        Print every FROP days, and
         IF ((DYNAMIC .EQ. OUTPUT .AND. MOD(DAS, FROP) .EQ. 0) .OR. 
 !        Print on last day if not already done.
-     &      (DYNAMIC .EQ. SEASEND  .AND. MOD(DAS, FROP) .NE. 0)) THEN
+     &      (DYNAMIC .EQ. SEASEND  .AND. MOD(DAS, FROP) .NE. 0)) THEN 
+!        PL: Print on SEASINIT for 2nd season and later
+!     &      (DYNAMIC .EQ. SEASINIT  .AND. RUN .GT. 1)) THEN
 
           IF (NAVWB > 0) THEN
             AVWTD = AVWTD / NAVWB
@@ -330,7 +331,7 @@ C-----------------------------------------------------------------------
             CALL SUMVALS (SUMNUM, LABEL, VALUE) 
 
             !Close daily output files.
-            CLOSE (NOUTDW)
+            !CLOSE (NOUTDW) !PL: Comment out to enable multi pixel output at the end of the season
           !ENDIF
         ENDIF
 !***********************************************************************

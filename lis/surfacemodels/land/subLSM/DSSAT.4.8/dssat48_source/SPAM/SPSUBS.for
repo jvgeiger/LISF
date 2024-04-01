@@ -332,7 +332,7 @@ C-----------------------------------------------------------------------
           !ENDIF
 
           !Close daily output files.
-          CLOSE (LUN)
+          !CLOSE (LUN) !PL: Comment out to enable multiple pixel output at the end of the season
         ENDIF
 
 !***********************************************************************
