@@ -423,7 +423,7 @@ C-----------------------------------------------------------------------
 
       CHARACTER*6 SECTION, ERRKEY 
       PARAMETER (ERRKEY = 'FIND_HDATE')
-      CHARACTER*30 FILEIO 
+      CHARACTER*120 FILEIO 
       CHARACTER*90 CHAR
 
       INTEGER ERRNUM

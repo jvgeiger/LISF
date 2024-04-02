@@ -64,7 +64,7 @@ subroutine dssat48_main(n)
     LOGICAL             :: doseasinit !Pang 2023.09.19
 
     CHARACTER*120 :: FILECTL
-    CHARACTER*30  :: FILEIO
+    CHARACTER*120 :: FILEIO
     CHARACTER*4   :: fproc      !JE
     CHARACTER*12  :: FILEX
     CHARACTER*8   :: MODELARG
@@ -236,6 +236,9 @@ subroutine dssat48_main(n)
             ! JE Add options for tight coupling
             ! Add model flag
 
+            ! Keep end of day soil moisture; this needs to be replaced with average 
+            ! instead of instantaneous 
+            !JE Temporarily turn off to check timing (03.26.2024)
             IF (dssat48_struc(n)%sm_coupling.eq.1) THEN
                do l=0, LIS_sfmodel_struc(n)%nsm_layers
                   dssat48_struc(n)%dssat48(t)%LIS_sm(l) = NOAHMP401_struc(n)%noahmp401(t)%smc(l)
@@ -258,7 +261,9 @@ subroutine dssat48_main(n)
                PRINT*, 'SEAS YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%YRDOY
                  !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
-                 FILEIO = 'DSSAT48.INP.'//fproc
+
+                print*, 'Writing INP Files to ', dssat48_struc(n)%outpath
+                FILEIO = trim(dssat48_struc(n)%outpath)//'DSSAT48.INP.'//fproc
 
                 FILEX = dssat48_struc(n)%CONTROL(t)%filex !PL 20240207
                 ROTNUM = dssat48_struc(n)%CONTROL(t)%rotnum !PL 20240207

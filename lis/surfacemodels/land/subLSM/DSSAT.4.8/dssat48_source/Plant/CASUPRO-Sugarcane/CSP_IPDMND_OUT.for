@@ -30,7 +30,7 @@ C=======================================================================
       PARAMETER (ERRKEY = 'DEMAND')
       CHARACTER*6   SECTION
       CHARACTER*6   ECONO ! , ECOTYP
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
 !       CHARACTER*80  C80
       CHARACTER*92  FILECC    ! , FILEGC
 !       CHARACTER*255 C255

@@ -394,7 +394,7 @@ C The statements begining with !*! are refer to APSIM source codes
       INTEGER         ERR
       CHARACTER*6     ERRKEY
       PARAMETER       (ERRKEY='TF_GRO')
-      CHARACTER*30    FILEIO
+      CHARACTER*120    FILEIO
       CHARACTER*12    FILEC
       CHARACTER*92    FILECC
       CHARACTER*12    FILES

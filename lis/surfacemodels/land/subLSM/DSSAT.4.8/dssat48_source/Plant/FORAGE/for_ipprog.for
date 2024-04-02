@@ -37,7 +37,7 @@ C-----------------------------------------------------------------------
 
       CHARACTER*1   RNMODE
       CHARACTER*6   HEAD
-      CHARACTER     FILET*12, FILEIO*30
+      CHARACTER     FILET*12, FILEIO*120
       CHARACTER*200 C200, AMPSAVE, CSAVE
       CHARACTER*5   PSTHD(6)
       CHARACTER*5   PID(200)

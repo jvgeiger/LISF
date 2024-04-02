@@ -53,7 +53,7 @@ C  Calls:     None
       CHARACTER*12 OUTG, OUTPC, OUTPN, OUTKG
       CHARACTER*15 GROHEAD(4, 50)
       CHARACTER*15 GRO_OUT(50)
-      CHARACTER*20 FILEIO, OFILE
+      CHARACTER*120 FILEIO, OFILE
       CHARACTER*100 G_FMT_STR, D_FMT_STR ! Strings for outputting comments 
 	                                   !         and daily values 
       CHARACTER*1024 FMT_STR, T_FMT_STR  ! Runtime format strings

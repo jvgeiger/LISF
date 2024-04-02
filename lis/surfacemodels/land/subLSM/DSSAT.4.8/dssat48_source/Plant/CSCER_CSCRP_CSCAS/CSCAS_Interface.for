@@ -110,7 +110,7 @@ C=======================================================================
 
       DEPMAX = DS(NLAYR)
 
-      FILEIOIN(1:30) = CONTROL % FILEIO
+      FILEIOIN(1:120) = CONTROL % FILEIO
 
       CALL YR_DOY(YRDOY, YEAR, DOY)
 

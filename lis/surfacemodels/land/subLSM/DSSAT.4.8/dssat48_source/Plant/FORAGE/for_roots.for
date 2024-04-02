@@ -38,7 +38,7 @@ C-----------------------------------------------------------------------
       CHARACTER*1 PLME
       CHARACTER*1 ISWWAT
       CHARACTER*2 CROP
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*92 FILECC
 
       INTEGER L, L1, NLAYR

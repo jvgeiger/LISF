@@ -83,7 +83,7 @@ C The statements begining with !*! are refer to APSIM source codes
       REAL            EOP           
       CHARACTER*6     ERRKEY  
       REAL            ESW(NL)     
-      CHARACTER*30    FILEIO
+      CHARACTER*120   FILEIO
       INTEGER         FROP  
       real            fstage  
       REAL            GDDAE

@@ -54,7 +54,7 @@ C=======================================================================
 
       LOGICAL FIRST
       CHARACTER*1   ISWNIT
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 
       INTEGER DYNAMIC, L, L1, NLAYR
 
@@ -244,7 +244,7 @@ C-----------------------------------------------------------------------
 
       CHARACTER*6   SECTION
       CHARACTER*12  FILEC
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*80  PATHCR
       CHARACTER*92  FILECC
       CHARACTER*180 CHAR

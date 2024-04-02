@@ -26,6 +26,8 @@ subroutine dssat48_f2t(n)
   use LIS_logMod,        only : LIS_logunit, LIS_verify, &
                                 LIS_endrun
   use dssat48_lsmMod
+  use LIS_surfaceModelDataMod, only : LIS_sfmodel_struc !JE for exchange
+  use NoahMP401_lsmMod !JE for soil moisture exchange
 
   implicit none
 
@@ -47,7 +49,7 @@ subroutine dssat48_f2t(n)
 !
 !EOP
 
-  integer            :: t,v,status
+  integer            :: t,v,l,status
   integer            :: tid
   real               :: ee, val, td
 
@@ -166,6 +168,19 @@ subroutine dssat48_f2t(n)
   endif
 
   !Keep track of number of forcing times so that we can compute daily averages
+
+! JE This is a test for keeping end of day soil moisture from the previous day
+!  if (dssat48_struc(n)%forc_count.eq.0) then !Remember ending soil moisture from yesterday
+!     write(LIS_logunit,*) "Saving LSM soil moisture "
+!     do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
+!         if (dssat48_struc(n)%sm_coupling.eq.1) then
+!            do l=0, LIS_sfmodel_struc(n)%nsm_layers
+!               dssat48_struc(n)%dssat48(t)%LIS_sm(l) = NOAHMP401_struc(n)%noahmp401(t)%smc(l)
+!            end do
+!         endif
+!      end do
+!  end if
+
   dssat48_struc(n)%forc_count = dssat48_struc(n)%forc_count + 1
 
   do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)

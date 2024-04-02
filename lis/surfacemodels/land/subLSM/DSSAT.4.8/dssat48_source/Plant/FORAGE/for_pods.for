@@ -49,7 +49,7 @@ C=======================================================================
       PARAMETER (ERRKEY = 'PODS  ')
       CHARACTER*6   ECOTYP, ECONO
       CHARACTER*6   SECTION
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MESSAGE(10)
       CHARACTER*80  C80
       CHARACTER*92  FILECC, FILEGC

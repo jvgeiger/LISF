@@ -1312,7 +1312,7 @@ c         Planting method
           INTEGER LUNIO, ERR, LNUM
           CHARACTER*6     ERRKEY          
           PARAMETER       (ERRKEY='SC_CNG')   
-          CHARACTER*30    FILEIO 
+          CHARACTER*120    FILEIO 
           CHARACTER*12    FILEC     
        !chp   CHARACTER*92    FILECC
           CHARACTER*12    FILES

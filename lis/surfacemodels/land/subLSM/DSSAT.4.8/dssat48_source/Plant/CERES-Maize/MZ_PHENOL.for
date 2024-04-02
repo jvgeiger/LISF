@@ -64,7 +64,7 @@
       CHARACTER*12    FILES
       CHARACTER*12    FILEE     
       CHARACTER*92    FILEGC
-      CHARACTER*30    FILEIO         
+      CHARACTER*120    FILEIO         
       INTEGER         FOUND          
       REAL            G2             
       REAL            G3             

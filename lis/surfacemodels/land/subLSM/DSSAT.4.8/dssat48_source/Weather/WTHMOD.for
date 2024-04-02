@@ -46,7 +46,7 @@ C=======================================================================
       CHARACTER*1 RADFAC(NMODS), WNDFAC(NMODS)
       CHARACTER*1  WMODB, RNMODE
       CHARACTER*6  SECTION, ERRKEY
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*90 CHAR
       CHARACTER*92 FILEWW
 

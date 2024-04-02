@@ -93,7 +93,7 @@ C-GH  REAL            DJTI
       REAL            ESW(NL)
       CHARACTER*12    FILEC
       CHARACTER*92    FILEGC
-      CHARACTER*30    FILEIO
+      CHARACTER*120    FILEIO
       INTEGER         FOUND
       INTEGER         FROP
       REAL            G2

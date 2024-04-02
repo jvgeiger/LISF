@@ -66,7 +66,7 @@ C-----------------------------------------------------------------------
       IMPLICIT NONE
       SAVE
 
-      CHARACTER FILEIO*30,ISWWAT*1,MEEVP*1,MEPHO*1,METEMP*1,
+      CHARACTER FILEIO*120,ISWWAT*1,MEEVP*1,MEPHO*1,METEMP*1,
      &  TYPPGN*3,TYPPGL*3, CROP*2
       INTEGER nest, t
       INTEGER DAS,DYNAMIC,H,I,NELAYR,NHOUR, DOY, YRDOY, YEAR,
@@ -926,7 +926,7 @@ C=======================================================================
       IMPLICIT NONE
       SAVE
 
-      CHARACTER BLANK*1,ERRKEY*6,FILEC*12,FILECC*92,FILEIO*30,
+      CHARACTER BLANK*1,ERRKEY*6,FILEC*12,FILECC*92,FILEIO*120,
      &  PATHCR*80,SECTION*6
       CHARACTER*80 C80
       INTEGER ERRNUM,FOUND,I,J,LNUM,LUNCRP,LUNIO,NELAYR,NLAYR,
@@ -1159,7 +1159,7 @@ C=======================================================================
       IMPLICIT NONE
       SAVE
 
-      CHARACTER BLANK*1,ERRKEY*6,FILEC*12,FILECC*92,FILEIO*30,
+      CHARACTER BLANK*1,ERRKEY*6,FILEC*12,FILECC*92,FILEIO*120,
      &  PATHCR*80,SECTION*6,TYPPGL*3,TYPPGN*3
       CHARACTER*80 C80
 

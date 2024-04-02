@@ -46,7 +46,7 @@ C=======================================================================
       CHARACTER*1  RNMODE  
       CHARACTER*4 StalkState(NumOfStalks,10)
       !CHARACTER(11) :: CropTypeName
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*92 FILECC, FILEGC
       CHARACTER*6 ECONO
 

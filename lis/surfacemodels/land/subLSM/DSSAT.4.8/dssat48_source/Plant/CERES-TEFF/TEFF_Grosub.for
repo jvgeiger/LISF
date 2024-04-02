@@ -1420,7 +1420,7 @@ C=======================================================================
       CHARACTER*6  ERRKEY, SECTION
       PARAMETER (ERRKEY = 'TEFIPGR')
       CHARACTER*12 FILEC
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*80 PATHCR
 
       INTEGER LINC, LNUM, LUNIO, ERR, FOUND

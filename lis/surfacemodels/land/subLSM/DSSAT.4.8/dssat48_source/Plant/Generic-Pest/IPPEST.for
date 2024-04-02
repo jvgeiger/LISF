@@ -25,7 +25,7 @@ C=======================================================================
       CHARACTER*2 CROP
       CHARACTER*6  SECTION,ERRKEY
       CHARACTER*12 FILEP, FILET
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*80 PATHPE, PATHEX
 
       INTEGER LUNIO

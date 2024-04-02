@@ -409,7 +409,7 @@ C-----------------------------------------------------------------------
       CHARACTER*2 CROP
       CHARACTER*6 SECTION, ERRKEY 
       PARAMETER (ERRKEY = 'IPAPLT')
-      CHARACTER*30 FILEIO 
+      CHARACTER*120 FILEIO 
 
       INTEGER ERRNUM, YRPLT
       INTEGER LINC, LNUM, FOUND

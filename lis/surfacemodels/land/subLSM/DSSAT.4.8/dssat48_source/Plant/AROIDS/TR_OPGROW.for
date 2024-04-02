@@ -24,7 +24,7 @@ C=======================================================================
 
       CHARACTER*1   IDETG, ISWNIT
       CHARACTER*12  OUTG, OUTPN
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*120 NITHEAD(4)
       CHARACTER*250 GROHEAD(4), TEXT
 

@@ -46,7 +46,7 @@ C-----------------------------------------------------------------------
       PARAMETER (ERRKEY = 'IPPLNT')
 
       CHARACTER*12 FILEC, FILEE
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*80 PATHCR, CHAR, PATHEC
       CHARACTER*92 FILECC, FILEGC
 

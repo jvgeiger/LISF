@@ -83,7 +83,7 @@ C-----------------------------------------------------------------------
       CHARACTER*6   ERRKEY,FINDCH,TRNARG
       CHARACTER*8   FNAME,DUMMY,MODELARG
       CHARACTER*12  FILEX   !,DSCSM,INPUT
-      CHARACTER*30  FILEB,FILEIO,FILEIOH
+      CHARACTER*120  FILEB,FILEIO,FILEIOH !JE
       CHARACTER*78  MSG(10)
       CHARACTER*80  PATHEX
       CHARACTER*102 DSSATP
@@ -225,7 +225,7 @@ C-----------------------------------------------------------------------
         ENDIF
         LN = LEN(TRIM(FILEIO))
         FILEIOH = FILEIO
-        WRITE(FILEIOH(LN+1:LN+1),'(A1)') 'H' !JE Append 'H' so we don't overwrite processor number 
+        WRITE(FILEIOH(LN-5:LN-5),'(A1)') 'H' !JE Change 'P' to 'H'
 
         INQUIRE (FILE = FILEIOH,EXIST = FEXIST)
         IF (FEXIST) THEN

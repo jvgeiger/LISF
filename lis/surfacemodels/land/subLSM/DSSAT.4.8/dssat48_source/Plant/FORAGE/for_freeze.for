@@ -32,7 +32,7 @@ C-----------------------------------------------------------------------
       SAVE
 C-----------------------------------------------------------------------
       CHARACTER*1  IDETO
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MESSAGE(10)
       INTEGER MDATE, YRDOY, DAP, NOUTDO, YRPLT, TIMDIF, RUN
       REAL  WLFDOT, WTLF, SLDOT, NRUSLF, TMIN, FREEZ1, FREEZ2

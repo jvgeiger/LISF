@@ -47,7 +47,7 @@ C-----------------------------------------------------------------------
       CHARACTER*1  RNMODE, ISWWAT !, IDETL
       CHARACTER*6  SECTION
       CHARACTER*6, PARAMETER :: ERRKEY = "STEMP "
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO !JE
       INTEGER nest, t !Pang 2024.02.12
       INTEGER DOY, DYNAMIC, I, L, NLAYR
       INTEGER RUN, YRDOY, YEAR

@@ -61,7 +61,7 @@ C=======================================================================
       CHARACTER(len=6)  SECTION,ERRKEY,trtchar
       character(len=10),parameter :: fhout='FORAGE.OUT'
       CHARACTER*12 MOWFILE
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(2)
       CHARACTER*80 FILECC
       CHARACTER*80 PATHEX

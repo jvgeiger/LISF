@@ -37,7 +37,7 @@ C=======================================================================
 
       CHARACTER*1  IDETG, ISWNIT, ISWWAT
       CHARACTER*2  CROP
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 
       INTEGER DYNAMIC, YREND, ISDATE, ISTAGE
       INTEGER MDATE, NLAYR, RUN, YRDOY, YREMRG, YRPLT, YRSIM
@@ -340,7 +340,7 @@ C-----------------------------------------------------------------------
 
       CHARACTER*4   C4
       CHARACTER*12  FILEC
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*80  PATHCR
       CHARACTER*92  FILECC
       CHARACTER*180 CHAR

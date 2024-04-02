@@ -23,7 +23,7 @@ C-----------------------------------------------------------------------
       CHARACTER*1  RNMODE, ISWWAT
       CHARACTER*6  SECTION
       CHARACTER*6, PARAMETER :: ERRKEY = "STEMP "
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(10)
 
       INTEGER DOY, DYNAMIC, I, L, MSGCOUNT, NLAYR

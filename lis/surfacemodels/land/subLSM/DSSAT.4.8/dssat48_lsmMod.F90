@@ -73,6 +73,10 @@ module dssat48_lsmMod
      character*256      :: rformat
      integer :: sm_coupling
      !-------------------------------------------------------------------------
+     !  DSSAT I/O
+     !-------------------------------------------------------------------------
+     character*128      :: outpath !path for INP, INH, and .OUT files
+     !-------------------------------------------------------------------------
      ! Parameter file names
      !-------------------------------------------------------------------------
      character*128      :: LDT_ncvar_CDL
@@ -153,7 +157,7 @@ contains
     CHARACTER*1   :: RNMODE
     CHARACTER*8   :: MODELARG
     CHARACTER*12  :: FILEX
-    CHARACTER*30  :: FILEIO
+    CHARACTER*120 :: FILEIO
     CHARACTER*4   :: fproc      !JE
     CHARACTER*80  :: PATHEX
     CHARACTER*120 :: FILECTL
@@ -176,10 +180,13 @@ contains
     ! read configuation information from lis.config file
     call dssat48_readcrd()
     !PRINT*,'Im in dssat48_init'
-        
+    
         do n=1, LIS_rc%nnest
             !Get  Dssat version # which is used to read dssat prms files
             WRITE(ModelVerTxt,'(I2.2,I1)') Version%Major, Version%Minor !Obtain Dssat version #
+
+            dssat48_struc(n)%outpath = trim(LIS_rc%odir)
+            write(LIS_logunit,*) "Writing DSSAT INP, INH, and .OUT files to ", dssat48_struc(n)%outpath
 
             ! allocate memory for all tiles in current nest 
             allocate(dssat48_struc(n)%dssat48(LIS_rc%npatch(n, LIS_rc%lsm_index)))
@@ -238,10 +245,11 @@ contains
                  !YRDOY_END = 9999999 !Can be removed
                  RNMODE = 'Q'
 
+                 print*, 'Writing INP Files to ', trim(dssat48_struc(n)%outpath)
                  !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
-                 FILEIO = 'DSSAT48.INP.'//fproc
-                 !print*, FILEIO
+                 FILEIO = trim(dssat48_struc(n)%outpath)//'DSSAT48.INP.'//fproc
+                 print*, 'FILEIO: ', FILEIO
 
                  ROTNUM = 1
                  !TRTREP = 1 !Not used in CSM

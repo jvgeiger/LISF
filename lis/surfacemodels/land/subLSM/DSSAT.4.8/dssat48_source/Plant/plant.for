@@ -857,7 +857,7 @@ c     Total LAI must exceed or be equal to healthy LAI:
       PARAMETER (ERRKEY = 'IPASCE')
 
       CHARACTER*12 FILEC
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(6)
       CHARACTER*80 PATHCR, CHAR
       CHARACTER*92 FILECC

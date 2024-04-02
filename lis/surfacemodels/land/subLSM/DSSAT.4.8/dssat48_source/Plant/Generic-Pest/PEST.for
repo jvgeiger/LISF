@@ -52,7 +52,7 @@ C=======================================================================
       CHARACTER*5   PID(MAXPEST)
       CHARACTER*5   PCPID(MAXPEST,6)
       CHARACTER*12  FILEP, FILET
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*80  PATHPE, PATHEX
       INTEGER nest, t
       INTEGER DYNAMIC, LUNIO, MULTI, PCN

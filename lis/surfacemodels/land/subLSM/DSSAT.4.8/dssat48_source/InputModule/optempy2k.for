@@ -76,7 +76,7 @@ C=======================================================================
       CHARACTER*8  MODEL
       CHARACTER*12 FILEX
       CHARACTER*16 VRNAME
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO !JE
       CHARACTER*42 CHEXTR(NAPPL)
       CHARACTER*75 FMT
       CHARACTER*80 PATHEX

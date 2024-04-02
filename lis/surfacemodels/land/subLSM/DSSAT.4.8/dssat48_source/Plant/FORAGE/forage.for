@@ -50,7 +50,7 @@ C=======================================================================
      &    ISWWAT, ISWDIS, MEPHO, RNMODE
       CHARACTER*2 CROP
       CHARACTER*6 ECONO
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*92 FILECC, FILEGC
 
       INTEGER DAS, DYNAMIC, RUN

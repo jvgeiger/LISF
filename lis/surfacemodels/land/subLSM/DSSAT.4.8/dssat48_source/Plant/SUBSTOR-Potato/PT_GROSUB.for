@@ -44,7 +44,7 @@ C-----------------------------------------------------------------------
       LOGICAL FIRST
 
       CHARACTER*1  ISWNIT, PLME
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 
       INTEGER DYNAMIC, ISTAGE
       INTEGER NLAYR, YRDOY
@@ -709,7 +709,7 @@ C=======================================================================
       CHARACTER*6   SECTION, ECONO, ECOTYP
       CHARACTER*12  FILEC, FILEE
       CHARACTER*16  ECONAM
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*80  PATHCR, PATHEC
       CHARACTER*92  FILECC, FILEGC
       CHARACTER*180 CHAR

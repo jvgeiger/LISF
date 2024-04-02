@@ -56,7 +56,7 @@ C=======================================================================
       CHARACTER*5  FERMET(NAPPL), FERTYPE_CDE(NAPPL)
       CHARACTER*6  SECTION
       CHARACTER*7  AppType
-      CHARACTER*30 FILEIO 
+      CHARACTER*120 FILEIO 
       CHARACTER*78 MSG(10)
       CHARACTER*90 CHAR
       CHARACTER*6, PARAMETER :: ERRKEY = 'FPLACE'

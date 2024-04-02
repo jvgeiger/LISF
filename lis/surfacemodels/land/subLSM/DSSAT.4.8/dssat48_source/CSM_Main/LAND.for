@@ -44,7 +44,7 @@ C-----------------------------------------------------------------------
       CHARACTER*6  ERRKEY
       PARAMETER   (ERRKEY = 'LAND  ')
       CHARACTER*8  MODEL
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       
 C-----------------------------------------------------------------------
 C     Date / Timing / Sequencing Variables

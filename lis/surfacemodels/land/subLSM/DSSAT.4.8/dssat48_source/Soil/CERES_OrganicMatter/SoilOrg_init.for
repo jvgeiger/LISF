@@ -53,7 +53,7 @@ C=======================================================================
       CHARACTER*2 CROP, PREV_CROP
       CHARACTER*6 ERRKEY, SECTION
       CHARACTER*17 SOILLAYERTYPE(NL)
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(8)
       PARAMETER (ERRKEY = 'SOLORG')
 

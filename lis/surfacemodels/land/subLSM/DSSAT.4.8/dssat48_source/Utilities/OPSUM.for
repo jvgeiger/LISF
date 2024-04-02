@@ -114,7 +114,7 @@ C-----------------------------------------------------------------------
       CHARACTER*12 OUTS, SEVAL, FMT
       PARAMETER (OUTS = 'Summary.OUT')
       CHARACTER*25 TITLET
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*60 ENAME
 
       INTEGER ADAT, CNAM, CRPNO, CWAM, DNR1, DNR7, DRCM, DWAP, DYNAMIC
