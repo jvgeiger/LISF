@@ -50,7 +50,7 @@ C=======================================================================
       CHARACTER*1  IIRRI, ISWWAT, PLME, RNMODE, MESOM
       CHARACTER*5 IOFF   ! old IRON, for compatibility with old files
       CHARACTER*6  SECTION
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*90 CHAR
       CHARACTER*78 MSG(10)
       INTEGER nest, t

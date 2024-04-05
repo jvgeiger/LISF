@@ -98,7 +98,7 @@ C             CHP Added TRTNUM to CONTROL variable.
         CHARACTER (len=2)  CROP
         CHARACTER (len=8)  MODEL, ENAME
         CHARACTER (len=12) FILEX
-        CHARACTER (len=30) FILEIO
+        CHARACTER (len=120) FILEIO
         CHARACTER (len=102)DSSATP
         CHARACTER (len=120) :: SimControl = 
      &  "                                                            "//

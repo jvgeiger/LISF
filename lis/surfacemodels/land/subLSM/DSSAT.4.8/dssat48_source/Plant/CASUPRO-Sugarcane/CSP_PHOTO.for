@@ -44,7 +44,7 @@ C=======================================================================
       CHARACTER*3 TYPPGN, TYPPGT
       CHARACTER*4 StalkState(NumOfStalks,10)
       CHARACTER*6 ECONO
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*92 FILECC, FILEGC
 
       INTEGER DAS, DYNAMIC, H, PLUN, Smax, YRDOY, YRSIM, Zone
@@ -940,7 +940,7 @@ C=======================================================================
       CHARACTER*3  TYPPGN, TYPPGT
       CHARACTER*6  ERRKEY, SECTION
       CHARACTER*12 FILEC
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*80 PATHCR,CHAR
       CHARACTER*92 FILECC
 

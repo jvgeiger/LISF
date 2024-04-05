@@ -35,7 +35,7 @@ C-----------------------------------------------------------------------
       CHARACTER*1  RNMODE, ISWWAT
       CHARACTER*6  SECTION
       CHARACTER*6, PARAMETER :: ERRKEY = "EPIC STEMP"
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(3)
       INTEGER nest, t
       INTEGER DOY, DYNAMIC, I, L, NLAYR

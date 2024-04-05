@@ -36,7 +36,7 @@ C=======================================================================
       SAVE
 
       CHARACTER*3  TYPPGN, TYPPGT
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 
       INTEGER DYNAMIC
       INTEGER DAS, NR5
@@ -302,7 +302,7 @@ C=======================================================================
       CHARACTER*3  TYPPGN, TYPPGT
       CHARACTER*6  ERRKEY, SECTION
       CHARACTER*12 FILEC
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*80 PATHCR,CHAR
       CHARACTER*92 FILECC
 

@@ -36,9 +36,9 @@ C-----------------------------------------------------------------------
       CHARACTER*6 ERRKEY
       PARAMETER (ERRKEY = 'CANOPY')
       CHARACTER*4 StalkState(NumOfStalks,10)
-	CHARACTER*6   SECTION
+      CHARACTER*6   SECTION
       CHARACTER*6   ECOTYP, ECONO
-	CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*80  CHAR
       CHARACTER*92  FILECC, FILEGC
       CHARACTER*255 C255

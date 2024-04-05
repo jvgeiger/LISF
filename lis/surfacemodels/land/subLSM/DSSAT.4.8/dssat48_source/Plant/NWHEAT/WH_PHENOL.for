@@ -168,7 +168,7 @@ C-----------------------------------------------------------------------
       CHARACTER*12    FILES
       CHARACTER*12    FILEE     
       CHARACTER*92    FILEGC
-      CHARACTER*30    FILEIO 
+      CHARACTER*120   FILEIO 
       CHARACTER*78 MSG(2)
       INTEGER         FOUND          
       REAL            G2             
@@ -1359,7 +1359,7 @@ cbak  ears that is not included in lai calculation.
       PARAMETER    (ERRKEY='MZPHEN')          
 !*!      PARAMETER    (ERRKEY='WHPHEN')
       CHARACTER*92 FILECC 
-      CHARACTER*30 FILEIO     
+      CHARACTER*120 FILEIO     
       CHARACTER*12 FILES
       CHARACTER*80 PATHSR
       CHARACTER*6  SECTION

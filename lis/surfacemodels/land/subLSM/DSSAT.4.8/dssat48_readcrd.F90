@@ -78,8 +78,7 @@ subroutine dssat48_readcrd()
          write(LIS_logunit,*) "LIS - DSSAT Soil Moisture Coupling OFF"
         endif
     enddo 
-    
-    
+
     !---------------------------!
     ! Constant Parameters       !
     !---------------------------!

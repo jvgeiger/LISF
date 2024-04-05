@@ -19,7 +19,7 @@ C=======================================================================
 
       CHARACTER*(*) ERRKEY
       CHARACTER*11, PARAMETER :: InfoOut = 'INFO.OUT'
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*(*) MESSAGE(*)
 
       INTEGER ICOUNT, DOY, I, LUN, OLDRUN, RUN, YEAR, YRDOY

@@ -171,7 +171,7 @@ C-----------------------------------------------------------------------
       CHARACTER*12    FILES
       CHARACTER*12    FILEE
       CHARACTER*92    FILEGC
-      CHARACTER*30    FILEIO
+      CHARACTER*120    FILEIO
       CHARACTER*78 MSG(2)
       INTEGER         FOUND
       REAL            G2

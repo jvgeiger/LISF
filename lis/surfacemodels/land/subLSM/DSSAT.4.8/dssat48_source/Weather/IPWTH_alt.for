@@ -53,7 +53,7 @@ C=======================================================================
       CHARACTER*10 TEXT
       CHARACTER*12 FILEW, LastFILEW, FILEWC, FILEWG
       CHARACTER*15 CXCRD, CYCRD      
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(8)
       CHARACTER*80 PATHWTC, PATHWTG, PATHWTW, WPath
       CHARACTER*92 FILEWW, WFile

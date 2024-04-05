@@ -40,7 +40,7 @@ C-----------------------------------------------------------------------
 
       CHARACTER*1  IDETL, IDETN
       CHARACTER*13 PNBAL
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 
       INTEGER DYNAMIC, ERRNUM, YRDOY
       INTEGER YRSIM, RUN, LUNPNC

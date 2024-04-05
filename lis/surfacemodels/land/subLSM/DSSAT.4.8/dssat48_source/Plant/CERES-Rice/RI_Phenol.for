@@ -1107,7 +1107,7 @@ C=======================================================================
       CHARACTER*1  PLME
       CHARACTER*6  ERRKEY, SECTION
       PARAMETER (ERRKEY = 'IPRICE')
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       INTEGER LINC, LNUM, LUNIO, ERR, FOUND
 
 !     CHP , US, JF 2019-04-25 IFDC

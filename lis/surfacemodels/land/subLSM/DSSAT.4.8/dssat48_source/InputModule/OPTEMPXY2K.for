@@ -57,9 +57,9 @@ C=======================================================================
       CHARACTER* 7 ERRKEY
       CHARACTER* 8 MODEL
       CHARACTER*16 VRNAME
-      CHARACTER*30 FILEIO,FILEIOH
+      CHARACTER*120 FILEIO,FILEIOH !JE
       CHARACTER*42 CHEXTR(NAPPL)
-	CHARACTER*80 PATHEX
+      CHARACTER*80 PATHEX
       CHARACTER*1000 ATLINE	
 
       INTEGER NYRS,I,LUNIO,ERRNUM,FROP,YRIC
@@ -81,7 +81,7 @@ C=======================================================================
 
       LN = LEN(TRIM(FILEIO))
       FILEIOH = FILEIO
-      WRITE(FILEIOH(LN+1:LN+1),'(A1)') 'H' !JE Append 'H' so we don't overwrite processor number   
+      WRITE(FILEIOH(LN-5:LN-5),'(A1)') 'H' !JE Change 'P' to 'H'  
 C-----------------------------------------------------------------------
 C
 C-----------------------------------------------------------------------

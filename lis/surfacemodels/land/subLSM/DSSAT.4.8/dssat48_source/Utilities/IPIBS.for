@@ -63,7 +63,7 @@ C-----------------------------------------------------------------------
       PARAMETER    (ERRKEY = 'IPIBS ')
       CHARACTER*8  FNAME, MODEL
       CHARACTER*12 FILEX, FILEA, FILEC
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 !     CHARACTER*78 MESSAGE(10)
       CHARACTER*80 PATHCR,PATHEX
 

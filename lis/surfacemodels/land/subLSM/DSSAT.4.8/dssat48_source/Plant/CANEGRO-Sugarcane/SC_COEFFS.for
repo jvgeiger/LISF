@@ -107,7 +107,7 @@ c         The name of the cultivar file
 !          CHARACTER*256 ECO_FNAME
 
 !         Name of INH file (temporary input, like INP)
-          CHARACTER*30 FILEIOH
+          CHARACTER*120 FILEIOH
 
 c         The Code (IB***) of the cultivar (internal var) and eco type:
           CHARACTER*6 CULT_CODE, ECOTYPE
@@ -147,7 +147,7 @@ C-KRT     CHARACTER BLANK*1,ERRKEY*6,FILEC*12,FILECC*92,FILEIO*30,
 c                   Eco file name from INP
 C-KRT&              FILEE*12, FILEEE*92,
 C-KRT&    PATHCR*80,SECTION*6, ERRMSG*78(1)          
-	      CHARACTER BLANK*1,ERRKEY*6,FILEC*12,FILECC*92,FILEIO*30
+	      CHARACTER BLANK*1,ERRKEY*6,FILEC*12,FILECC*92,FILEIO*120
 	      CHARACTER FILEE*12, FILEEE*92
 	      CHARACTER PATHCR*80, PATHER*80, SECTION*6
 	      CHARACTER*78 ERRMSG(1)
@@ -411,7 +411,7 @@ c                 These are still in a single string, and need to be parsed.
 !                 CHP 4/1/2010 Read cultivar info directly from INH file
                   I = LEN(TRIM(CONTROL % FILEIO))
                   FILEIOH = CONTROL % FILEIO
-                  WRITE(FILEIOH(I+1:I+1),'(A1)') 'H' !JE Don't overwrite processor number
+                  WRITE(FILEIOH(I-5:I-5),'(A1)') 'H' !JE Change 'P' to 'H'
 
                   OPEN(LUNIO,FILE=FILEIOH,STATUS='OLD',IOSTAT=ERRNUM)
                   IF (ERRNUM .NE. 0) CALL ERROR(ERRKEY,ERRNUM,FILEIOH,0)

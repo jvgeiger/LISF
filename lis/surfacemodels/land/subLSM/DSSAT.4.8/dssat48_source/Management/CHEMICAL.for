@@ -28,7 +28,7 @@ C-----------------------------------------------------------------------
       CHARACTER*5 CHCOD(10), CHMET(10), CHT(10)
       CHARACTER*6 ERRKEY, SECTION
       PARAMETER (ERRKEY = 'Chemic')
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*90 CHAR
 
       INTEGER DYNAMIC, ERRNUM, FOUND, I, IDATE, LNUM, LUNIO

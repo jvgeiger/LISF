@@ -73,7 +73,7 @@ C======================================================================
       REAL            EOP           
       CHARACTER*6     ERRKEY  
       REAL            ESW(NL)     
-      CHARACTER*30    FILEIO
+      CHARACTER*120    FILEIO
       INTEGER         FROP    
       REAL            GDDAE
       REAL            GNUP      

@@ -300,7 +300,7 @@ C-----------------------------------------------------------------------
       CHARACTER*5 HCOM(3), HSIZ(3)
       CHARACTER*6 SECTION, ERRKEY 
       PARAMETER (ERRKEY = 'IPAHAR')
-      CHARACTER*30 FILEIO 
+      CHARACTER*120 FILEIO 
       CHARACTER*90 CHAR
 
       INTEGER ERRNUM

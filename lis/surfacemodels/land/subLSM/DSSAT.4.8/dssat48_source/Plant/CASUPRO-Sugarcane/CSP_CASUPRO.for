@@ -52,7 +52,7 @@ C=======================================================================
       CHARACTER*2 CROP
       CHARACTER*4 StalkState(NumOfStalks,10)
       CHARACTER*6 ECONO
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*10 STNAME(20)
       CHARACTER*92 FILECC, FILEGC
        

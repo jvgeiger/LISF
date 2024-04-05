@@ -100,7 +100,7 @@ C=======================================================================
       CHARACTER* 16 ECONAM,VRNAME
 !      CHARACTER* 18 RUNARG
       CHARACTER* 25 TITLET
-      CHARACTER* 30 FILEIO
+      CHARACTER* 120 FILEIO !JE
       CHARACTER* 42 CHEXTR(NAPPL)
       CHARACTER* 80 PATHEX
       CHARACTER* 92 FILEX_P

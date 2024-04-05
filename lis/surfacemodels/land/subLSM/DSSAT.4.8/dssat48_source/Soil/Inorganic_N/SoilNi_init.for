@@ -42,7 +42,7 @@ C=======================================================================
 
       CHARACTER*1 RNMODE, ISWNIT
       CHARACTER*6 ERRKEY, SECTION, DUMMY
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       PARAMETER (ERRKEY = 'SOILNI')
 
       INTEGER ERRNUM, FOUND, L, LNUM

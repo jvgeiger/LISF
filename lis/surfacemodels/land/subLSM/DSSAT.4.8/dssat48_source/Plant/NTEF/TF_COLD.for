@@ -84,7 +84,7 @@ C  FSR added coefficients from WHAPS cultivar file
       INTEGER     istage
       INTEGER     leafno
       INTEGER     YRDOY     
-      CHARACTER*30 FILEIO  
+      CHARACTER*120 FILEIO  
       CHARACTER*1  IDETO  
       CHARACTER*1  ISWWAT
       CHARACTER*78 MSG(10)

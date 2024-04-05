@@ -49,7 +49,7 @@
 !-----------------------------------------------------------------------
       CHARACTER*6, PARAMETER :: ERRKEY='RTSOLV'
       CHARACTER*6 SECTION
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(5) 
       CHARACTER*120 CHAR
 

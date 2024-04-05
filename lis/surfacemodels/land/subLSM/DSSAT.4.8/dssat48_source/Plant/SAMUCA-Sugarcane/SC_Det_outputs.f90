@@ -24,7 +24,7 @@
     INTEGER         DYNAMIC         ! Dynamic
     LOGICAL         FILE_EXISTS     ! Does the file exist, is this the first run?
     CHARACTER*1     IDETG           ! Print Output flag
-    CHARACTER*20    FILEIO          ! local ?
+    CHARACTER*120    FILEIO          ! local ?
     CHARACTER*21    OFILE_det       ! Filename detailed (phytomers)
     CHARACTER*21    OFILE_pho       ! Filename photosynthesis (layered canopy)
     CHARACTER*21    OFILE_str       ! Filename crop stresses

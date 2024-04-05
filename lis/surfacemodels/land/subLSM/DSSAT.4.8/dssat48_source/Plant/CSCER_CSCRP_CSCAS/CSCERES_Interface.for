@@ -21,7 +21,7 @@ C=======================================================================
 
       CHARACTER*1   IDETG, IDETL, IDETO, IDETS, ISWWAT, ISWNIT, RNMODE
       CHARACTER*2   CROP
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*250 FILEIOCS
 
       INTEGER DYNAMIC, RUN, TN, RUNI, RN, ON
@@ -84,7 +84,7 @@ C=======================================================================
 
       DEPMAX = DS(NLAYR)
 
-      FILEIOCS(1:30) = FILEIO
+      FILEIOCS(1:120) = FILEIO
 
       CALL YR_DOY(YRDOY, YEAR, DOY)
 

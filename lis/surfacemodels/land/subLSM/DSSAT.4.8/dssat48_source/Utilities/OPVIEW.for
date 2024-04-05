@@ -34,7 +34,7 @@ C=======================================================================
       CHARACTER*16 CROPD
       CHARACTER*12 FILEA, OUTO
       CHARACTER*25 TITLET
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*84 SimText
 
       INTEGER DAP, DOY, DSTRES, DYNAMIC, ERRNUM, FOUND

@@ -95,7 +95,7 @@ C=======================================================================
       CHARACTER*2  XPODF, CROP
       CHARACTER*6  ERRKEY
       PARAMETER (ERRKEY = 'FRGROW')
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*92 FILECC, FILEGC
       CHARACTER*78 MSG(2)
       CHARACTER*6   SECTION
@@ -2096,7 +2096,7 @@ C=======================================================================
       IMPLICIT NONE
 !-----------------------------------------------------------------------
       CHARACTER*1  IDETO, IHARI
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MESSAGE(10)
       INTEGER NOUTDO, YRDOY, YRPLT, MDATE, DAP, TIMDIF, RUN
       INTEGER YR, DOY
@@ -2184,7 +2184,7 @@ C=======================================================================
       CHARACTER*6 ERRKEY
       PARAMETER (ERRKEY = 'IPGROW')
       CHARACTER*6 SECTION, ECONO, ECOTYP
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*80 C80
       CHARACTER*92 FILECC, FILEGC
       CHARACTER*255 C255

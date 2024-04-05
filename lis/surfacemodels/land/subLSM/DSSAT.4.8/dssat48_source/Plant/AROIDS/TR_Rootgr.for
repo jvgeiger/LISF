@@ -189,7 +189,7 @@ C=======================================================================
 
       CHARACTER*6  ERRKEY, SECTION
       PARAMETER (ERRKEY = 'IPRICE')
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 
       INTEGER LNUM, LUNIO, ERR, FOUND
 

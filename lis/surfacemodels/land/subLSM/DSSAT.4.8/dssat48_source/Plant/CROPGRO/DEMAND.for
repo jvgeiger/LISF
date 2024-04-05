@@ -46,7 +46,7 @@ C=======================================================================
       CHARACTER*3 TYPSDT
       CHARACTER*6   ERRKEY
       PARAMETER (ERRKEY = 'DEMAND')
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(2)
       CHARACTER*92 FILECC, FILEGC
 
@@ -683,7 +683,7 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
       PARAMETER (ERRKEY = 'DEMAND')
       CHARACTER*6   SECTION
       CHARACTER*6   ECOTYP, ECONO
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*80  C80
       CHARACTER*92  FILECC, FILEGC
       CHARACTER*255 C255

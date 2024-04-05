@@ -60,7 +60,7 @@ C-----------------------------------------------------------------------
       CHARACTER(len=3)   ModelVersionDecimal
       CHARACTER(len=9)   VERSION_TXT
       CHARACTER(len=12)  FILESS, NAMEF
-      CHARACTER(len=30)  FILEIO
+      CHARACTER(len=120)  FILEIO
       CHARACTER(len=78)  MSG(4)
       CHARACTER(len=80)  PATHSD
       CHARACTER(len=92)  SOILNF

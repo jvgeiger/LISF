@@ -72,7 +72,7 @@ c     The file unit number for the growth output file.
 c     local run number
       INTEGER RUN
 c     local ?
-      CHARACTER*20 FILEIO
+      CHARACTER*120 FILEIO
 
 c     Soil water content
       REAL SW(NL)

@@ -23,7 +23,7 @@ C=======================================================================
 
       CHARACTER*(*) ERRKEY
       CHARACTER*11, PARAMETER :: WarnOut = 'WARNING.OUT'
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*(*)  MESSAGE(*)
 
       INTEGER ICOUNT, DOY, I, LUN, OLDRUN, RUN, YEAR, YRDOY, ErrCode

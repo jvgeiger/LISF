@@ -31,7 +31,7 @@ C=======================================================================
 
       CHARACTER*1  ISWWAT
       CHARACTER*2  CROP
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 
       INTEGER DOY, DYNAMIC, IEMRG, ISDATE, ISTAGE, L0, I, L
       INTEGER MDATE, NDAS, NLAYR, YEAR, YRDOY, YRPLT, YRSIM
@@ -348,7 +348,7 @@ C-----------------------------------------------------------------------
 
       CHARACTER*2   CROP
       CHARACTER*6   SECTION
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
 
       INTEGER ERR, FOUND, LINC, LNUM, IEMRG
 

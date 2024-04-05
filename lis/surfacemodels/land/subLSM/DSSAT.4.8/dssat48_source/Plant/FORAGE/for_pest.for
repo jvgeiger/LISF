@@ -58,7 +58,7 @@ C=======================================================================
       CHARACTER*5   PID(200)
       CHARACTER*5   PCPID(200,6)
       CHARACTER*12  FILEP, FILET
-      CHARACTER*30  FILEIO
+      CHARACTER*120  FILEIO
       CHARACTER*80  PATHPE
 
       INTEGER DYNAMIC, LUNIO, MULTI, PCN

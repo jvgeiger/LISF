@@ -791,7 +791,7 @@ C=======================================================================
       CHARACTER*1  PLME
       CHARACTER*6  ERRKEY, SECTION
       PARAMETER (ERRKEY = 'IPRICE')
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       INTEGER LINC, LNUM, LUNIO, ERR, FOUND
       REAL ATEMP, G2, G4, G3, P1, P3, P4, P5, PHINT, PCINT, PCGRD
 	REAL SDAGE

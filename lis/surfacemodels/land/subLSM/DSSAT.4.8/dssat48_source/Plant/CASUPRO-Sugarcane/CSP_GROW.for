@@ -63,7 +63,7 @@ C=======================================================================
       CHARACTER*2  CROP   !, XPODF
       CHARACTER*6  ERRKEY
       PARAMETER (ERRKEY = 'GROW  ')
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*92 FILECC, FILEGC
 
       INTEGER DYNAMIC, NOUTDO, L, NLAYR
@@ -1117,7 +1117,7 @@ C=======================================================================
       CHARACTER*6 ERRKEY
       PARAMETER (ERRKEY = 'IPGROW')
       CHARACTER*6 SECTION, ECONO, ECOTYP
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*80 C80
       CHARACTER*92 FILECC, FILEGC
       CHARACTER*255 C255

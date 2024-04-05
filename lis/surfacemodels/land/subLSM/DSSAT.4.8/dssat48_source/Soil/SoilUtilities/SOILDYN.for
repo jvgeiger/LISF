@@ -48,7 +48,7 @@ C-----------------------------------------------------------------------
       CHARACTER*1 ISWTIL, ISWWAT, MEINF, MESOM, RNMODE, UPCASE
       CHARACTER*6 SECTION
       CHARACTER*7, PARAMETER :: ERRKEY = 'SOILDYN'
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       CHARACTER*78 MSG(NL+10)
       CHARACTER*200 CHAR
       INTEGER nest, t

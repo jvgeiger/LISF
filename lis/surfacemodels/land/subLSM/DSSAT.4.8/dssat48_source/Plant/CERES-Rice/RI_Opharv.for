@@ -46,7 +46,7 @@ C=======================================================================
       CHARACTER*6, PARAMETER :: ERRKEY = 'OPHARV'
       CHARACTER*10 STNAME(20)
       CHARACTER*12 FILEA
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
 	CHARACTER*80 PATHEX
 
       INTEGER TRTNUM

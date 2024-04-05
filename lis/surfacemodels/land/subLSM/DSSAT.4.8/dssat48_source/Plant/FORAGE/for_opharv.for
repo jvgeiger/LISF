@@ -36,7 +36,7 @@ C-----------------------------------------------------------------------
       CHARACTER*6, PARAMETER :: ERRKEY = 'OPHARV'
       CHARACTER*10 STNAME(20)
       CHARACTER*12 FILEA
-      CHARACTER*30 FILEIO
+      CHARACTER*120 FILEIO
       character*80 pathex
 
       INTEGER DFLR,DFPD,DFSD,DHRV,DNR8,DMAT,DNR1,DNR3,DNR5,DNR7
