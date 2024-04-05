@@ -690,6 +690,7 @@ contains
   ! FAO-only
     external read_FAO_soilfractions, read_FAO_texture, read_FAO_color, &
              read_FAO_porosity
+  
 
   ! STATSGO+FAO blended global product (NCAR/NCEP)
     external set_STATSGOFAO_LIS_texture_attribs
@@ -734,9 +735,6 @@ contains
   ! SSURGO
     external set_SSURGO_texture_attribs
     external read_SSURGO_texture
-
-  ! SSURGO MUKEY
-    external set_SSURGO_mukey_attribs
     external read_SSURGO_mukey
 
 !== FAO (global; original LIS-processed):
@@ -840,15 +838,11 @@ contains
          read_ISRIC_soilfractions)
 
 !=== SSURGO mukey
-    call registersettextureattribs(trim(LDT_SSURGOmukeyId)//char(0),&
+    call registersettextureattribs(trim(LDT_SSURGOsoilId)//char(0),&
                                  set_SSURGO_texture_attribs)
-    call registerreadsoiltexture(trim(LDT_SSURGOmukeyId)//char(0), &
+    call registerreadsoiltexture(trim(LDT_SSURGOsoilId)//char(0), &
          read_SSURGO_texture)
-
-!=== SSURGO raw mukey
-    call registersettextureattribs(trim(LDT_SSURGOrawmukeyId)//char(0),&
-                                 set_SSURGO_mukey_attribs)
-    call registerreadsoiltexture(trim(LDT_SSURGOrawmukeyId)//char(0), &
+    call registerreadmukey(trim(LDT_SSURGOsoilId)//char(0), &
          read_SSURGO_mukey)
 
   end subroutine LDT_soils_plugin

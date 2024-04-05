@@ -287,8 +287,7 @@ module LDT_pluginIndices
    character*50, public,  parameter :: LDT_specialsoilId     = "Special"
    character*50, public,  parameter :: LDT_ISRICsoilId       = "ISRIC"
    character*50, public,  parameter :: LDT_ukmofracId        = "UKMOFRAC"        ! UKMO
-   character*50, public,  parameter :: LDT_SSURGOmukeyId     = "SSURGO"          ! SSURGO
-   character*50, public,  parameter :: LDT_SSURGOrawmukeyId  = "SSURGO MUKEY"    ! SSURGO RAW MUKEY 
+   character*50, public,  parameter :: LDT_SSURGOsoilId      = "SSURGO"          ! SSURGO soil texture
 
 !-------------------------------------------------------------------------
 ! LAI/SAI sources

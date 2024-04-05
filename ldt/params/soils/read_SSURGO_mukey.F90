@@ -10,14 +10,14 @@
 #include "LDT_misc.h"
 !BOP
 !
-! !ROUTINE: read_SSURGO_texture
-! \label{read_SSURGO_texture}
+! !ROUTINE: read_SSURGO_mukey
+! \label{read_SSURGO_mukey}
 !
 ! !REVISION HISTORY:
 !  31 Jul 2017: Sujay Kumar; Initial Specification
 !
 ! !INTERFACE:
-subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
+subroutine read_SSURGO_mukey( n, num_bins, fgrd) !, mukey_layers )
 
 ! !USES:
   use LDT_coreMod
@@ -38,10 +38,10 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
   integer,intent(in)    :: n
   integer,intent(in)    :: num_bins   ! Number of soil types
   real,   intent(inout) :: fgrd(LDT_rc%lnc(n),LDT_rc%lnr(n),num_bins)
-  real,   intent(inout) :: texture_layers(LDT_rc%lnc(n),LDT_rc%lnr(n),1)
+!  real,   intent(inout) :: mukey_layers(LDT_rc%lnc(n),LDT_rc%lnr(n),1)
 !
 ! !DESCRIPTION:
-!  This subroutine retrieves SSURGO soil texture data and reprojects
+!  This subroutine retrieves SSURGO soil mukey data and reprojects
 !  it to the latlon projection. 
 !
 !  The arguments are:
@@ -49,7 +49,7 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
 !  \item[n]
 !   index of the nest
 !  \item[fgrd]
-!   output field with the retrieved soil texture
+!   output field with the retrieved soil mukey
 !  \end{description}
 !EOP
 
@@ -93,22 +93,22 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
   logical*1 :: lo2(LDT_rc%lnc(n)*LDT_rc%lnr(n), num_bins) ! Output logical mask (go2)
 
 ! ___________________________________________________________________
-   water_class = 14 !setting to a value from STATSGO for water
+!   water_class = 14 !setting to a value from STATSGO for water
 
    temp = LDT_rc%udef
    gridcnt = 0.
    fgrd = 0.
-   texture_layers = 0.
+!   mukey_layers = 0.
    param_gridDesc = 0.
 
-   inquire(file=trim(LDT_rc%txtfile(n)), exist=file_exists)
+   inquire(file=trim(LDT_rc%mukeyfile(n)), exist=file_exists)
    if(.not.file_exists) then 
-     write(LDT_logunit,*) "[ERR] SSURGO mukey map ",trim(LDT_rc%txtfile(n))," not found."
+     write(LDT_logunit,*) "[ERR] SSURGO mukey map ",trim(LDT_rc%mukeyfile(n))," not found."
      write(LDT_logunit,*) "Program stopping ..."
      call LDT_endrun
    endif
-   write(LDT_logunit,*) "[INFO] Reading SSURGO texture file: ",&
-                                trim(LDT_rc%txtfile(n))
+   write(LDT_logunit,*) "[INFO] Reading SSURGO mukey file: ",&
+                                trim(LDT_rc%mukeyfile(n))
 
 #if (defined USE_GDAL)
    file_read_status = .false. 
@@ -117,11 +117,11 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
   
    ! Use GDAL routines to open the tiff files:
    driver = gdalgetdriverbyname('Tif'//CHAR(0))
-   ds = gdalopen( trim(LDT_rc%txtfile(n))//CHAR(0), GA_ReadOnly)
+   ds = gdalopen( trim(LDT_rc%mukeyfile(n))//CHAR(0), GA_ReadOnly)
   
    if( .not.gdalassociated(ds) ) then
       write(LDT_logunit,*) "[ERR] Opening dataset on file ",&
-           trim(LDT_rc%txtfile(n))," failed ..."
+           trim(LDT_rc%mukeyfile(n))," failed ..."
       call LDT_endrun
    end if
   
@@ -157,7 +157,7 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
    band = gdalgetrasterband(ds, 1)
    if (.NOT.gdalassociated(band)) THEN
       write(LDT_logunit,*) '[ERR] Failed getting raster band from GeoTIFF dataset on file, ',&
-           TRIM(LDT_rc%txtfile(n))
+           TRIM(LDT_rc%mukeyfile(n))
       call LDT_endrun()
    endif
     
@@ -165,7 +165,7 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
    ierr = gdalrasterio_f(band, GF_Read, 0, 0, zval)
    if (ierr /= 0) THEN
       write(LDT_logunit,*) '[ERR] Reading data from GeoTIFF dataset on file ',&
-           TRIM(LDT_rc%txtfile(n))
+           TRIM(LDT_rc%mukeyfile(n))
       call LDT_endrun()
    endif
    call gdalclose(ds)
@@ -281,7 +281,7 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
      case default
        write(LDT_logunit,*) "[ERR] Selected grid transform option, "//&
                  LDT_rc%soiltext_gridtransform(n)
-       write(LDT_logunit,*) "[ERR]  not supported for the SSURGO texture reader."
+       write(LDT_logunit,*) "[ERR]  not supported for the SSURGO mukey reader."
        write(LDT_logunit,*) "Program stopping ..."
        call LDT_endrun
 
@@ -295,35 +295,34 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
        LDT_rc%soiltext_gridtransform(n) == "mode" .or. &
        LDT_rc%soiltext_gridtransform(n) == "neighbor" ) then
 
-   !- Assign soil texture types of less than 0 to an actual texture value:
+   !- Assign soil mukey types of less than 0 to an actual mukey value:
       do r = 1, LDT_rc%lnr(n)
          do c = 1, LDT_rc%lnc(n)
-          ! Assign soil texture types of less than 0 to an actual texture value:
-            if( nint(temp(c,r)) .ge. 2e9 .OR. nint(temp(c,r)) .le. 0 ) then
-          !   temp(c,r) = LDT_rc%udef   ! placeholder
-              temp(c,r) = 14 !LDT_rc%udef   ! placeholder
+          ! Assign soil mukey types of less than 0 to an actual mukey value:
+            if(nint(temp(c,r)) .le. 0 ) then
+                temp(c,r) = NINT(temp(c,r)) ! LDT_rc%udef   ! placeholder
             endif
             if( (nint(temp(c,r)) .ne. LDT_rc%udef) ) then
-!                 write(LDT_logunit,*) temp(c,r)
-               !gridcnt(c,r,1) = NINT(temp(c,r))
-               gridcnt(c,r,NINT(temp(c,r))) = 1.0
+ !                write(LDT_logunit,*) temp(c,r)
+                    gridcnt(c,r,1) = NINT(temp(c,r))
+!                gridcnt(c,r,NINT(temp(c,r))) = 1.0
             endif
          enddo
       enddo
    end if
 
-   !fgrd = gridcnt  ! assign the mukey grid to fraction grid (one dimension only)
-   ! Estimate fraction of grid (fgrid) represented by soil type::
-   call param_index_fgrdcalc( n, LDT_rc%soiltext_proj, &
-        LDT_rc%soiltext_gridtransform(n), &
-        water_class, num_bins, gridcnt, fgrd )
+   fgrd = gridcnt  ! assign the mukey grid to fraction grid (one dimension only)
+ ! Estimate fraction of grid (fgrid) represented by soil type::
+!  call param_index_fgrdcalc( n, LDT_rc%soiltext_proj, &
+!      LDT_rc%soiltext_gridtransform(n), &
+!      water_class, num_bins, gridcnt, fgrd )
   
 ! ---
 !  call LDT_releaseUnitNumber(ftn)
-  write(LDT_logunit,*) "[INFO] Done reading SSURGO soil texture file."
+  write(LDT_logunit,*) "[INFO] Done reading SSURGO soil mukey file."
 
 #endif
 
-end subroutine read_SSURGO_texture
+end subroutine read_SSURGO_mukey
 
 

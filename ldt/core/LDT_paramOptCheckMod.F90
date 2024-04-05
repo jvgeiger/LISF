@@ -514,8 +514,8 @@ contains
 !             call LDT_endrun
 !          endif
 
-        case( "SSURGO MUKEY")
-          write(LDT_logunit,*) " SSURGO MUKEY: The current value of types is: ",nt
+!        case( "SSURGO MUKEY")
+!          write(LDT_logunit,*) " SSURGO MUKEY: The current value of types is: ",nt
 
         case( "Special" )
 

@@ -482,6 +482,7 @@ subroutine LDT_readConfig(configfile)
   allocate(LDT_rc%curvfile(LDT_rc%nnest))
 
   allocate(LDT_rc%txtfile(LDT_rc%nnest))
+  allocate(LDT_rc%mukeyfile(LDT_rc%nnest))
   allocate(LDT_rc%safile(LDT_rc%nnest))
   allocate(LDT_rc%clfile(LDT_rc%nnest))
   allocate(LDT_rc%sifile(LDT_rc%nnest))

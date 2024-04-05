@@ -262,6 +262,7 @@ module LDT_PRIV_rcMod
      character(len=LDT_CONST_PATH_LEN), allocatable :: sifile(:) 
      character(len=LDT_CONST_PATH_LEN), allocatable :: gravelfile(:) 
      character(len=LDT_CONST_PATH_LEN), allocatable :: txtfile(:)
+     character(len=LDT_CONST_PATH_LEN), allocatable :: mukeyfile(:)
      character(len=LDT_CONST_PATH_LEN), allocatable :: pofile(:)
      character(len=LDT_CONST_PATH_LEN), allocatable :: psisatfile(:) 
      character(len=LDT_CONST_PATH_LEN), allocatable :: ksatfile(:) 
