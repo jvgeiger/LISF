@@ -82,7 +82,7 @@ module LDT_soilsMod
      type(LDT_paramEntry) :: rockfragcls    ! Rock fragment class (STATSGO v1)
      type(LDT_paramEntry) :: permrate       ! Permeability rate (STATSGO v1)
      type(LDT_paramEntry) :: texture_nlyrs  ! Soil texture - Number of layers (STATSGO v1)
-
+     type(LDT_paramEntry) :: mukey          ! MUKEY (gSSURGO MAP UNIT KEY)        
   end type soils_type_dec
 
   type(soils_type_dec), allocatable :: LDT_soils_struc(:)
@@ -183,6 +183,15 @@ module LDT_soilsMod
         call LDT_set_param_attribs(rc,LDT_soils_struc(n)%color,&
              "SOILCOLOR",source)
      enddo
+
+  !- MUKEY (gSSURGO MAPUNIT KEY) data source check:
+     call ESMF_ConfigFindLabel(LDT_config,"MUKEY data source:",rc=rc)
+     do n=1,LDT_rc%nnest
+        call ESMF_ConfigGetAttribute(LDT_config,source,rc=rc)
+        call LDT_set_param_attribs(rc,LDT_soils_struc(n)%mukey,&
+             "MUKEY",source)
+     enddo
+
    ! LSM-required parameter check:
      if( index(LDT_rc%lsm,"CLM") == 1 ) then
        if( rc /= 0 ) then
@@ -297,6 +306,9 @@ module LDT_soilsMod
 !   \item[readcolor](\ref{readcolor}) \newline
 !    invokes the generic method in the registry to read
 !    the soil color data
+!   \item[readmukey](\ref{readmukey}) \newline
+!    invokes the generic method in the registry to read
+!    the SSURGO MUKEY data
 !   \item[readporosity](\ref{readporosity}) \newline
 !    invokes the generic method in the registry to read
 !    the porosity data
@@ -341,7 +353,7 @@ module LDT_soilsMod
     if(LDT_LSMparam_struc(1)%texture%selectOpt.eq.1) then 
        call setTextureattribs(trim(LDT_LSMparam_struc(1)%texture%source)//char(0))  
     endif
-
+    
   ! Plugin:  HSG Maps - Set number of Hydrologic Soil Group types (attributes):
     if(LDT_soils_struc(1)%hsg%selectOpt.eq.1) then
        call setHSGattribs(trim(LDT_soils_struc(1)%hsg%source)//char(0))
@@ -434,6 +446,13 @@ module LDT_soilsMod
           allocate(LDT_soils_struc(n)%color%value(&
                LDT_rc%lnc(n),LDT_rc%lnr(n),&
                LDT_soils_struc(n)%color%num_bins))
+       endif
+    !- Mukey:
+       if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+          LDT_soils_struc(n)%mukey%vlevels = LDT_soils_struc(n)%mukey%num_bins
+          allocate(LDT_soils_struc(n)%mukey%value(&
+               LDT_rc%lnc(n),LDT_rc%lnr(n),&
+               LDT_soils_struc(n)%mukey%num_bins))
        endif
     !- Soil hydraulic properties:
        if(LDT_soils_struc(n)%porosity%selectOpt.eq.1) then
@@ -564,6 +583,23 @@ module LDT_soilsMod
       end if
 
     endif
+
+
+ !- MUKEY:
+    check_data = .false.
+    do n=1,LDT_rc%nnest
+       if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+          check_data = .true.
+       endif   
+    enddo
+    if(check_data) then
+       call ESMF_ConfigFindLabel(LDT_config,"MUKEY map:", rc=rc)
+       do i=1,LDT_rc%nnest
+          call ESMF_ConfigGetAttribute(LDT_config,LDT_rc%mukeyfile(i),rc=rc)   
+
+        enddo 
+    end if
+
 
  !- Soil fractions:
     check_data = .false. 
@@ -782,8 +818,8 @@ module LDT_soilsMod
                trim(LDT_LSMparam_struc(n)%texture%source)=="Special" .or. &
                trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO" ) then
                soiltext%watervalue = 14.
-            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0 .or. &
-                   trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO MUKEY" ) then 
+            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0) then 
+                    !trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO MUKEY" ) then 
                    soiltext%watervalue = 1.0
             elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ISRIC") >0) then 
                soiltext%watervalue = 14.
@@ -908,6 +944,20 @@ module LDT_soilsMod
 #endif
       endif
 
+      if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+!           write(LDT_logunit,*) "LDT_soils_struc(n)%mukey%value",LDT_soils_struc(n)%mukey%value
+         call readmukey(&
+              trim(LDT_soils_struc(n)%mukey%source)//char(0), &
+              n, LDT_soils_struc(n)%mukey%num_bins,           &
+              LDT_soils_struc(n)%mukey%value,                 &
+              LDT_soils_struc(n)%texture_nlyrs%value )
+
+!      call readmukey(&
+!              trim(LDT_soils_struc(n)%mukey%source)//char(0),&
+!              n,LDT_soils_struc(n)%mukey%value)
+!           write(LDT_logunit,*) "---- after call LDT_soils_struc(n)%mukey%value",LDT_soils_struc(n)%mukey%value
+      endif
+      
       if(LDT_soils_struc(n)%porosity%selectOpt.eq.1) then
          call readporosity(&
               trim(LDT_soils_struc(n)%porosity%source)//char(0),&
@@ -994,6 +1044,9 @@ module LDT_soilsMod
 !   \item[readcolor](\ref{readcolor}) \newline
 !    invokes the generic method in the registry to read
 !    the soil color data
+!   \item[readmukey](\ref{readmukey}) \newline
+!    invokes the generic method in the registry to read
+!    the SSURGO MUKEY data
 !   \item[readporosity](\ref{readporosity}) \newline
 !    invokes the generic method in the registry to read
 !    the porosity data
@@ -1141,6 +1194,15 @@ module LDT_soilsMod
                LDT_rc%lnc(n),LDT_rc%lnr(n),&
                LDT_soils_struc(n)%color%num_bins))
        endif
+
+    !- MUKEY
+       if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+          LDT_soils_struc(n)%mukey%vlevels = LDT_soils_struc(n)%mukey%num_bins
+          allocate(LDT_soils_struc(n)%mukey%value(&
+               LDT_rc%lnc(n),LDT_rc%lnr(n),&
+               LDT_soils_struc(n)%mukey%num_bins))
+       endif
+       
     !- Soil hydraulic properties:
        if(LDT_soils_struc(n)%porosity%selectOpt.eq.1) then
           if( LDT_soils_struc(n)%porosity%source == "FAO" ) then
@@ -1271,6 +1333,22 @@ module LDT_soilsMod
 
     endif
 
+
+ !- MUKEY:
+    check_data = .false.
+    do n=1,LDT_rc%nnest
+       if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+          check_data = .true.
+       endif
+    enddo
+    if(check_data) then
+       call ESMF_ConfigFindLabel(LDT_config,"MUKEY map:", rc=rc)
+       do i=1,LDT_rc%nnest
+          call ESMF_ConfigGetAttribute(LDT_config,LDT_rc%mukeyfile(i),rc=rc)
+       enddo
+    end if
+
+
  !- Soil fractions:
     check_data = .false. 
     do n=1,LDT_rc%nnest
@@ -1345,7 +1423,8 @@ module LDT_soilsMod
           call LDT_verify(rc,'Soil color spatial transform: option not specified in the config file')
        enddo
     end if
-    
+ 
+
  !- Slope type:
 
  !- Soil hydraulic properties:
@@ -1488,8 +1567,8 @@ module LDT_soilsMod
                trim(LDT_LSMparam_struc(n)%texture%source)=="Special"  .or. &
                trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO") then
                soiltext%watervalue = 14.
-            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0 .or. & 
-                   trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO MUKEY" ) then
+            elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ZOBLER") >0) then              
+                   !trim(LDT_LSMparam_struc(n)%texture%source)=="SSURGO MUKEY" ) then
                    soiltext%watervalue = 1.0
             elseif(INDEX(LDT_LSMparam_struc(n)%texture%source,"ISRIC") >0) then 
                soiltext%watervalue = 14.
@@ -1612,6 +1691,19 @@ module LDT_soilsMod
                  soilcolor%filltype, soilcolor%fillvalue, soilcolor%fillradius )
          endif
 #endif
+      endif
+
+      if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+         call readmukey(&
+              trim(LDT_soils_struc(n)%mukey%source)//char(0), &
+              n, LDT_soils_struc(n)%mukey%num_bins,           &
+              LDT_soils_struc(n)%mukey%value,                 &
+              LDT_soils_struc(n)%texture_nlyrs%value )
+
+
+      !call readmukey(&
+      !        trim(LDT_soils_struc(n)%mukey%source)//char(0),&
+      !        n,LDT_soils_struc(n)%mukey%value) 
       endif
 
       if(LDT_soils_struc(n)%porosity%selectOpt.eq.1) then
@@ -1796,6 +1888,10 @@ module LDT_soilsMod
        call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
             LDT_soils_struc(n)%color)
     endif
+    if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then 
+       call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
+            LDT_soils_struc(n)%mukey)
+    endif   
     if(LDT_soils_struc(n)%porosity%selectOpt.eq.1) then
        call LDT_verify(nf90_def_dim(ftn,'porosity_levels',&
             LDT_soils_struc(n)%porosity%vlevels,tdimID(3)))
@@ -1952,6 +2048,10 @@ module LDT_soilsMod
        call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
             LDT_soils_struc(n)%color,flag)
     endif
+    if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+       call LDT_writeNETCDFdataHeader(n,ftn,tdimID,&
+            LDT_soils_struc(n)%mukey,flag)
+    endif
     if(LDT_soils_struc(n)%porosity%selectOpt.eq.1) then
        call LDT_verify(nf90_def_dim(ftn,'porosity_levels',&
             LDT_soils_struc(n)%porosity%vlevels,tdimID(3)))
@@ -2037,6 +2137,9 @@ module LDT_soilsMod
     if(LDT_soils_struc(n)%color%selectOpt.eq.1) then
        call LDT_writeNETCDFdata(n,ftn,LDT_soils_struc(n)%color)
     endif
+    if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+       call LDT_writeNETCDFdata(n,ftn,LDT_soils_struc(n)%mukey)
+    endif
     if(LDT_soils_struc(n)%porosity%selectOpt.eq.1) then
        call LDT_writeNETCDFdata(n,ftn,LDT_soils_struc(n)%porosity)
     endif
@@ -2106,6 +2209,9 @@ module LDT_soilsMod
     endif
     if(LDT_soils_struc(n)%color%selectOpt.eq.1) then
        call LDT_writeNETCDFdata(n,ftn,LDT_soils_struc(n)%color)
+    endif
+    if(LDT_soils_struc(n)%mukey%selectOpt.eq.1) then
+       call LDT_writeNETCDFdata(n,ftn,LDT_soils_struc(n)%mukey)
     endif
     if(LDT_soils_struc(n)%porosity%selectOpt.eq.1) then
        call LDT_writeNETCDFdata(n,ftn,LDT_soils_struc(n)%porosity)

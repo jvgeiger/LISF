@@ -52,6 +52,28 @@ struct colornode
 
 struct colornode* color_table = NULL; 
 
+struct mukeysetnode
+{
+  char *name;
+  void (*func)();
+
+  struct mukeysetnode* next;
+} ;
+struct mukeysetnode* mukeyset_table = NULL;
+
+
+struct mukeynode
+{
+  char *name;
+//  void (*func)(int*, float*);
+  void (*func)(int*, int*, float*, float*);
+
+  struct mukeynode* next;
+} ;
+
+struct mukeynode* mukey_table = NULL;
+
+
 struct txtsetnode
 { 
   char *name;
@@ -704,6 +726,94 @@ void FTN(readcolor)(char *j,int *n,float *array, int len)
   }
   current->func(n,array); 
 }
+
+
+//BOP
+// !ROUTINE: registerreadmukey
+// \label{registerreadmukey}
+// 
+// !INTERFACE:
+void FTN(registerreadmukey)(char *j,void (*func)(int*, int*, float*, float*),int len)
+// void FTN(registerreadmukey)(char *j, void (*func)(int*, float*),int len)
+//  
+// !DESCRIPTION:
+//  Creates an entry in the registry for the routine to 
+//  read the mukey data
+// 
+//  The arguments are: 
+//  \begin{description}
+//  \item[j]
+//   index of the soils source
+//  \end{description}
+  //EOP
+{
+  int len1;
+  struct mukeynode* current;
+  struct mukeynode* pnode;
+  // create node
+
+  len1 = len + 1; // ensure that there is space for terminating null
+  pnode=(struct mukeynode*) malloc(sizeof(struct mukeynode));
+  pnode->name=(char*) calloc(len1,sizeof(char));
+  strncpy(pnode->name,j,len);
+  pnode->func = func;
+  pnode->next = NULL;
+
+  if(mukey_table == NULL){
+    mukey_table = pnode;
+  }
+  else{
+    current = mukey_table;
+    while(current->next!=NULL){
+      current = current->next;
+    }
+    current->next = pnode;
+  }
+
+}
+
+
+//BOP
+// !ROUTINE: readmukey
+// \label{readmukey}
+// 
+// !INTERFACE:
+void FTN(readmukey)(char *j,int *n,int *nt,float *array, float *arrayopt, int len)
+// void FTN(readmukey)(char *j,int *n,float *array, int len)
+//  
+// !DESCRIPTION: 
+//  Invokes the routine from the registry to read the
+//  mukey data
+// 
+//  The arguments are: 
+//  \begin{description}
+//  \item[n]
+//   index of the nest
+//  \item[j]
+//   index of the soils source
+//  \item[array]
+//   pointer to the color array
+//  \end{description}
+//EOP
+{
+  struct mukeynode* current;
+
+  current = mukey_table;
+  while(strcmp(current->name,j)!=0){
+    current = current->next;
+    if(current==NULL) {
+      printf("****************Error****************************\n");
+      printf("MUKEY reading routine for source %s is not defined\n",j);
+      printf("Please refer to configs/ldt.config_master or LDT User's Guide for options.\n");
+      printf("program will seg fault.....\n");
+      printf("****************Error****************************\n");
+    }
+  }
+  current->func(n,nt,array,arrayopt);
+}
+
+
+
 
 
 //BOP
