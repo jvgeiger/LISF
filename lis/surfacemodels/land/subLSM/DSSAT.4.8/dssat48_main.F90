@@ -54,7 +54,7 @@ subroutine dssat48_main(n)
     integer              :: tmp_year, tmp_month, tmp_day, tmp_hour, tmp_minute
     integer              :: year_end, month_end, day_end
     real                 :: tmp_pres, tmp_precip, tmp_tmax, tmp_tmin, tmp_tdew   ! Weather Forcing
-    real                 :: tmp_swrad, tmp_wind                                  ! Weather Forcing
+    real                 :: tmp_swrad, tmp_wind, tmp_sm                          ! Weather Forcing
     character*3          :: fnest ! MN Bug in toolkit (added to this code)
 ! CONTRO
     INTEGER             :: RUN, REPNO, EXPNO, TRTALL, NREPS
@@ -127,7 +127,7 @@ subroutine dssat48_main(n)
             dssat48_struc(n)%dssat48(t)%forc_pres = tmp_pres
  
             ! Total daily precipitation (rain+snow) (mm)
-            tmp_precip    = dssat48_struc(n)%dssat48(t)%totprc * 3600. * 24. !Convert from kg/ms2 to mm
+            tmp_precip    = (dssat48_struc(n)%dssat48(t)%totprc / dssat48_struc(n)%forc_count) * 3600. * 24. !Convert from kg/ms2 to mm
             write(LIS_logunit,*) 'Precip: ',tmp_precip
             dssat48_struc(n)%dssat48(t)%forc_precip = tmp_precip
 
@@ -241,7 +241,10 @@ subroutine dssat48_main(n)
 
             IF (dssat48_struc(n)%sm_coupling.eq.1) THEN
                do l=0, LIS_sfmodel_struc(n)%nsm_layers
-                  dssat48_struc(n)%dssat48(t)%LIS_sm(l) = NOAHMP401_struc(n)%noahmp401(t)%smc(l)
+                  tmp_sm = (dssat48_struc(n)%dssat48(t)%LIS_sm(l) / dssat48_struc(n)%forc_count)
+                  write(LIS_logunit,*) 'Soil Moisture Layer: ',l,tmp_sm
+                  dssat48_struc(n)%dssat48(t)%LIS_sm(l) = tmp_sm
+                  !dssat48_struc(n)%dssat48(t)%LIS_sm(l) = NOAHMP401_struc(n)%noahmp401(t)%smc(l)
                end do
             ENDIF
 
@@ -611,6 +614,13 @@ subroutine dssat48_main(n)
             dssat48_struc(n)%dssat48(t)%snowf = 0.0
             dssat48_struc(n)%dssat48(t)%totprc = 0.0
             dssat48_struc(n)%dssat48(t)%tdew = 0.0
+
+            if (dssat48_struc(n)%sm_coupling.eq.1) then
+               do l=0, LIS_sfmodel_struc(n)%nsm_layers
+                  dssat48_struc(n)%dssat48(t)%LIS_sm(l) = 0.0
+                end do
+           endif
+
         enddo ! end of tile (t) loop
 
         ! Reset forcing counter to be zero

@@ -26,6 +26,8 @@ subroutine dssat48_f2t(n)
   use LIS_logMod,        only : LIS_logunit, LIS_verify, &
                                 LIS_endrun
   use dssat48_lsmMod
+  use LIS_surfaceModelDataMod, only : LIS_sfmodel_struc !JE for exchange
+  use NoahMP401_lsmMod !JE for soil moisture exchange
 
   implicit none
 
@@ -47,7 +49,7 @@ subroutine dssat48_f2t(n)
 !
 !EOP
 
-  integer            :: t,v,status
+  integer            :: t,v,l,status
   integer            :: tid
   real               :: ee, val, td
 
@@ -171,25 +173,32 @@ subroutine dssat48_f2t(n)
   do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
 
      write(LIS_logunit,*) "At tile ",t
-
      ! Transform tile to the patch
      tid = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%tile_id
+
+     ! Soil moisture
+     if (dssat48_struc(n)%sm_coupling.eq.1) then
+        do l=0, LIS_sfmodel_struc(n)%nsm_layers
+           dssat48_struc(n)%dssat48(t)%LIS_sm(l) = dssat48_struc(n)%dssat48(t)%LIS_sm(l) &
+     &        + NOAHMP401_struc(n)%noahmp401(t)%smc(l)
+         end do
+     endif
 
      ! Air temperature (DSSAT requires daily maximum and minimum)
      dssat48_struc(n)%dssat48(t)%tair=dssat48_struc(n)%dssat48(t)%tair + tmp(tid)
  
      if (dssat48_struc(n)%forc_count.eq.1) then !First iteration set max/min 
-        write(LIS_logunit,*) "First loop temperature ", tmp(tid)
+        !write(LIS_logunit,*) "First loop temperature ", tmp(tid)
         dssat48_struc(n)%dssat48(t)%tmax = tmp(tid)
         dssat48_struc(n)%dssat48(t)%tmin = tmp(tid)
      else
         write(LIS_logunit,*) "Loop ",dssat48_struc(n)%forc_count
         if (tmp(tid).gt.dssat48_struc(n)%dssat48(t)%tmax) then
-           write(LIS_logunit,*) "Maximum temperature replaced ",tmp(tid)
+           !write(LIS_logunit,*) "Maximum temperature replaced ",tmp(tid)
            dssat48_struc(n)%dssat48(t)%tmax=tmp(tid) !Replace maximum temperature
         endif
         if (tmp(tid).lt.dssat48_struc(n)%dssat48(t)%tmin) then
-          write(LIS_logunit,*) "Minimum temperature replaced ", tmp(tid)
+          !write(LIS_logunit,*) "Minimum temperature replaced ", tmp(tid)
           dssat48_struc(n)%dssat48(t)%tmin=tmp(tid) !Replace minimum temperature
         endif
      endif !Check loop index     
@@ -220,12 +229,12 @@ subroutine dssat48_f2t(n)
 
      if(LIS_FORC_Snowf%selectOpt.eq.1) then
         ! Snowfall
-        dssat48_struc(n)%dssat48(t)%snowf=dssat48_struc(n)%dssat48(t)%snowf + snowf(tid)
+        dssat48_struc(n)%dssat48(t)%snowf= dssat48_struc(n)%dssat48(t)%snowf + snowf(tid)
         ! Total Precipitation
-        dssat48_struc(n)%dssat48(t)%totprc = pcp(tid) + snowf(tid)
+        dssat48_struc(n)%dssat48(t)%totprc = dssat48_struc(n)%dssat48(t)%totprc + pcp(tid) + snowf(tid)
      else
         ! Total Precipitation
-        dssat48_struc(n)%dssat48(t)%totprc = pcp(tid)
+        dssat48_struc(n)%dssat48(t)%totprc = dssat48_struc(n)%dssat48(t)%totprc + pcp(tid)
      endif
 
      ! Calculate Dewpoint
