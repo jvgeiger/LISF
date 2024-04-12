@@ -228,7 +228,7 @@ C=======================================================================
 
       IF (ISWWAT == 'Y') THEN
 !       Water balance output initialization
-        CALL Wbal(CONTROL, ISWITCH, 
+        CALL Wbal(CONTROL, ISWITCH, nest, t, !Pang
      &    CRAIN, DLAYR, DRAIN, FLOODWAT, 
      &    IRRAMT, MULCH, NLAYR, RAIN, RUNOFF, SNOW, 
      &    SWDELTS, SWDELTT, SWDELTU, SWDELTX, SWDELTL,
@@ -254,9 +254,7 @@ C=======================================================================
       SWDELTL = 0.0
 
       DLAYR_YEST = DLAYR
-!----- Assign Vars To Memory do Once-----------------------------------------
-!----- Pang 2023.10.11 -------------------------------------------------
-      dssat48_struc(nest)%dssat48(t)%DLAYR_YEST = DLAYR_YEST
+
 !***********************************************************************
 !***********************************************************************
 !     DAILY RATE CALCULATIONS
@@ -480,23 +478,23 @@ C       extraction (based on yesterday's values) for each soil layer.
           !PRINT*, "Coupling Flag: ", dssat48_struc(nest)%sm_coupling
           IF (dssat48_struc(nest)%sm_coupling .EQ. 1) THEN
              IF (dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 0) THEN 
-                IF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .LT. 
-     &             LL(L) ) THEN
-                   PRINT*, "Replacing with LL ", LL(L)
-                   SW(L) = LL(L)
-                ELSEIF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 
-     &             SAT(L) ) THEN
-                   PRINT*, "Replacing with SAT ", SAT(L)
-                   SW(L) = SAT(L)
-                ELSE
-                   PRINT*, 'Replacing ', SW(L), 'with LIS '
-                   PRINT*, dssat48_struc(nest)%dssat48(t)%LIS_sm(L) 
+                !IF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .LT. 
+     &          !   LL(L) ) THEN
+                !   PRINT*, "Replacing with LL ", LL(L)
+                !   SW(L) = LL(L)
+                !ELSEIF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 
+     &          !   SAT(L) ) THEN
+                !   PRINT*, "Replacing with SAT ", SAT(L)
+                !   SW(L) = SAT(L)
+                !ELSE
+                !   PRINT*, 'Replacing ', SW(L), 'with LIS '
+                !   PRINT*, dssat48_struc(nest)%dssat48(t)%LIS_sm(L) 
                    SW(L) = dssat48_struc(nest)%dssat48(t)%LIS_sm(L)
-                ENDIF 
+                !ENDIF 
              ELSE
                 SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10. ! default
              ENDIF
-             ELSE
+          ELSE
                 SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10. ! default 
           ENDIF
 
@@ -552,7 +550,7 @@ C-----------------------------------------------------------------------
      &    TDRAIN, TRUNOF, WTDEP)                          !Input
 
 !     Water balance daily output 
-      CALL Wbal(CONTROL, ISWITCH, 
+      CALL Wbal(CONTROL, ISWITCH, nest, t, !Pang 
      &    CRAIN, DLAYR, DRAIN, FLOODWAT, 
      &    IRRAMT, MULCH, NLAYR, RAIN, RUNOFF, SNOW, 
      &    SWDELTS, SWDELTT, SWDELTU, SWDELTX, SWDELTL,
@@ -578,7 +576,7 @@ C-----------------------------------------------------------------------
      &    TDRAIN, TRUNOF, WTDEP)                          !Input
 
 !     Water balance seasonal output 
-      CALL Wbal(CONTROL, ISWITCH, 
+      CALL Wbal(CONTROL, ISWITCH, nest, t, !Pang 
      &    CRAIN, DLAYR, DRAIN, FLOODWAT, 
      &    IRRAMT, MULCH, NLAYR, RAIN, RUNOFF, SNOW, 
      &    SWDELTS, SWDELTT, SWDELTU, SWDELTX, SWDELTL,
@@ -606,6 +604,8 @@ C-----------------------------------------------------------------------
       dssat48_struc(nest)%dssat48(t)%WATAVL = WATAVL
       dssat48_struc(nest)%dssat48(t)%SWDELTT = SWDELTT
       dssat48_struc(nest)%dssat48(t)%SWDELTL = SWDELTL
+      dssat48_struc(nest)%dssat48(t)%DLAYR_YEST = DLAYR_YEST
+
       RETURN
       END SUBROUTINE WATBAL
 

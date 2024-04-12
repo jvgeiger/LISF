@@ -237,10 +237,10 @@ subroutine dssat48_f2t(n)
         ! Snowfall
         dssat48_struc(n)%dssat48(t)%snowf=dssat48_struc(n)%dssat48(t)%snowf + snowf(tid)
         ! Total Precipitation
-        dssat48_struc(n)%dssat48(t)%totprc = pcp(tid) + snowf(tid)
+        dssat48_struc(n)%dssat48(t)%totprc = dssat48_struc(n)%dssat48(t)%totprc + pcp(tid) + snowf(tid)
      else
         ! Total Precipitation
-        dssat48_struc(n)%dssat48(t)%totprc = pcp(tid)
+        dssat48_struc(n)%dssat48(t)%totprc = dssat48_struc(n)%dssat48(t)%totprc + pcp(tid)
      endif
 
      ! Calculate Dewpoint

@@ -14,7 +14,7 @@
 ! \label{dssat48_setup}
 !
 ! !REVISION HISTORY:
-!  26 Jun 2023: Pang-Wei Liu 
+!  09 Apr 2024: Pang-Wei Liu 
 ! 
 ! !INTERFACE:
 subroutine dssat48_setup()
@@ -48,13 +48,12 @@ subroutine dssat48_setup()
   integer           :: mtype
   integer           :: t
   integer           :: col, row
-  integer       :: ios, nid, param_ID, nc_ID, nr_ID
-  integer       :: nc, nr
+!  integer           :: nc, nr
 !  integer           :: ews, ewe, nss, nse 
 !  double precision  :: xmn_part  ! center x of local LL starting point
 !  double precision  :: ymn_part  ! center y of local LL starting point
 !  integer, allocatable :: global_kstn(:,:,:)
-  integer, allocatable :: level_data(:, :)
+!  integer, allocatable :: level_data(:, :)
   integer, allocatable :: placeholder(:,:)
   CHARACTER*10   :: mukey
 ! _______________________________________________________________
@@ -67,7 +66,18 @@ subroutine dssat48_setup()
   do n=1, LIS_rc%nnest
 
      ! Allocate memory for place holder for #n nest
+
      allocate(placeholder(LIS_rc%lnc(n), LIS_rc%lnr(n)))
+     ! Read MUKEY from Input File
+
+        write(LIS_logunit,*) "DSSAT48: reading MUKEY from ", trim(LIS_rc%paramfile(n))
+        call LIS_read_param(n, 'MUKEY', placeholder)
+        do t = 1, LIS_rc%npatch(n, mtype)
+            col = LIS_surface(n, mtype)%tile(t)%col
+            row = LIS_surface(n, mtype)%tile(t)%row
+            WRITE( mukey, '(I10)') placeholder(col, row) !Turn mukey number to a string
+            dssat48_struc(n)%dssat48(t)%SLNO = 'LC'//repeat('0',8-len(trim(adjustl(mukey))))//adjustl(mukey)
+        enddo
 
 
      ! Initialize crop data layer and soil propertiy parameters:
@@ -92,79 +102,6 @@ subroutine dssat48_setup()
      !    ! Assign LDT-version of SnowModel topo map to topo_land ...
      !     cdl(col,row) = placeholder(col, row)
      !  enddo
-
-!       write(LIS_logunit,*) "SnowModel: Reading parameter SOIL from: ",&
-!          trim(LIS_rc%paramfile(n))
-!       call LIS_read_param(n, "SOIL", placeholder)
-!       do t = 1, LIS_rc%npatch(n, mtype)
-!          col = LIS_surface(n, mtype)%tile(t)%col
-!          row = LIS_surface(n, mtype)%tile(t)%row
-!          dssat48_struc(n)%sm(t)%smsoil = placeholder(col, row)
-!         ! Assign LDT-version of dssat48 soil types ...
-!          soiltype(col,row) = placeholder(col, row)
-!       enddo
-!
-!     endif
-
-
-       !----------------------------------------------!
-        ! MULTILEVEL reading spatial spatial parameters Pang 2024.02.09!
-        !----------------------------------------------!
-          ! read: Mukey from external file
-          ! write(LIS_logunit,*) "DSSAT48: reading parameter MUKEY  from ", trim('lis_input_IAcounty_merged.nc')
-          !CALL DSSAT48_read_EXTERNAL_param(n, 'MUKEY', placeholder)
-          ! open NetCDF parameter file
-          ios = nf90_open(path=trim('lis_input_IAcounty_merged.nc'), mode=NF90_NOWRITE, ncid=nid)
-          !ios = nf90_open(path=trim('lis_input_smallcnty.nc'), mode=NF90_NOWRITE, ncid=nid)          
-          !ios = nf90_open(path=trim('lis_input_lrgcnty.nc'), mode=NF90_NOWRITE, ncid=nid)
-          call LIS_verify(ios, 'Error in nf90_open in dssat48_setup')
-
-          ! inquire the ID of east-west dimension
-          ios = nf90_inq_dimid(nid, 'east_west', nc_ID)
-          call LIS_verify(ios, 'Error in nf90_inq_dimid in dssat48_setup')
-
-          ! inquire the ID of north-south dimension
-          ios = nf90_inq_dimid(nid, 'north_south', nr_ID)
-          call LIS_verify(ios, 'Error in nf90_inq_dimid in dssat48_setup')
-          ! inquire the length of east-west dimension
-
-          ios = nf90_inquire_dimension(nid, nc_ID, len=nc)
-          call LIS_verify(ios, 'Error in nf90_inquire_dimension in dssat48_setup')
-
-        ! inquire the length of north-south dimension
-        ios = nf90_inquire_dimension(nid, nr_ID, len=nr)
-        call LIS_verify(ios, 'Error in nf90_inquire_dimension in dssat48_setup')
-
-        ! inquire the ID of parameter. 
-        ios = nf90_inq_varid(nid, Trim('MUKEY'), param_ID)
-        call LIS_verify(ios, trim('MUKEY')//' field not found in the external file')
-
-        ! allocate memory
-        allocate(level_data(LIS_rc%gnc(n), LIS_rc%gnr(n)))
-
-        ! read parameter 
-        ios = nf90_get_var(nid, param_ID, level_data)
-        call LIS_verify(ios, 'Error in nf90_get_var in dssat48_setup')
-      
-        ! close netcdf file 
-        ios = nf90_close(nid)
-        call LIS_verify(ios, 'Error in nf90_close in dssat48_setup')
-
-        ! grab parameter at specific level
-        placeholder(:, :) = &
-             level_data(LIS_ews_halo_ind(n, LIS_localPet+1):LIS_ewe_halo_ind(n, LIS_localPet+1), &
-                        LIS_nss_halo_ind(n, LIS_localPet+1):LIS_nse_halo_ind(n, LIS_localPet+1))
-        ! free memory 
-        deallocate(level_data)
-        do t = 1, LIS_rc%npatch(n, mtype)
-                  col = LIS_surface(n, mtype)%tile(t)%col
-                  row = LIS_surface(n, mtype)%tile(t)%row
-                  WRITE( mukey, '(I10)') placeholder(col, row) !Turn mukey number to a string
-                  !PRINT*, 'In dsst48_setup: t, mukey', t, trim(mukey)
-                  dssat48_struc(n)%dssat48(t)%SLNO = 'LC'//repeat('0',8-len(trim(adjustl(mukey))))//adjustl(mukey)
-                  !PRINT*, 'dssat48_struc(n)%dssat48(t)%SLNO ',dssat48_struc(n)%dssat48(t)%SLNO
-        enddo
-
   enddo
 
   ! ------------------------------ 

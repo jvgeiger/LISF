@@ -14,7 +14,7 @@ C  08/20/2002 GH  Modified for Y2K
 !-----------------------------------------------------------------------
 !  Called by: WATBAL
 C=====================================================================
-      SUBROUTINE Wbal(CONTROL, ISWITCH, 
+      SUBROUTINE Wbal(CONTROL, ISWITCH, nest, t, !PL 20240410 
      &    CRAIN, DLAYR, DRAIN, FLOODWAT, 
      &    IRRAMT, MULCH, NLAYR, RAIN, RUNOFF, SNOW, 
      &    SWDELTS, SWDELTT, SWDELTU, SWDELTX, SWDELTL,
@@ -23,9 +23,10 @@ C=====================================================================
       USE ModuleDefs 
       USE ModuleData
       USE FloodModule
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
       CHARACTER*1 IDETL, IDETW, ISWWAT, MEINF
       CHARACTER*14, PARAMETER :: SWBAL = 'SoilWatBal.OUT'
       INTEGER DAS, DOY, DYNAMIC, INCDAT, LUNWBL
@@ -83,7 +84,18 @@ C=====================================================================
       MULCHWAT  = MULCH % MULCHWAT
       MULCHEVAP = MULCH % MULCHEVAP
       RESWATADD_T = MULCH % NEWMULCHWAT
-
+!-----------------------------------------------------------------------
+! Obtain Vars from Memory ----------------------------------------------
+!-----------------------------------------------------------------------
+      CUMWBAL = dssat48_struc(nest)%dssat48(t)%CUMWBAL
+      CUMRESWATADD = dssat48_struc(nest)%dssat48(t)%CUMRESWATADD
+      CUMMULEVAP = dssat48_struc(nest)%dssat48(t)%CUMMULEVAP
+      TSWY = dssat48_struc(nest)%dssat48(t)%TSWY
+      SNOWY = dssat48_struc(nest)%dssat48(t)%SNOWY
+      MWY = dssat48_struc(nest)%dssat48(t)%MWY
+      FLOODY = dssat48_struc(nest)%dssat48(t)%FLOODY
+      EP = dssat48_struc(nest)%dssat48(t)%EP
+      ES = dssat48_struc(nest)%dssat48(t)%ES
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -157,8 +169,8 @@ C=====================================================================
         CALL Get('SPAM','CEO',CEO)
         CALL Get('SPAM','CEP',CEP)
         CALL Get('SPAM','CES',CES)
-        CALL Get('SPAM','EP', EP)
-        CALL Get('SPAM','ES', ES)
+        !CALL Get('SPAM','EP', EP) !Pang: Replace by obtaining from memory
+        !CALL Get('SPAM','ES', ES) !Pang: Replace by obtaining from memory
         CALL Get('MGMT','TOTIR', TOTIR)
         CALL Get('MGMT','EFFIRR',EFFIRR)
         CALL YR_DOY(YRDOY, YEAR, DOY) 
@@ -233,8 +245,8 @@ C-----------------------------------------------------------------------
       CALL Get('SPAM','CEO',CEO)
       CALL Get('SPAM','CEP',CEP)
       CALL Get('SPAM','CES',CES)
-      CALL Get('SPAM','EP', EP)
-      CALL Get('SPAM','ES', ES)
+      !CALL Get('SPAM','EP', EP) !Pang: Replace by obtaining from memory
+      !CALL Get('SPAM','ES', ES) !Pang: Replace by obtaining from memory
 
 !      CALL Get('MGMT','DEPIR', DEPIR)   !Total irrig amt today (mm) (includes losses)
 !      CALL Get('MGMT','IRRAMT',IRRAMT)  !Effective irrig amt today (mm)
@@ -314,6 +326,18 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Save Vars to Memory ----------------------------------------------
+!-----------------------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CUMWBAL = CUMWBAL
+      dssat48_struc(nest)%dssat48(t)%CUMRESWATADD = CUMRESWATADD
+      dssat48_struc(nest)%dssat48(t)%CUMMULEVAP = CUMMULEVAP
+      dssat48_struc(nest)%dssat48(t)%TSWY = TSWY
+      dssat48_struc(nest)%dssat48(t)%SNOWY = SNOWY
+      dssat48_struc(nest)%dssat48(t)%MWY = MWY
+      dssat48_struc(nest)%dssat48(t)%FLOODY = FLOODY
+      dssat48_struc(nest)%dssat48(t)%EP = EP
+      dssat48_struc(nest)%dssat48(t)%ES = ES
       RETURN
       END SUBROUTINE Wbal
 C=======================================================================
