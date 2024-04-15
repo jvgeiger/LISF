@@ -102,7 +102,7 @@ subroutine dssat48_main(n)
     if (alarmCheck) Then
 
         do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-        !do t=1, 1 !PL for testing code     
+        !do t=1, 3 !PL for testing code     
             dt = LIS_rc%ts
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
             col = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%col
@@ -272,6 +272,7 @@ subroutine dssat48_main(n)
             !------ CSM INITIALIZATION -----------------------------------------------
             IF (.NOT.DONE) THEN
                 PRINT*, 'Im in INIT'
+                 PRINT*, 't, tmp_LAT, tmp_LON', t, tmp_LAT, tmp_LON
                 !PRINT*, 'RUN: ', RUN
                 year_end = LIS_rc%eyr
                 month_end = LIS_rc%emo
@@ -284,8 +285,8 @@ subroutine dssat48_main(n)
 
                 !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
-                 FILEIO = trim(dssat48_struc(n)%outpath)//'DSSAT48.INP.'//fproc
-                 print*, 'Writing INP Files to ', dssat48_struc(n)%outpath
+                 FILEIO = trim(dssat48_struc(n)%outpath)//'/'//'DSSAT48.INP.'//fproc !PL add "/"
+                 !print*, 'Writing INP Files to ', trim(dssat48_struc(n)%outpath)
                  !print*, 'FILEIO, RUN: ', FILEIO, RUN
                  TRTNUM = 1 !Initialization
                  ROTNUM = 1 !Initialization
@@ -366,7 +367,8 @@ subroutine dssat48_main(n)
 
             !----- SEASONAL INITIALIZATION -------------------------------------------
             IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
-                !PRINT*, 'In SEAS INIT'
+                PRINT*, 'In SEAS INIT'
+                PRINT*, 't, tmp_LAT, tmp_LON', t, tmp_LAT, tmp_LON
                   !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
                 !PRINT*, 'SEAS YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%YRDOY
                  !JE Add one .INP file per processor
@@ -438,6 +440,26 @@ subroutine dssat48_main(n)
                     vlevel=1,unit="m^3 m-3",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD1, &
+                    value=dssat48_struc(n)%dssat48(t)%SWDELTX(1),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD2, &
+                    value=dssat48_struc(n)%dssat48(t)%SWDELTX(2),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD3, &
+                    value=dssat48_struc(n)%dssat48(t)%SWDELTX(3),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD4, &
+                    value=dssat48_struc(n)%dssat48(t)%SWDELTX(4),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_DSSAT_LAI, &
                     value=dssat48_struc(n)%dssat48(t)%XLAI,&
                     vlevel=1,unit="m2/m2",direction="-",&
@@ -454,7 +476,8 @@ subroutine dssat48_main(n)
                 !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
             !----- DAILY  ------------------------------------------------------------
             IF ((.NOT.dssat48_struc(n)%dssat48(t)%doseasinit).AND.(YRDOY.GE.YRSIM)) THEN
-               !PRINT*, 'Im in seas daily rate'
+               !PRINT*, 'Im in DAILY: ', dssat48_struc(n)%CONTROL(t) % YRDOY
+               !PRINT*, 't, tmp_LAT, tmp_LON', t, tmp_LAT, tmp_LON
                !-----------------------------------------------------------------------
                !     Calculate days after simulation (DAS) 
                !-----------------------------------------------------------------------
@@ -509,6 +532,26 @@ subroutine dssat48_main(n)
                   value=dssat48_struc(n)%dssat48(t)%SW(4),&
                   vlevel=1,unit="m^3 m-3",direction="-",&
                   surface_type=LIS_rc%lsm_index)
+          
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD1, &
+                  value=dssat48_struc(n)%dssat48(t)%SWDELTX(1),&
+                  vlevel=1,unit="m^3 m-3",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD2, &
+                  value=dssat48_struc(n)%dssat48(t)%SWDELTX(2),&
+                  vlevel=1,unit="m^3 m-3",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD3, &
+                  value=dssat48_struc(n)%dssat48(t)%SWDELTX(3),&
+                  vlevel=1,unit="m^3 m-3",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD4, &
+                  value=dssat48_struc(n)%dssat48(t)%SWDELTX(4),&
+                  vlevel=1,unit="m^3 m-3",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
 
                call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_DSSAT_LAI, &
                   value=dssat48_struc(n)%dssat48(t)%XLAI,&
@@ -552,6 +595,26 @@ subroutine dssat48_main(n)
 
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD4, &
                     value=dssat48_struc(n)%dssat48(t)%SW(4),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+     
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD1, &
+                    value=dssat48_struc(n)%dssat48(t)%SWDELTX(1),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD2, &
+                    value=dssat48_struc(n)%dssat48(t)%SWDELTX(2),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD3, &
+                    value=dssat48_struc(n)%dssat48(t)%SWDELTX(3),&
+                    vlevel=1,unit="m^3 m-3",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWDELTXD4, &
+                    value=dssat48_struc(n)%dssat48(t)%SWDELTX(4),&
                     vlevel=1,unit="m^3 m-3",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 

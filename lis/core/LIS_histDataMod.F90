@@ -528,7 +528,10 @@ module LIS_histDataMod
   public :: LIS_MOC_SMD2
   public :: LIS_MOC_SMD3
   public :: LIS_MOC_SMD4
-
+  public :: LIS_MOC_SWDELTXD1
+  public :: LIS_MOC_SWDELTXD2
+  public :: LIS_MOC_SWDELTXD3
+  public :: LIS_MOC_SWDELTXD4
   ! AWRAL
   public :: LIS_MOC_SR
   public :: LIS_MOC_SG
@@ -1026,6 +1029,10 @@ module LIS_histDataMod
     integer :: LIS_MOC_SMD2 = -9999
     integer :: LIS_MOC_SMD3 = -9999
     integer :: LIS_MOC_SMD4 = -9999
+    integer :: LIS_MOC_SWDELTXD1 = -9999
+    integer :: LIS_MOC_SWDELTXD2 = -9999
+    integer :: LIS_MOC_SWDELTXD3 = -9999
+    integer :: LIS_MOC_SWDELTXD4 = -9999
 ! .......
 
 
@@ -5567,7 +5574,61 @@ contains
             model_patch=.true.)
     endif
 
+!integer :: LIS_MOC_SWDELTXD1 = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SWDELTXD1:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SWDELTXD1",&
+         "dssat_swdeltxd1",&
+         "DSSAT water uptake by root layer 1",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SWDELTXD1,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m3/m3"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
 
+!integer :: LIS_MOC_SWDELTXD2 = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SWDELTXD2:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SWDELTXD2",&
+         "dssat_swdeltxd2",&
+         "DSSAT water uptake by root layer 2",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SWDELTXD2,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m3/m3"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+!integer :: LIS_MOC_SWDELTXD3 = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SWDELTXD3:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SWDELTXD3",&
+         "dssat_swdeltxd3",&
+         "DSSAT water uptake by root layer 3",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SWDELTXD3,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m3/m3"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+!integer :: LIS_MOC_SWDELTXD4 = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SWDELTXD4:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SWDELTXD4",&
+         "dssat_swdeltxd4",&
+         "DSSAT water uptake by root layer 4",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SWDELTXD4,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"m3/m3"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
 
 ! End DSSAT Outputs
 

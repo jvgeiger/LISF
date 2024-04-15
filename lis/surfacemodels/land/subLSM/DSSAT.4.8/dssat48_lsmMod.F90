@@ -189,7 +189,6 @@ contains
 
             dssat48_struc(n)%outpath = trim(LIS_rc%odir)
             write(LIS_logunit,*) "Writing DSSAT INP, INH, and .OUT files to ", dssat48_struc(n)%outpath
-
             ! allocate memory for all tiles in current nest 
             allocate(dssat48_struc(n)%dssat48(LIS_rc%npatch(n, LIS_rc%lsm_index)))
             allocate(dssat48_struc(n)%CONTROL(LIS_rc%npatch(n, LIS_rc%lsm_index)))
@@ -240,10 +239,10 @@ contains
                   !PRINT*, 'LIS_rc%npatch(n, LIS_rc%lsm_index): ', LIS_rc%npatch(n, LIS_rc%lsm_index)
           
             ! Call dssat48_setup to obtain mukey number before initialization
-               CALL dssat48_setup !Pang 2024.02.09 (This is used to obtain soil mukey)
+            !  CALL dssat48_setup !Pang 2024.02.09 (This is used to obtain soil mukey)
 
             do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-            !do t=1,1 !PL for testing code
+            !do t=1,3 !PL for testing code
                  !Start CSM 
                  dssat48_struc(n)%dssat48(t)%DONE =  .FALSE.  !PL: Control code to run DSSAT48 or NOT
                  dssat48_struc(n)%dssat48(t)%YRDOY_END = 9999999 !PL: Initial YRDOY_END
@@ -261,11 +260,11 @@ contains
                  dssat48_struc(n)%CONTROL(t)%filex  = 'NASA2019.SQX' !This can be set in config file
                 !----------------------------------------------------------------------------------------
                 !JE Add one .INP file per processor
-                 print*, 'Writing INP Files to ', trim(dssat48_struc(n)%outpath)
+                 !print*, 'Writing INP Files to ', trim(dssat48_struc(n)%outpath)
                  !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
-                 FILEIO = trim(dssat48_struc(n)%outpath)//'DSSAT48.INP.'//fproc
-                 print*, 'FILEIO: ', FILEIO
+                 FILEIO = trim(dssat48_struc(n)%outpath)//'/'//'DSSAT48.INP.'//fproc !PL: add '/'
+                 !print*, 'FILEIO: ', FILEIO
 
                  !Check If There is FILEIO and Delete It  
                  INQUIRE (FILE = FILEIO,EXIST = FEXIST)

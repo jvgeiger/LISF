@@ -228,7 +228,7 @@ C=======================================================================
 
       IF (ISWWAT == 'Y') THEN
 !       Water balance output initialization
-        CALL Wbal(CONTROL, ISWITCH, 
+        CALL Wbal(CONTROL, ISWITCH, nest, t, !Pang
      &    CRAIN, DLAYR, DRAIN, FLOODWAT, 
      &    IRRAMT, MULCH, NLAYR, RAIN, RUNOFF, SNOW, 
      &    SWDELTS, SWDELTT, SWDELTU, SWDELTX, SWDELTL,
@@ -254,9 +254,7 @@ C=======================================================================
       SWDELTL = 0.0
 
       DLAYR_YEST = DLAYR
-!----- Assign Vars To Memory do Once-----------------------------------------
-!----- Pang 2023.10.11 -------------------------------------------------
-      dssat48_struc(nest)%dssat48(t)%DLAYR_YEST = DLAYR_YEST
+
 !***********************************************************************
 !***********************************************************************
 !     DAILY RATE CALCULATIONS
@@ -549,7 +547,7 @@ C-----------------------------------------------------------------------
      &    TDRAIN, TRUNOF, WTDEP)                          !Input
 
 !     Water balance daily output 
-      CALL Wbal(CONTROL, ISWITCH, 
+      CALL Wbal(CONTROL, ISWITCH, nest, t, !Pang 
      &    CRAIN, DLAYR, DRAIN, FLOODWAT, 
      &    IRRAMT, MULCH, NLAYR, RAIN, RUNOFF, SNOW, 
      &    SWDELTS, SWDELTT, SWDELTU, SWDELTX, SWDELTL,
@@ -575,7 +573,7 @@ C-----------------------------------------------------------------------
      &    TDRAIN, TRUNOF, WTDEP)                          !Input
 
 !     Water balance seasonal output 
-      CALL Wbal(CONTROL, ISWITCH, 
+      CALL Wbal(CONTROL, ISWITCH, nest, t, !Pang 
      &    CRAIN, DLAYR, DRAIN, FLOODWAT, 
      &    IRRAMT, MULCH, NLAYR, RAIN, RUNOFF, SNOW, 
      &    SWDELTS, SWDELTT, SWDELTU, SWDELTX, SWDELTL,
@@ -603,6 +601,8 @@ C-----------------------------------------------------------------------
       dssat48_struc(nest)%dssat48(t)%WATAVL = WATAVL
       dssat48_struc(nest)%dssat48(t)%SWDELTT = SWDELTT
       dssat48_struc(nest)%dssat48(t)%SWDELTL = SWDELTL
+      dssat48_struc(nest)%dssat48(t)%DLAYR_YEST = DLAYR_YEST
+
       RETURN
       END SUBROUTINE WATBAL
 
