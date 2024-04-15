@@ -480,11 +480,7 @@ C       extraction (based on yesterday's values) for each soil layer.
           !PRINT*, "Coupling Flag: ", dssat48_struc(nest)%sm_coupling
           IF (dssat48_struc(nest)%sm_coupling .EQ. 1) THEN
              IF (dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 0) THEN 
-                IF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .LT. 
-     &             LL(L) ) THEN
-                   PRINT*, "Replacing with LL ", LL(L)
-                   SW(L) = LL(L)
-                ELSEIF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 
+                IF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 
      &             SAT(L) ) THEN
                    PRINT*, "Replacing with SAT ", SAT(L)
                    SW(L) = SAT(L)
@@ -496,12 +492,13 @@ C       extraction (based on yesterday's values) for each soil layer.
              ELSE
                 SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10. ! default
              ENDIF
-             ELSE
-                SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10. ! default 
+          ELSE
+             SW(L) = SW_mm_NEW(L) / DLAYR(L) / 10. ! default 
           ENDIF
 
 !         Round SW to 5 decimal places
-          NewSW = ANINT(SW(L) * 1.e6)/ 1.e6
+          NewSW = SW(L) !Test if the problem is rounding JE 04.11.24
+          !JE NewSW = ANINT(SW(L) * 1.e6)/ 1.e6
           IF (abs(NewSW) < 1.e-4) NewSW = 0.0
           SW(L) = NewSW
         ENDDO

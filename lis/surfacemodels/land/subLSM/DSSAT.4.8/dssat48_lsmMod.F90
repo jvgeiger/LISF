@@ -53,6 +53,7 @@ module dssat48_lsmMod
                         TillType, FertType, OrgMatAppType !From DSSAT
   USE FloodModule !From DSSAT
   USE GHG_types_mod, only: CH4_type, N2O_type !From DSSAT
+  use LIS_surfaceModelDataMod, only : LIS_sfmodel_struc !JE for exchange 
   implicit none
   
   PRIVATE
@@ -147,7 +148,7 @@ contains
 !EOP
     implicit none        
     integer, intent(in) :: eks    
-    integer  :: n, t     
+    integer  :: n, t, l     
     character*3             :: fnest
     integer  :: status   
     type(ESMF_ArraySpec) :: arrspec1
@@ -228,6 +229,13 @@ contains
                 dssat48_struc(n)%dssat48(t)%lwdown = 0.0
                 dssat48_struc(n)%dssat48(t)%swdown = 0.0
                 dssat48_struc(n)%dssat48(t)%psurf = 0.0
+                dssat48_struc(n)%dssat48(t)%totprc = 0.0
+                dssat48_struc(n)%dssat48(t)%tdew = 0.0
+                if (dssat48_struc(n)%sm_coupling.eq.1) then
+                   do l=0, LIS_sfmodel_struc(n)%nsm_layers
+                      dssat48_struc(n)%dssat48(t)%LIS_sm(l) = 0.0
+                   end do
+                endif
             enddo ! end of tile (t) loop
                   !PRINT*, 'LIS_rc%npatch(n, LIS_rc%lsm_index): ', LIS_rc%npatch(n, LIS_rc%lsm_index)
           
