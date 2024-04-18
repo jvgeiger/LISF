@@ -132,6 +132,7 @@ contains
     use LIS_timeMgrMod
     use LIS_surfaceModelDataMod
     use LIS_lsmMod
+    use LIS_fileIOMod, only : LIS_create_output_directory !JG
     USE ModuleDefs, only: ModelVerTxt, MonthTxt !From DSSAT
     USE CSMVersion
 ! !DESCRIPTION:
@@ -263,7 +264,7 @@ contains
                  !print*, 'Writing INP Files to ', trim(dssat48_struc(n)%outpath)
                  !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
-                 FILEIO = trim(dssat48_struc(n)%outpath)//'/'//'DSSAT48.INP.'//fproc !PL: add '/'
+                 FILEIO = trim(dssat48_struc(n)%outpath)//'/INP/'//'DSSAT48.INP.'//fproc !JG: add '/INP/'
                  !print*, 'FILEIO: ', FILEIO
 
                  !Check If There is FILEIO and Delete It  
@@ -312,5 +313,8 @@ contains
            !      'ESMF_StateAdd failed for SM in dssat48_init')
 
         enddo
+        if ( LIS_masterproc ) then
+           call LIS_create_output_directory('INP')
+        endif
     end subroutine dssat48_init
 end module dssat48_lsmMod

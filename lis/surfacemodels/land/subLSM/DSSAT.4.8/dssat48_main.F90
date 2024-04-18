@@ -289,7 +289,7 @@ subroutine dssat48_main(n)
 
                 !JE Add one .INP file per processor
                  write(unit=fproc,fmt='(i4.4)') LIS_localPet
-                 FILEIO = trim(dssat48_struc(n)%outpath)//'/'//'DSSAT48.INP.'//fproc !PL add "/"
+                 FILEIO = trim(dssat48_struc(n)%outpath)//'/INP/'//'DSSAT48.INP.'//fproc !JG add "/INP/"
                  !print*, 'Writing INP Files to ', trim(dssat48_struc(n)%outpath)
                  !print*, 'FILEIO, RUN: ', FILEIO, RUN
                  TRTNUM = 1 !Initialization
