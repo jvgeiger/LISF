@@ -14,7 +14,7 @@
 ! \label{dssat48_readrst}
 !
 ! !REVISION HISTORY: 
-!  26 Jun 2023: Pang-Wei Liu
+!  17 Apr 2024: Pang-Wei Liu
 !
 ! !INTERFACE:
 subroutine dssat48_readrst()
@@ -39,18 +39,7 @@ subroutine dssat48_readrst()
 !
 !  \begin{verbatim}
 !    nc, nr, ntiles        - grid and tile space dimensions 
-!    snow_d                - Snow depth (m), density-adjusted and used in subgrid-scale snow
-!    snow_depth            - Snow depth (m)
-!    canopy_int            - Canopy interception store (m)
-!    soft_snow_d           - Soft snow layer depth (m)
-!    ro_snow_grid          - Snow grid density (kg/m3)
-!    swe_depth             - Snow water equivalent depth (m)
-!    ro_soft_snow_old      - Density of former soft snow layer (kg/m3)
-!    snow_d_init           - Initial snow depth (m)
-!    swe_depth_old         - Former SWE depth (m) step
-!    canopy_int_old        - Former canopy interception store (m)
-!    topo                  - Snow-depth changing grid topography level (m)
-!    sum_sprec             - Summed snowfall (m)
+!    dssat_sm_d            - Soil moisture of DSSAt (m3/m3)
 !  \end{verbatim}
 !
 !  The routines invoked are: 
@@ -81,6 +70,8 @@ subroutine dssat48_readrst()
       ! Coldstart
       if(LIS_rc%startcode .eq. "coldstart") then
          call dssat48_coldstart(LIS_rc%lsm_index)
+         !PL 04.17.2024
+          dssat48_struc(n)%dssat48%restart_flag = .FALSE.
       ! Restart
       elseif(LIS_rc%startcode .eq. "restart") then
 
@@ -92,125 +83,75 @@ subroutine dssat48_readrst()
          !   write(LIS_logunit,*) "  supported with 'Dssat48' forcing-format option."
          !   call LIS_endrun
          !endif
-
+         dssat48_struc(n)%dssat48%restart_flag = .TRUE.
          ! check the existance of restart file
-         !inquire(file=dssat48_struc(n)%rfile, exist=file_exists)
-         !if(.not. file_exists) then
-         !   write(LIS_logunit,*) "[ERR] Dssat48 restart file ", &
-         !                        dssat48_struc(n)%rfile," does not exist "
-         !   write(LIS_logunit,*) " Program stopping ..."
-         !   call LIS_endrun
-         !endif
-         !write(LIS_logunit,*) "[INFO] DSSAT48 restart file used: ",&
-          !                     trim(dssat48_struc(n)%rfile)
+         inquire(file=dssat48_struc(n)%rfile, exist=file_exists)
+         if(.not. file_exists) then
+            write(LIS_logunit,*) "[ERR] Dssat48 restart file ", &
+                                 dssat48_struc(n)%rfile," does not exist "
+            write(LIS_logunit,*) " Program stopping ..."
+            call LIS_endrun
+         endif
+         write(LIS_logunit,*) "[INFO] DSSAT48 restart file used: ",&
+                               trim(dssat48_struc(n)%rfile)
 
          ! open restart file
-         !if(wformat .eq. "binary") then
-         !   ftn = LIS_getNextUnitNumber()
-         !   open(ftn, file=snowmodel_struc(n)%rfile, form="unformatted")
-         !   read(ftn) nc, nr, npatch  ! time, veg class, no. tiles
+         if(wformat .eq. "binary") then
+            ftn = LIS_getNextUnitNumber()
+            open(ftn, file=dssat48_struc(n)%rfile, form="unformatted")
+            read(ftn) nc, nr, npatch  ! time, veg class, no. tiles
 
-         !   ! check for grid space conflict
-         !   if((nc .ne. LIS_rc%gnc(n)) .or. (nr .ne. LIS_rc%gnr(n))) then
-         !      write(LIS_logunit,*) "[ERR] "//trim(snowmodel_struc(n)%rfile), &
-         !                    ":: grid space mismatch - SnowModel run halted"
-         !      call LIS_endrun
-         !   endif
+            ! check for grid space conflict
+            if((nc .ne. LIS_rc%gnc(n)) .or. (nr .ne. LIS_rc%gnr(n))) then
+               write(LIS_logunit,*) "[ERR] "//trim(dssat48_struc(n)%rfile), &
+                             ":: grid space mismatch - dssat48 run halted"
+               call LIS_endrun
+            endif
 
-          !  if(npatch .ne. LIS_rc%glbnpatch_red(n, LIS_rc%lsm_index)) then
-          !     write(LIS_logunit,*) "[ERR] SnowModel restart tile space mismatch"
-          !     call LIS_endrun
-          !  endif
+            if(npatch .ne. LIS_rc%glbnpatch_red(n, LIS_rc%lsm_index)) then
+               write(LIS_logunit,*) "[ERR] dssat48 restart tile space mismatch"
+               call LIS_endrun
+            endif
+         elseif(wformat .eq. "netcdf") then
+#if (defined USE_NETCDF3 || defined USE_NETCDF4)
+            status = nf90_open(path=dssat48_struc(n)%rfile, &
+                               mode=NF90_NOWRITE, ncid=ftn)
+            call LIS_verify(status, "Error opening file "//dssat48_struc(n)%rfile)
+#endif
+         endif
 
-         !elseif(wformat .eq. "netcdf") then
-!#if (defined USE_NETCDF3 || defined USE_NETCDF4)
-!            status = nf90_open(path=snowmodel_struc(n)%rfile, &
-!                               mode=NF90_NOWRITE, ncid=ftn)
-!            call LIS_verify(status, "Error opening file "//snowmodel_struc(n)%rfile)
-!#endif
-!         endif
-!
-!         ! read(1): Snow depth (m), density-adjusted and used in subgrid-scale snow
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%snow_d, &
-!                                  varname="SNOWD", &
-!                                  wformat=wformat)
-!
-!         ! read(2): Snow depth (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%snow_depth, &
-!                                  varname="SNOWDEPTH", &
-!                                  wformat=wformat)
-!
-!         ! read(3): Canopy interception store (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%canopy_int, &
-!                                  varname="CANOPYINT", &
-!                                  wformat=wformat)
-!
-!         ! read(4): Soft snow layer depth (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%soft_snow_d, &
-!                                  varname="SOFTSNOWD", &
-!                                  wformat=wformat)
-!
-!         ! read(5): Snow grid density (kg/m3)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%ro_snow_grid, &
-!                                  varname="ROSNOWGRID", &
-!                                  wformat=wformat)
-!
-!         ! read(6): SWE depth (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%swe_depth, &
-!                                  varname="SWEDEPTH", &
-!                                  wformat=wformat)
-!
-!         ! read(7): Density of former soft snow layer (kg/m3)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%ro_soft_snow_old, &
-!                                  varname="ROSOFTSNOWOLD", &
-!                                  wformat=wformat)
-!
-!         ! read(8): Initial snow depth, density-layer and subgrid scale snow (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%snow_d_init, &
-!                                  varname="SNOWDINIT", &
-!                                  wformat=wformat)
-!
-!         ! read(9): Former SWE depth, step (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%swe_depth_old, &
-!                                  varname="SWEDEPTHOLD", &
-!                                  wformat=wformat)
-!
-!         ! read(10): Former canopy interception store (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%canopy_int_old, &
-!                                  varname="CANOPYINTOLD", &
-!                                  wformat=wformat)
-!
-!         ! read(11): Snow-depth changing grid topography level (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%topo, &
-!                                  varname="TOPO", &
-!                                  wformat=wformat)
-!
-!         ! read(12): Sum of snowfall, over time (m)
-!         call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-!                                  snowmodel_struc(n)%sm%sum_sprec, &
-!                                  varname="SUMSPREC", &
-!                                  wformat=wformat)
-!
-!         ! Close the restart file
-!         if(wformat .eq. "binary") then
-!            call LIS_releaseUnitNumber(ftn)
-!         elseif(wformat .eq. "netcdf") then
-!#if (defined USE_NETCDF3 || defined USE_NETCDF4)
-!            status = nf90_close(ftn)
-!            call LIS_verify(status, "Error in nf90_close in SnowModel_readrst")
-!#endif
-!         endif
+         ! Soil moisture D1 (m3/m3)
+           call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
+                                  dssat48_struc(n)%dssat48%DSSAT_sm_restart(1), &
+                                  varname="DSSATSMD1", &
+                                  wformat=wformat)
+
+         ! Soil moisture D2 (m3/m3)
+           call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
+                                  dssat48_struc(n)%dssat48%DSSAT_sm_restart (2), &
+                                  varname="DSSATSMD2", &
+                                  wformat=wformat)
+         ! Soil moisture D3 (m3/m3)
+           call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
+                                  dssat48_struc(n)%dssat48%DSSAT_sm_restart (3), &
+                                  varname="DSSATSMD3", &
+                                  wformat=wformat)
+
+         ! Soil moisture D4 (m3/m3)
+           call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
+                                  dssat48_struc(n)%dssat48%DSSAT_sm_restart(4), &
+                                  varname="DSSATSMD4", &
+                                  wformat=wformat)
+
+         ! Close the restart file
+         if(wformat .eq. "binary") then
+            call LIS_releaseUnitNumber(ftn)
+         elseif(wformat .eq. "netcdf") then
+#if (defined USE_NETCDF3 || defined USE_NETCDF4)
+            status = nf90_close(ftn)
+            call LIS_verify(status, "Error in nf90_close in dssat48_readrst")
+#endif
+         endif
 !
 !         ! Assign the read-in states to the SnowModel local states:
 !         do t = 1,LIS_rc%npatch(n,LIS_rc%lsm_index)
@@ -230,7 +171,7 @@ subroutine dssat48_readrst()
 !            topo(col,row)          = snowmodel_struc(n)%sm(t)%topo 
 !            sum_sprec(col,row)     = snowmodel_struc(n)%sm(t)%sum_sprec 
 !         enddo
-!
+
       endif
    enddo
 

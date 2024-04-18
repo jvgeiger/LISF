@@ -90,7 +90,7 @@ subroutine dssat48_writerst(n)
      endif
 
      ! Call routine to write out the model states to the file:
-     !call dssat48_dump_restart(n, ftn, wformat)
+     call dssat48_dump_restart(n, ftn, wformat) !Here is where we put variables to write out
 
      if (LIS_masterproc) then
         if(wformat .eq. "binary") then
@@ -118,7 +118,7 @@ end subroutine dssat48_writerst
 !  by Shugong Wang for the NASA Land Information System Version 7. The initial 
 !  specification of the subroutine is defined by Sujay Kumar. 
 !
-!  26 Jun 20223: Pang-Wei Liu
+!  17 Apr 2024: Pang-Wei Liu
 !
 ! !INTERFACE:
 subroutine dssat48_dump_restart(n, ftn, wformat)
@@ -154,18 +154,7 @@ subroutine dssat48_dump_restart(n, ftn, wformat)
 !
 !  \begin{verbatim}
 !    nc, nr, ntiles        - grid and tile space dimensions
-!    snow_d                - Snow depth (m), density-adjusted and used in subgrid-scale snow
-!    snow_depth            - Snow depth (m)
-!    canopy_int            - Canopy interception store (m)
-!    soft_snow_d           - Soft snow layer depth (m)
-!    ro_snow_grid          - Snow grid density (kg/m3)
-!    swe_depth             - Snow water equivalent depth (m)
-!    ro_soft_snow_old      - Density of former soft snow layer (kg/m3)
-!    snow_d_init           - Initial snow depth (m)
-!    swe_depth_old         - Former SWE depth (m) step
-!    canopy_int_old        - Former canopy interception store (m)
-!    topo                  - Snow-depth changing grid topography level (m)
-!    sum_sprec             - Summed snowfall (m)
+!    dssat_sm_d            - Soil moisture of DSSAt (m3/m3)
 !  \end{verbatim}
 !
 ! The routines invoked are:
@@ -186,35 +175,63 @@ subroutine dssat48_dump_restart(n, ftn, wformat)
     real    :: tmptilen(LIS_rc%npatch(n, LIS_rc%lsm_index))
     integer :: dimID(11)
 
-    integer :: snow_d_ID          ! 1
+    integer :: SMD1_d_ID, SMD2_d_ID, SMD3_d_ID, SMD4_d_ID  ! 1
 
 
 !- Write the header of the restart file
-   !call LIS_writeGlobalHeader_restart(ftn, n, LIS_rc%lsm_index, &
-   !                                    "DSSAT48", &
-   !                                    dim1=dssat48_struc(n)%nsnow, &   ! Set as one for now
-   !                                    dimID=dimID, &
-   !                                    output_format = trim(wformat))
+   call LIS_writeGlobalHeader_restart(ftn, n, LIS_rc%lsm_index, &
+                                       "DSSAT48", &
+                                       dim1=1, &   ! Set as one for now
+                                       dimID=dimID, &
+                                       output_format = trim(wformat))
 
    !TODO: replace -99999 and 99999 with correct values for valid_min and valid_max
 
-!-  SnowModel states, based on preprocess_code: HRESTART_SAVE routine
+!-  DSSAT48 states, based on preprocess_code
+   ! write header for DSSAT Soil Moisture at 1st layer
+   call LIS_writeHeader_restart(ftn, n, dimID, SMD1_d_ID, "DSSATSMD1", &
+                                "DSSAT Soil Moisture at 1st Layer", &
+                                "m3/m3", vlevels=1, valid_min=-99999.0, valid_max=99999.0)
 
-   ! write header for Snow depth (m), density-adjusted and used in subgrid-scale snow (1)
-   !call LIS_writeHeader_restart(ftn, n, dimID, snow_d_ID, "SNOWD", &
-   !                             "Snow depth, density-adjusted and used in SnowTran subgrid-scale snow", &
-   !                             "m", vlevels=1, valid_min=-99999.0, valid_max=99999.0)
+   ! write header for DSSAT Soil Moisture at 2nd layer
+   call LIS_writeHeader_restart(ftn, n, dimID, SMD2_d_ID, "DSSATSMD2", &
+                                "DSSAT Soil Moisture at 2nd Layer", &
+                                "m3/m3", vlevels=1, valid_min=-99999.0, valid_max=99999.0)
 
+   ! write header for DSSAT Soil Moisture at 3rd layer
+   call LIS_writeHeader_restart(ftn, n, dimID, SMD3_d_ID, "DSSATSMD3", &
+                                "DSSAT Soil Moisture at 3rd Layer", &
+                                "m3/m3", vlevels=1, valid_min=-99999.0, valid_max=99999.0)
+
+   ! write header for DSSAT Soil Moisture at 4th layer
+   call LIS_writeHeader_restart(ftn, n, dimID, SMD4_d_ID, "DSSATSMD4", &
+                                "DSSAT Soil Moisture at 4th Layer", &
+                                "m3/m3", vlevels=1, valid_min=-99999.0, valid_max=99999.0)
    ! close header of restart file
-   !call LIS_closeHeader_restart(ftn, n, LIS_rc%lsm_index, dimID, dssat48_struc(n)%rstInterval)
+   call LIS_closeHeader_restart(ftn, n, LIS_rc%lsm_index, dimID, dssat48_struc(n)%rstInterval)
 
 
 !- Write state variables into restart file:
 
-   ! (1) Snow depth (m), density-adjusted and used in subgrid-scale snow
-   !call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, &
-   !                          dssat48model_struc(n)%sm%snow_d, &
-   !                          varid=snow_d_ID, dim=1, wformat=wformat)
+   ! Soil moisture D1 (m3/m3)
+   call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, &
+                             dssat48_struc(n)%dssat48%SW(1), &
+                             varid=SMD1_d_ID, dim=1, wformat=wformat)
+
+   ! Soil moisture D2 (m3/m3)
+   call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, &
+                             dssat48_struc(n)%dssat48%SW(2), &
+                             varid=SMD2_d_ID, dim=1, wformat=wformat)
+
+   ! Soil moisture D3 (m3/m3)
+   call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, &
+                             dssat48_struc(n)%dssat48%SW(3), &
+                             varid=SMD3_d_ID, dim=1, wformat=wformat)
+
+   ! Soil moisture D4 (m3/m3)
+   call LIS_writevar_restart(ftn, n, LIS_rc%lsm_index, &
+                             dssat48_struc(n)%dssat48%SW(4), &
+                             varid=SMD4_d_ID, dim=1, wformat=wformat)
 
 end subroutine dssat48_dump_restart
 

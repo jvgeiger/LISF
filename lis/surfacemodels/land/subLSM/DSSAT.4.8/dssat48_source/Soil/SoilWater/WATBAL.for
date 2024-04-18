@@ -480,11 +480,11 @@ C       extraction (based on yesterday's values) for each soil layer.
              IF (dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 0) THEN 
                 IF ( dssat48_struc(nest)%dssat48(t)%LIS_sm(L) .GT. 
      &             SAT(L) ) THEN
-                   PRINT*, "Replacing with SAT ", SAT(L)
+                   !PRINT*, "Replacing with SAT ", SAT(L)
                    SW(L) = SAT(L)
                 ELSE
-                   PRINT*, 'Replacing ', SW(L), 'with LIS '
-                   PRINT*, dssat48_struc(nest)%dssat48(t)%LIS_sm(L) 
+                   !PRINT*, 'Replacing ', SW(L), 'with LIS '
+                   !PRINT*, dssat48_struc(nest)%dssat48(t)%LIS_sm(L) 
                    SW(L) = dssat48_struc(nest)%dssat48(t)%LIS_sm(L)
                 ENDIF 
              ELSE

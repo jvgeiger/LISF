@@ -521,6 +521,8 @@ module dssat48_module
           REAL, DIMENSION(20):: LIS_sm            !Dimensioned the same as SW
           REAL, DIMENSION(20):: LIS_sm_start
         !------------------------------------------------------------------------
+          REAL, DIMENSION(20):: DSSAT_sm_restart            !For restart
+          LOGICAL :: restart_flag
         !---- ADDITIONAL CONTROL ------------------------------------------------
         !---- Pang 2023.09.19 ---------------------------------------------------
         !------------------------------------------------------------------------
