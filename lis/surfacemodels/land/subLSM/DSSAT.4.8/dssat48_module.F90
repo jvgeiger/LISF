@@ -390,6 +390,7 @@ module dssat48_module
            ! PLANT - CROPGRO
            ! Pang 2024.01.24
            !------------------------------------------------------------------------
+             REAL CMINEP, CNODMN, NAVL, PGAVL, RO, RP, RPROAV, RSPNO3, RSPNH4 !SWFAC, TURFAC, ,KSTRES
            !---- PLANT - IPPLNT Module
              CHARACTER*1 DETACH
              CHARACTER*6 ECONO
@@ -407,9 +408,153 @@ module dssat48_module
                  REAL CCEFF, CCMAX, CCMP, FNPGN(4), FNPGT(4), LNREF, PARMAX, PHTHRS10, PHTMAX, ROWSPC, &
                       XPGSLW(15), YPGSLW(15), PGLFMX, CUMSTR
            !-----------------------------------------------------------------------
-           !---- CROPGROW - PHENOL ----------------------------------
+           !---- CROPGRO - PHENOL -----------------------------------------------
            !-----------------------------------------------------------------------
-
+              REAL    :: DRPP, DTX, DXR57, FRACDN, PHTHRS(20), RVSTGE
+              REAL    :: TDUMX, TDUMX2 !VSTAGE SeedFrac, VegFrac
+              INTEGER :: NDLEAF, NDSET, NR1, NR2, NR5, NR7, NVEG0 !RSTAGE
+              INTEGER :: YRNR1, YRNR2, YRNR3, YRNR5, YRNR7 !YREMRG
+              !----- In PHENOL.for -------------------------------------------------
+                  !CHARACTER*1 PLME
+                  CHARACTER*3 CTMP(20), DLTYP(20)
+                  REAL :: ATEMP, CLDVAR, CLDVRR, CSDVAR, CSDVRR, EVMODC, NSENP(20), OPTBI, PSENP(20)
+                  REAL :: SDAGE, SLOBI, THVAR, TRIFOL, TB(5), TO1(5), TO2(5), TM(5), WSENP(20), MNEMV1, MNFLLL
+                  REAL :: TNTFAC, TNTFC2, FNSTR(20), FPSTR(20), FSW(20), FT(20), FUDAY(20), PHZACC(20) !SDEPTH
+                  INTEGER NPRIOR(20), TSELC(20), JPEND, NDVST, NVALPH(20), NVEG1
+                 !----- In PHENOL.for -> RSTAGES.for
+                    INTEGER NR0, NR3
+                    REAL VegTime
+                 !----- In PHENOL.for -> VSTAGES.for
+                    REAL VSTGED, VSTAGP
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - DEMAND -----------------------------------------------
+           !-----------------------------------------------------------------------
+               REAL AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM, &
+                    GDMSD, GRRAT1, NDMNEW, NDMOLD, NDMREP, NDMSDR, NDMTOT, NDMVEG, NMINEP, NMOBR, PHTIM(300), &
+                    PNTIM(300), POTCAR, POTLIP, SDGR, TURADD, XFRT
+              !----- In DEMAND.for ------------------------------------------------
+                   CHARACTER*3 TYPSDT
+                   REAL CARMIN, FINREF, FNSDT(4), FRLFF, FRLFMX, FRSTMF, LIPOPT, LIPTB, LNGSH, NMOBMX, &
+                      NRCVR, NVSMOB, PROLFF, PRORTF, PROSTF, & !PROSTI, PLIGSD, PMINSD, POASD, PROLFI, PRORTI
+                      SDLIP, SDPRO, SHLAG, SLAMAX, SLAMIN, & !RCH2O, RLIG, RLIP, RMIN, RNO3C, ROA, RPRO
+                      SLAPAR, SLAREF, SLAVAR, SLOSUM, SIZELF, SIZREF, SRMAX, THRESH, TURSLA, VSSINK, XFRMAX, &
+                      XFRUIT, XLEAF(25), XSLATM(10), XTRFAC(10), XVGROW(6), XXFTEM(10), &
+                      YLEAF(25), YSLATM(10), YSTEM(25), YTRFAC(10), YVREF(6), YXFTEM(10)
+                   REAL CDMSDR, GDMSDR, NDMSD, NDMSH, RPRPUN, TMPFAC, DUMFAC, FVEG, SLAMN, SLAMX, GROMAX, SIZRAT, YVGROW(6)
+                   REAL ADDSHL, TURXFR, CDMSD
+                   INTEGER NAGE
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - INCOMP -----------------------------------------------
+           !-----------------------------------------------------------------------
+               REAL AGRLF, AGRNOD, AGRRT, AGRSH1, AGRSH2, AGRSTM, SDPROR
+              !----- In INCOMP.for ------------------------------------------------
+                   !REAL SDPRO, SDLIP, RNO3C, RCH2O, RLIP, RLIG, ROA, RMIN, PROLFI, PROSTI, PRORTI, PROSHI, 
+                        !PCARSH, PLIGSH, PLIPSH,PLIGSD,POASH, POASD, PMINSH, PMINSD, PLIGLF,  PLIGRT
+                   REAL SDPROS, PCARLF, PCARST, PCARRT, PCARSD, PCARNO, PLIPLF, PLIPST, PLIPRT, PLIPNO, &
+                        PLIGST, PLIGNO, POALF, POAST, POART, POANO, PMINLF, PMINST, PMINRT, PMINNO 
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - NUPTAKE -----------------------------------------------
+           !-----------------------------------------------------------------------
+               REAL TRNH4U, TRNO3U !TRNU
+              !----- In NUPTAK.for ------------------------------------------------
+                 REAL RTNO3, RTNH4
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - NFIX ------------------------------------------------
+           !-----------------------------------------------------------------------
+               REAL CNOD, DWNOD, DWNODA, NDTH, NFIXN, NODGR, WTNFX, SENNOD(20)
+              !----- In NFIX.for --------------------------------------------------
+                  CHARACTER*3 TYPFXT,TYPNGT,TYPFXD,TYPFXW,TYPFXA
+                  REAL EFINOC, EFNFIX, PRONOD, SNACTM, NODRGM, DWNODI, NDTHMX, CNODCR, FNFXT(4), FNNGT(4), FNFXD(4), &
+                       FNFXW(4), FNFXA(4) !RFIXN
+                  INTEGER SDWNOD
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - PODS ------------------------------------------------
+           !-----------------------------------------------------------------------
+               REAL AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT, SDVAR, SHVAR, WSDDTN, & !PODNO, SEEDNO
+                    WSHDTN, WTABRT, WTSHMT, FLWN(300)
+              !----- In PODS.for -------------------------------------------------- 
+                 CHARACTER*3   TYPPDT
+                 INTEGER NR2TIM, TRIGGR
+                 REAL  SDPDVR, PODUR, SETMAX, RFLWAB, XMPAGE, DSWBAR, & !THRESH, PROLFF, PROSHI, SHLAG,
+                       FNPDT(4), XSWBAR(10), YSWBAR(10), XSWFAC(10), YSWFAC(10) !LNGSH
+                 REAL MNESPM !LNGPEG, LAGSD, SDVAR, SHVAR
+                 REAL FNINSH, NAVPOD, PGNPOD, WTSHM, PGAVLR !RPRPUN
+                 REAL ACCAGE, AFLW, CNSTRES, CPSTRES, FLWRDY, PODADD, SHMINE, TEMPOD, SUPDE(300), AVTEM(300)
+                 REAL ANINSD, CUMSIG, RSD !PODCOMP
+                 !----- In PODS.for->PODCOM ----------------------------------------------------
+                    REAL PROMIN, PROMAX, THETA !RCH2O, RLIP, RLIG, ROA, RMIN, PLIGSD, POASD, PMINSD
+                    REAL RATION, RATIOC
+                 !----- In PODS.for->FreshWt.for ----------------------------------------------------
+                    REAL AvgDMC, AvgDPW, AvgFPW, PodAge !SHELPC
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - PODDET ------------------------------------------------
+           !-----------------------------------------------------------------------
+              REAL PODWTD
+              !----- In PODDET.for -------------------------------------------------- 
+                 REAL DWC, PR1DET, PR2DET, XP1DET, XP2DET, DTC(300), DAYS(300), WPODY(300)
+                 !TB(5), TO1(5), TO2(5), TM(5)
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - VEGGR ------------------------------------------------
+           !----------------------------------------------------------------------- 
+              REAL CADLF, CADST, CMINEA, CRUSLF, CRUSRT, CRUSSH, CRUSST, EXCESS, NADLF, &
+                   NADRT, NADST, NGRLF, NGRRT, NGRST, TNLEAK, WLDOTN, WRDOTN, WSDOTN !CANWH
+              !----- In VEGGR.for--------------------------------------------------
+                 REAL PROLFG, PROSTG, PRORTG, CADSTF, ATOP !PROLFI, PROSTI, PRORTI, CMOBMX
+                 REAL CUMTUR, FNINLG, FNINRG, FNINSG, PGLEFT, SUPPN, VGRDEM
+                 !----- In VEGGR.for -> CANOPY.for ----------------------------------
+                    REAL XVSHT(15),YVSHT(15),YVSWH(15),XHWTEM(10),YHWTEM(10),XHWPAR(10),YHWPAR(10), RWIDTH, RHGHT
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - SENES ------------------------------------------------
+           !-----------------------------------------------------------------------
+              REAL SLDOT, SLNDOT, SSDOT, SSNDOT
+              !----- In SENES.for ------------------------------------------------
+                 REAL PORPT, SENRTE, SENRT2, SENDAY, ICMP, TCMP, SENMAX(4), SENPOR(4), XSENMX(4), XSTAGE_CROPGRO(4), &
+                      RATTP, SWFCAB(5)
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - ROOTS ------------------------------------------------
+           !-----------------------------------------------------------------------
+              REAL SENRT(20), SRDOT !SATFAC, RTDEP
+              !----- In ROOTS.for -------------------------------------------------
+                 REAL RFAC1, RLDSM, RTDEPI, RTEXF, RTSEN, RTSDF, RTWTMIN, XRTFAC(4), YRTFAC(4) 
+                 REAL DEPMAX, RFAC2, RFAC3, CumRootMass, TRLV !SUMRL, SUMEX
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - GROW ------------------------------------------------
+           !-----------------------------------------------------------------------
+              REAL WLFDOT, CLW, CSW, GROWTH, GRWRES, LAIMX, PCCSD, & !AREALF, CANNAA, CANWAA, BETN
+                   PCLSD, PCNSH, & ! PCNSD, PLIGLF, PLIGRT, PLIGNO, PLIGST, PLTPOP, PCNL, PCNRT, PCNST
+                   PUNCSD, PUNCTR, RHOL, RHOS, RNITP, SDNPL, SDRATE, SEEDNI, & !ROWSPC, POTWT, RTWT
+                   SHELWT, SLAAD, TOTWT, WCRLF, WCRRT, WCRSH, WCRST, WNRLF, WNRRT, & !SLA, TOPWT, STMWT
+                   WNRSH, WNRST, WTCO, WTLO, WTMAIN, WTNEW, WTNLA, WTNLO, WTNNA, & !WTNCAN, WTNLF, WTLF
+                   WTNNAG, WTNNO, WTNNOD, WTNOO, WTNRA, WTNRO, WTNRT, WTNSA, WTNSDA, WTNSDO, & !WTNSD
+                   WTNSH, WTNSHA, WTNSHO, WTNSO, WTRO, WTSDO, WTSHO, WTSO, XPOD !WTNUP, WTNST
+                   !ShutMob, RootMob, ShelMob
+              !----- In GROW.for --------------------------------------------------
+                 !CHARACTER*1  PLME
+                 CHARACTER*2  XPODF 
+                 REAL ALPHL, ALPHR, ALPHS, ALPHSH, PROSHF, & !PLIGST, PLIGLF, PLIGRT, PLIGSH, PLIPNO, 
+                      !ROWSPC, PROLFF, PROSTF, PRORTF, PRONOD, PROLFI, PROSTI, PRORTI, PLTPOP
+                      SDWTPL, WTFSD, WTPSD, CPFLF, CPFSTM, CPFRT, CPFNOD, CPFSH1, CPFSD1, PCNMIN, & !SDPRO
+                      ALFDOT, AREAH, NLDOT, NSDOT, NRDOT, NSDDOT, NSHDOT, NTOVR, RHOR, RHOSH, SDWTAM, &
+                      SenWt(0:20), SenLig(0:20), SenE(0:20,3), TGROW, WSDDOT, WSHDOT, WTCSD, WTLSD, &
+                      WTNMOB, WTNTOT, SDPDOT, PUNDOT, NLPEST, &
+                      WLDOT, WSDOT, WRDOT, WNDOT, WPDOT, WRCLDT, WRCSDT, WRCRDT, WRCSHD !WLFDOT
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - P_CGRO ------------------------------------------------
+           !-----------------------------------------------------------------------
+              !REAL PConc_Shut, PConc_Root, PConc_Shel, PConc_Seed, PStres2
+              !----- In P_CGRO.for ------------------------------------------------
+                 REAL Leaf_kg, Stem_kg, Root_kg, Shel_kg, Seed_kg !SenSoilP, SenSurfP, PestShut, PestRoot, PestShel, PestSeed
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - MOBIL ------------------------------------------------
+           !-----------------------------------------------------------------------
+              REAL NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST
+           !-----------------------------------------------------------------------
+           !---- CROPGRO - OPGROW ------------------------------------------------
+           !-----------------------------------------------------------------------
+              !----- In Opgrow.for ------------------------------------------------
+                 CHARACTER*12 OUTG, OUTPN, OUTPC
+                 INTEGER N_LYR 
+                 REAL CUMSENSURF, CUMSENSOIL, CUMSENSURFN, CUMSENSOILN, SWF_AV, TUR_AV, NST_AV, EXW_AV, PS1_AV, PS2_AV, KST_AV
            !-----------------------------------------------------------------------
            ! PLANT - MZ_CERES
            ! Pang 2024.01.24
@@ -520,9 +665,6 @@ module dssat48_module
         ! JE Tight Coupling Variables
           REAL, DIMENSION(20):: LIS_sm            !Dimensioned the same as SW
           REAL, DIMENSION(20):: LIS_sm_start
-        !------------------------------------------------------------------------
-          REAL, DIMENSION(20):: DSSAT_sm_restart            !For restart
-          LOGICAL :: restart_flag
         !---- ADDITIONAL CONTROL ------------------------------------------------
         !---- Pang 2023.09.19 ---------------------------------------------------
         !------------------------------------------------------------------------

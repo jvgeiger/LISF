@@ -179,7 +179,7 @@ C-----------------------------------------------------------------------
       ISENS  = 0
       TITLER(1:5) = '     '
       
-      FILEX_P = TRIM(PATHEX)//FILEX !Pang: Add path with exp file
+      FILEX_P = TRIM(PATHEX)//FILEX
       CALL Join_Trim(PATHEX, FILEX, FILEX_P)
 C-----------------------------------------------------------------------
 C     Call IPEXP

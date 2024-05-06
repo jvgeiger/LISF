@@ -269,10 +269,13 @@ subroutine dssat48_main(n)
             NYRS = dssat48_struc(n)%CONTROL(t)%nyrs
             ENDYRS = dssat48_struc(n)%CONTROL(t)%endyrs
             MULTI = dssat48_struc(n)%CONTROL(t)%multi
-            PRINT*, 'SM1: ', dssat48_struc(n)%dssat48(t)%SW(1)
-            PRINT*, 'SM2: ', dssat48_struc(n)%dssat48(t)%SW(2)
-            PRINT*, 'SM3: ', dssat48_struc(n)%dssat48(t)%SW(3)
-            PRINT*, 'SM4: ', dssat48_struc(n)%dssat48(t)%SW(4)
+            !PRINT*, 'SM at Begining of MAIN'
+            !PRINT*, 'YRDOY: ', YRDOY
+            !PRINT*, 'SM1: ', dssat48_struc(n)%dssat48(t)%SW(1)
+            !PRINT*, 'SM2: ', dssat48_struc(n)%dssat48(t)%SW(2)
+            !PRINT*, 'SM3: ', dssat48_struc(n)%dssat48(t)%SW(3)
+            !PRINT*, 'SM4: ', dssat48_struc(n)%dssat48(t)%SW(4)
+            write(unit=fproc,fmt='(i4.4)') LIS_localPet !Processor number
             !------ CSM INITIALIZATION -----------------------------------------------
             IF (.NOT.DONE) THEN
                 !PRINT*, 'Im in INIT'
@@ -368,10 +371,9 @@ subroutine dssat48_main(n)
                  dssat48_struc(n)%dssat48(t)%DONE = .TRUE.
             ENDIF
 
-
             !----- SEASONAL INITIALIZATION -------------------------------------------
             IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
-                !PRINT*, 'In SEAS INIT'
+                PRINT*, 'In SEAS INIT'
                 !PRINT*, 't, tmp_LAT, tmp_LON', t, tmp_LAT, tmp_LON
                   !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
                 !PRINT*, 'SEAS YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%YRDOY
@@ -391,13 +393,6 @@ subroutine dssat48_main(n)
                  REPNO = dssat48_struc(n)%CONTROL(t)%repno !May not really needed for Q mode
                  !dssat48_struc(n)%CONTROL(t) % YRDOY   = YRDOY !Put back later
                  
-                 !CALL INPUT_SUB( n, t,                                  & !Pang 20240207
-                 !       FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
-                 !       RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input
-                 !       dssat48_struc(n)%ISWITCH(t), dssat48_struc(n)%CONTROL(t)) !Output
-
-                 !!CONDITIONS
-                 !!PRINT*, 'NYRS, ENDYRS, MULTI bf: ', NYRS, ENDYRS, MULTI
                  IF (NYRS .GT. 1) THEN
                      ENDYRS = ENDYRS + 1
                      IF (RNMODE .NE. 'Y') THEN
@@ -479,25 +474,10 @@ subroutine dssat48_main(n)
                 !PRINT*, 'YREND in seas: ', YREND, YRDOY
                 !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
             !After INIT
-
-            IF(dssat48_struc(n)%dssat48(t)%restart_flag) THEN
-               dssat48_struc(n)%dssat48(t)%SW(1) = dssat48_struc(n)%dssat48(t)%DSSAT_sm_restart(1)
-               dssat48_struc(n)%dssat48(t)%SW(2) = dssat48_struc(n)%dssat48(t)%DSSAT_sm_restart(2)
-               dssat48_struc(n)%dssat48(t)%SW(3) = dssat48_struc(n)%dssat48(t)%DSSAT_sm_restart(3)
-               dssat48_struc(n)%dssat48(t)%SW(4) = dssat48_struc(n)%dssat48(t)%DSSAT_sm_restart(4)
-               dssat48_struc(n)%dssat48(t)%restart_flag = .FALSE.
-            ENDIF   
-
-            PRINT*, 'Do We hold the retstart SM'
-            PRINT*, 'SM1: ', dssat48_struc(n)%dssat48(t)%SW(1)
-            PRINT*, 'SM2: ', dssat48_struc(n)%dssat48(t)%SW(2)
-            PRINT*, 'SM3: ', dssat48_struc(n)%dssat48(t)%SW(3)
-            PRINT*, 'SM4: ', dssat48_struc(n)%dssat48(t)%SW(4)
-
             !----- DAILY  ------------------------------------------------------------
             IF ((.NOT.dssat48_struc(n)%dssat48(t)%doseasinit).AND.(YRDOY.GE.YRSIM)) THEN
-               PRINT*, 'Im in DAILY: ', dssat48_struc(n)%CONTROL(t) % YRDOY
-               PRINT*, 'fproc, t, tmp_LAT, tmp_LON', fproc, t, tmp_LAT, tmp_LON
+               !PRINT*, 'Im in DAILY: ', dssat48_struc(n)%CONTROL(t) % YRDOY
+               !PRINT*, 'fproc, t, tmp_LAT, tmp_LON', fproc, t, tmp_LAT, tmp_LON
                !-----------------------------------------------------------------------
                !     Calculate days after simulation (DAS) 
                !-----------------------------------------------------------------------
@@ -531,6 +511,12 @@ subroutine dssat48_main(n)
                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
                !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
+               ! PRINT*, 'SM Before Writing Out'
+               ! PRINT*, 'YRDOY: ', YRDOY
+               ! PRINT*, 'SM1: ', dssat48_struc(n)%dssat48(t)%SW(1)
+               ! PRINT*, 'SM2: ', dssat48_struc(n)%dssat48(t)%SW(2)
+               ! PRINT*, 'SM3: ', dssat48_struc(n)%dssat48(t)%SW(3)
+               ! PRINT*, 'SM4: ', dssat48_struc(n)%dssat48(t)%SW(4)
 
                !JE Write variables to LIS_HIST file
                call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD1, &

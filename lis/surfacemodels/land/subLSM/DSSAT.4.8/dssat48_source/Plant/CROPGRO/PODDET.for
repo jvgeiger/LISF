@@ -15,7 +15,7 @@ C-----------------------------------------------------------------------
 !  Calls:        ERROR, FIND, IGNORE
 C=======================================================================
 
-      SUBROUTINE PODDET(
+      SUBROUTINE PODDET(nest, t, !Pang 2024.05.02
      &  FILECC, TGRO, WTLF, YRDOY, YRNR2,                 !Input
      &  PODWTD, SDNO, SHELN, SWIDOT,                      !Output
      &  WSHIDT, WTSD, WTSHE,                              !Output
@@ -25,9 +25,10 @@ C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
       CHARACTER*6 ERRKEY
       PARAMETER (ERRKEY = 'PODDET')
 
@@ -53,7 +54,19 @@ C-----------------------------------------------------------------------
       REAL WTSD(NCOHORTS), SDNO(NCOHORTS), WTSHE(NCOHORTS)
       REAL WPODY(NCOHORTS), SHELN(NCOHORTS), PDET(NCOHORTS)
       REAL DAYS(NCOHORTS), MSHELN(NCOHORTS), DTC(NCOHORTS)
-
+!----- Obtain Vars from Memory -----------------------------------------
+      DWC = dssat48_struc(nest)%dssat48(t)%DWC
+      PR1DET = dssat48_struc(nest)%dssat48(t)%PR1DET 
+      PR2DET = dssat48_struc(nest)%dssat48(t)%PR2DET 
+      XP1DET = dssat48_struc(nest)%dssat48(t)%XP1DET
+      XP2DET = dssat48_struc(nest)%dssat48(t)%XP2DET
+      TB = dssat48_struc(nest)%dssat48(t)%TB
+      TO1 = dssat48_struc(nest)%dssat48(t)%TO1
+      TO2 = dssat48_struc(nest)%dssat48(t)%TO2
+      TM = dssat48_struc(nest)%dssat48(t)%TM
+      DTC = dssat48_struc(nest)%dssat48(t)%DTC
+      DAYS = dssat48_struc(nest)%dssat48(t)%DAYS
+      WPODY = dssat48_struc(nest)%dssat48(t)%WPODY
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -270,6 +283,19 @@ C       curve based on Drew control, disease and Lowman tag pod cohort study
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!----- Obtain Vars from Memory -----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%DWC = DWC
+      dssat48_struc(nest)%dssat48(t)%PR1DET = PR1DET
+      dssat48_struc(nest)%dssat48(t)%PR2DET = PR2DET
+      dssat48_struc(nest)%dssat48(t)%XP1DET = XP1DET
+      dssat48_struc(nest)%dssat48(t)%XP2DET = XP2DET
+      dssat48_struc(nest)%dssat48(t)%TB = TB
+      dssat48_struc(nest)%dssat48(t)%TO1 = TO1
+      dssat48_struc(nest)%dssat48(t)%TO2 = TO2
+      dssat48_struc(nest)%dssat48(t)%TM = TM
+      dssat48_struc(nest)%dssat48(t)%DTC = DTC
+      dssat48_struc(nest)%dssat48(t)%DAYS = DAYS
+      dssat48_struc(nest)%dssat48(t)%WPODY = WPODY
       RETURN
       END ! SUBROUTINE PODDET
 !=======================================================================

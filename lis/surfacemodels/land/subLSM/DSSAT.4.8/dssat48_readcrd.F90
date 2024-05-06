@@ -67,6 +67,12 @@ subroutine dssat48_readcrd()
             call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%rformat, rc=rc)
             call LIS_verify(rc, "DSSAT48 restart file format: not defined")
         enddo
+   
+    call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 experiment file:", rc = rc)
+        do n=1,LIS_rc%nnest
+            call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%expfile, rc=rc)
+            call LIS_verify(rc, "DSSAT48 experiment file: not defined")
+        enddo
 
     !JE Coupling Options 
     call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 soil moisture coupling:", rc = rc)

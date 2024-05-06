@@ -26,7 +26,8 @@ C=======================================================================
      &                YRPLT, MDATE, YREND, nest, t)
       
 C-----------------------------------------------------------------------
-      USE ModuleDefs      
+      USE ModuleDefs    
+      USE ModuleData, only : PUT !Pang: for PUT CONTROL
       USE FloodModule      
       USE CsvOutput   ! VSH 
       USE dssat48_lsmMod !Pang: Use memory from LIS
@@ -129,6 +130,8 @@ C     Define constructed variable types based on definitions in
 C     ModuleDefs.for.
       TYPE (ControlType) CONTROL
       TYPE (SwitchType)  ISWITCH
+
+      CALL PUT(CONTROL) !PL: Put the current CRONTROL to the memory for GET in modules
 
 C     Transfer values from constructed data types into local variables.
       CROP    = CONTROL % CROP

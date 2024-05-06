@@ -29,7 +29,7 @@ C  05/11/1999 GH  Incorporated in CROPGRO
 !  Calls      :  IPROOT, INROOT
 !=======================================================================
 
-      SUBROUTINE ROOTS(DYNAMIC,
+      SUBROUTINE ROOTS(DYNAMIC, nest, t, !Pang 2024.05.03
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -39,13 +39,14 @@ C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*1 ISWWAT
       CHARACTER*2 CROP
       CHARACTER*92 FILECC
-
+      INTEGER nest, t
       INTEGER L, L1, NLAYR
 
       INTEGER DYNAMIC
@@ -73,7 +74,25 @@ C-----------------------------------------------------------------------
 !     TRLV_MIN  = conversion of RTWTMIN to RLV units per layer
       REAL TRLV_MIN, RLSENTOT, FACTOR, RTWTMIN
       REAL TotRootMass, CumRootMass
+!------- Obtain Vars from Memory --------------------------------------
+      PORMIN = dssat48_struc(nest)%dssat48(t)%PORMIN
+      RFAC1 = dssat48_struc(nest)%dssat48(t)%RFAC1
+      RLDSM = dssat48_struc(nest)%dssat48(t)%RLDSM
+      RTDEPI = dssat48_struc(nest)%dssat48(t)%RTDEPI
+      RTEXF = dssat48_struc(nest)%dssat48(t)%RTEXF
+      RTSEN = dssat48_struc(nest)%dssat48(t)%RTSEN
+      RTSDF = dssat48_struc(nest)%dssat48(t)%RTSDF
+      RTWTMIN = dssat48_struc(nest)%dssat48(t)%RTWTMIN
+      XRTFAC = dssat48_struc(nest)%dssat48(t)%XRTFAC
+      YRTFAC = dssat48_struc(nest)%dssat48(t)%YRTFAC
+      DEPMAX = dssat48_struc(nest)%dssat48(t)%DEPMAX
 
+      SUMEX = dssat48_struc(nest)%dssat48(t)%SUMEX
+      SUMRL = dssat48_struc(nest)%dssat48(t)%SUMRL
+      RFAC2 = dssat48_struc(nest)%dssat48(t)%RFAC2
+      RFAC3 = dssat48_struc(nest)%dssat48(t)%RFAC3
+      CumRootMass = dssat48_struc(nest)%dssat48(t)%CumRootMass
+      TRLV = dssat48_struc(nest)%dssat48(t)%TRLV
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -85,7 +104,19 @@ C-----------------------------------------------------------------------
      &  RTSEN, RTSDF, RTWTMIN, XRTFAC, YRTFAC)            !Output
 
       DEPMAX = DS(NLAYR)
-
+!------- Obtain Vars from Memory -- DO It Once------------------------------------
+      dssat48_struc(nest)%dssat48(t)%PORMIN = PORMIN
+      dssat48_struc(nest)%dssat48(t)%RFAC1 = RFAC1
+      dssat48_struc(nest)%dssat48(t)%RLDSM = RLDSM
+      dssat48_struc(nest)%dssat48(t)%RTDEPI = RTDEPI
+      dssat48_struc(nest)%dssat48(t)%RTEXF = RTEXF
+      dssat48_struc(nest)%dssat48(t)%RTSEN = RTSEN
+      dssat48_struc(nest)%dssat48(t)%RTSDF = RTSDF
+      dssat48_struc(nest)%dssat48(t)%RTWTMIN = RTWTMIN
+      dssat48_struc(nest)%dssat48(t)%XRTFAC = XRTFAC
+      dssat48_struc(nest)%dssat48(t)%YRTFAC = YRTFAC
+      dssat48_struc(nest)%dssat48(t)%DEPMAX = DEPMAX
+      
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -367,6 +398,13 @@ C     respiration, and update root length density for each layer.
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!----- Save VARS to Memory --------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%SUMEX = SUMEX
+      dssat48_struc(nest)%dssat48(t)%SUMRL =  SUMRL
+      dssat48_struc(nest)%dssat48(t)%RFAC2 = RFAC2
+      dssat48_struc(nest)%dssat48(t)%RFAC3 = RFAC3
+      dssat48_struc(nest)%dssat48(t)%CumRootMass = CumRootMass
+      dssat48_struc(nest)%dssat48(t)%TRLV = TRLV
       RETURN
       END SUBROUTINE ROOTS
 !=======================================================================

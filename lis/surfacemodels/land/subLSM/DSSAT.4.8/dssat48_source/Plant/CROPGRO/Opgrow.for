@@ -15,7 +15,7 @@ C-----------------------------------------------------------------------
 C  Called by: PLANT
 C  Calls:     None
 !=======================================================================
-      SUBROUTINE OPGROW(CONTROL, ISWITCH, SoilProp, 
+      SUBROUTINE OPGROW(CONTROL, ISWITCH, SoilProp, nest, t, !Pang 2024.05.06 
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
      &    GRWRES, KSTRES, MAINR, MDATE, NFIXN, NLAYR, NSTRES, 
      &    PCLSD, PCCSD, PCNL, PCNRT, PCNSD, PCNSH, PCNST, PG, 
@@ -30,6 +30,7 @@ C  Calls:     None
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
 !     VSH
       USE CsvOutput 
       USE Linklist
@@ -41,7 +42,7 @@ C  Calls:     None
       CHARACTER*6, PARAMETER :: ERRKEY = 'OPGROW'
 !      CHARACTER*8  FNAME
       CHARACTER*12 OUTG, OUTPC, OUTPN
-
+      INTEGER nest, t
       INTEGER COUNT, DAP, DAS, DOY, DYNAMIC, ERRNUM, FROP, I, L
       INTEGER N_LYR, NLAYR, NOUTDG, NOUTPC, NOUTPN, RUN, RSTAGE
       INTEGER TIMDIF, YEAR, YRDOY, MDATE, YRPLT, VWAD
@@ -103,6 +104,20 @@ C  Calls:     None
       ISWPOT = ISWITCH % ISWPOT
           
       FMOPT  = ISWITCH % FMOPT    ! VSH
+
+!----- Obtain Vars from Memory -----------------------------------------
+       N_LYR = dssat48_struc(nest)%dssat48(t)%N_LYR
+       CUMSENSURF = dssat48_struc(nest)%dssat48(t)%CUMSENSURF
+       CUMSENSOIL = dssat48_struc(nest)%dssat48(t)%CUMSENSOIL
+       CUMSENSURFN = dssat48_struc(nest)%dssat48(t)%CUMSENSURFN
+       CUMSENSOILN = dssat48_struc(nest)%dssat48(t)%CUMSENSOILN
+       SWF_AV = dssat48_struc(nest)%dssat48(t)%SWF_AV
+       TUR_AV = dssat48_struc(nest)%dssat48(t)%TUR_AV
+       NST_AV = dssat48_struc(nest)%dssat48(t)%NST_AV
+       EXW_AV = dssat48_struc(nest)%dssat48(t)%EXW_AV
+       PS1_AV = dssat48_struc(nest)%dssat48(t)%PS1_AV
+       PS2_AV = dssat48_struc(nest)%dssat48(t)%PS2_AV
+       KST_AV = dssat48_struc(nest)%dssat48(t)%KST_AV
 
 !***********************************************************************
 !***********************************************************************
@@ -501,9 +516,9 @@ C       changed from 12 to TS/2 on 9Jul17 by Bruce Kimball
 C-----------------------------------------------------------------------
         IF (FMOPT == 'A' .OR. FMOPT == ' ') THEN   ! VSH
         !Close daily output files.
-        CLOSE (NOUTDG)
-        CLOSE (NOUTPN)
-        CLOSE (NOUTPC)
+        !CLOSE (NOUTDG) !PL: Comment to enable mutiple pixel output at the end of season
+        !CLOSE (NOUTPN)
+        !CLOSE (NOUTPC)
         END IF   ! VSH
 
 !***********************************************************************
@@ -512,6 +527,20 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!----- Save Vars to Memory -----------------------------------------
+       dssat48_struc(nest)%dssat48(t)%N_LYR = N_LYR
+       dssat48_struc(nest)%dssat48(t)%CUMSENSURF = CUMSENSURF
+       dssat48_struc(nest)%dssat48(t)%CUMSENSOIL = CUMSENSOIL
+       dssat48_struc(nest)%dssat48(t)%CUMSENSURFN = CUMSENSURFN
+       dssat48_struc(nest)%dssat48(t)%CUMSENSOILN = CUMSENSOILN
+       dssat48_struc(nest)%dssat48(t)%SWF_AV = SWF_AV
+       dssat48_struc(nest)%dssat48(t)%TUR_AV = TUR_AV
+       dssat48_struc(nest)%dssat48(t)%NST_AV = TUR_AV
+       dssat48_struc(nest)%dssat48(t)%EXW_AV = EXW_AV
+       dssat48_struc(nest)%dssat48(t)%PS1_AV = PS1_AV
+       dssat48_struc(nest)%dssat48(t)%PS2_AV = PS2_AV
+       dssat48_struc(nest)%dssat48(t)%KST_AV = KST_AV
+
       RETURN
       END ! SUBROUTINE OPGROW
 !=======================================================================

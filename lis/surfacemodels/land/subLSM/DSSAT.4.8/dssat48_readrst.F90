@@ -70,8 +70,6 @@ subroutine dssat48_readrst()
       ! Coldstart
       if(LIS_rc%startcode .eq. "coldstart") then
          call dssat48_coldstart(LIS_rc%lsm_index)
-         !PL 04.17.2024
-          dssat48_struc(n)%dssat48%restart_flag = .FALSE.
       ! Restart
       elseif(LIS_rc%startcode .eq. "restart") then
 
@@ -83,7 +81,6 @@ subroutine dssat48_readrst()
          !   write(LIS_logunit,*) "  supported with 'Dssat48' forcing-format option."
          !   call LIS_endrun
          !endif
-         dssat48_struc(n)%dssat48%restart_flag = .TRUE.
          ! check the existance of restart file
          inquire(file=dssat48_struc(n)%rfile, exist=file_exists)
          if(.not. file_exists) then
@@ -122,24 +119,24 @@ subroutine dssat48_readrst()
 
          ! Soil moisture D1 (m3/m3)
            call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-                                  dssat48_struc(n)%dssat48%DSSAT_sm_restart(1), &
+                                  dssat48_struc(n)%dssat48%SW(1), &
                                   varname="DSSATSMD1", &
                                   wformat=wformat)
 
          ! Soil moisture D2 (m3/m3)
            call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-                                  dssat48_struc(n)%dssat48%DSSAT_sm_restart (2), &
+                                  dssat48_struc(n)%dssat48%SW(2), &
                                   varname="DSSATSMD2", &
                                   wformat=wformat)
          ! Soil moisture D3 (m3/m3)
            call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-                                  dssat48_struc(n)%dssat48%DSSAT_sm_restart (3), &
+                                  dssat48_struc(n)%dssat48%SW(3), &
                                   varname="DSSATSMD3", &
                                   wformat=wformat)
 
          ! Soil moisture D4 (m3/m3)
            call LIS_readvar_restart(ftn, n, LIS_rc%lsm_index, &
-                                  dssat48_struc(n)%dssat48%DSSAT_sm_restart(4), &
+                                  dssat48_struc(n)%dssat48%SW(4), &
                                   varname="DSSATSMD4", &
                                   wformat=wformat)
 

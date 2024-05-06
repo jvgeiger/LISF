@@ -12,15 +12,16 @@
 !=======================================================================
 
       SUBROUTINE FreshWt(DYNAMIC, ISWFWT, NR2TIM, PHTIM, SDNO, SHELN, 
-     &    WTSD, WTSHE, YRPLT)
+     &    WTSD, WTSHE, YRPLT, nest, t) !Pang 2024.05.02
 
 !-----------------------------------------------------------------------
       USE ModuleDefs 
       USE ModuleData
-
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
+      INTEGER nest, t
       CHARACTER*1   ISWFWT
       CHARACTER*2   CROP
       CHARACTER*7   ERRKEY
@@ -46,6 +47,12 @@
       TYPE (ControlType) CONTROL
       TYPE (SwitchType)  ISWITCH
       CALL GET(CONTROL)
+!----- Obtain Vars from Memory -----------------------------------------
+       AvgDMC = dssat48_struc(nest)%dssat48(t)%AvgDMC
+       AvgDPW = dssat48_struc(nest)%dssat48(t)%AvgDPW
+       AvgFPW = dssat48_struc(nest)%dssat48(t)%AvgFPW
+       PodAge = dssat48_struc(nest)%dssat48(t)%PodAge
+       SHELPC = dssat48_struc(nest)%dssat48(t)%SHELPC
 
 !***********************************************************************
 !***********************************************************************
@@ -286,6 +293,12 @@
 !***********************************************************************
       ENDIF
 !***********************************************************************
+      !----- Save Vars to Memory -----------------------------------
+       dssat48_struc(nest)%dssat48(t)%AvgDMC = AvgDMC
+       dssat48_struc(nest)%dssat48(t)%AvgDPW = AvgDPW
+       dssat48_struc(nest)%dssat48(t)%AvgFPW = AvgFPW
+       dssat48_struc(nest)%dssat48(t)%PodAge = PodAge
+       dssat48_struc(nest)%dssat48(t)%SHELPC = SHELPC
       RETURN
       END SUBROUTINE FreshWt
 !=======================================================================

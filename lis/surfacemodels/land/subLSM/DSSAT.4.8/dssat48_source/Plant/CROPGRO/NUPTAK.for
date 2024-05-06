@@ -13,16 +13,18 @@ C  Called from:  PLANT
 C  Calls:        ERROR, FIND, IGNORE
 C=======================================================================
 
-      SUBROUTINE NUPTAK(DYNAMIC,
+      SUBROUTINE NUPTAK(DYNAMIC, nest, t, !Pang 2024.05.01
      &  DLAYR, DUL, FILECC, KG2PPM, LL, NDMSDR, NDMTOT,   !Input
      &  NH4, NO3, NLAYR, RLV, SAT, SW,                    !Input
      &  TRNH4U, TRNO3U, TRNU, UNH4, UNO3)                 !Output
 
 !-----------------------------------------------------------------------
       USE ModuleDefs
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+ 
+      INTEGER nest, t
       CHARACTER*6 ERRKEY
       PARAMETER (ERRKEY = 'NUPTAK')
       CHARACTER*6 SECTION
@@ -39,7 +41,9 @@ C=======================================================================
       REAL TRNO3U, TRNH4U, TRNU
       REAL NDMTOT, NDMSDR, ANDEM, FNH4, FNO3, SMDFR, RFAC
       REAL RTNO3, RTNH4, MXNH4U, MXNO3U
-
+!----- Obtain Vars from Memory -----------------------------------------
+      RTNO3 = dssat48_struc(nest)%dssat48(t)%RTNO3
+      RTNH4 = dssat48_struc(nest)%dssat48(t)%RTNH4
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -76,7 +80,9 @@ C=======================================================================
       ENDIF
 
       CLOSE (LUNCRP)
-
+!----- Save Vars to Memory - DO IT ONCE-----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%RTNO3 = RTNO3
+      dssat48_struc(nest)%dssat48(t)%RTNH4 = RTNH4
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season

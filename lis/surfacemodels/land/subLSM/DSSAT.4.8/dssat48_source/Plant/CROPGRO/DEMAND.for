@@ -20,7 +20,7 @@ C  Called by:  PLANT
 C  Calls:      SDCOMP, IPDMND
 C=======================================================================
 
-      SUBROUTINE DEMAND(DYNAMIC, CONTROL,
+      SUBROUTINE DEMAND(DYNAMIC, CONTROL, nest, t, !Pang 2024.05.01
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
      &  LNGPEG, NDLEAF, NSTRES, PAR, PCNL, PCNRT, PCNST,  !Input
@@ -39,9 +39,11 @@ C=======================================================================
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
+      INTEGER nest, t
       CHARACTER*2 CROP
       CHARACTER*3 TYPSDT
       CHARACTER*6   ERRKEY
@@ -111,7 +113,84 @@ C=======================================================================
       REAL PUNCSD, PUNCTR, RPRPUN
 
       TYPE (ControlType) CONTROL
+!----- Obtain Vars from Memory -----------------------------------------
+!----- IPDMND ----------------------------------------------------------
+      CARMIN = dssat48_struc(nest)%dssat48(t)%CARMIN
+      FINREF = dssat48_struc(nest)%dssat48(t)%FINREF
+      FNSDT = dssat48_struc(nest)%dssat48(t)%FNSDT
+      FRLFF = dssat48_struc(nest)%dssat48(t)%FRLFF
+      FRLFMX = dssat48_struc(nest)%dssat48(t)%FRLFMX
+      FRSTMF = dssat48_struc(nest)%dssat48(t)%FRSTMF
+      LIPOPT = dssat48_struc(nest)%dssat48(t)%LIPOPT
+      LIPTB = dssat48_struc(nest)%dssat48(t)%LIPTB
+      LNGSH = dssat48_struc(nest)%dssat48(t)%LNGSH
+      NMOBMX = dssat48_struc(nest)%dssat48(t)%NMOBMX
+      NRCVR = dssat48_struc(nest)%dssat48(t)%NRCVR
+      NVSMOB = dssat48_struc(nest)%dssat48(t)%NVSMOB
+      PLIGSD = dssat48_struc(nest)%dssat48(t)%PLIGSD
+      PMINSD = dssat48_struc(nest)%dssat48(t)%PMINSD
+      POASD = dssat48_struc(nest)%dssat48(t)%POASD
+      PROLFF = dssat48_struc(nest)%dssat48(t)%PROLFF
+      PROLFI = dssat48_struc(nest)%dssat48(t)%PROLFI
+      PRORTF = dssat48_struc(nest)%dssat48(t)%PRORTF
+      PRORTI = dssat48_struc(nest)%dssat48(t)%PRORTI
+      PROSTF = dssat48_struc(nest)%dssat48(t)%PROSTF
+      PROSTI = dssat48_struc(nest)%dssat48(t)%PROSTI
+      RCH2O = dssat48_struc(nest)%dssat48(t)%RCH2O
+      RLIG = dssat48_struc(nest)%dssat48(t)%RLIG
+      RLIP = dssat48_struc(nest)%dssat48(t)%RLIP
+      RMIN = dssat48_struc(nest)%dssat48(t)%RMIN
+      RNO3C = dssat48_struc(nest)%dssat48(t)%RNO3C
+      ROA = dssat48_struc(nest)%dssat48(t)%ROA
+      RPRO = dssat48_struc(nest)%dssat48(t)%RPRO
+      SDLIP = dssat48_struc(nest)%dssat48(t)%SDLIP
+      SDPRO = dssat48_struc(nest)%dssat48(t)%SDPRO
+      SHLAG = dssat48_struc(nest)%dssat48(t)%SHLAG
+      SLAMAX = dssat48_struc(nest)%dssat48(t)%SLAMAX
+      SLAMIN = dssat48_struc(nest)%dssat48(t)%SLAMIN
+      SLAPAR = dssat48_struc(nest)%dssat48(t)%SLAPAR
+      SLAREF = dssat48_struc(nest)%dssat48(t)%SLAREF
+      SLAVAR = dssat48_struc(nest)%dssat48(t)%SLAVAR
+      SLOSUM = dssat48_struc(nest)%dssat48(t)%SLOSUM
+      SIZELF = dssat48_struc(nest)%dssat48(t)%SIZELF
+      SIZREF = dssat48_struc(nest)%dssat48(t)%SIZREF
+      SRMAX = dssat48_struc(nest)%dssat48(t)%SRMAX
+      TYPSDT = dssat48_struc(nest)%dssat48(t)%TYPSDT
+      THRESH = dssat48_struc(nest)%dssat48(t)%THRESH
+      TURSLA = dssat48_struc(nest)%dssat48(t)%TURSLA
+      VSSINK = dssat48_struc(nest)%dssat48(t)%VSSINK
+      XFRMAX = dssat48_struc(nest)%dssat48(t)%XFRMAX
+      XFRUIT = dssat48_struc(nest)%dssat48(t)%XFRUIT
+      XLEAF = dssat48_struc(nest)%dssat48(t)%XLEAF
+      XSLATM = dssat48_struc(nest)%dssat48(t)%XSLATM
+      XTRFAC = dssat48_struc(nest)%dssat48(t)%XTRFAC
+      XVGROW = dssat48_struc(nest)%dssat48(t)%XVGROW
+      XXFTEM = dssat48_struc(nest)%dssat48(t)%XXFTEM
+      YLEAF = dssat48_struc(nest)%dssat48(t)%YLEAF
+      YSLATM = dssat48_struc(nest)%dssat48(t)%YSLATM
+      YSTEM = dssat48_struc(nest)%dssat48(t)%YSTEM
+      YTRFAC = dssat48_struc(nest)%dssat48(t)%YTRFAC
+      YVREF = dssat48_struc(nest)%dssat48(t)%YVREF
+      YXFTEM = dssat48_struc(nest)%dssat48(t)%YXFTEM
 
+      CDMSDR = dssat48_struc(nest)%dssat48(t)%CDMSDR
+      GDMSDR = dssat48_struc(nest)%dssat48(t)%GDMSDR
+      NDMSD = dssat48_struc(nest)%dssat48(t)%NDMSD
+      NDMSH = dssat48_struc(nest)%dssat48(t)%NDMSH
+      RPRPUN = dssat48_struc(nest)%dssat48(t)%RPRPUN
+      TMPFAC = dssat48_struc(nest)%dssat48(t)%TMPFAC
+      DUMFAC = dssat48_struc(nest)%dssat48(t)%DUMFAC
+      FVEG = dssat48_struc(nest)%dssat48(t)%FVEG
+      SLAMN = dssat48_struc(nest)%dssat48(t)%SLAMN
+      SLAMX = dssat48_struc(nest)%dssat48(t)%SLAMX
+      GROMAX = dssat48_struc(nest)%dssat48(t)%GROMAX
+      SIZRAT = dssat48_struc(nest)%dssat48(t)%SIZRAT
+      YVGROW = dssat48_struc(nest)%dssat48(t)%YVGROW
+
+      ADDSHL = dssat48_struc(nest)%dssat48(t)%ADDSHL
+      TURXFR = dssat48_struc(nest)%dssat48(t)%TURXFR
+      CDMSD = dssat48_struc(nest)%dssat48(t)%CDMSD
+      NAGE = dssat48_struc(nest)%dssat48(t)%NAGE
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -644,7 +723,84 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !***********************************************************************
       ENDIF
 !-----------------------------------------------------------------------
+!----- Save Vars to Memory -----------------------------------------
+!----- IPDMND ----------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%CARMIN = CARMIN
+      dssat48_struc(nest)%dssat48(t)%FINREF = FINREF
+      dssat48_struc(nest)%dssat48(t)%FNSDT = FNSDT
+      dssat48_struc(nest)%dssat48(t)%FRLFF = FRLFF
+      dssat48_struc(nest)%dssat48(t)%FRLFMX = FRLFMX
+      dssat48_struc(nest)%dssat48(t)%FRSTMF = FRSTMF
+      dssat48_struc(nest)%dssat48(t)%LIPOPT = LIPOPT
+      dssat48_struc(nest)%dssat48(t)%LIPTB = LIPTB
+      dssat48_struc(nest)%dssat48(t)%LNGSH = LNGSH
+      dssat48_struc(nest)%dssat48(t)%NMOBMX = NMOBMX
+      dssat48_struc(nest)%dssat48(t)%NRCVR = NRCVR
+      dssat48_struc(nest)%dssat48(t)%NVSMOB = NVSMOB
+      dssat48_struc(nest)%dssat48(t)%PLIGSD = PLIGSD
+      dssat48_struc(nest)%dssat48(t)%PMINSD = PMINSD
+      dssat48_struc(nest)%dssat48(t)%POASD = POASD
+      dssat48_struc(nest)%dssat48(t)%PROLFF = PROLFF
+      dssat48_struc(nest)%dssat48(t)%PROLFI = PROLFI
+      dssat48_struc(nest)%dssat48(t)%PRORTF = PRORTF
+      dssat48_struc(nest)%dssat48(t)%PRORTI = PRORTI
+      dssat48_struc(nest)%dssat48(t)%PROSTF = PROSTF
+      dssat48_struc(nest)%dssat48(t)%PROSTI = PROSTI
+      dssat48_struc(nest)%dssat48(t)%RCH2O = RCH2O
+      dssat48_struc(nest)%dssat48(t)%RLIG = RLIG
+      dssat48_struc(nest)%dssat48(t)%RLIP = RLIP
+      dssat48_struc(nest)%dssat48(t)%RMIN = RMIN
+      dssat48_struc(nest)%dssat48(t)%RNO3C = RNO3C
+      dssat48_struc(nest)%dssat48(t)%ROA = ROA
+      dssat48_struc(nest)%dssat48(t)%RPRO = RPRO
+      dssat48_struc(nest)%dssat48(t)%SDLIP = SDLIP
+      dssat48_struc(nest)%dssat48(t)%SDPRO = SDPRO
+      dssat48_struc(nest)%dssat48(t)%SHLAG = SHLAG
+      dssat48_struc(nest)%dssat48(t)%SLAMAX = SLAMAX
+      dssat48_struc(nest)%dssat48(t)%SLAMIN = SLAMIN
+      dssat48_struc(nest)%dssat48(t)%SLAPAR = SLAPAR
+      dssat48_struc(nest)%dssat48(t)%SLAREF = SLAREF
+      dssat48_struc(nest)%dssat48(t)%SLAVAR = SLAVAR
+      dssat48_struc(nest)%dssat48(t)%SLOSUM = SLOSUM
+      dssat48_struc(nest)%dssat48(t)%SIZELF = SIZELF
+      dssat48_struc(nest)%dssat48(t)%SIZREF = SIZREF
+      dssat48_struc(nest)%dssat48(t)%SRMAX = SRMAX
+      dssat48_struc(nest)%dssat48(t)%TYPSDT = TYPSDT
+      dssat48_struc(nest)%dssat48(t)%THRESH = THRESH
+      dssat48_struc(nest)%dssat48(t)%TURSLA = TURSLA
+      dssat48_struc(nest)%dssat48(t)%VSSINK = VSSINK
+      dssat48_struc(nest)%dssat48(t)%XFRMAX = XFRMAX
+      dssat48_struc(nest)%dssat48(t)%XFRUIT = XFRUIT
+      dssat48_struc(nest)%dssat48(t)%XLEAF = XLEAF
+      dssat48_struc(nest)%dssat48(t)%XSLATM = XSLATM
+      dssat48_struc(nest)%dssat48(t)%XTRFAC = XTRFAC
+      dssat48_struc(nest)%dssat48(t)%XVGROW = XVGROW
+      dssat48_struc(nest)%dssat48(t)%XXFTEM = XXFTEM
+      dssat48_struc(nest)%dssat48(t)%YLEAF = YLEAF
+      dssat48_struc(nest)%dssat48(t)%YSLATM = YSLATM
+      dssat48_struc(nest)%dssat48(t)%YSTEM = YSTEM
+      dssat48_struc(nest)%dssat48(t)%YTRFAC = YTRFAC
+      dssat48_struc(nest)%dssat48(t)%YVREF = YVREF
+      dssat48_struc(nest)%dssat48(t)%YXFTEM = YXFTEM
 
+      dssat48_struc(nest)%dssat48(t)%CDMSDR = CDMSDR
+      dssat48_struc(nest)%dssat48(t)%GDMSDR = GDMSDR
+      dssat48_struc(nest)%dssat48(t)%NDMSD = NDMSD
+      dssat48_struc(nest)%dssat48(t)%NDMSH = NDMSH
+      dssat48_struc(nest)%dssat48(t)%RPRPUN = RPRPUN
+      dssat48_struc(nest)%dssat48(t)%TMPFAC = TMPFAC
+      dssat48_struc(nest)%dssat48(t)%DUMFAC = DUMFAC
+      dssat48_struc(nest)%dssat48(t)%FVEG = FVEG
+      dssat48_struc(nest)%dssat48(t)%SLAMN = SLAMN
+      dssat48_struc(nest)%dssat48(t)%SLAMX = SLAMX
+      dssat48_struc(nest)%dssat48(t)%GROMAX = GROMAX
+      dssat48_struc(nest)%dssat48(t)%SIZRAT = SIZRAT
+      dssat48_struc(nest)%dssat48(t)%YVGROW = YVGROW
+
+      dssat48_struc(nest)%dssat48(t)%ADDSHL = ADDSHL
+      dssat48_struc(nest)%dssat48(t)%TURXFR = TURXFR
+      dssat48_struc(nest)%dssat48(t)%CDMSD = CDMSD
+      dssat48_struc(nest)%dssat48(t)%NAGE = NAGE
       RETURN
       END SUBROUTINE DEMAND
 !=======================================================================

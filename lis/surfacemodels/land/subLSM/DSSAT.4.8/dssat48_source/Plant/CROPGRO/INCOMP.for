@@ -15,7 +15,7 @@ C  Called : PLANT
 C  Calls  : ERROR, FIND, IGNORE
 C=======================================================================
 
-      SUBROUTINE INCOMP(DYNAMIC,
+      SUBROUTINE INCOMP(DYNAMIC, nest, t, !Pang 2024.05.01
      &    FILECC, FILEIO, FRLF, FRRT, FRSTM,              !Input
      &    AGRLF, AGRNOD, AGRRT, AGRSD1, AGRSD2, AGRSH1,   !Output
      &    AGRSH2, AGRSTM, AGRVG, AGRVG2, SDPROR)          !Output
@@ -24,6 +24,7 @@ C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -33,7 +34,7 @@ C-----------------------------------------------------------------------
       CHARACTER*120 FILEIO
       CHARACTER*80 C80
       CHARACTER*92 FILECC
-
+      INTEGER nest, t
       INTEGER LUNCRP, LUNIO
       INTEGER DYNAMIC, ERR, FOUND, ISECT, LINC, LNUM
 
@@ -48,6 +49,49 @@ C-----------------------------------------------------------------------
      &              PROLFI, PRORTI,                 PROSHI, PROSTI,
      &      RCH2O , RLIG  , RLIP  , RMIN  , RNO3C , ROA   ,
      &      SDLIP,  SDPRO , SDPROR, SDPROS
+!------ Obtain Vars from Memory ----------------------------------------
+      SDPRO = dssat48_struc(nest)%dssat48(t)%SDPRO
+      SDLIP = dssat48_struc(nest)%dssat48(t)%SDLIP
+      RNO3C = dssat48_struc(nest)%dssat48(t)%RNO3C
+      RCH2O = dssat48_struc(nest)%dssat48(t)%RCH2O
+      RLIP = dssat48_struc(nest)%dssat48(t)%RLIP
+      RLIG = dssat48_struc(nest)%dssat48(t)%RLIG
+      ROA = dssat48_struc(nest)%dssat48(t)%ROA
+      RMIN = dssat48_struc(nest)%dssat48(t)%RMIN
+      PROLFI = dssat48_struc(nest)%dssat48(t)%PROLFI
+      PROSTI = dssat48_struc(nest)%dssat48(t)%PROSTI
+      PRORTI = dssat48_struc(nest)%dssat48(t)%PRORTI
+      PROSHI = dssat48_struc(nest)%dssat48(t)%PROSHI
+      SDPROS = dssat48_struc(nest)%dssat48(t)%SDPROS
+      PCARLF = dssat48_struc(nest)%dssat48(t)%PCARLF
+      PCARST = dssat48_struc(nest)%dssat48(t)%PCARST
+      PCARRT = dssat48_struc(nest)%dssat48(t)%PCARRT
+      PCARSH = dssat48_struc(nest)%dssat48(t)%PCARSH
+      PCARSD = dssat48_struc(nest)%dssat48(t)%PCARSD
+      PCARNO = dssat48_struc(nest)%dssat48(t)%PCARNO
+      PLIPLF = dssat48_struc(nest)%dssat48(t)%PLIPLF
+      PLIPST = dssat48_struc(nest)%dssat48(t)%PLIPST
+      PLIPRT = dssat48_struc(nest)%dssat48(t)%PLIPRT
+      PLIPSH = dssat48_struc(nest)%dssat48(t)%PLIPSH
+      PLIPNO = dssat48_struc(nest)%dssat48(t)%PLIPNO
+      PLIGLF = dssat48_struc(nest)%dssat48(t)%PLIGLF
+      PLIGST = dssat48_struc(nest)%dssat48(t)%PLIGST
+      PLIGRT = dssat48_struc(nest)%dssat48(t)%PLIGRT
+      PLIGSH = dssat48_struc(nest)%dssat48(t)%PLIGSH
+      PLIGSD = dssat48_struc(nest)%dssat48(t)%PLIGSD
+      PLIGNO = dssat48_struc(nest)%dssat48(t)%PLIGNO
+      POALF = dssat48_struc(nest)%dssat48(t)%POALF
+      POAST = dssat48_struc(nest)%dssat48(t)%POAST
+      POART = dssat48_struc(nest)%dssat48(t)%POART
+      POASH = dssat48_struc(nest)%dssat48(t)%POASH
+      POASD = dssat48_struc(nest)%dssat48(t)%POASD
+      POANO = dssat48_struc(nest)%dssat48(t)%POANO
+      PMINLF = dssat48_struc(nest)%dssat48(t)%PMINLF
+      PMINST = dssat48_struc(nest)%dssat48(t)%PMINST
+      PMINRT = dssat48_struc(nest)%dssat48(t)%PMINRT
+      PMINSH = dssat48_struc(nest)%dssat48(t)%PMINSH
+      PMINSD = dssat48_struc(nest)%dssat48(t)%PMINSD
+      PMINNO = dssat48_struc(nest)%dssat48(t)%PMINNO
 
 !***********************************************************************
 !***********************************************************************
@@ -154,6 +198,50 @@ C-----------------------------------------------------------------------
 
       CLOSE (LUNCRP)
 
+
+!------ Save Vars to Memory- DO IT ONCE ----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%SDPRO = SDPRO
+      dssat48_struc(nest)%dssat48(t)%SDLIP = SDLIP
+      dssat48_struc(nest)%dssat48(t)%RNO3C = RNO3C
+      dssat48_struc(nest)%dssat48(t)%RCH2O = RCH2O
+      dssat48_struc(nest)%dssat48(t)%RLIP = RLIP
+      dssat48_struc(nest)%dssat48(t)%RLIG = RLIG
+      dssat48_struc(nest)%dssat48(t)%ROA = ROA
+      dssat48_struc(nest)%dssat48(t)%RMIN = RMIN
+      dssat48_struc(nest)%dssat48(t)%PROLFI = PROLFI
+      dssat48_struc(nest)%dssat48(t)%PROSTI = PROSTI
+      dssat48_struc(nest)%dssat48(t)%PRORTI = PRORTI
+      dssat48_struc(nest)%dssat48(t)%PROSHI = PROSHI
+      dssat48_struc(nest)%dssat48(t)%SDPROS = SDPROS
+      dssat48_struc(nest)%dssat48(t)%PCARLF = PCARLF
+      dssat48_struc(nest)%dssat48(t)%PCARST = PCARST
+      dssat48_struc(nest)%dssat48(t)%PCARRT = PCARRT
+      dssat48_struc(nest)%dssat48(t)%PCARSH = PCARSH
+      dssat48_struc(nest)%dssat48(t)%PCARSD = PCARSD
+      dssat48_struc(nest)%dssat48(t)%PCARNO = PCARNO
+      dssat48_struc(nest)%dssat48(t)%PLIPLF = PLIPLF
+      dssat48_struc(nest)%dssat48(t)%PLIPST = PLIPST
+      dssat48_struc(nest)%dssat48(t)%PLIPRT = PLIPRT
+      dssat48_struc(nest)%dssat48(t)%PLIPSH = PLIPSH
+      dssat48_struc(nest)%dssat48(t)%PLIPNO = PLIPNO
+      dssat48_struc(nest)%dssat48(t)%PLIGLF = PLIGLF
+      dssat48_struc(nest)%dssat48(t)%PLIGST = PLIGST
+      dssat48_struc(nest)%dssat48(t)%PLIGRT = PLIGRT
+      dssat48_struc(nest)%dssat48(t)%PLIGSH = PLIGSH
+      dssat48_struc(nest)%dssat48(t)%PLIGSD = PLIGSD
+      dssat48_struc(nest)%dssat48(t)%PLIGNO = PLIGNO
+      dssat48_struc(nest)%dssat48(t)%POALF = POALF
+      dssat48_struc(nest)%dssat48(t)%POAST = POAST
+      dssat48_struc(nest)%dssat48(t)%POART = POART
+      dssat48_struc(nest)%dssat48(t)%POASH = POASH 
+      dssat48_struc(nest)%dssat48(t)%POASD = POASD
+      dssat48_struc(nest)%dssat48(t)%POANO = POANO
+      dssat48_struc(nest)%dssat48(t)%PMINLF = PMINLF
+      dssat48_struc(nest)%dssat48(t)%PMINST = PMINST
+      dssat48_struc(nest)%dssat48(t)%PMINRT = PMINRT
+      dssat48_struc(nest)%dssat48(t)%PMINSH = PMINSH
+      dssat48_struc(nest)%dssat48(t)%PMINSD = PMINSD
+      dssat48_struc(nest)%dssat48(t)%PMINNO = PMINNO
 !C-----------------------------------------------------------------------
 !C    Read Ecotype Parameter File
 !C-----------------------------------------------------------------------

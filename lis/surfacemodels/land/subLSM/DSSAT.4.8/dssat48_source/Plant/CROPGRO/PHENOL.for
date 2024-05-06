@@ -18,7 +18,7 @@ C-----------------------------------------------------------------------
 !                     CURV
 C=======================================================================
 
-      SUBROUTINE PHENOL(CONTROL, ISWITCH, 
+      SUBROUTINE PHENOL(CONTROL, ISWITCH, nest, t, !Pang 2024.04.29 
      &    DAYL, NSTRES, PStres2, SOILPROP, ST,            !Input
      &    SW, SWFAC, TGRO, TMIN, TURFAC, XPOD, YRPLT,     !Input
      &    DRPP, DTX, DXR57, FRACDN, MDATE, NDLEAF,        !Output
@@ -31,12 +31,13 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 !----------------------------------------------------------------------------
       INTEGER NPHS
       PARAMETER (NPHS = 13)
-
+      INTEGER nest, t
       CHARACTER*1 ISIMI, ISWWAT, PLME
       CHARACTER*2 CROP
       CHARACTER*3 CTMP(20), DLTYP(20)
@@ -91,7 +92,45 @@ C=======================================================================
 
       ISWWAT = ISWITCH % ISWWAT
       ISIMI  = ISWITCH % ISIMI
-
+!------ Obtain Vars fomr Memory -----------------------------------------
+       PLME = dssat48_struc(nest)%dssat48(t)%PLME
+       CTMP = dssat48_struc(nest)%dssat48(t)%CTMP
+       DLTYP = dssat48_struc(nest)%dssat48(t)%DLTYP
+       ATEMP = dssat48_struc(nest)%dssat48(t)%ATEMP
+       CLDVAR = dssat48_struc(nest)%dssat48(t)%CLDVAR
+       CLDVRR = dssat48_struc(nest)%dssat48(t)%CLDVRR
+       CSDVAR = dssat48_struc(nest)%dssat48(t)%CSDVAR
+       CSDVRR = dssat48_struc(nest)%dssat48(t)%CSDVRR
+       EVMODC = dssat48_struc(nest)%dssat48(t)%EVMODC
+       NSENP = dssat48_struc(nest)%dssat48(t)%NSENP
+       OPTBI = dssat48_struc(nest)%dssat48(t)%OPTBI
+       PSENP = dssat48_struc(nest)%dssat48(t)%PSENP
+       SDAGE = dssat48_struc(nest)%dssat48(t)%SDAGE
+       SDEPTH = dssat48_struc(nest)%dssat48(t)%SDEPTH
+       SLOBI = dssat48_struc(nest)%dssat48(t)%SLOBI
+       THVAR = dssat48_struc(nest)%dssat48(t)%THVAR
+       TRIFOL = dssat48_struc(nest)%dssat48(t)%TRIFOL
+       TB = dssat48_struc(nest)%dssat48(t)%TB
+       TO1 = dssat48_struc(nest)%dssat48(t)%TO1
+       TO2 = dssat48_struc(nest)%dssat48(t)%TO2
+       TM = dssat48_struc(nest)%dssat48(t)%TM
+       WSENP = dssat48_struc(nest)%dssat48(t)%WSENP
+       MNEMV1 = dssat48_struc(nest)%dssat48(t)%MNEMV1
+       MNFLLL = dssat48_struc(nest)%dssat48(t)%MNFLLL
+       TNTFAC = dssat48_struc(nest)%dssat48(t)%TNTFAC
+       TNTFC2 = dssat48_struc(nest)%dssat48(t)%TNTFC2
+       FNSTR = dssat48_struc(nest)%dssat48(t)%FNSTR
+       FPSTR = dssat48_struc(nest)%dssat48(t)%FPSTR
+       FSW = dssat48_struc(nest)%dssat48(t)%FSW
+       FT = dssat48_struc(nest)%dssat48(t)%FT
+       FUDAY = dssat48_struc(nest)%dssat48(t)%FUDAY
+       PHZACC = dssat48_struc(nest)%dssat48(t)%PHZACC
+       NPRIOR = dssat48_struc(nest)%dssat48(t)%NPRIOR
+       TSELC = dssat48_struc(nest)%dssat48(t)%TSELC
+       JPEND = dssat48_struc(nest)%dssat48(t)%JPEND
+       NDVST = dssat48_struc(nest)%dssat48(t)%NDVST
+       NVALPH = dssat48_struc(nest)%dssat48(t)%NVALPH
+       NVEG1 = dssat48_struc(nest)%dssat48(t)%NVEG1
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -147,7 +186,7 @@ C       Number of days from flowering to harvest maturity
         FUDAY(J) = 0.
       ENDDO
 
-      CALL RSTAGES(CONTROL,
+      CALL RSTAGES(CONTROL, nest, t,  !Pang 2024.04.30
      &    FNSTR, FPSTR, FSW, FT, FUDAY, ISIMI, NPRIOR,    !Input
      &    PHTHRS, PLME, SDEPTH, YRDOY, YRPLT, YRSIM,      !Input
      &    JPEND, MDATE, NDLEAF, NDSET, NDVST, NVALPH,     !Output
@@ -155,7 +194,7 @@ C       Number of days from flowering to harvest maturity
      &    RSTAGE, STGDOY, SeedFrac, VegFrac, YREMRG,      !Output
      &    YRNR1, YRNR2, YRNR3, YRNR5, YRNR7)              !Output
 
-      CALL VSTAGES(
+      CALL VSTAGES( nest, t, !Pang 2024.04.30
      &    DAS, DTX, EVMODC, MNEMV1, NDVST,                !Input
      &    NVEG0, NVEG1, PHZACC, PLME, TRIFOL,             !Input
      &    TURFAC, XPOD, YRDOY, YRPLT,                     !Input
@@ -289,7 +328,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C    Calculate rate of V-stage change for height and width determination
 C-----------------------------------------------------------------------
-      CALL VSTAGES(
+      CALL VSTAGES( nest, t, !Pang 2024.04.30
      &    DAS, DTX, EVMODC, MNEMV1, NDVST,                !Input
      &    NVEG0, NVEG1, PHZACC, PLME, TRIFOL,             !Input
      &    TURFAC, XPOD, YRDOY, YRPLT,                     !Input
@@ -305,7 +344,7 @@ C**********************************************************************
 C----------------------------------------------------------------------
 C     Check to see if stages occur today, if so set them in RSTAGES
 C----------------------------------------------------------------------
-      CALL RSTAGES(CONTROL,
+      CALL RSTAGES(CONTROL, nest, t,  !Pang 2024.04.30
      &    FNSTR, FPSTR, FSW, FT, FUDAY, ISIMI, NPRIOR,    !Input
      &    PHTHRS, PLME, SDEPTH, YRDOY, YRPLT, YRSIM,      !Input
      &    JPEND, MDATE, NDLEAF, NDSET, NDVST, NVALPH,     !Output
@@ -337,7 +376,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 !     Calculate V-stages
 !-----------------------------------------------------------------------
-      CALL VSTAGES(
+      CALL VSTAGES( nest, t, !Pang 2024.04.30
      &    DAS, DTX, EVMODC, MNEMV1, NDVST,                !Input
      &    NVEG0, NVEG1, PHZACC, PLME, TRIFOL,             !Input
      &    TURFAC, XPOD, YRDOY, YRPLT,                     !Input
@@ -349,6 +388,46 @@ C***********************************************************************
 C***********************************************************************
       END IF
 !-----------------------------------------------------------------------
+!------ Save Vars to Memory -----------------------------------------
+       dssat48_struc(nest)%dssat48(t)%PLME = PLME
+       dssat48_struc(nest)%dssat48(t)%CTMP = CTMP
+       dssat48_struc(nest)%dssat48(t)%DLTYP = DLTYP
+       dssat48_struc(nest)%dssat48(t)%ATEMP = ATEMP
+       dssat48_struc(nest)%dssat48(t)%CLDVAR = CLDVAR
+       dssat48_struc(nest)%dssat48(t)%CLDVRR = CLDVRR
+       dssat48_struc(nest)%dssat48(t)%CSDVAR = CSDVAR
+       dssat48_struc(nest)%dssat48(t)%CSDVRR = CSDVRR
+       dssat48_struc(nest)%dssat48(t)%EVMODC = EVMODC
+       dssat48_struc(nest)%dssat48(t)%NSENP = NSENP
+       dssat48_struc(nest)%dssat48(t)%OPTBI = OPTBI
+       dssat48_struc(nest)%dssat48(t)%PSENP = PSENP
+       dssat48_struc(nest)%dssat48(t)%SDAGE = SDAGE
+       dssat48_struc(nest)%dssat48(t)%SDEPTH = SDEPTH
+       dssat48_struc(nest)%dssat48(t)%SLOBI = SLOBI
+       dssat48_struc(nest)%dssat48(t)%THVAR = THVAR
+       dssat48_struc(nest)%dssat48(t)%TRIFOL = TRIFOL
+       dssat48_struc(nest)%dssat48(t)%TB = TB
+       dssat48_struc(nest)%dssat48(t)%TO1 = TO1
+       dssat48_struc(nest)%dssat48(t)%TO2 = TO2
+       dssat48_struc(nest)%dssat48(t)%TM = TM
+       dssat48_struc(nest)%dssat48(t)%WSENP = WSENP
+       dssat48_struc(nest)%dssat48(t)%MNEMV1 = MNEMV1
+       dssat48_struc(nest)%dssat48(t)%MNFLLL = MNFLLL
+       dssat48_struc(nest)%dssat48(t)%TNTFAC = TNTFAC
+       dssat48_struc(nest)%dssat48(t)%TNTFC2 = TNTFC2
+       dssat48_struc(nest)%dssat48(t)%FNSTR = FNSTR
+       dssat48_struc(nest)%dssat48(t)%FPSTR = FPSTR
+       dssat48_struc(nest)%dssat48(t)%FSW = FSW
+       dssat48_struc(nest)%dssat48(t)%FT = FT
+       dssat48_struc(nest)%dssat48(t)%FUDAY = FUDAY
+       dssat48_struc(nest)%dssat48(t)%PHZACC = PHZACC
+       dssat48_struc(nest)%dssat48(t)%NPRIOR = NPRIOR
+       dssat48_struc(nest)%dssat48(t)%TSELC = TSELC
+       dssat48_struc(nest)%dssat48(t)%JPEND = JPEND 
+       dssat48_struc(nest)%dssat48(t)%NDVST = NDVST
+       dssat48_struc(nest)%dssat48(t)%NVALPH = NVALPH
+       dssat48_struc(nest)%dssat48(t)%NVEG1 = NVEG1
+
       RETURN
       END   !SUBROUTINE PHENOL
 
@@ -369,7 +448,7 @@ C-----------------------------------------------------------------------
 !     Calls:          None
 C=======================================================================
 
-      SUBROUTINE VSTAGES(
+      SUBROUTINE VSTAGES( nest, t, !Pang 2024.04.30
      &    DAS, DTX, EVMODC, MNEMV1, NDVST,                !Input
      &    NVEG0, NVEG1, PHZACC, PLME, TRIFOL,             !Input
      &    TURFAC, XPOD, YRDOY, YRPLT,                     !Input
@@ -380,10 +459,12 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*1 PLME
+      INTEGER nest, t
       INTEGER DYNAMIC
       INTEGER DAS, NVEG0, NVEG1, NDVST
       INTEGER YRPLT, YRDOY
@@ -392,6 +473,9 @@ C=======================================================================
       REAL TURFAC, XPOD
       REAL PHZACC(20)
 
+!------ Obtain Vars from Memory ---------------------------------------
+      VSTGED = dssat48_struc(nest)%dssat48(t)%VSTGED
+      VSTAGP = dssat48_struc(nest)%dssat48(t)%VSTAGP
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -471,6 +555,9 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       END IF
 !***********************************************************************
+!------ Save Vars to Memory ---------------------------------------
+      dssat48_struc(nest)%dssat48(t)%VSTGED = VSTGED
+      dssat48_struc(nest)%dssat48(t)%VSTAGP = VSTAGP
       RETURN
       END   !SUBROUTINE VSTAGES
 

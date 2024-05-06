@@ -27,7 +27,7 @@
 !                ERROR, FIND, IGNORE
 !=======================================================================
 
-      SUBROUTINE PODS(DYNAMIC,  
+      SUBROUTINE PODS(DYNAMIC, nest, t, !Pang 2024.05.02 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
      &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
@@ -43,9 +43,11 @@
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
+      INTEGER nest, t
       CHARACTER*1   ISWWAT, ISWFWT
       CHARACTER*2   CROP
       CHARACTER*3   TYPPDT
@@ -100,7 +102,51 @@
 !     P module
       REAL PStres2, CPSTRES
       TYPE (ControlType) CONTROL
-
+!------ Obtain Vars from Memory ----------------------------------------
+      TYPPDT = dssat48_struc(nest)%dssat48(t)%TYPPDT
+      NR2TIM = dssat48_struc(nest)%dssat48(t)%NR2TIM
+      TRIGGR = dssat48_struc(nest)%dssat48(t)%TRIGGR
+      SDPDVR = dssat48_struc(nest)%dssat48(t)%SDPDVR
+      PODUR = dssat48_struc(nest)%dssat48(t)%PODUR
+      THRESH = dssat48_struc(nest)%dssat48(t)%THRESH
+      PROLFF = dssat48_struc(nest)%dssat48(t)%PROLFF
+      PROSHI = dssat48_struc(nest)%dssat48(t)%PROSHI
+      SETMAX = dssat48_struc(nest)%dssat48(t)%SETMAX
+      RFLWAB = dssat48_struc(nest)%dssat48(t)%RFLWAB
+      XMPAGE = dssat48_struc(nest)%dssat48(t)%XMPAGE
+      DSWBAR = dssat48_struc(nest)%dssat48(t)%DSWBAR
+      SHLAG = dssat48_struc(nest)%dssat48(t)%SHLAG
+      FNPDT = dssat48_struc(nest)%dssat48(t)%FNPDT
+      XSWBAR = dssat48_struc(nest)%dssat48(t)%XSWBAR
+      YSWBAR = dssat48_struc(nest)%dssat48(t)%YSWBAR
+      XSWFAC = dssat48_struc(nest)%dssat48(t)%XSWFAC
+      YSWFAC = dssat48_struc(nest)%dssat48(t)%YSWFAC
+      LNGSH = dssat48_struc(nest)%dssat48(t)%LNGSH
+      MNESPM = dssat48_struc(nest)%dssat48(t)%MNESPM
+      LNGPEG = dssat48_struc(nest)%dssat48(t)%LNGPEG
+      LAGSD = dssat48_struc(nest)%dssat48(t)%LAGSD
+      SDVAR = dssat48_struc(nest)%dssat48(t)%SDVAR
+      SHVAR = dssat48_struc(nest)%dssat48(t)%SHVAR
+      FNINSH = dssat48_struc(nest)%dssat48(t)%FNINSH
+      NAVPOD = dssat48_struc(nest)%dssat48(t)%NAVPOD
+      PGNPOD = dssat48_struc(nest)%dssat48(t)%PGNPOD
+      WTSHM = dssat48_struc(nest)%dssat48(t)%WTSHM
+      RPRPUN = dssat48_struc(nest)%dssat48(t)%RPRPUN
+      PGAVLR = dssat48_struc(nest)%dssat48(t)%PGAVLR
+      ACCAGE = dssat48_struc(nest)%dssat48(t)%ACCAGE
+      AFLW = dssat48_struc(nest)%dssat48(t)%AFLW
+      CNSTRES = dssat48_struc(nest)%dssat48(t)%CNSTRES
+      CPSTRES = dssat48_struc(nest)%dssat48(t)%CPSTRES
+      FLWRDY = dssat48_struc(nest)%dssat48(t)%FLWRDY
+      PODADD = dssat48_struc(nest)%dssat48(t)%PODADD
+      SHMINE = dssat48_struc(nest)%dssat48(t)%SHMINE
+      TEMPOD = dssat48_struc(nest)%dssat48(t)%TEMPOD
+      SUPDE = dssat48_struc(nest)%dssat48(t)%SUPDE
+      AVTEM = dssat48_struc(nest)%dssat48(t)%AVTEM
+!------ PODCOMP---------------------------------------------------------
+      ANINSD = dssat48_struc(nest)%dssat48(t)%ANINSD
+      CUMSIG = dssat48_struc(nest)%dssat48(t)%CUMSIG
+      RSD = dssat48_struc(nest)%dssat48(t)%RSD
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -260,7 +306,7 @@
 
 !-----------------------------------------------------------------------
 
-      CALL PODCOMP(
+      CALL PODCOMP( nest, t, !Pang 2024.05.02
      &  AGRSD1, FILECC, FNINSD, GDMSD, NAVL, PGAVLR,    !Input
      &  POTCAR, POTLIP,                                 !Input/Output
      &  AGRSD3, ANINSD, CUMSIG, RSD,                    !Output
@@ -320,7 +366,7 @@
       FLWN   = 0.0
 
       CALL FreshWt(SEASINIT, ISWFWT, NR2TIM, PHTIM, SDNO, SHELN, 
-     &    WTSD, WTSHE, YRPLT)
+     &    WTSD, WTSHE, YRPLT, nest, t) !Pang 2024.05.02)
 
 !***********************************************************************
 !***********************************************************************
@@ -352,7 +398,7 @@
           AVTEM(NPP) = 0.0
         ENDDO
       
-        CALL PODCOMP(
+        CALL PODCOMP( nest, t, !Pang 2024.05.02
      &    AGRSD1, FILECC, FNINSD, GDMSD, NAVL, PGAVLR,  !Input
      &    POTCAR, POTLIP,                               !Input/Output
      &    AGRSD3, ANINSD, CUMSIG, RSD,                  !Output
@@ -481,7 +527,7 @@ C-GH      IF (GDMSD .GT. 0.0001) THEN
 !-----------------------------------------------------------------------
 !     Detailed seed composition calculations
 !-----------------------------------------------------------------------
-          CALL PODCOMP(
+          CALL PODCOMP( nest, t, !Pang 2024.05.02
      &      AGRSD1, FILECC, FNINSD, GDMSD, NAVL, PGAVLR,  !Input
      &      POTCAR, POTLIP,                               !Input/Output
      &      AGRSD3, ANINSD, CUMSIG, RSD,                  !Output
@@ -746,7 +792,7 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
         IF (YRDOY .GE. YRNR2 .AND. YRNR2 .GT. 0) THEN
 
           CALL FreshWt(INTEGR, ISWFWT, NR2TIM, PHTIM, SDNO, SHELN, 
-     &       WTSD, WTSHE, YRPLT)
+     &       WTSD, WTSHE, YRPLT, nest, t) !Pang 2024.05.02)
 
           DO 2900 NPP = 1, NR2TIM + 1
 !-----------------------------------------------------------------------
@@ -796,7 +842,7 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
 !-----------------------------------------------------------------------
       IF (YRDOY .GE. YRNR2 .AND. YRNR2 .GT. 0) THEN
         CALL FreshWt(DYNAMIC, ISWFWT, NR2TIM, PHTIM, SDNO, SHELN, 
-     &       WTSD, WTSHE, YRPLT)
+     &       WTSD, WTSHE, YRPLT, nest, t) !Pang 2024.05.02)
       ENDIF
 
 !***********************************************************************
@@ -805,6 +851,52 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
 !***********************************************************************
       ENDIF
 !***********************************************************************
+      !------ Save Vars to Memory ----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%TYPPDT = TYPPDT
+      dssat48_struc(nest)%dssat48(t)%NR2TIM = NR2TIM
+      dssat48_struc(nest)%dssat48(t)%TRIGGR = TRIGGR
+      dssat48_struc(nest)%dssat48(t)%SDPDVR = SDPDVR
+      dssat48_struc(nest)%dssat48(t)%PODUR = PODUR
+      dssat48_struc(nest)%dssat48(t)%THRESH = THRESH
+      dssat48_struc(nest)%dssat48(t)%PROLFF = PROLFF
+      dssat48_struc(nest)%dssat48(t)%PROSHI = PROSHI
+      dssat48_struc(nest)%dssat48(t)%SETMAX = SETMAX
+      dssat48_struc(nest)%dssat48(t)%RFLWAB = RFLWAB
+      dssat48_struc(nest)%dssat48(t)%XMPAGE = XMPAGE
+      dssat48_struc(nest)%dssat48(t)%DSWBAR = DSWBAR
+      dssat48_struc(nest)%dssat48(t)%SHLAG = SHLAG
+      dssat48_struc(nest)%dssat48(t)%FNPDT = FNPDT
+      dssat48_struc(nest)%dssat48(t)%XSWBAR = XSWBAR
+      dssat48_struc(nest)%dssat48(t)%YSWBAR = YSWBAR
+      dssat48_struc(nest)%dssat48(t)%XSWFAC = XSWFAC
+      dssat48_struc(nest)%dssat48(t)%YSWFAC = YSWFAC
+      dssat48_struc(nest)%dssat48(t)%LNGSH = LNGSH
+      dssat48_struc(nest)%dssat48(t)%MNESPM = MNESPM
+      dssat48_struc(nest)%dssat48(t)%LNGPEG = LNGPEG
+      dssat48_struc(nest)%dssat48(t)%LAGSD = LAGSD
+      dssat48_struc(nest)%dssat48(t)%SDVAR = SDVAR 
+      dssat48_struc(nest)%dssat48(t)%SHVAR = SHVAR
+      dssat48_struc(nest)%dssat48(t)%FNINSH = FNINSH
+      dssat48_struc(nest)%dssat48(t)%NAVPOD = NAVPOD
+      dssat48_struc(nest)%dssat48(t)%PGNPOD = PGNPOD
+      dssat48_struc(nest)%dssat48(t)%WTSHM = WTSHM
+      dssat48_struc(nest)%dssat48(t)%RPRPUN = RPRPUN
+      dssat48_struc(nest)%dssat48(t)%PGAVLR = PGAVLR
+      dssat48_struc(nest)%dssat48(t)%ACCAGE = ACCAGE
+      dssat48_struc(nest)%dssat48(t)%AFLW = AFLW
+      dssat48_struc(nest)%dssat48(t)%CNSTRES = CNSTRES
+      dssat48_struc(nest)%dssat48(t)%CPSTRES = CPSTRES
+      dssat48_struc(nest)%dssat48(t)%FLWRDY = FLWRDY
+      dssat48_struc(nest)%dssat48(t)%PODADD = PODADD
+      dssat48_struc(nest)%dssat48(t)%SHMINE = SHMINE
+      dssat48_struc(nest)%dssat48(t)%TEMPOD = TEMPOD
+      dssat48_struc(nest)%dssat48(t)%SUPDE = SUPDE
+      dssat48_struc(nest)%dssat48(t)%AVTEM = AVTEM
+!------ PODCOMP---------------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%ANINSD = ANINSD
+      dssat48_struc(nest)%dssat48(t)%CUMSIG = CUMSIG 
+      dssat48_struc(nest)%dssat48(t)%RSD = RSD
+
       RETURN
       END SUBROUTINE PODS
 !=======================================================================
@@ -836,7 +928,7 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
 !  Calls:        ERROR, FIND, IGNORE
 !=======================================================================
 
-      SUBROUTINE PODCOMP(
+      SUBROUTINE PODCOMP(nest, t, !Pang 2024.05.02
      &  AGRSD1, FILECC, FNINSD, GDMSD, NAVL, PGAVLR,    !Input
      &  POTCAR, POTLIP,                                 !Input/Output
      &  AGRSD3, ANINSD, CUMSIG, RSD,                    !Output
@@ -846,9 +938,10 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
       CHARACTER*6 ERRKEY
       PARAMETER (ERRKEY = 'PODCOM')
 
@@ -864,6 +957,20 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
       REAL PGAVLR, PLIGSD, PMINSD, PNINSD, POASD, POTCAR, POTLIP
       REAL PROMAX, PROMIN, RATIOC, RATION, RCH2O, RLIG, RLIP
       REAL RMIN, ROA, RSD, THETA, TOTAL, XRSD
+!----- Obtain Vars From Memory -----------------------------------------
+      RCH2O = dssat48_struc(nest)%dssat48(t)%RCH2O
+      RLIP = dssat48_struc(nest)%dssat48(t)%RLIP
+      RLIG = dssat48_struc(nest)%dssat48(t)%RLIG
+      ROA = dssat48_struc(nest)%dssat48(t)%ROA
+      RMIN = dssat48_struc(nest)%dssat48(t)%RMIN
+      PROMIN = dssat48_struc(nest)%dssat48(t)%PROMIN
+      PROMAX = dssat48_struc(nest)%dssat48(t)%PROMAX
+      THETA = dssat48_struc(nest)%dssat48(t)%THETA
+      PLIGSD = dssat48_struc(nest)%dssat48(t)%PLIGSD
+      POASD = dssat48_struc(nest)%dssat48(t)%POASD
+      PMINSD = dssat48_struc(nest)%dssat48(t)%PMINSD
+      RATION = dssat48_struc(nest)%dssat48(t)%RATION
+      RATIOC = dssat48_struc(nest)%dssat48(t)%RATIOC
 
 !***********************************************************************
 !***********************************************************************
@@ -1171,6 +1278,21 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
 !***********************************************************************
       ENDIF
 !***********************************************************************
+      !----- Save Vars to Memory -----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%RCH2O = RCH2O
+      dssat48_struc(nest)%dssat48(t)%RLIP = RLIP
+      dssat48_struc(nest)%dssat48(t)%RLIG = RLIG
+      dssat48_struc(nest)%dssat48(t)%ROA = ROA
+      dssat48_struc(nest)%dssat48(t)%RMIN = RMIN
+      dssat48_struc(nest)%dssat48(t)%PROMIN = PROMIN
+      dssat48_struc(nest)%dssat48(t)%PROMAX = PROMAX
+      dssat48_struc(nest)%dssat48(t)%THETA = THETA
+      dssat48_struc(nest)%dssat48(t)%PLIGSD = PLIGSD
+      dssat48_struc(nest)%dssat48(t)%POASD = POASD
+      dssat48_struc(nest)%dssat48(t)%PMINSD = PMINSD
+      dssat48_struc(nest)%dssat48(t)%RATION = RATION
+      dssat48_struc(nest)%dssat48(t)%RATIOC = RATIOC
+
       RETURN
       END !SUBROUTINE PODCOMP
 !=======================================================================

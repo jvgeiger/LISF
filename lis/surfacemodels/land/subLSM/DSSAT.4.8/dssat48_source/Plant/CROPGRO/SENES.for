@@ -16,7 +16,7 @@ C  Called : PLANT
 C  Calls  : ERROR, FIND, IGNORE
 C========================================================================
 
-      SUBROUTINE SENES(DYNAMIC,
+      SUBROUTINE SENES(DYNAMIC, nest, t,  !Pang 2024.05.03
      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -24,6 +24,7 @@ C========================================================================
 C-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -31,7 +32,7 @@ C-----------------------------------------------------------------------
       CHARACTER*80 CHAR
       CHARACTER*92 FILECC
       PARAMETER (ERRKEY = 'SENES')
-
+      INTEGER nest, t
       INTEGER I, II, LUNCRP, ERR, LINC, LNUM, ISECT
       INTEGER DYNAMIC
       INTEGER NR7, DAS
@@ -49,7 +50,20 @@ C-----------------------------------------------------------------------
       REAL SWFCAB(NSWAB)
 
       TYPE (ControlType) CONTROL
-
+!------ Obtain Vars from Memory ----------------------------------------
+      PORPT = dssat48_struc(nest)%dssat48(t)%PORPT
+      SENRTE = dssat48_struc(nest)%dssat48(t)%SENRTE
+      SENRT2 = dssat48_struc(nest)%dssat48(t)%SENRT2
+      SENDAY = dssat48_struc(nest)%dssat48(t)%SENDAY
+      ICMP = dssat48_struc(nest)%dssat48(t)%ICMP
+      TCMP = dssat48_struc(nest)%dssat48(t)%TCMP
+      SENMAX = dssat48_struc(nest)%dssat48(t)%SENMAX
+      SENPOR = dssat48_struc(nest)%dssat48(t)%SENPOR
+      XSENMX = dssat48_struc(nest)%dssat48(t)%XSENMX
+      XSTAGE = dssat48_struc(nest)%dssat48(t)%XSTAGE_CROPGRO 
+      
+      RATTP = dssat48_struc(nest)%dssat48(t)%RATTP
+      SWFCAB = dssat48_struc(nest)%dssat48(t)%SWFCAB
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -139,6 +153,17 @@ C-----------------------------------------------------------------------
 
       CLOSE (LUNCRP)
 
+!----- Save Vars to Memory ----------------------------------
+       dssat48_struc(nest)%dssat48(t)%PORPT = PORPT
+       dssat48_struc(nest)%dssat48(t)%SENRTE = SENRTE
+       dssat48_struc(nest)%dssat48(t)%SENRT2 = SENRT2
+       dssat48_struc(nest)%dssat48(t)%SENDAY = SENDAY
+       dssat48_struc(nest)%dssat48(t)%ICMP = ICMP
+       dssat48_struc(nest)%dssat48(t)%TCMP = TCMP
+       dssat48_struc(nest)%dssat48(t)%SENMAX = SENMAX
+       dssat48_struc(nest)%dssat48(t)%SENPOR = SENPOR
+       dssat48_struc(nest)%dssat48(t)%XSENMX = XSENMX
+       dssat48_struc(nest)%dssat48(t)%XSTAGE_CROPGRO = XSTAGE
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -257,6 +282,9 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!----- Save Vars to Memory --------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%RATTP = RATTP
+      dssat48_struc(nest)%dssat48(t)%SWFCAB = SWFCAB
       RETURN
       END ! SUBROUTINE SENES
 !***********************************************************************

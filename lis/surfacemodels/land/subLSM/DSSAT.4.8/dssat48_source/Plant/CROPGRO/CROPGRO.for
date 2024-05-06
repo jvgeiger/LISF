@@ -258,6 +258,291 @@ C=======================================================================
 !-----------------------------------------------------------------------
        AGEFAC = dssat48_struc(nest)%dssat48(t)%AGEFAC
        PG = dssat48_struc(nest)%dssat48(t)%PG
+!-----------------------------------------------------------------------
+! CROPGRO - PHENOL
+! Pang 2024.04.29
+!-----------------------------------------------------------------------
+       DRPP = dssat48_struc(nest)%dssat48(t)%DRPP
+       DTX = dssat48_struc(nest)%dssat48(t)%DTX
+       DXR57 = dssat48_struc(nest)%dssat48(t)%DXR57
+       FRACDN = dssat48_struc(nest)%dssat48(t)%FRACDN
+       PHTHRS = dssat48_struc(nest)%dssat48(t)%PHTHRS
+       RVSTGE = dssat48_struc(nest)%dssat48(t)%RVSTGE
+       SeedFrac = dssat48_struc(nest)%dssat48(t)%SeedFrac
+       TDUMX = dssat48_struc(nest)%dssat48(t)%TDUMX
+       TDUMX2 = dssat48_struc(nest)%dssat48(t)%TDUMX2
+       VegFrac = dssat48_struc(nest)%dssat48(t)%VegFrac
+       VSTAGE = dssat48_struc(nest)%dssat48(t)%VSTAGE
+       NDLEAF = dssat48_struc(nest)%dssat48(t)%NDLEAF
+       NDSET = dssat48_struc(nest)%dssat48(t)%NDSET
+       NR1 = dssat48_struc(nest)%dssat48(t)%NR1
+       NR2 = dssat48_struc(nest)%dssat48(t)%NR2
+       NR5 = dssat48_struc(nest)%dssat48(t)%NR5
+       NR7 = dssat48_struc(nest)%dssat48(t)%NR7
+       NVEG0 = dssat48_struc(nest)%dssat48(t)%NVEG0
+       RSTAGE = dssat48_struc(nest)%dssat48(t)%RSTAGE
+       YREMRG = dssat48_struc(nest)%dssat48(t)%YREMRG
+       YRNR1 = dssat48_struc(nest)%dssat48(t)%YRNR1
+       YRNR2 = dssat48_struc(nest)%dssat48(t)%YRNR2
+       YRNR3 = dssat48_struc(nest)%dssat48(t)%YRNR3
+       YRNR5 = dssat48_struc(nest)%dssat48(t)%YRNR5
+       YRNR7 = dssat48_struc(nest)%dssat48(t)%YRNR7
+!-----------------------------------------------------------------------
+! CROPGRO - DEMAND
+! Pang 2024.04.29
+!-----------------------------------------------------------------------
+       AGRSD1 = dssat48_struc(nest)%dssat48(t)%AGRSD1
+       AGRSD2 = dssat48_struc(nest)%dssat48(t)%AGRSD2
+       AGRVG = dssat48_struc(nest)%dssat48(t)%AGRVG
+       AGRVG2 = dssat48_struc(nest)%dssat48(t)%AGRVG2
+       CDMREP = dssat48_struc(nest)%dssat48(t)%CDMREP
+       F = dssat48_struc(nest)%dssat48(t)%F
+       FNINL = dssat48_struc(nest)%dssat48(t)%FNINL
+       FNINR = dssat48_struc(nest)%dssat48(t)%FNINR
+       FNINS = dssat48_struc(nest)%dssat48(t)%FNINS
+       FNINSD = dssat48_struc(nest)%dssat48(t)%FNINSD
+       FRLF = dssat48_struc(nest)%dssat48(t)%FRLF
+       FRRT = dssat48_struc(nest)%dssat48(t)%FRRT
+       FRSTM = dssat48_struc(nest)%dssat48(t)%FRSTM
+       GDMSD = dssat48_struc(nest)%dssat48(t)%GDMSD
+       GRRAT1 = dssat48_struc(nest)%dssat48(t)%GRRAT1
+       NDMNEW = dssat48_struc(nest)%dssat48(t)%NDMNEW
+       NDMOLD = dssat48_struc(nest)%dssat48(t)%NDMOLD
+       NDMREP = dssat48_struc(nest)%dssat48(t)%NDMREP
+       NDMSDR = dssat48_struc(nest)%dssat48(t)%NDMSDR
+       NDMTOT = dssat48_struc(nest)%dssat48(t)%NDMTOT
+       NDMVEG = dssat48_struc(nest)%dssat48(t)%NDMVEG
+       NMINEP = dssat48_struc(nest)%dssat48(t)%NMINEP
+       NMOBR = dssat48_struc(nest)%dssat48(t)%NMOBR
+       PHTIM = dssat48_struc(nest)%dssat48(t)%PHTIM
+       PNTIM = dssat48_struc(nest)%dssat48(t)%PNTIM
+       POTCAR = dssat48_struc(nest)%dssat48(t)%POTCAR
+       POTLIP = dssat48_struc(nest)%dssat48(t)%POTLIP
+       SDGR = dssat48_struc(nest)%dssat48(t)%SDGR
+       TURADD = dssat48_struc(nest)%dssat48(t)%TURADD
+       XFRT = dssat48_struc(nest)%dssat48(t)%XFRT
+!---- PEST ------------------------------------------------------------
+       SDNO = dssat48_struc(nest)%dssat48(t)%SDNO             
+       SHELN = dssat48_struc(nest)%dssat48(t)%SHELN           
+       WSHIDT = dssat48_struc(nest)%dssat48(t)%WSHIDT
+       WTSD = dssat48_struc(nest)%dssat48(t)%WTSD
+       WTSHE = dssat48_struc(nest)%dssat48(t)%WTSHE
+       DISLA = dssat48_struc(nest)%dssat48(t)%DISLA
+       NPLTD = dssat48_struc(nest)%dssat48(t)%NPLTD
+       SDDES = dssat48_struc(nest)%dssat48(t)%SDDES
+       SDWT= dssat48_struc(nest)%dssat48(t)%SDWT
+       ASMDOT = dssat48_struc(nest)%dssat48(t)%ASMDOT
+       PPLTD = dssat48_struc(nest)%dssat48(t)%PPLTD
+       SWIDOT = dssat48_struc(nest)%dssat48(t)%SWIDOT 
+       WLIDOT  = dssat48_struc(nest)%dssat48(t)%WLIDOT
+       WRIDOT = dssat48_struc(nest)%dssat48(t)%WRIDOT         
+       WSIDOT = dssat48_struc(nest)%dssat48(t)%WSIDOT
+!-----------------------------------------------------------------------
+! CROPGRO - INCOMP
+! Pang 2024.05.01
+!-----------------------------------------------------------------------
+       AGRLF = dssat48_struc(nest)%dssat48(t)%AGRLF
+       AGRNOD = dssat48_struc(nest)%dssat48(t)%AGRNOD
+       AGRRT = dssat48_struc(nest)%dssat48(t)%AGRRT
+       AGRSH1 = dssat48_struc(nest)%dssat48(t)%AGRSH1
+       AGRSH2 = dssat48_struc(nest)%dssat48(t)%AGRSH2
+       AGRSTM = dssat48_struc(nest)%dssat48(t)%AGRSTM
+       SDPROR = dssat48_struc(nest)%dssat48(t)%SDPROR
+!-----------------------------------------------------------------------
+! CROPGRO - NUPTAKE
+! Pang 2024.04.29
+!-----------------------------------------------------------------------
+       TRNH4U = dssat48_struc(nest)%dssat48(t)%TRNH4U
+       TRNO3U = dssat48_struc(nest)%dssat48(t)%TRNO3U
+       TRNU = dssat48_struc(nest)%dssat48(t)%TRNU
+
+!-----------------------------------------------------------------------
+! CROPGRO - NFIX
+! Pang 2024.04.29
+!-----------------------------------------------------------------------
+       CNOD = dssat48_struc(nest)%dssat48(t)%CNOD
+       DWNOD = dssat48_struc(nest)%dssat48(t)%DWNOD
+       DWNODA = dssat48_struc(nest)%dssat48(t)%DWNODA
+       NDTH = dssat48_struc(nest)%dssat48(t)%NDTH
+       NFIXN = dssat48_struc(nest)%dssat48(t)%NFIXN
+       NODGR = dssat48_struc(nest)%dssat48(t)%NODGR
+       WTNFX = dssat48_struc(nest)%dssat48(t)%WTNFX
+       SENNOD = dssat48_struc(nest)%dssat48(t)%SENNOD
+
+!-----------------------------------------------------------------------
+! CROPGRO - PODS
+! Pang 2024.05.02
+!-----------------------------------------------------------------------
+       AGRSD3 = dssat48_struc(nest)%dssat48(t)%AGRSD3
+       LAGSD = dssat48_struc(nest)%dssat48(t)%LAGSD
+       LNGPEG = dssat48_struc(nest)%dssat48(t)%LNGPEG
+       NGRSD = dssat48_struc(nest)%dssat48(t)%NGRSD
+       NGRSH = dssat48_struc(nest)%dssat48(t)%NGRSH
+       PCTMAT = dssat48_struc(nest)%dssat48(t)%PCTMAT
+       PODNO = dssat48_struc(nest)%dssat48(t)%PODNO
+       SDVAR = dssat48_struc(nest)%dssat48(t)%SDVAR
+       SEEDNO = dssat48_struc(nest)%dssat48(t)%SEEDNO
+       SHVAR = dssat48_struc(nest)%dssat48(t)%SHVAR
+       WSDDTN = dssat48_struc(nest)%dssat48(t)%WSDDTN
+       WSHDTN = dssat48_struc(nest)%dssat48(t)%WSHDTN
+       WTABRT = dssat48_struc(nest)%dssat48(t)%WTABRT
+       WTSHMT = dssat48_struc(nest)%dssat48(t)%WTSHMT
+       FLWN = dssat48_struc(nest)%dssat48(t)%FLWN
+!-----------------------------------------------------------------------
+! CROPGRO - PODDET
+! Pang 2024.05.02
+!-----------------------------------------------------------------------
+       PODWTD = dssat48_struc(nest)%dssat48(t)%PODWTD
+!-----------------------------------------------------------------------
+! CROPGRO - VEGGR
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       CADLF = dssat48_struc(nest)%dssat48(t)%CADLF
+       CADST = dssat48_struc(nest)%dssat48(t)%CADST
+       CANWH = dssat48_struc(nest)%dssat48(t)%CANWH
+       CMINEA = dssat48_struc(nest)%dssat48(t)%CMINEA
+       CRUSLF = dssat48_struc(nest)%dssat48(t)%CRUSLF
+       CRUSRT = dssat48_struc(nest)%dssat48(t)%CRUSRT
+       CRUSSH = dssat48_struc(nest)%dssat48(t)%CRUSSH
+       CRUSST = dssat48_struc(nest)%dssat48(t)%CRUSST
+       EXCESS = dssat48_struc(nest)%dssat48(t)%EXCESS
+       NADLF = dssat48_struc(nest)%dssat48(t)%NADLF
+       NADRT = dssat48_struc(nest)%dssat48(t)%NADRT 
+       NADST = dssat48_struc(nest)%dssat48(t)%NADST
+       NGRLF = dssat48_struc(nest)%dssat48(t)%NGRLF
+       NGRRT = dssat48_struc(nest)%dssat48(t)%NGRRT
+       NGRST = dssat48_struc(nest)%dssat48(t)%NGRST
+       TNLEAK = dssat48_struc(nest)%dssat48(t)%TNLEAK
+       WLDOTN = dssat48_struc(nest)%dssat48(t)%WLDOTN
+       WRDOTN = dssat48_struc(nest)%dssat48(t)%WRDOTN
+       WSDOTN = dssat48_struc(nest)%dssat48(t)%WSDOTN
+!-----------------------------------------------------------------------
+! CROPGRO - SENES
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       SLDOT = dssat48_struc(nest)%dssat48(t)%SLDOT
+       SLNDOT = dssat48_struc(nest)%dssat48(t)%SLNDOT
+       SSDOT = dssat48_struc(nest)%dssat48(t)%SSDOT
+       SSNDOT = dssat48_struc(nest)%dssat48(t)%SSNDOT
+!-----------------------------------------------------------------------
+! CROPGRO - ROOTS
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       RTDEP = dssat48_struc(nest)%dssat48(t)%RTDEP
+       SATFAC = dssat48_struc(nest)%dssat48(t)%SATFAC
+       SENRT = dssat48_struc(nest)%dssat48(t)%SENRT
+       SRDOT = dssat48_struc(nest)%dssat48(t)%SRDOT
+!-----------------------------------------------------------------------
+! CROPGRO - GROW
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       WLFDOT = dssat48_struc(nest)%dssat48(t)%WLFDOT
+       AREALF = dssat48_struc(nest)%dssat48(t)%AREALF
+       BETN = dssat48_struc(nest)%dssat48(t)%BETN
+       CANNAA = dssat48_struc(nest)%dssat48(t)%CANNAA
+       CANWAA = dssat48_struc(nest)%dssat48(t)%CANWAA
+       CLW = dssat48_struc(nest)%dssat48(t)%CLW
+       CSW = dssat48_struc(nest)%dssat48(t)%CSW
+       GROWTH = dssat48_struc(nest)%dssat48(t)%GROWTH
+       GRWRES = dssat48_struc(nest)%dssat48(t)%GRWRES
+       LAIMX = dssat48_struc(nest)%dssat48(t)%LAIMX
+       PCCSD = dssat48_struc(nest)%dssat48(t)%PCCSD
+       PCLSD = dssat48_struc(nest)%dssat48(t)%PCLSD
+       PCNL = dssat48_struc(nest)%dssat48(t)%PCNL
+       PCNRT = dssat48_struc(nest)%dssat48(t)%PCNRT
+       PCNSD = dssat48_struc(nest)%dssat48(t)%PCNSD
+       PCNSH = dssat48_struc(nest)%dssat48(t)%PCNSH
+       PCNST = dssat48_struc(nest)%dssat48(t)%PCNST
+       PLTPOP = dssat48_struc(nest)%dssat48(t)%PLTPOP
+       PLIGLF = dssat48_struc(nest)%dssat48(t)%PLIGLF
+       PLIGNO = dssat48_struc(nest)%dssat48(t)%PLIGNO
+       PLIGRT = dssat48_struc(nest)%dssat48(t)%PLIGRT
+       PLIGST = dssat48_struc(nest)%dssat48(t)%PLIGST
+       PODWT = dssat48_struc(nest)%dssat48(t)%PODWT
+       PUNCSD = dssat48_struc(nest)%dssat48(t)%PUNCSD
+       PUNCTR = dssat48_struc(nest)%dssat48(t)%PUNCTR
+       RHOL = dssat48_struc(nest)%dssat48(t)%RHOL
+       RHOS = dssat48_struc(nest)%dssat48(t)%RHOS
+       RNITP = dssat48_struc(nest)%dssat48(t)%RNITP
+       ROWSPC = dssat48_struc(nest)%dssat48(t)%ROWSPC
+       RTWT = dssat48_struc(nest)%dssat48(t)%RTWT
+       SDNPL = dssat48_struc(nest)%dssat48(t)%SDNPL
+       SDRATE = dssat48_struc(nest)%dssat48(t)%SDRATE
+       SEEDNI = dssat48_struc(nest)%dssat48(t)%SEEDNI
+       SHELWT = dssat48_struc(nest)%dssat48(t)%SHELWT
+       SLA = dssat48_struc(nest)%dssat48(t)%SLA
+       SLAAD = dssat48_struc(nest)%dssat48(t)%SLAAD
+       STMWT = dssat48_struc(nest)%dssat48(t)%STMWT
+       TOPWT = dssat48_struc(nest)%dssat48(t)%TOPWT
+       TOTWT = dssat48_struc(nest)%dssat48(t)%TOTWT
+       WCRLF = dssat48_struc(nest)%dssat48(t)%WCRLF
+       WCRRT = dssat48_struc(nest)%dssat48(t)%WCRRT
+       WCRSH = dssat48_struc(nest)%dssat48(t)%WCRSH
+       WCRST = dssat48_struc(nest)%dssat48(t)%WCRST
+       WNRLF = dssat48_struc(nest)%dssat48(t)%WNRLF
+       WNRRT = dssat48_struc(nest)%dssat48(t)%WNRRT
+       WNRSH = dssat48_struc(nest)%dssat48(t)%WNRSH
+       WNRST = dssat48_struc(nest)%dssat48(t)%WNRST
+       WTCO = dssat48_struc(nest)%dssat48(t)%WTCO
+       WTLF = dssat48_struc(nest)%dssat48(t)%WTLF
+       WTLO = dssat48_struc(nest)%dssat48(t)%WTLO
+       WTMAIN = dssat48_struc(nest)%dssat48(t)%WTMAIN
+       WTNCAN = dssat48_struc(nest)%dssat48(t)%WTNCAN
+       WTNEW = dssat48_struc(nest)%dssat48(t)%WTNEW
+       WTNLA = dssat48_struc(nest)%dssat48(t)%WTNLA
+       WTNLF = dssat48_struc(nest)%dssat48(t)%WTNLF
+       WTNLO = dssat48_struc(nest)%dssat48(t)%WTNLO
+       WTNNA = dssat48_struc(nest)%dssat48(t)%WTNNA
+       WTNNAG = dssat48_struc(nest)%dssat48(t)%WTNNAG
+       WTNNO = dssat48_struc(nest)%dssat48(t)%WTNNO
+       WTNNOD = dssat48_struc(nest)%dssat48(t)%WTNNOD
+       WTNOO = dssat48_struc(nest)%dssat48(t)%WTNOO
+       WTNRA = dssat48_struc(nest)%dssat48(t)%WTNRA
+       WTNRO = dssat48_struc(nest)%dssat48(t)%WTNRO
+       WTNRT = dssat48_struc(nest)%dssat48(t)%WTNRT
+       WTNSA = dssat48_struc(nest)%dssat48(t)%WTNSA
+       WTNSD = dssat48_struc(nest)%dssat48(t)%WTNSD
+       WTNSDA = dssat48_struc(nest)%dssat48(t)%WTNSDA
+       WTNSDO = dssat48_struc(nest)%dssat48(t)%WTNSDO
+       WTNSH = dssat48_struc(nest)%dssat48(t)%WTNSH
+       WTNSHA = dssat48_struc(nest)%dssat48(t)%WTNSHA
+       WTNSHO = dssat48_struc(nest)%dssat48(t)%WTNSHO
+       WTNSO = dssat48_struc(nest)%dssat48(t)%WTNSO
+       WTNST = dssat48_struc(nest)%dssat48(t)%WTNST
+       WTNUP = dssat48_struc(nest)%dssat48(t)%WTNUP
+       WTRO = dssat48_struc(nest)%dssat48(t)%WTRO
+       WTSDO = dssat48_struc(nest)%dssat48(t)%WTSDO
+       WTSHO = dssat48_struc(nest)%dssat48(t)%WTSHO
+       WTSO = dssat48_struc(nest)%dssat48(t)%WTSO
+       XPOD = dssat48_struc(nest)%dssat48(t)%XPOD
+       ShutMob = dssat48_struc(nest)%dssat48(t)%ShutMob
+       RootMob = dssat48_struc(nest)%dssat48(t)%RootMob
+       ShelMob = dssat48_struc(nest)%dssat48(t)%ShelMob
+!----- SEAS INIT ------------------------------------------------------
+       CMINEP = dssat48_struc(nest)%dssat48(t)%CMINEP
+       CNODMN = dssat48_struc(nest)%dssat48(t)%CNODMN
+       NAVL = dssat48_struc(nest)%dssat48(t)%NAVL
+       PGAVL = dssat48_struc(nest)%dssat48(t)%PGAVL
+       RO = dssat48_struc(nest)%dssat48(t)%RO
+       RP = dssat48_struc(nest)%dssat48(t)%RP
+       RPROAV = dssat48_struc(nest)%dssat48(t)%RPROAV
+       TURFAC = dssat48_struc(nest)%dssat48(t)%TURFAC
+       SWFAC = dssat48_struc(nest)%dssat48(t)%SWFAC
+       RSPNO3 = dssat48_struc(nest)%dssat48(t)%RSPNO3
+       RSPNH4 = dssat48_struc(nest)%dssat48(t)%RSPNH4
+       KSTRES = dssat48_struc(nest)%dssat48(t)%KSTRES
+!----- P_CGRO ------------------------------------------------------
+       PConc_Shut = dssat48_struc(nest)%dssat48(t)%PConc_Shut
+       PConc_Root = dssat48_struc(nest)%dssat48(t)%PConc_Root
+       PConc_Shel = dssat48_struc(nest)%dssat48(t)%PConc_Shel
+       PConc_Seed = dssat48_struc(nest)%dssat48(t)%PConc_Seed
+       PStres2 = dssat48_struc(nest)%dssat48(t)%PStres2
+!----- MOBIL ------------------------------------------------------
+       NMINEA = dssat48_struc(nest)%dssat48(t)%NMINEA
+       NRUSLF = dssat48_struc(nest)%dssat48(t)%NRUSLF
+       NRUSRT = dssat48_struc(nest)%dssat48(t)%NRUSRT
+       NRUSSH = dssat48_struc(nest)%dssat48(t)%NRUSSH
+       NRUSST = dssat48_struc(nest)%dssat48(t)%NRUSST
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -322,7 +607,7 @@ C=======================================================================
       dssat48_struc(nest)%dssat48(t)%TTFIX = TTFIX
 
       IF (CROP .NE. 'FA' .AND. MEPHO .EQ. 'C') THEN
-        CALL PHOTO(CONTROL, 
+        CALL PHOTO(CONTROL,nest, t,           !Pang 2024.01.24 
      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
@@ -330,7 +615,7 @@ C=======================================================================
       ENDIF
 
 !-----------------------------------------------------------------------
-      CALL PHENOL(CONTROL, ISWITCH, 
+      CALL PHENOL(CONTROL, ISWITCH, nest, t, !Pang 2024.04.29  
      &    DAYL, NSTRES, PStres2, SOILPROP, ST,            !Input
      &    SW, SWFAC, TGRO, TMIN, TURFAC, XPOD, YRPLT,     !Input
      &    DRPP, DTX, DXR57, FRACDN, MDATE, NDLEAF,        !Output
@@ -341,7 +626,7 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
       IF (ISWDIS .EQ. 'Y') THEN
-        CALL PEST(CONTROL, ISWITCH, 
+        CALL PEST(CONTROL, ISWITCH, nest, t, !Pang 2024.04.29 
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, PGAVL,    !Input
      &    PHTIM, PLTPOP, RTWT, SLA, SLDOT, SOILPROP,      !Input
      &    SSDOT, STMWT, TOPWT, WLFDOT, WTLF, YRPLT,       !Input
@@ -353,7 +638,7 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
       IF (CROP .NE. 'FA') THEN
-        CALL DEMAND(RUNINIT, CONTROL,
+        CALL DEMAND(RUNINIT, CONTROL, nest, t, !Pang 2024.05.01
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
      &  LNGPEG, NDLEAF, NSTRES, PAR, PCNL, PCNRT, PCNST,  !Input
@@ -371,20 +656,20 @@ C=======================================================================
 !-----------------------------------------------------------------------
 C    Call plant COMPosition INitialization (for data input)
 C-----------------------------------------------------------------------
-        CALL INCOMP(RUNINIT, 
+        CALL INCOMP(RUNINIT,  nest, t, !Pang 2024.05.01 
      &    FILECC, FILEIO, FRLF, FRRT, FRSTM,              !Input
      &    AGRLF, AGRNOD, AGRRT, AGRSD1, AGRSD2, AGRSH1,   !Output
      &    AGRSH2, AGRSTM, AGRVG, AGRVG2, SDPROR)          !Output
 
 !-----------------------------------------------------------------------
-        CALL NUPTAK(RUNINIT,
+        CALL NUPTAK(RUNINIT, nest, t, !Pang 2024.05.01
      &     DLAYR, DUL, FILECC, KG2PPM, LL, NDMSDR, NDMTOT,!Input
      &     NH4, NO3, NLAYR, RLV, SAT, SW,                 !Input
      &     TRNH4U, TRNO3U, TRNU, UNH4, UNO3)              !Output
 
 !-----------------------------------------------------------------------
         IF (ISWSYM .EQ. 'Y') THEN
-          CALL NFIX(RUNINIT,
+          CALL NFIX(RUNINIT, nest, t, !Pang 2024.05.01
      &      AGRNOD, CNODMN, CTONOD, DLAYR, DXR57,         !Input
      &      FILECC, FILEIO, NLAYR, NR7, PLTPOP,           !Input
      &      SAT, ST, SW, TURFAC,                          !Input
@@ -393,7 +678,7 @@ C-----------------------------------------------------------------------
         ENDIF
 
 !-----------------------------------------------------------------------
-        CALL PODS(RUNINIT, 
+        CALL PODS(RUNINIT, nest, t, !Pang 2024.05.02
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
      &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
@@ -408,7 +693,7 @@ C-----------------------------------------------------------------------
 
 !-----------------------------------------------------------------------
         IF (DETACH .EQ. 'Y') THEN
-          CALL PODDET(
+          CALL PODDET( nest, t, !Pang 2024.05.02
      &      FILECC, TGRO, WTLF, YRDOY, YRNR2,             !Input
      &      PODWTD, SDNO, SHELN, SWIDOT,                  !Output
      &      WSHIDT, WTSD, WTSHE,                          !Output
@@ -416,7 +701,7 @@ C-----------------------------------------------------------------------
         ENDIF
 
 !-----------------------------------------------------------------------
-        CALL VEGGR (RUNINIT, 
+        CALL VEGGR (RUNINIT,nest, t, !Pang 2024.05.03  
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -433,7 +718,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 C     Call leaf senescence routine for initialization
 C-----------------------------------------------------------------------
-        CALL SENES(RUNINIT, 
+        CALL SENES(RUNINIT, nest, t,  !Pang 2024.05.03 
      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -441,7 +726,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 C-----------------------------------------------------------------------
-        CALL ROOTS(RUNINIT,
+        CALL ROOTS(RUNINIT, nest, t, !Pang 2024.05.03
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -449,7 +734,7 @@ C-----------------------------------------------------------------------
         ENDIF
 
 !-----------------------------------------------------------------------
-      CALL GROW(CONTROL, ISWITCH, RUNINIT, SOILPROP, 
+      CALL GROW(CONTROL, ISWITCH, RUNINIT, SOILPROP,nest, t, !Pang 2024.05.05  
      &  AGEFAC, CADLF, CADST, CRUSLF, CRUSRT, CRUSSH,     !Input
      &  CRUSST, DISLA, F, FILECC, FRLF, FRSTM,            !Input
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
@@ -478,7 +763,7 @@ C-----------------------------------------------------------------------
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob)                        !Output
 
-      CALL OPGROW(CONTROL, ISWITCH, SoilProp, 
+      CALL OPGROW(CONTROL, ISWITCH, SoilProp,nest, t, !Pang 2024.05.06  
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
      &    GRWRES, KSTRES, MAINR, MDATE, NFIXN, NLAYR, NSTRES, 
      &    PCLSD, PCCSD, PCNL, PCNRT, PCNSD, PCNSH, PCNST, PG, 
@@ -541,7 +826,7 @@ C-----------------------------------------------------------------------
           CALL GET('SPAM', 'AGEFAC', AGEFAC)
           CALL GET('SPAM', 'PG'    , PG)
         ELSEIF (MEPHO .EQ. 'C') THEN
-          CALL PHOTO(CONTROL, 
+          CALL PHOTO(CONTROL,nest, t,           !Pang 2024.01.24 
      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
@@ -550,7 +835,7 @@ C-----------------------------------------------------------------------
       ENDIF
 
 !-----------------------------------------------------------------------
-      CALL PHENOL(CONTROL, ISWITCH, 
+      CALL PHENOL(CONTROL, ISWITCH, nest, t, !Pang 2024.04.29  
      &    DAYL, NSTRES, PStres2, SOILPROP, ST,            !Input
      &    SW, SWFAC, TGRO, TMIN, TURFAC, XPOD, YRPLT,     !Input
      &    DRPP, DTX, DXR57, FRACDN, MDATE, NDLEAF,        !Output
@@ -564,7 +849,7 @@ C     Initialize pest coupling point and damage variables
 !     Need to initialize even if pests are not being modelled this
 !     season - zero out values from last simulation.
 !-----------------------------------------------------------------------
-      CALL PEST(CONTROL, ISWITCH, 
+      CALL PEST(CONTROL, ISWITCH,nest, t, !Pang 2024.04.29 
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, PGAVL,    !Input
      &    PHTIM, PLTPOP, RTWT, SLA, SLDOT, SOILPROP,      !Input
      &    SSDOT, STMWT, TOPWT, WLFDOT, WTLF, YRPLT,       !Input
@@ -578,7 +863,7 @@ C     Initialize pest coupling point and damage variables
 !         to INCOMP and GROW (need to initialize values of F, FRLF,
 !         FRRT, and FRSTM for use in those routines)  chp 9/22/98
 !-----------------------------------------------------------------------
-      CALL DEMAND(SEASINIT, CONTROL,
+      CALL DEMAND(SEASINIT, CONTROL, nest, t, !Pang 2024.05.01
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
      &  LNGPEG, NDLEAF, NSTRES, PAR, PCNL, PCNRT, PCNST,  !Input
@@ -599,14 +884,14 @@ C     Initialize pest coupling point and damage variables
 !         initialize value of SDPROR for use in that routine) chp 9/22/98
 !-----------------------------------------------------------------------
       IF (CROP .NE. 'FA') THEN
-        CALL INCOMP(SEASINIT, 
+        CALL INCOMP(SEASINIT,  nest, t, !Pang 2024.05.01 
      &    FILECC, FILEIO, FRLF, FRRT, FRSTM,              !Input
      &    AGRLF, AGRNOD, AGRRT, AGRSD1, AGRSD2, AGRSH1,   !Output
      &    AGRSH2, AGRSTM, AGRVG, AGRVG2, SDPROR)          !Output
       ENDIF
 
 !-----------------------------------------------------------------------
-      CALL GROW(CONTROL, ISWITCH, SEASINIT, SOILPROP, 
+      CALL GROW(CONTROL, ISWITCH, SEASINIT, SOILPROP,nest, t, !Pang 2024.05.05  
      &  AGEFAC, CADLF, CADST, CRUSLF, CRUSRT, CRUSSH,     !Input
      &  CRUSST, DISLA, F, FILECC, FRLF, FRSTM,            !Input
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
@@ -636,13 +921,13 @@ C     Initialize pest coupling point and damage variables
      &  ShutMob, RootMob, ShelMob)                        !Output
 
 !-----------------------------------------------------------------------
-      CALL NUPTAK(SEASINIT, 
+      CALL NUPTAK(SEASINIT, nest, t, !Pang 2024.05.01 
      &    DLAYR, DUL, FILECC, KG2PPM, LL, NDMSDR, NDMTOT, !Input
      &    NH4, NO3, NLAYR, RLV, SAT, SW,                  !Input
      &    TRNH4U, TRNO3U, TRNU, UNH4, UNO3)               !Output
 
 !     Plant phosphorus module initialization
-      CALL P_CGRO (DYNAMIC, ISWITCH, 
+      CALL P_CGRO (DYNAMIC, ISWITCH,  nest, t, !Pang 2024.05.06 
      &    CROP, FILECC, MDATE, PCNVEG, PLTPOP, RLV,       !Input
      &    RootMob, RTDEP, RTWT, SDWT, SeedFrac,           !Input
      &    ShelMob, SHELWT, ShutMob, SOILPROP,             !Input
@@ -659,7 +944,7 @@ C     Initialize pest coupling point and damage variables
      &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST)         !Output
 
 !-----------------------------------------------------------------------
-      CALL NFIX(SEASINIT,
+      CALL NFIX(SEASINIT, nest, t, !Pang 2024.05.01
      &    AGRNOD, CNODMN, CTONOD, DLAYR, DXR57,           !Input
      &    FILECC, FILEIO, NLAYR, NR7, PLTPOP,             !Input
      &    SAT, ST, SW, TURFAC,                            !Input
@@ -667,7 +952,7 @@ C     Initialize pest coupling point and damage variables
      &    NODGR, WTNFX, SENNOD)                           !Output
 
 !-----------------------------------------------------------------------
-      CALL PODS(SEASINIT, 
+      CALL PODS(SEASINIT, nest, t, !Pang 2024.05.02 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
      &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
@@ -681,7 +966,7 @@ C     Initialize pest coupling point and damage variables
      &    WTSHE, WTSHMT, FLWN)                            !Output
 
 !-----------------------------------------------------------------------
-      CALL VEGGR (SEASINIT, 
+      CALL VEGGR (SEASINIT,nest, t, !Pang 2024.05.03  
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -698,7 +983,7 @@ C     Initialize pest coupling point and damage variables
 !-----------------------------------------------------------------------
 C     Call leaf senescence routine for initialization
 C-----------------------------------------------------------------------
-      CALL SENES(SEASINIT, 
+      CALL SENES(SEASINIT, nest, t,  !Pang 2024.05.03 
      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -706,7 +991,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 C-----------------------------------------------------------------------
-      CALL ROOTS(SEASINIT,
+      CALL ROOTS(SEASINIT, nest, t, !Pang 2024.05.03
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -715,7 +1000,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 !     Write headings to output file GROWTH.OUT
 !-----------------------------------------------------------------------
-      CALL OPGROW(CONTROL, ISWITCH, SoilProp,  
+      CALL OPGROW(CONTROL, ISWITCH, SoilProp, nest, t, !Pang 2024.05.06  
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
      &    GRWRES, KSTRES, MAINR, MDATE, NFIXN, NLAYR, NSTRES, 
      &    PCLSD, PCCSD, PCNL, PCNRT, PCNSD, PCNSH, PCNST, PG, 
@@ -770,7 +1055,7 @@ C-----------------------------------------------------------------------
 !     CALL vegetative and reproductive development subroutine
 !-----------------------------------------------------------------------
       IF (CROP .NE. 'FA') THEN
-        CALL PHENOL(CONTROL, ISWITCH, 
+        CALL PHENOL(CONTROL, ISWITCH, nest, t, !Pang 2024.04.29  
      &    DAYL, NSTRES, PStres2, SOILPROP, ST,            !Input
      &    SW, SWFAC, TGRO, TMIN, TURFAC, XPOD, YRPLT,     !Input
      &    DRPP, DTX, DXR57, FRACDN, MDATE, NDLEAF,        !Output
@@ -782,7 +1067,7 @@ C-----------------------------------------------------------------------
 
 !----------------------------------------------------------------------
       IF (ISWDIS .EQ. 'Y') THEN
-        CALL PEST(CONTROL, ISWITCH, 
+        CALL PEST(CONTROL, ISWITCH,nest, t, !Pang 2024.04.29  
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, PGAVL,    !Input
      &    PHTIM, PLTPOP, RTWT, SLA, SLDOT, SOILPROP,      !Input
      &    SSDOT, STMWT, TOPWT, WLFDOT, WTLF, YRPLT,       !Input
@@ -798,7 +1083,7 @@ C-----------------------------------------------------------------------
           CALL GET('SPAM', 'AGEFAC', AGEFAC)
           CALL GET('SPAM', 'PG'    , PG)
         ELSEIF (MEPHO .EQ. 'C') THEN
-          CALL PHOTO(CONTROL, 
+          CALL PHOTO(CONTROL,nest, t,           !Pang 2024.01.24 
      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
@@ -817,7 +1102,7 @@ C-----------------------------------------------------------------------
 !     Need to set NVEG0 before test for DAS = NVEG0, otherwise,
 !     initialization on day of emergence will never occur.
 !-----------------------------------------------------------------------
-      CALL PHENOL(CONTROL, ISWITCH, 
+      CALL PHENOL(CONTROL, ISWITCH, nest, t, !Pang 2024.04.29  
      &    DAYL, NSTRES, PStres2, SOILPROP, ST,            !Input
      &    SW, SWFAC, TGRO, TMIN, TURFAC, XPOD, YRPLT,     !Input
      &    DRPP, DTX, DXR57, FRACDN, MDATE, NDLEAF,        !Output
@@ -831,7 +1116,7 @@ C-----------------------------------------------------------------------
 !----------------------------------------------------------------------
 !     On day of emergence, initialize:
 !-----------------------------------------------------------------------
-        CALL GROW(CONTROL, ISWITCH, EMERG, SOILPROP, 
+        CALL GROW(CONTROL, ISWITCH, EMERG, SOILPROP,nest, t, !Pang 2024.05.05  
      &  AGEFAC, CADLF, CADST, CRUSLF, CRUSRT, CRUSSH,     !Input
      &  CRUSST, DISLA, F, FILECC, FRLF, FRSTM,            !Input
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
@@ -863,7 +1148,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 C-----------------------------------------------------------------------
-      CALL ROOTS(EMERG,
+      CALL ROOTS(EMERG, nest, t, !Pang 2024.05.03
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -871,7 +1156,7 @@ C-----------------------------------------------------------------------
 
 !-----------------------------------------------------------------------
 !       DYNAMIC = EMERG (not INTEGR) here
-        CALL DEMAND(EMERG, CONTROL, 
+        CALL DEMAND(EMERG, CONTROL, nest, t, !Pang 2024.05.01 
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
      &  LNGPEG, NDLEAF, NSTRES, PAR, PCNL, PCNRT, PCNST,  !Input
@@ -887,7 +1172,7 @@ C-----------------------------------------------------------------------
      &  POTLIP, SDGR, TURADD, XFRT, YREND)                !Output
 
 !-----------------------------------------------------------------------
-        CALL PODS(EMERG, 
+        CALL PODS(EMERG, nest, t, !Pang 2024.05.02 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
      &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
@@ -901,7 +1186,7 @@ C-----------------------------------------------------------------------
      &    WTSHE, WTSHMT, FLWN)                            !Output
 
 !-----------------------------------------------------------------------
-        CALL VEGGR(EMERG, 
+        CALL VEGGR(EMERG,nest, t, !Pang 2024.05.03  
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -917,7 +1202,7 @@ C-----------------------------------------------------------------------
 
         IF (ISWPHO .EQ. 'Y' .OR. ISWPHO .EQ. 'H') THEN
 !       Plant phosphorus module initialization at plant emergence
-          CALL P_CGRO (EMERG, ISWITCH, 
+          CALL P_CGRO (EMERG, ISWITCH,  nest, t, !Pang 2024.05.06  
      &      CROP, FILECC, MDATE, PCNVEG, PLTPOP, RLV,       !Input
      &      RootMob, RTDEP, RTWT, SDWT, SeedFrac,           !Input
      &      ShelMob, SHELWT, ShutMob, SOILPROP,             !Input
@@ -932,7 +1217,7 @@ C-----------------------------------------------------------------------
       ENDIF
 !----------------------------------------------------------------------
       IF (DETACH .EQ. 'Y' .AND. DAS .LE. NVEG0+1) THEN
-        CALL PODDET(
+        CALL PODDET( nest, t, !Pang 2024.05.02
      &    FILECC, TGRO, WTLF, YRDOY, YRNR2,               !Input
      &    PODWTD, SDNO, SHELN, SWIDOT,                    !Output
      &    WSHIDT, WTSD, WTSHE,                            !Output
@@ -981,7 +1266,7 @@ C-----------------------------------------------------------------------
 !     Call PEST Module for INTEGRATION calculations
 !-----------------------------------------------------------------------
       IF (ISWDIS.EQ.'Y') THEN
-        CALL PEST(CONTROL, ISWITCH, 
+        CALL PEST(CONTROL, ISWITCH,nest, t, !Pang 2024.04.29  
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, PGAVL,    !Input
      &    PHTIM, PLTPOP, RTWT, SLA, SLDOT, SOILPROP,      !Input
      &    SSDOT, STMWT, TOPWT, WLFDOT, WTLF, YRPLT,       !Input
@@ -999,7 +1284,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C    Call Subroutine to calculate Nitrogen and Carbon Demand for new growth
 C-----------------------------------------------------------------------
-      CALL DEMAND(INTEGR, CONTROL, 
+      CALL DEMAND(INTEGR, CONTROL, nest, t, !Pang 2024.05.01 
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
      &  LNGPEG, NDLEAF, NSTRES, PAR, PCNL, PCNRT, PCNST,  !Input
@@ -1033,7 +1318,7 @@ C    If ISWNIT = Y - Call soil N routines. Balance Available C and N
 C    If ISWNIT = N - Do not call soil N routines, N assumed to be limited by C
 C-----------------------------------------------------------------------
       IF (ISWNIT .EQ. 'Y') THEN
-        CALL NUPTAK(INTEGR, 
+        CALL NUPTAK(INTEGR, nest, t, !Pang 2024.05.01 
      &    DLAYR, DUL, FILECC, KG2PPM, LL, NDMSDR, NDMTOT, !Input
      &    NH4, NO3, NLAYR, RLV, SAT, SW,                  !Input
      &    TRNH4U, TRNO3U, TRNU, UNH4, UNO3)               !Output
@@ -1066,7 +1351,7 @@ C-----------------------------------------------------------------------
 !       Plant phosphorus module
 C-----------------------------------------------------------------------
       IF (ISWPHO .EQ. 'Y' .OR. ISWPHO .EQ. 'H') THEN
-        CALL P_CGRO (DYNAMIC, ISWITCH, 
+        CALL P_CGRO (DYNAMIC, ISWITCH, nest, t, !Pang 2024.05.06  
      &    CROP, FILECC, MDATE, PCNVEG, PLTPOP, RLV,       !Input
      &    RootMob, RTDEP, RTWT, SDWT, SeedFrac,           !Input
      &    ShelMob, SHELWT, ShutMob, SOILPROP,             !Input
@@ -1125,7 +1410,7 @@ C     and if thermal time exceeds the lag phase for n-fixation
 C-----------------------------------------------------------------------
       IF (ISWNIT .EQ. 'Y' .AND. ISWSYM .EQ. 'Y') THEN
         IF (VSTAGE .GT. TTFIX) THEN
-          CALL NFIX(INTEGR, 
+          CALL NFIX(INTEGR, nest, t, !Pang 2024.05.01 
      &    AGRNOD, CNODMN, CTONOD, DLAYR, DXR57,           !Input
      &    FILECC, FILEIO, NLAYR, NR7, PLTPOP,             !Input
      &    SAT, ST, SW, TURFAC,                            !Input
@@ -1154,7 +1439,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call routine to compute actual seed and shell growth
 C-----------------------------------------------------------------------
-      CALL PODS(INTEGR, 
+      CALL PODS(INTEGR, nest, t, !Pang 2024.05.02 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
      &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
@@ -1174,7 +1459,7 @@ C         Pod color
 C         Pod Detachment
 C-----------------------------------------------------------------------
       IF (DETACH .EQ. 'Y' .AND. DAS .GE. NR1) THEN
-        CALL PODDET(
+        CALL PODDET( nest, t, !Pang 2024.05.02
      &    FILECC, TGRO, WTLF, YRDOY, YRNR2,               !Input
      &    PODWTD, SDNO, SHELN, SWIDOT,                    !Output
      &    WSHIDT, WTSD, WTSHE,                            !Output
@@ -1210,7 +1495,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call routine to compute actual vegetative growth, C to mine or add
 C-----------------------------------------------------------------------
-      CALL VEGGR(INTEGR, 
+      CALL VEGGR(INTEGR,nest, t, !Pang 2024.05.03  
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -1234,7 +1519,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call leaf senescence routine to compute leaf loss variables
 C-----------------------------------------------------------------------
-      CALL SENES(INTEGR, 
+      CALL SENES(INTEGR, nest, t,  !Pang 2024.05.03 
      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -1254,7 +1539,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 !-----------------------------------------------------------------------
-      CALL ROOTS(INTEGR,
+      CALL ROOTS(INTEGR, nest, t, !Pang 2024.05.03
      &    AGRRT, CROP, DLAYR, DS, DTX, DUL, FILECC, FRRT, !Input
      &    ISWWAT, LL, NLAYR, PG, PLTPOP, RO, RP, RTWT,    !Input
      &    SAT, SW, SWFAC, VSTAGE, WR, WRDOTN, WTNEW,      !Input
@@ -1285,7 +1570,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call routine to integrate growth and damage
 C-----------------------------------------------------------------------
-      CALL GROW(CONTROL, ISWITCH, INTEGR, SOILPROP, 
+      CALL GROW(CONTROL, ISWITCH, INTEGR, SOILPROP,nest, t, !Pang 2024.05.05  
      &  AGEFAC, CADLF, CADST, CRUSLF, CRUSRT, CRUSSH,     !Input
      &  CRUSST, DISLA, F, FILECC, FRLF, FRSTM,            !Input
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
@@ -1341,7 +1626,7 @@ C-----------------------------------------------------------------------
         ENDIF
 
         IF (ISWDIS.EQ.'Y') THEN
-          CALL PEST(CONTROL, ISWITCH, 
+          CALL PEST(CONTROL, ISWITCH,nest, t, !Pang 2024.04.29  
      &      AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, PGAVL,    !Input
      &      PHTIM, PLTPOP, RTWT, SLA, SLDOT, SOILPROP,      !Input
      &      SSDOT, STMWT, TOPWT, WLFDOT, WTLF, YRPLT,       !Input
@@ -1351,7 +1636,7 @@ C-----------------------------------------------------------------------
      &      SDDES, WLIDOT, WRIDOT, WSIDOT,SDWT)             !Output
         ENDIF
 
-        CALL PODS(DYNAMIC, 
+        CALL PODS(DYNAMIC, nest, t, !Pang 2024.05.02 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
      &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
@@ -1364,7 +1649,7 @@ C-----------------------------------------------------------------------
      &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
      &    WTSHE, WTSHMT, FLWN)                            !Output
 
-        CALL OPGROW(CONTROL, ISWITCH, SoilProp, 
+        CALL OPGROW(CONTROL, ISWITCH, SoilProp,nest, t, !Pang 2024.05.06  
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
      &    GRWRES, KSTRES, MAINR, MDATE, NFIXN, NLAYR, NSTRES, 
      &    PCLSD, PCCSD, PCNL, PCNRT, PCNSD, PCNSH, PCNST, PG, 
@@ -1375,7 +1660,7 @@ C-----------------------------------------------------------------------
      &    WTNSD, WTNUP, WTNFX, XLAI, YRPLT) 
 
         IF (ISWPHO .EQ. 'Y' .OR. ISWPHO .EQ. 'H') THEN
-          CALL P_CGRO (DYNAMIC, ISWITCH, 
+          CALL P_CGRO (DYNAMIC, ISWITCH, nest, t, !Pang 2024.05.06  
      &      CROP, FILECC, MDATE, PCNVEG, PLTPOP, RLV,       !Input
      &      RootMob, RTDEP, RTWT, SDWT, SeedFrac,           !Input
      &      ShelMob, SHELWT, ShutMob, SOILPROP,             !Input
@@ -1444,6 +1729,296 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
        dssat48_struc(nest)%dssat48(t)%AGEFAC = AGEFAC
        dssat48_struc(nest)%dssat48(t)%PG = PG
+!-----------------------------------------------------------------------
+! CROPGRO - PHENOL
+! Pang 2024.04.29
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%DRPP = DRPP
+       dssat48_struc(nest)%dssat48(t)%DTX = DTX
+       dssat48_struc(nest)%dssat48(t)%DXR57 = DXR57
+       dssat48_struc(nest)%dssat48(t)%FRACDN = FRACDN
+       dssat48_struc(nest)%dssat48(t)%PHTHRS = PHTHRS
+       dssat48_struc(nest)%dssat48(t)%RVSTGE = RVSTGE
+       dssat48_struc(nest)%dssat48(t)%SeedFrac = SeedFrac
+       dssat48_struc(nest)%dssat48(t)%TDUMX = TDUMX
+       dssat48_struc(nest)%dssat48(t)%TDUMX2 = TDUMX2
+       dssat48_struc(nest)%dssat48(t)%VegFrac = VegFrac
+       dssat48_struc(nest)%dssat48(t)%VSTAGE = VSTAGE
+       dssat48_struc(nest)%dssat48(t)%NDLEAF = NDLEAF
+       dssat48_struc(nest)%dssat48(t)%NDSET = NDSET
+       dssat48_struc(nest)%dssat48(t)%NR1 = NR1
+       dssat48_struc(nest)%dssat48(t)%NR2 = NR2
+       dssat48_struc(nest)%dssat48(t)%NR5 = NR5
+       dssat48_struc(nest)%dssat48(t)%NR7 = NR7
+       dssat48_struc(nest)%dssat48(t)%NVEG0 = NVEG0
+       dssat48_struc(nest)%dssat48(t)%RSTAGE = RSTAGE
+       dssat48_struc(nest)%dssat48(t)%YREMRG = YREMRG
+       dssat48_struc(nest)%dssat48(t)%YRNR1 = YRNR1
+       dssat48_struc(nest)%dssat48(t)%YRNR2 = YRNR2
+       dssat48_struc(nest)%dssat48(t)%YRNR3 = YRNR3
+       dssat48_struc(nest)%dssat48(t)%YRNR5 = YRNR5
+       dssat48_struc(nest)%dssat48(t)%YRNR7 = YRNR7
+
+!---- PEST ------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%SDNO = SDNO
+       dssat48_struc(nest)%dssat48(t)%SHELN = SHELN
+       dssat48_struc(nest)%dssat48(t)%WSHIDT = WSHIDT
+       dssat48_struc(nest)%dssat48(t)%WTSD = WTSD
+       dssat48_struc(nest)%dssat48(t)%WTSHE = WTSHE
+       dssat48_struc(nest)%dssat48(t)%DISLA = DISLA
+       dssat48_struc(nest)%dssat48(t)%NPLTD = NPLTD
+       dssat48_struc(nest)%dssat48(t)%SDDES = SDDES
+       dssat48_struc(nest)%dssat48(t)%SDWT = SDWT
+       dssat48_struc(nest)%dssat48(t)%ASMDOT = ASMDOT
+       dssat48_struc(nest)%dssat48(t)%PPLTD = PPLTD
+       dssat48_struc(nest)%dssat48(t)%SWIDOT = SWIDOT
+       dssat48_struc(nest)%dssat48(t)%WLIDOT = WLIDOT
+       dssat48_struc(nest)%dssat48(t)%WRIDOT = WRIDOT
+       dssat48_struc(nest)%dssat48(t)%WSIDOT = WSIDOT
+!-----------------------------------------------------------------------
+! CROPGRO - DEMAND
+! Pang 2024.04.29
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%AGRSD1 = AGRSD1
+       dssat48_struc(nest)%dssat48(t)%AGRSD2 = AGRSD2
+       dssat48_struc(nest)%dssat48(t)%AGRVG = AGRVG
+       dssat48_struc(nest)%dssat48(t)%AGRVG2 = AGRVG2
+       dssat48_struc(nest)%dssat48(t)%CDMREP = CDMREP
+       dssat48_struc(nest)%dssat48(t)%F = F
+       dssat48_struc(nest)%dssat48(t)%FNINL = FNINL
+       dssat48_struc(nest)%dssat48(t)%FNINR = FNINR
+       dssat48_struc(nest)%dssat48(t)%FNINS = FNINS
+       dssat48_struc(nest)%dssat48(t)%FNINSD = FNINSD 
+       dssat48_struc(nest)%dssat48(t)%FRLF = FRLF
+       dssat48_struc(nest)%dssat48(t)%FRRT = FRRT
+       dssat48_struc(nest)%dssat48(t)%FRSTM = FRSTM
+       dssat48_struc(nest)%dssat48(t)%GDMSD = GDMSD
+       dssat48_struc(nest)%dssat48(t)%GRRAT1 = GRRAT1
+       dssat48_struc(nest)%dssat48(t)%NDMNEW = NDMNEW
+       dssat48_struc(nest)%dssat48(t)%NDMOLD = NDMOLD
+       dssat48_struc(nest)%dssat48(t)%NDMREP = NDMREP
+       dssat48_struc(nest)%dssat48(t)%NDMSDR = NDMSDR
+       dssat48_struc(nest)%dssat48(t)%NDMTOT = NDMTOT
+       dssat48_struc(nest)%dssat48(t)%NDMVEG = NDMVEG
+       dssat48_struc(nest)%dssat48(t)%NMINEP = NMINEP
+       dssat48_struc(nest)%dssat48(t)%NMOBR = NMOBR
+       dssat48_struc(nest)%dssat48(t)%PHTIM = PHTIM
+       dssat48_struc(nest)%dssat48(t)%PNTIM = PNTIM
+       dssat48_struc(nest)%dssat48(t)%POTCAR = POTCAR
+       dssat48_struc(nest)%dssat48(t)%POTLIP = POTLIP
+       dssat48_struc(nest)%dssat48(t)%SDGR = SDGR
+       dssat48_struc(nest)%dssat48(t)%TURADD = TURADD
+       dssat48_struc(nest)%dssat48(t)%XFRT = XFRT
+!-----------------------------------------------------------------------
+! CROPGRO - INCOMP
+! Pang 2024.05.01
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%AGRLF = AGRLF
+       dssat48_struc(nest)%dssat48(t)%AGRNOD = AGRNOD
+       dssat48_struc(nest)%dssat48(t)%AGRRT = AGRRT
+       dssat48_struc(nest)%dssat48(t)%AGRSH1 = AGRSH1
+       dssat48_struc(nest)%dssat48(t)%AGRSH2 = AGRSH2
+       dssat48_struc(nest)%dssat48(t)%AGRSTM = AGRSTM
+       dssat48_struc(nest)%dssat48(t)%SDPROR = SDPROR
+!-----------------------------------------------------------------------
+! CROPGRO - NUPTAKE
+! Pang 2024.05.01
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%TRNH4U = TRNH4U
+       dssat48_struc(nest)%dssat48(t)%TRNO3U = TRNO3U
+       dssat48_struc(nest)%dssat48(t)%TRNU = TRNU
+!-----------------------------------------------------------------------
+! CROPGRO - NFIX
+! Pang 2024.04.29
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%CNOD = CNOD
+       dssat48_struc(nest)%dssat48(t)%DWNOD = DWNOD
+       dssat48_struc(nest)%dssat48(t)%DWNODA = DWNODA
+       dssat48_struc(nest)%dssat48(t)%NDTH = NDTH
+       dssat48_struc(nest)%dssat48(t)%NFIXN = NFIXN
+       dssat48_struc(nest)%dssat48(t)%NODGR = NODGR
+       dssat48_struc(nest)%dssat48(t)%WTNFX = WTNFX
+       dssat48_struc(nest)%dssat48(t)%SENNOD = SENNOD
+!-----------------------------------------------------------------------
+! CROPGRO - PODS
+! Pang 2024.05.02
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%AGRSD3 = AGRSD3
+       dssat48_struc(nest)%dssat48(t)%LAGSD = LAGSD
+       dssat48_struc(nest)%dssat48(t)%LNGPEG = LNGPEG
+       dssat48_struc(nest)%dssat48(t)%NGRSD = NGRSD
+       dssat48_struc(nest)%dssat48(t)%NGRSH = NGRSH
+       dssat48_struc(nest)%dssat48(t)%PCTMAT = PCTMAT
+       dssat48_struc(nest)%dssat48(t)%PODNO = PODNO
+       dssat48_struc(nest)%dssat48(t)%SDVAR = SDVAR
+       dssat48_struc(nest)%dssat48(t)%SEEDNO = SEEDNO
+       dssat48_struc(nest)%dssat48(t)%SHVAR = SHVAR
+       dssat48_struc(nest)%dssat48(t)%WSDDTN = WSDDTN
+       dssat48_struc(nest)%dssat48(t)%WSHDTN = WSHDTN
+       dssat48_struc(nest)%dssat48(t)%WTABRT = WTABRT
+       dssat48_struc(nest)%dssat48(t)%WTSHMT = WTSHMT
+       dssat48_struc(nest)%dssat48(t)%FLWN = FLWN
+!-----------------------------------------------------------------------
+! CROPGRO - PODDET
+! Pang 2024.05.02
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%PODWTD = PODWTD
+!-----------------------------------------------------------------------
+! CROPGRO - VEGGR
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%CADLF = CADLF
+       dssat48_struc(nest)%dssat48(t)%CADST = CADST
+       dssat48_struc(nest)%dssat48(t)%CANWH = CANWH
+       dssat48_struc(nest)%dssat48(t)%CMINEA = CMINEA
+       dssat48_struc(nest)%dssat48(t)%CRUSLF = CRUSLF
+       dssat48_struc(nest)%dssat48(t)%CRUSRT = CRUSRT
+       dssat48_struc(nest)%dssat48(t)%CRUSSH = CRUSSH
+       dssat48_struc(nest)%dssat48(t)%CRUSST = CRUSST
+       dssat48_struc(nest)%dssat48(t)%EXCESS = EXCESS
+       dssat48_struc(nest)%dssat48(t)%NADLF = NADLF
+       dssat48_struc(nest)%dssat48(t)%NADRT = NADRT
+       dssat48_struc(nest)%dssat48(t)%NADST = NADST
+       dssat48_struc(nest)%dssat48(t)%NGRLF = NGRLF
+       dssat48_struc(nest)%dssat48(t)%NGRRT = NGRRT
+       dssat48_struc(nest)%dssat48(t)%NGRST = NGRST
+       dssat48_struc(nest)%dssat48(t)%TNLEAK = TNLEAK
+       dssat48_struc(nest)%dssat48(t)%WLDOTN = WLDOTN
+       dssat48_struc(nest)%dssat48(t)%WRDOTN = WRDOTN
+       dssat48_struc(nest)%dssat48(t)%WSDOTN = WSDOTN
+!-----------------------------------------------------------------------
+! CROPGRO - SENES
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%SLDOT = SLDOT
+       dssat48_struc(nest)%dssat48(t)%SLNDOT = SLNDOT
+       dssat48_struc(nest)%dssat48(t)%SSDOT = SSDOT
+       dssat48_struc(nest)%dssat48(t)%SSNDOT = SSNDOT
+!-----------------------------------------------------------------------
+! CROPGRO - ROOTS
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%RTDEP = RTDEP
+       dssat48_struc(nest)%dssat48(t)%SATFAC = SATFAC
+       dssat48_struc(nest)%dssat48(t)%SENRT = SENRT
+       dssat48_struc(nest)%dssat48(t)%SRDOT = SRDOT
+!-----------------------------------------------------------------------
+! CROPGRO - GROW
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%PLIGSD = PLIGSD
+       dssat48_struc(nest)%dssat48(t)%PLIGSH = PLIGSH
+!-----------------------------------------------------------------------
+! CROPGRO - GROW
+! Pang 2024.05.03
+!-----------------------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%WLFDOT = WLFDOT
+       dssat48_struc(nest)%dssat48(t)%AREALF = AREALF
+       dssat48_struc(nest)%dssat48(t)%BETN = BETN
+       dssat48_struc(nest)%dssat48(t)%CANNAA = CANNAA
+       dssat48_struc(nest)%dssat48(t)%CANWAA = CANWAA
+       dssat48_struc(nest)%dssat48(t)%CLW = CLW
+       dssat48_struc(nest)%dssat48(t)%CSW = CSW
+       dssat48_struc(nest)%dssat48(t)%GROWTH = GROWTH
+       dssat48_struc(nest)%dssat48(t)%GRWRES = GRWRES
+       dssat48_struc(nest)%dssat48(t)%LAIMX = LAIMX
+       dssat48_struc(nest)%dssat48(t)%PCCSD = PCCSD
+       dssat48_struc(nest)%dssat48(t)%PCLSD = PCLSD
+       dssat48_struc(nest)%dssat48(t)%PCNL = PCNL
+       dssat48_struc(nest)%dssat48(t)%PCNRT = PCNRT
+       dssat48_struc(nest)%dssat48(t)%PCNSD = PCNSD
+       dssat48_struc(nest)%dssat48(t)%PCNSH = PCNSH
+       dssat48_struc(nest)%dssat48(t)%PCNST = PCNST
+       dssat48_struc(nest)%dssat48(t)%PLTPOP = PLTPOP
+       dssat48_struc(nest)%dssat48(t)%PLIGLF = PLIGLF
+       dssat48_struc(nest)%dssat48(t)%PLIGNO = PLIGNO
+       dssat48_struc(nest)%dssat48(t)%PLIGRT = PLIGRT
+       dssat48_struc(nest)%dssat48(t)%PLIGST = PLIGST
+       dssat48_struc(nest)%dssat48(t)%PODWT = PODWT
+       dssat48_struc(nest)%dssat48(t)%PUNCSD = PUNCSD
+       dssat48_struc(nest)%dssat48(t)%PUNCTR = PUNCTR
+       dssat48_struc(nest)%dssat48(t)%RHOL = RHOL
+       dssat48_struc(nest)%dssat48(t)%RHOS = RHOS
+       dssat48_struc(nest)%dssat48(t)%RNITP = RNITP
+       dssat48_struc(nest)%dssat48(t)%ROWSPC = ROWSPC
+       dssat48_struc(nest)%dssat48(t)%RTWT = RTWT
+       dssat48_struc(nest)%dssat48(t)%SDNPL = SDNPL
+       dssat48_struc(nest)%dssat48(t)%SDRATE = SDRATE
+       dssat48_struc(nest)%dssat48(t)%SEEDNI = SEEDNI
+       dssat48_struc(nest)%dssat48(t)%SHELWT = SHELWT
+       dssat48_struc(nest)%dssat48(t)%SLA = SLA
+       dssat48_struc(nest)%dssat48(t)%SLAAD = SLAAD
+       dssat48_struc(nest)%dssat48(t)%STMWT = STMWT
+       dssat48_struc(nest)%dssat48(t)%TOPWT = TOPWT
+       dssat48_struc(nest)%dssat48(t)%TOTWT = TOTWT
+       dssat48_struc(nest)%dssat48(t)%WCRLF = WCRLF
+       dssat48_struc(nest)%dssat48(t)%WCRRT = WCRRT
+       dssat48_struc(nest)%dssat48(t)%WCRSH = WCRSH
+       dssat48_struc(nest)%dssat48(t)%WCRST = WCRST
+       dssat48_struc(nest)%dssat48(t)%WNRLF = WNRLF
+       dssat48_struc(nest)%dssat48(t)%WNRRT = WNRRT
+       dssat48_struc(nest)%dssat48(t)%WNRSH = WNRSH
+       dssat48_struc(nest)%dssat48(t)%WNRST = WNRST
+       dssat48_struc(nest)%dssat48(t)%WTCO = WTCO
+       dssat48_struc(nest)%dssat48(t)%WTLF = WTLF
+       dssat48_struc(nest)%dssat48(t)%WTLO = WTLO
+       dssat48_struc(nest)%dssat48(t)%WTMAIN = WTMAIN
+       dssat48_struc(nest)%dssat48(t)%WTNCAN = WTNCAN
+       dssat48_struc(nest)%dssat48(t)%WTNEW = WTNEW
+       dssat48_struc(nest)%dssat48(t)%WTNLA = WTNLA
+       dssat48_struc(nest)%dssat48(t)%WTNLF = WTNLF
+       dssat48_struc(nest)%dssat48(t)%WTNLO = WTNLO
+       dssat48_struc(nest)%dssat48(t)%WTNNA = WTNNA
+       dssat48_struc(nest)%dssat48(t)%WTNNAG = WTNNAG
+       dssat48_struc(nest)%dssat48(t)%WTNNO = WTNNO
+       dssat48_struc(nest)%dssat48(t)%WTNNOD = WTNNOD
+       dssat48_struc(nest)%dssat48(t)%WTNOO = WTNOO
+       dssat48_struc(nest)%dssat48(t)%WTNRA = WTNRA
+       dssat48_struc(nest)%dssat48(t)%WTNRO = WTNRO
+       dssat48_struc(nest)%dssat48(t)%WTNRT = WTNRT
+       dssat48_struc(nest)%dssat48(t)%WTNSA = WTNSA
+       dssat48_struc(nest)%dssat48(t)%WTNSD = WTNSD
+       dssat48_struc(nest)%dssat48(t)%WTNSDA = WTNSDA
+       dssat48_struc(nest)%dssat48(t)%WTNSDO = WTNSDO
+       dssat48_struc(nest)%dssat48(t)%WTNSH = WTNSH
+       dssat48_struc(nest)%dssat48(t)%WTNSHA = WTNSHA
+       dssat48_struc(nest)%dssat48(t)%WTNSHO = WTNSHO
+       dssat48_struc(nest)%dssat48(t)%WTNSO = WTNSO
+       dssat48_struc(nest)%dssat48(t)%WTNST = WTNST
+       dssat48_struc(nest)%dssat48(t)%WTNUP = WTNUP
+       dssat48_struc(nest)%dssat48(t)%WTRO = WTRO
+       dssat48_struc(nest)%dssat48(t)%WTSDO = WTSDO
+       dssat48_struc(nest)%dssat48(t)%WTSHO = WTSHO
+       dssat48_struc(nest)%dssat48(t)%WTSO = WTSO
+       dssat48_struc(nest)%dssat48(t)%XPOD = XPOD
+       dssat48_struc(nest)%dssat48(t)%ShutMob = ShutMob
+       dssat48_struc(nest)%dssat48(t)%RootMob = RootMob
+       dssat48_struc(nest)%dssat48(t)%ShelMob = ShelMob
+!----- SEAS INIT ------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%CMINEP = CMINEP
+       dssat48_struc(nest)%dssat48(t)%CNODMN = CNODMN
+       dssat48_struc(nest)%dssat48(t)%NAVL = NAVL
+       dssat48_struc(nest)%dssat48(t)%PGAVL = PGAVL
+       dssat48_struc(nest)%dssat48(t)%RO = RO
+       dssat48_struc(nest)%dssat48(t)%RP = RP
+       dssat48_struc(nest)%dssat48(t)%RPROAV = RPROAV
+       dssat48_struc(nest)%dssat48(t)%TURFAC = TURFAC
+       dssat48_struc(nest)%dssat48(t)%SWFAC = SWFAC
+       dssat48_struc(nest)%dssat48(t)%RSPNO3 = RSPNO3
+       dssat48_struc(nest)%dssat48(t)%RSPNH4 = RSPNH4
+       dssat48_struc(nest)%dssat48(t)%KSTRES = KSTRES
+!----- P_CGRO ------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%PConc_Shut = PConc_Shut
+       dssat48_struc(nest)%dssat48(t)%PConc_Root = PConc_Root
+       dssat48_struc(nest)%dssat48(t)%PConc_Shel = PConc_Shel
+       dssat48_struc(nest)%dssat48(t)%PConc_Seed = PConc_Seed
+       dssat48_struc(nest)%dssat48(t)%PStres2 = PStres2
+!----- MOBIL ------------------------------------------------------
+       dssat48_struc(nest)%dssat48(t)%NMINEA = NMINEA
+       dssat48_struc(nest)%dssat48(t)%NRUSLF = NRUSLF
+       dssat48_struc(nest)%dssat48(t)%NRUSRT = NRUSRT
+       dssat48_struc(nest)%dssat48(t)%NRUSSH = NRUSSH
+       dssat48_struc(nest)%dssat48(t)%NRUSST = NRUSST
 
       RETURN
       END SUBROUTINE CROPGRO

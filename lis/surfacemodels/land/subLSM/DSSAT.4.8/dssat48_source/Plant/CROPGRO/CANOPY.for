@@ -18,7 +18,7 @@ C  Called : VEGGR
 C  Calls  : ERROR, FIND, IGNORE
 C========================================================================
 
-      SUBROUTINE CANOPY(DYNAMIC, 
+      SUBROUTINE CANOPY(DYNAMIC, nest, t, !Pang 2024.05.03 
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI,             !Input
      &    CANHT, CANWH)                                   !Output
@@ -27,6 +27,7 @@ C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -37,7 +38,7 @@ C-----------------------------------------------------------------------
       CHARACTER*6   ECOTYP, ECONO
       CHARACTER*92  FILECC, FILEGC
       CHARACTER*255 C255
-
+      INTEGER nest, t
       INTEGER I, II, LUNCRP, LUNECO, ERR, LINC, LNUM, ISECT
       INTEGER DYNAMIC
       INTEGER FOUND
@@ -50,7 +51,16 @@ C-----------------------------------------------------------------------
       REAL XHWPAR(10), XHWTEM(10), YHWPAR(10), YHWTEM(10)
       REAL XVSHT(15), YVSHT(15), YVSWH(15)
       REAL TGRO(TS)
-
+!------ Obtain Vars from Memory ----------------------------------------
+      XVSHT = dssat48_struc(nest)%dssat48(t)%XVSHT
+      YVSHT = dssat48_struc(nest)%dssat48(t)%YVSHT
+      YVSWH = dssat48_struc(nest)%dssat48(t)%YVSWH
+      XHWTEM = dssat48_struc(nest)%dssat48(t)%XHWTEM
+      YHWTEM = dssat48_struc(nest)%dssat48(t)%YHWTEM
+      XHWPAR = dssat48_struc(nest)%dssat48(t)%XHWPAR
+      YHWPAR = dssat48_struc(nest)%dssat48(t)%YHWPAR
+      RWIDTH = dssat48_struc(nest)%dssat48(t)%RWIDTH
+      RHGHT = dssat48_struc(nest)%dssat48(t)%RHGHT
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -154,6 +164,17 @@ C-----------------------------------------------------------------------
 
       CLOSE (LUNECO)
 
+!------ Save Vars to Memory - Do Only Once ---------------------------------------
+      dssat48_struc(nest)%dssat48(t)%XVSHT = XVSHT
+      dssat48_struc(nest)%dssat48(t)%YVSHT = YVSHT
+      dssat48_struc(nest)%dssat48(t)%YVSWH = YVSWH
+      dssat48_struc(nest)%dssat48(t)%XHWTEM =  XHWTEM
+      dssat48_struc(nest)%dssat48(t)%YHWTEM = YHWTEM
+      dssat48_struc(nest)%dssat48(t)%XHWPAR = XHWPAR
+      dssat48_struc(nest)%dssat48(t)%YHWPAR = YHWPAR
+      dssat48_struc(nest)%dssat48(t)%RWIDTH = RWIDTH
+      dssat48_struc(nest)%dssat48(t)%RHGHT = RHGHT
+!----------------------------------------------------------------------------
       CANHT = 0.0
       CANWH = 0.0
 

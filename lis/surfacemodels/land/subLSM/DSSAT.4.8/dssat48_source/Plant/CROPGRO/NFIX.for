@@ -35,7 +35,7 @@
 !  Calls:        FIND, ERROR, IGNORE
 !=======================================================================
 
-      SUBROUTINE NFIX(DYNAMIC,
+      SUBROUTINE NFIX(DYNAMIC, nest, t, !Pang 2024.05.01
      &    AGRNOD, CNODMN, CTONOD, DLAYR, DXR57,           !Input
      &    FILECC, FILEIO, NLAYR, NR7, PLTPOP,             !Input
      &    SAT, ST, SW, TURFAC,                            !Input
@@ -45,9 +45,10 @@
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
-
+      INTEGER nest, t
       CHARACTER*3 TYPFXT,TYPNGT,TYPFXD,TYPFXW,TYPFXA
       CHARACTER*6 ERRKEY
       PARAMETER (ERRKEY = 'NFIX')
@@ -82,6 +83,28 @@
 
       TYPE (ControlType) CONTROL
 
+!--------- Obtain Vars From Memory ------------------------------------
+      TYPFXT = dssat48_struc(nest)%dssat48(t)%TYPFXT
+      TYPNGT = dssat48_struc(nest)%dssat48(t)%TYPNGT
+      TYPFXD = dssat48_struc(nest)%dssat48(t)%TYPFXD
+      TYPFXW = dssat48_struc(nest)%dssat48(t)%TYPFXW
+      TYPFXA = dssat48_struc(nest)%dssat48(t)%TYPFXA
+      EFINOC = dssat48_struc(nest)%dssat48(t)%EFINOC
+      EFNFIX = dssat48_struc(nest)%dssat48(t)%EFNFIX
+      RFIXN = dssat48_struc(nest)%dssat48(t)%RFIXN
+      PRONOD = dssat48_struc(nest)%dssat48(t)%PRONOD
+      SNACTM = dssat48_struc(nest)%dssat48(t)%SNACTM
+      NODRGM = dssat48_struc(nest)%dssat48(t)%NODRGM
+      DWNODI = dssat48_struc(nest)%dssat48(t)%DWNODI
+      NDTHMX = dssat48_struc(nest)%dssat48(t)%NDTHMX
+      CNODCR = dssat48_struc(nest)%dssat48(t)%CNODCR
+      FNFXT = dssat48_struc(nest)%dssat48(t)%FNFXT
+      FNNGT = dssat48_struc(nest)%dssat48(t)%FNNGT
+      FNFXD = dssat48_struc(nest)%dssat48(t)%FNFXD
+      FNFXW = dssat48_struc(nest)%dssat48(t)%FNFXW
+      FNFXA = dssat48_struc(nest)%dssat48(t)%FNFXA
+
+      SDWNOD = dssat48_struc(nest)%dssat48(t)%SDWNOD
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -183,6 +206,26 @@
       ENDIF
 
       CLOSE(LUNCRP)
+!------- Save Vars to Memory -------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%TYPFXT = TYPFXT
+      dssat48_struc(nest)%dssat48(t)%TYPNGT = TYPNGT
+      dssat48_struc(nest)%dssat48(t)%TYPFXD = TYPFXD
+      dssat48_struc(nest)%dssat48(t)%TYPFXW = TYPFXW
+      dssat48_struc(nest)%dssat48(t)%TYPFXA = TYPFXA
+      dssat48_struc(nest)%dssat48(t)%EFINOC = EFINOC
+      dssat48_struc(nest)%dssat48(t)%EFNFIX = EFNFIX
+      dssat48_struc(nest)%dssat48(t)%RFIXN = RFIXN
+      dssat48_struc(nest)%dssat48(t)%PRONOD = PRONOD
+      dssat48_struc(nest)%dssat48(t)%SNACTM = SNACTM
+      dssat48_struc(nest)%dssat48(t)%NODRGM = NODRGM
+      dssat48_struc(nest)%dssat48(t)%DWNODI = DWNODI
+      dssat48_struc(nest)%dssat48(t)%NDTHMX = NDTHMX
+      dssat48_struc(nest)%dssat48(t)%CNODCR = CNODCR
+      dssat48_struc(nest)%dssat48(t)%FNFXT = FNFXT
+      dssat48_struc(nest)%dssat48(t)%FNNGT = FNNGT
+      dssat48_struc(nest)%dssat48(t)%FNFXD = FNFXD
+      dssat48_struc(nest)%dssat48(t)%FNFXW = FNFXW
+      dssat48_struc(nest)%dssat48(t)%FNFXA = FNFXA
 
 !***********************************************************************
 !***********************************************************************
@@ -370,6 +413,8 @@
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!----- Save Vars to Memory --------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%SDWNOD = SDWNOD
       RETURN
       END ! SUBROUTINE NFIX
 !=======================================================================

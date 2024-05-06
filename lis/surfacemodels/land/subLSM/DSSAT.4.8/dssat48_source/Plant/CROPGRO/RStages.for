@@ -13,7 +13,7 @@ C-----------------------------------------------------------------------
 !     Calls:       None
 C=======================================================================
 
-      SUBROUTINE RSTAGES(CONTROL,
+      SUBROUTINE RSTAGES(CONTROL, nest, t,  !Pang 2024.04.30
      &    FNSTR, FPSTR, FSW, FT, FUDAY, ISIMI, NPRIOR,    !Input
      &    PHTHRS, PLME, SDEPTH, YRDOY, YRPLT, YRSIM,      !Input
      &    JPEND, MDATE, NDLEAF, NDSET, NDVST, NVALPH,     !Output
@@ -25,11 +25,12 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
       CHARACTER*1 ISIMI, PLME
-
+      INTEGER nest, t
       INTEGER DYNAMIC
       INTEGER I, J, NVALP0, DAS, YRDOY, YRPLT, YRSIM
       INTEGER NDLEAF,  NDSET, NDVST, JPEND  !, TIMDIF
@@ -61,6 +62,12 @@ C=======================================================================
       DAS     = CONTROL % DAS
 !      FILEIO  = CONTROL % FILEIO
 !      RUN     = CONTROL % RUN
+!-----------------------------------------------------------------------
+!------ Obtain Vars From Memory ----------------------------------------
+      NVALP0 = 10000 !PL: This is a constant and just do it here insetad of saving in memory
+      NR0 = dssat48_struc(nest)%dssat48(t)%NR0
+      NR3 = dssat48_struc(nest)%dssat48(t)%NR3
+      VegTime = dssat48_struc(nest)%dssat48(t)%VegTime
 
 !***********************************************************************
 !***********************************************************************
@@ -521,6 +528,9 @@ C-------------------------------------------------------------------------------
       END IF
 !************************************************************************
       RETURN
+       dssat48_struc(nest)%dssat48(t)%NR0 = NR0
+       dssat48_struc(nest)%dssat48(t)%NR3 = NR3
+       dssat48_struc(nest)%dssat48(t)%VegTime = VegTime
       END SUBROUTINE RSTAGES
 
 !------------------------------------------------------------------------

@@ -10,7 +10,7 @@
 !  Called by: CROPGRO
 !  Calls:     P_PLANT
 !=======================================================================
-      SUBROUTINE P_CGRO (DYNAMIC, ISWITCH, 
+      SUBROUTINE P_CGRO (DYNAMIC, ISWITCH, nest, t, !Pang 2024.05.06 
      &    CROP, FILECC, MDATE, PCNVEG, PLTPOP, RLV,       !Input
      &    RootMob, RTDEP, RTWT, SDWT, SeedFrac,           !Input
      &    ShelMob, SHELWT, ShutMob, SOILPROP,             !Input
@@ -27,6 +27,7 @@
       USE ModuleDefs     !Definitions of constructed variable types, 
                          !which contain control information, soil
                          !parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT  NONE
       SAVE
 !     ------------------------------------------------------------------
@@ -36,6 +37,7 @@
       CHARACTER*6, PARAMETER :: ERRKEY = 'P_CGRO'
       CHARACTER*92 FILECC
 
+      INTEGER nest, t
       INTEGER DYNAMIC, L, MDATE, NLAYR, YRPLT
 
       REAL PConc_Shut, PConc_Root, PConc_Shel, PConc_Seed
@@ -59,18 +61,18 @@
       TYPE (SwitchType)  ISWITCH
       TYPE (SoilType)    SOILPROP
       TYPE (ResidueType) SENESCE
-
 !-----------------------------------------------------------------------
 !    03/20/2007 CHP Need to call RootSoilVol to initialize root volume
 !     when fertilizer added in bands or hills prior to planting.
       INTERFACE 
-        SUBROUTINE RootSoilVol(DYNAMIC, ISWPHO,  
+        SUBROUTINE RootSoilVol(DYNAMIC, ISWPHO, nest, t, !Pang 2024.01.31 
      &    DLAYR, DS, NLAYR,           !Input from all routines
      &    PLTPOP, RLV, RTDEP, FILECC, !Input from plant routine
      &    FracRts,                    !Output
      &    LAYER, AppType)      !Input from soil module (for banded fert)
           USE ModuleDefs
           IMPLICIT NONE
+          INTEGER nest, t
           CHARACTER*1,         INTENT(IN)           :: ISWPHO
           INTEGER,             INTENT(IN)           :: DYNAMIC, NLAYR
           REAL, DIMENSION(NL), INTENT(IN)           :: DS, DLAYR
@@ -82,6 +84,20 @@
           CHARACTER*7,         INTENT(IN), OPTIONAL :: AppType
         END SUBROUTINE RootSoilVol
       END INTERFACE
+
+!------ Obtain Vars from Memory ----------------------------------------
+      Leaf_kg = dssat48_struc(nest)%dssat48(t)%Leaf_kg
+      Stem_kg = dssat48_struc(nest)%dssat48(t)%Stem_kg
+      Root_kg = dssat48_struc(nest)%dssat48(t)%Root_kg
+      Shel_kg = dssat48_struc(nest)%dssat48(t)%Shel_kg
+      Seed_kg = dssat48_struc(nest)%dssat48(t)%Seed_kg
+      SenSoilP = dssat48_struc(nest)%dssat48(t)%SenSoilP
+      SenSurfP = dssat48_struc(nest)%dssat48(t)%SenSurfP
+      PestShut = dssat48_struc(nest)%dssat48(t)%PestShut
+      PestRoot = dssat48_struc(nest)%dssat48(t)%PestRoot
+      PestShel = dssat48_struc(nest)%dssat48(t)%PestShel
+      PestSeed = dssat48_struc(nest)%dssat48(t)%PestSeed
+
 !-----------------------------------------------------------------------
 
       DLAYR  = SOILPROP % DLAYR
@@ -94,7 +110,7 @@
       IF (DYNAMIC == SEASINIT) THEN
         IF (CROP /= 'FA') THEN
 !         Soil phosphorus routine needs volume of soil adjacent to roots.
-          CALL RootSoilVol(DYNAMIC, ISWPHO,    
+          CALL RootSoilVol(DYNAMIC, ISWPHO,    nest, t, !Pang 2024.01.31
      &    DLAYR, DS, NLAYR, PLTPOP, RLV, RTDEP, FILECC,   !Input
      &    FracRts)                                        !Output
         ELSE
@@ -148,7 +164,7 @@
           ENDDO
           SENESCE%CumResE(P) = SENESCE%CumResE(P) + SenSurfP + SenSoilP 
 
-          CALL RootSoilVol(DYNAMIC, ISWPHO,      
+          CALL RootSoilVol(DYNAMIC, ISWPHO,      nest, t, !Pang 2024.01.31
      &      DLAYR, DS, NLAYR, PLTPOP, RLV, RTDEP, FILECC, !Input
      &      FracRts)                                      !Output
 
@@ -168,7 +184,7 @@
         PhFrac2 = SeedFrac
       ENDIF
       
-      CALL P_PLANT(DYNAMIC, ISWPHO,                       !I Control
+      CALL P_PLANT(DYNAMIC, ISWPHO,  nest, t,   !Pang 2024.02.05 !I Control
      &    CROP, FILECC, MDATE, YRPLT,                     !I Crop
      &    SPi_AVAIL,                                      !I Soils
      &    Leaf_kg, Stem_kg, Root_kg, Shel_kg, Seed_kg,    !I Mass
@@ -184,6 +200,19 @@
      &    PUptake)                                        !O P uptake
 
 !***********************************************************************
+!------ Save Vars to Memory ----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%Leaf_kg = Leaf_kg
+      dssat48_struc(nest)%dssat48(t)%Stem_kg = Stem_kg
+      dssat48_struc(nest)%dssat48(t)%Root_kg = Root_kg
+      dssat48_struc(nest)%dssat48(t)%Shel_kg = Shel_kg
+      dssat48_struc(nest)%dssat48(t)%Seed_kg = Seed_kg
+      dssat48_struc(nest)%dssat48(t)%SenSoilP = SenSoilP
+      dssat48_struc(nest)%dssat48(t)%SenSurfP = SenSurfP
+      dssat48_struc(nest)%dssat48(t)%PestShut = PestShut
+      dssat48_struc(nest)%dssat48(t)%PestRoot = PestRoot
+      dssat48_struc(nest)%dssat48(t)%PestShel = PestShel
+      dssat48_struc(nest)%dssat48(t)%PestSeed = PestSeed
+
       RETURN
       END SUBROUTINE P_CGRO
 C=======================================================================

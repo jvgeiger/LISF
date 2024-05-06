@@ -191,7 +191,7 @@ C         Variables to run CASUPRO from Alt_PLANT.  FSR 07-23-03
 !------ Pang-Wei Liu 2024.01.18 -------------
       KCAN = dssat48_struc(nest)%dssat48(t)%KCAN
       KEP =  dssat48_struc(nest)%dssat48(t)%KEP
-      !RWUEP1 = dssat48_struc(nest)%dssat48(t)%RWUEP1 
+      RWUEP1 = dssat48_struc(nest)%dssat48(t)%RWUEP1 
       FixCanht =  dssat48_struc(nest)%dssat48(t)%FixCanht
 !***********************************************************************
 !***********************************************************************
@@ -745,7 +745,7 @@ c     Total LAI must exceed or be equal to healthy LAI:
       dssat48_struc(nest)%dssat48(t)%KCAN = KCAN
       dssat48_struc(nest)%dssat48(t)%KEP = KEP
       dssat48_struc(nest)%dssat48(t)%FixCanht = FixCanht
-      !dssat48_struc(nest)%dssat48(t)%RWUEP1 = RWUEP1
+      dssat48_struc(nest)%dssat48(t)%RWUEP1 = RWUEP1
       RETURN
       END SUBROUTINE PLANT
 

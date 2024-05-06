@@ -24,7 +24,7 @@ C  Called by:  PLANT
 C  Calls:      IPGROW, STRESS
 C              ERROR
 C=======================================================================
-      SUBROUTINE GROW(CONTROL, ISWITCH, DYNAMIC, SOILPROP, 
+      SUBROUTINE GROW(CONTROL, ISWITCH, DYNAMIC, SOILPROP, nest, t,
      &  AGEFAC, CADLF, CADST, CRUSLF, CRUSRT, CRUSSH,     !Input
      &  CRUSST, DISLA, F, FILECC, FRLF, FRSTM,            !Input
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
@@ -59,6 +59,7 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 !-----------------------------------------------------------------------
@@ -69,7 +70,7 @@ C=======================================================================
       PARAMETER (ERRKEY = 'GROW  ')
       CHARACTER*120 FILEIO
       CHARACTER*92 FILECC
-
+      INTEGER nest, t
       INTEGER DYNAMIC, NOUTDO, L, NLAYR
       INTEGER YRDOY, YRNR1, MDATE
       INTEGER YRPLT
@@ -172,7 +173,73 @@ C=======================================================================
       ISWSYM = ISWITCH % ISWSYM
 
       NLAYR  = SOILPROP % NLAYR
-
+!----- Obtain Vars from Memory -----------------------------------------
+      PLME = dssat48_struc(nest)%dssat48(t)%PLME
+      XPODF = dssat48_struc(nest)%dssat48(t)%XPODF
+      ALPHL = dssat48_struc(nest)%dssat48(t)%ALPHL
+      ALPHR = dssat48_struc(nest)%dssat48(t)%ALPHR
+      ALPHS = dssat48_struc(nest)%dssat48(t)%ALPHS
+      ALPHSH = dssat48_struc(nest)%dssat48(t)%ALPHSH
+      PLIGLF = dssat48_struc(nest)%dssat48(t)%PLIGLF
+      PLIGST = dssat48_struc(nest)%dssat48(t)%PLIGST
+      PLIGRT = dssat48_struc(nest)%dssat48(t)%PLIGRT
+      PLIGSH = dssat48_struc(nest)%dssat48(t)%PLIGSH
+      PLIPNO = dssat48_struc(nest)%dssat48(t)%PLIPNO
+      PROLFF = dssat48_struc(nest)%dssat48(t)%PROLFF
+      PROSTF = dssat48_struc(nest)%dssat48(t)%PROSTF
+      PRORTF = dssat48_struc(nest)%dssat48(t)%PRORTF
+      PROSHF = dssat48_struc(nest)%dssat48(t)%PROSHF
+      PRONOD = dssat48_struc(nest)%dssat48(t)%PRONOD
+      PROLFI = dssat48_struc(nest)%dssat48(t)%PROLFI
+      PROSTI = dssat48_struc(nest)%dssat48(t)%PROSTI
+      PRORTI = dssat48_struc(nest)%dssat48(t)%PRORTI
+      PLTPOP = dssat48_struc(nest)%dssat48(t)%PLTPOP
+      ROWSPC = dssat48_struc(nest)%dssat48(t)%ROWSPC
+      SDWTPL = dssat48_struc(nest)%dssat48(t)%SDWTPL
+      SDPRO = dssat48_struc(nest)%dssat48(t)%SDPRO
+      WTFSD = dssat48_struc(nest)%dssat48(t)%WTFSD
+      WTPSD = dssat48_struc(nest)%dssat48(t)%WTPSD
+      CPFLF = dssat48_struc(nest)%dssat48(t)%CPFLF
+      CPFSTM = dssat48_struc(nest)%dssat48(t)%CPFSTM
+      CPFRT = dssat48_struc(nest)%dssat48(t)%CPFRT
+      CPFNOD = dssat48_struc(nest)%dssat48(t)%CPFNOD
+      CPFSH1 = dssat48_struc(nest)%dssat48(t)%CPFSH1
+      CPFSD1 = dssat48_struc(nest)%dssat48(t)%CPFSD1
+      PCNMIN = dssat48_struc(nest)%dssat48(t)%PCNMIN
+      ALFDOT = dssat48_struc(nest)%dssat48(t)%ALFDOT
+      AREAH = dssat48_struc(nest)%dssat48(t)%AREAH
+      NLDOT = dssat48_struc(nest)%dssat48(t)%NLDOT
+      NSDOT = dssat48_struc(nest)%dssat48(t)%NSDOT
+      NRDOT = dssat48_struc(nest)%dssat48(t)%NRDOT
+      NSDDOT = dssat48_struc(nest)%dssat48(t)%NSDDOT
+      NSHDOT = dssat48_struc(nest)%dssat48(t)%NSHDOT
+      NTOVR = dssat48_struc(nest)%dssat48(t)%NTOVR
+      RHOR = dssat48_struc(nest)%dssat48(t)%RHOR
+      RHOSH = dssat48_struc(nest)%dssat48(t)%RHOSH
+      SDWTAM = dssat48_struc(nest)%dssat48(t)%SDWTAM
+      SenWt = dssat48_struc(nest)%dssat48(t)%SenWt
+      SenLig = dssat48_struc(nest)%dssat48(t)%SenLig
+      SenE = dssat48_struc(nest)%dssat48(t)%SenE
+      TGROW = dssat48_struc(nest)%dssat48(t)%TGROW
+      WSDDOT = dssat48_struc(nest)%dssat48(t)%WSDDOT
+      WSHDOT = dssat48_struc(nest)%dssat48(t)%WSHDOT
+      WTCSD = dssat48_struc(nest)%dssat48(t)%WTCSD
+      WTLSD = dssat48_struc(nest)%dssat48(t)%WTLSD
+      WTNMOB = dssat48_struc(nest)%dssat48(t)%WTNMOB
+      WTNTOT = dssat48_struc(nest)%dssat48(t)%WTNTOT
+      SDPDOT = dssat48_struc(nest)%dssat48(t)%SDPDOT
+      PUNDOT = dssat48_struc(nest)%dssat48(t)%PUNDOT
+      NLPEST = dssat48_struc(nest)%dssat48(t)%NLPEST
+      WLDOT = dssat48_struc(nest)%dssat48(t)%WLDOT
+      WSDOT = dssat48_struc(nest)%dssat48(t)%WSDOT
+      WRDOT = dssat48_struc(nest)%dssat48(t)%WRDOT
+      WNDOT = dssat48_struc(nest)%dssat48(t)%WNDOT
+      WPDOT = dssat48_struc(nest)%dssat48(t)%WPDOT
+      WLFDOT = dssat48_struc(nest)%dssat48(t)%WLFDOT
+      WRCLDT = dssat48_struc(nest)%dssat48(t)%WRCLDT
+      WRCSDT = dssat48_struc(nest)%dssat48(t)%WRCSDT
+      WRCRDT = dssat48_struc(nest)%dssat48(t)%WRCRDT
+      WRCSHD = dssat48_struc(nest)%dssat48(t)%WRCSHD
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -1122,6 +1189,73 @@ C     END OF DYNAMIC IF CONSTRUCT
 C***********************************************************************
       ENDIF
 C-----------------------------------------------------------------------
+!----- Save Vars to Memory -----------------------------------------
+       dssat48_struc(nest)%dssat48(t)%PLME = PLME
+       dssat48_struc(nest)%dssat48(t)%XPODF = XPODF
+       dssat48_struc(nest)%dssat48(t)%ALPHL = ALPHL
+       dssat48_struc(nest)%dssat48(t)%ALPHR = ALPHR
+       dssat48_struc(nest)%dssat48(t)%ALPHS = ALPHS
+       dssat48_struc(nest)%dssat48(t)%ALPHSH = ALPHSH
+       dssat48_struc(nest)%dssat48(t)%PLIGLF = PLIGLF
+       dssat48_struc(nest)%dssat48(t)%PLIGST = PLIGST
+       dssat48_struc(nest)%dssat48(t)%PLIGRT = PLIGRT
+       dssat48_struc(nest)%dssat48(t)%PLIGSH = PLIGSH
+       dssat48_struc(nest)%dssat48(t)%PLIPNO = PLIPNO
+       dssat48_struc(nest)%dssat48(t)%PROLFF = PROLFF
+       dssat48_struc(nest)%dssat48(t)%PROSTF = PROSTF
+       dssat48_struc(nest)%dssat48(t)%PRORTF = PRORTF
+       dssat48_struc(nest)%dssat48(t)%PROSHF = PROSHF
+       dssat48_struc(nest)%dssat48(t)%PRONOD = PRONOD
+       dssat48_struc(nest)%dssat48(t)%PROLFI = PROLFI
+       dssat48_struc(nest)%dssat48(t)%PROSTI = PROSTI
+       dssat48_struc(nest)%dssat48(t)%PRORTI = PRORTI
+       dssat48_struc(nest)%dssat48(t)%PLTPOP = PLTPOP
+       dssat48_struc(nest)%dssat48(t)%ROWSPC = ROWSPC
+       dssat48_struc(nest)%dssat48(t)%SDWTPL = SDWTPL
+       dssat48_struc(nest)%dssat48(t)%SDPRO = SDPRO
+       dssat48_struc(nest)%dssat48(t)%WTFSD = WTFSD
+       dssat48_struc(nest)%dssat48(t)%WTPSD = WTPSD
+       dssat48_struc(nest)%dssat48(t)%CPFLF = CPFLF
+       dssat48_struc(nest)%dssat48(t)%CPFSTM = CPFSTM
+       dssat48_struc(nest)%dssat48(t)%CPFRT = CPFRT
+       dssat48_struc(nest)%dssat48(t)%CPFNOD = CPFNOD
+       dssat48_struc(nest)%dssat48(t)%CPFSH1 = CPFSH1
+       dssat48_struc(nest)%dssat48(t)%CPFSD1 = CPFSD1
+       dssat48_struc(nest)%dssat48(t)%PCNMIN = PCNMIN
+       dssat48_struc(nest)%dssat48(t)%ALFDOT = ALFDOT
+       dssat48_struc(nest)%dssat48(t)%AREAH = AREAH
+       dssat48_struc(nest)%dssat48(t)%NLDOT = NLDOT
+       dssat48_struc(nest)%dssat48(t)%NSDOT = NSDOT
+       dssat48_struc(nest)%dssat48(t)%NRDOT = NRDOT
+       dssat48_struc(nest)%dssat48(t)%NSDDOT = NSDDOT
+       dssat48_struc(nest)%dssat48(t)%NSHDOT = NSHDOT
+       dssat48_struc(nest)%dssat48(t)%NTOVR = NTOVR
+       dssat48_struc(nest)%dssat48(t)%RHOR = RHOR
+       dssat48_struc(nest)%dssat48(t)%RHOSH = RHOSH
+       dssat48_struc(nest)%dssat48(t)%SDWTAM = SDWTAM
+       dssat48_struc(nest)%dssat48(t)%SenWt = SenWt
+       dssat48_struc(nest)%dssat48(t)%SenLig = SenLig
+       dssat48_struc(nest)%dssat48(t)%SenE = SenE
+       dssat48_struc(nest)%dssat48(t)%TGROW = TGROW
+       dssat48_struc(nest)%dssat48(t)%WSDDOT = WSDDOT
+       dssat48_struc(nest)%dssat48(t)%WSHDOT = WSHDOT
+       dssat48_struc(nest)%dssat48(t)%WTCSD = WTCSD
+       dssat48_struc(nest)%dssat48(t)%WTLSD = WTLSD
+       dssat48_struc(nest)%dssat48(t)%WTNMOB = WTNMOB
+       dssat48_struc(nest)%dssat48(t)%WTNTOT = WTNTOT
+       dssat48_struc(nest)%dssat48(t)%SDPDOT = SDPDOT
+       dssat48_struc(nest)%dssat48(t)%PUNDOT = PUNDOT
+       dssat48_struc(nest)%dssat48(t)%NLPEST = NLPEST
+       dssat48_struc(nest)%dssat48(t)%WLDOT = WLDOT
+       dssat48_struc(nest)%dssat48(t)%WSDOT = WSDOT
+       dssat48_struc(nest)%dssat48(t)%WRDOT = WRDOT
+       dssat48_struc(nest)%dssat48(t)%WNDOT = WNDOT
+       dssat48_struc(nest)%dssat48(t)%WPDOT = WPDOT
+       dssat48_struc(nest)%dssat48(t)%WLFDOT = WLFDOT
+       dssat48_struc(nest)%dssat48(t)%WRCLDT = WRCLDT
+       dssat48_struc(nest)%dssat48(t)%WRCSDT = WRCSDT
+       dssat48_struc(nest)%dssat48(t)%WRCRDT = WRCRDT
+       dssat48_struc(nest)%dssat48(t)%WRCSHD = WRCSHD
       RETURN
       END  ! SUBROUTINE GROW
 C=======================================================================

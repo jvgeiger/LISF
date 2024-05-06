@@ -26,7 +26,7 @@ C  Calls:     CANOPY
 C             ERROR, FIND, IGNORE
 C========================================================================
 
-      SUBROUTINE VEGGR (DYNAMIC, 
+      SUBROUTINE VEGGR (DYNAMIC,nest, t, !Pang 2024.05.03 
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
@@ -43,6 +43,7 @@ C========================================================================
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
+      USE dssat48_lsmMod
       IMPLICIT NONE
       SAVE
 
@@ -52,7 +53,7 @@ C========================================================================
       CHARACTER*6  ECONO, SECTION
       CHARACTER*80 C80
       CHARACTER*92 FILECC, FILEGC
-
+      INTEGER nest, t
       INTEGER DYNAMIC
       INTEGER YRDOY, YREMRG, NR1, DAS
       INTEGER I, LUNCRP, ERR, LINC, LNUM, ISECT, FOUND
@@ -87,7 +88,23 @@ C========================================================================
       TYPE (ControlType) CONTROL
       CALL GET(CONTROL)
       DAS = CONTROL % DAS
-
+!----- Obtain Vars from Memory -----------------------------------------
+      PROLFI = dssat48_struc(nest)%dssat48(t)%PROLFI
+      PROLFG = dssat48_struc(nest)%dssat48(t)%PROLFG
+      PROSTI = dssat48_struc(nest)%dssat48(t)%PROSTI
+      PROSTG = dssat48_struc(nest)%dssat48(t)%PROSTG
+      PRORTI = dssat48_struc(nest)%dssat48(t)%PRORTI
+      PRORTG = dssat48_struc(nest)%dssat48(t)%PRORTG
+      CMOBMX = dssat48_struc(nest)%dssat48(t)%CMOBMX
+      CADSTF = dssat48_struc(nest)%dssat48(t)%CADSTF
+      ATOP = dssat48_struc(nest)%dssat48(t)%ATOP
+      CUMTUR = dssat48_struc(nest)%dssat48(t)%CUMTUR
+      FNINLG = dssat48_struc(nest)%dssat48(t)%FNINLG
+      FNINRG = dssat48_struc(nest)%dssat48(t)%FNINRG
+      FNINSG = dssat48_struc(nest)%dssat48(t)%FNINSG
+      PGLEFT = dssat48_struc(nest)%dssat48(t)%PGLEFT
+      SUPPN = dssat48_struc(nest)%dssat48(t)%SUPPN
+      VGRDEM = dssat48_struc(nest)%dssat48(t)%VGRDEM
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -157,7 +174,7 @@ C========================================================================
 !-----------------------------------------------------------------------
 !    Call CANOPY for input
 !-----------------------------------------------------------------------
-      CALL CANOPY(RUNINIT,
+      CALL CANOPY(RUNINIT, nest, t, !Pang 2024.05.03 
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI,             !Input
      &    CANHT, CANWH)                                   !Output
@@ -194,7 +211,7 @@ C========================================================================
       WRDOTN = 0.0  
       WSDOTN = 0.0  
 
-      CALL CANOPY(SEASINIT,
+      CALL CANOPY(SEASINIT, nest, t, !Pang 2024.05.03 
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI,             !Input
      &    CANHT, CANWH)                                   !Output
@@ -211,7 +228,7 @@ C========================================================================
       FNINSG = PROSTG * 0.16   
       CUMTUR = 1.0             
 
-      CALL CANOPY(EMERG,
+      CALL CANOPY(EMERG, nest, t, !Pang 2024.05.03 
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI,             !Input
      &    CANHT, CANWH)                                   !Output
@@ -443,7 +460,7 @@ C     Subroutine CANOPY calculates height and width of the canopy as a
 C     function of VSTAGE, air temperature, drought stress (TURFAC),
 C     daylenght and radiation (PAR).
 C-----------------------------------------------------------------------
-      CALL CANOPY(INTEGR,
+      CALL CANOPY(INTEGR, nest, t, !Pang 2024.05.03 
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI,             !Input
      &    CANHT, CANWH)                                   !Output
@@ -454,6 +471,24 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+!----- Save Vars from Memory -----------------------------------------
+      dssat48_struc(nest)%dssat48(t)%PROLFI = PROLFI
+      dssat48_struc(nest)%dssat48(t)%PROLFG = PROLFG
+      dssat48_struc(nest)%dssat48(t)%PROSTI = PROSTI
+      dssat48_struc(nest)%dssat48(t)%PROSTG = PROSTG
+      dssat48_struc(nest)%dssat48(t)%PRORTI = PRORTI
+      dssat48_struc(nest)%dssat48(t)%PRORTG = PRORTG
+      dssat48_struc(nest)%dssat48(t)%CMOBMX = CMOBMX
+      dssat48_struc(nest)%dssat48(t)%CADSTF = CADSTF
+      dssat48_struc(nest)%dssat48(t)%ATOP = ATOP
+      dssat48_struc(nest)%dssat48(t)%CUMTUR = CUMTUR
+      dssat48_struc(nest)%dssat48(t)%FNINLG = FNINLG
+      dssat48_struc(nest)%dssat48(t)%FNINRG = FNINRG
+      dssat48_struc(nest)%dssat48(t)%FNINSG = FNINSG
+      dssat48_struc(nest)%dssat48(t)%PGLEFT = PGLEFT
+      dssat48_struc(nest)%dssat48(t)%SUPPN = SUPPN
+      dssat48_struc(nest)%dssat48(t)%VGRDEM = VGRDEM
+
       RETURN
 C-----------------------------------------------------------------------
       END ! SUBROUTINE VEGGR
