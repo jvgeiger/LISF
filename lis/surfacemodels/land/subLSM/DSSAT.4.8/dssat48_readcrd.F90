@@ -46,14 +46,6 @@ subroutine dssat48_readcrd()
         call LIS_verify(rc, "DSSAT48 model timestep: not defined")
         call LIS_parseTimeString(time, dssat48_struc(n)%ts)
     enddo
-
-    if (LIS_rc%startcode== "restart" ) then
-       call ESMF_ConfigFindLabel(LIS_config,"DSSAT48 restart file:",rc=rc)
-      do n=1,LIS_rc%nnest
-         call ESMF_ConfigGetAttribute(LIS_config,dssat48_struc(n)%rfile,rc=rc)
-         call LIS_verify(rc,'DSSAT48 restart file: not defined')
-      enddo
-    endif
  
     call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 restart output interval:", rc = rc)
     do n=1,LIS_rc%nnest
@@ -62,12 +54,33 @@ subroutine dssat48_readcrd()
         call LIS_parseTimeString(time, dssat48_struc(n)%rstInterval)
     enddo
 
+    !PL DSSAT Restart-------------------------------------------------------------------
+    call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 start mode:", rc = rc)
+       do n=1,LIS_rc%nnest
+            call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%dssatstartcode, rc=rc)
+            call LIS_verify(rc, "DSSAT48 start mode: not defined")
+            if (trim(dssat48_struc(n)%dssatstartcode) == "restart" ) then
+                call ESMF_ConfigFindLabel(LIS_config,"DSSAT48 restart file:",rc=rc)
+                call ESMF_ConfigGetAttribute(LIS_config,dssat48_struc(n)%rfile,rc=rc)
+                call LIS_verify(rc,'DSSAT48 restart file: not defined')
+            endif
+       enddo
+
+   
+    !if (trim(dssat48_struc(n)%dssatstartcode) == "restart" ) then
+    !    call ESMF_ConfigFindLabel(LIS_config,"DSSAT48 restart file:",rc=rc)
+    !   do n=1,LIS_rc%nnest
+    !      call ESMF_ConfigGetAttribute(LIS_config,dssat48_struc(n)%rfile,rc=rc)
+    !      call LIS_verify(rc,'DSSAT48 restart file: not defined')
+    !  enddo
+    !endif
+
     Call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 restart file format:", rc=rc)
         do n=1,LIS_rc%nnest
             call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%rformat, rc=rc)
             call LIS_verify(rc, "DSSAT48 restart file format: not defined")
         enddo
-   
+     !--------------------------------------------------------------------------------
     call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 experiment file:", rc = rc)
         do n=1,LIS_rc%nnest
             call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%expfile, rc=rc)

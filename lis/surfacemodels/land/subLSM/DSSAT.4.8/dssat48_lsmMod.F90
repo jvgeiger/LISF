@@ -74,6 +74,7 @@ module dssat48_lsmMod
      character*256      :: rformat
      integer :: sm_coupling
      character*12 :: expfile
+     character*12 :: dssatstartcode
      !-------------------------------------------------------------------------
      !  DSSAT I/O
      !-------------------------------------------------------------------------
@@ -257,7 +258,7 @@ contains
               day_end = LIS_rc%eda
 
             do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-            !do t=61,61 !PL for testing code
+            !do t=1,2 !PL for testing code
                  !Start CSM
                  !FILEX = 'NASA2019.SQX' !This can be obtained from lis.config
                  FILEX = dssat48_struc(n)%expfile
@@ -408,8 +409,10 @@ contains
                  DAS = dssat48_struc(n)%CONTROL(t) % DAS
                  CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                     YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
+                 dssat48_struc(n)%dssat48(t)%yrend = YREND
+                 dssat48_struc(n)%dssat48(t)%mdate = MDATE
+                 dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
                  dssat48_struc(n)%dssat48(t)%doseasinit = .FALSE. !Turn off SEAS INIT when going to dssat48_main
-
             enddo
 
             !------------------------------------------------------------------------

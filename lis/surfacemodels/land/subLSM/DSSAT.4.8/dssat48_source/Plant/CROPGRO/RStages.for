@@ -68,7 +68,8 @@ C=======================================================================
       NR0 = dssat48_struc(nest)%dssat48(t)%NR0
       NR3 = dssat48_struc(nest)%dssat48(t)%NR3
       VegTime = dssat48_struc(nest)%dssat48(t)%VegTime
-
+      PROG = dssat48_struc(nest)%dssat48(t)%PROG
+      PHTEM = dssat48_struc(nest)%dssat48(t)%PHTEM
 !***********************************************************************
 !***********************************************************************
 !     Seasonal initialization - run once per season
@@ -208,7 +209,6 @@ C-----------------------------------------------------------------------
         PHTEM = PHTHRS(1) + SDEPTH * 0.6
         PROG(1) = FT(1) * FUDAY(1) * MIN(FSW(1),FNSTR(1),FPSTR(1))
         PHZACC(1) = PHZACC(1) + PROG(1)
-
 !        IF ((PHZACC(1) .GE. PHTEM) .OR. (ISIMI .EQ. 'E')) THEN
         IF ((PHZACC(1) - PHTEM) > -1.E-6 .OR. (ISIMI .EQ. 'E')) THEN
 
@@ -227,7 +227,6 @@ C-------------------------------------------------------------------------------
           ENDIF
         ENDIF
       ENDIF
-
 C-------------------------------------------------------------------------------
 C     Check for veg stage, V1
 C-------------------------------------------------------------------------------
@@ -527,10 +526,12 @@ C-------------------------------------------------------------------------------
 !************************************************************************
       END IF
 !************************************************************************
-      RETURN
        dssat48_struc(nest)%dssat48(t)%NR0 = NR0
        dssat48_struc(nest)%dssat48(t)%NR3 = NR3
        dssat48_struc(nest)%dssat48(t)%VegTime = VegTime
+       dssat48_struc(nest)%dssat48(t)%PROG = PROG
+       dssat48_struc(nest)%dssat48(t)%PHTEM = PHTEM
+      RETURN
       END SUBROUTINE RSTAGES
 
 !------------------------------------------------------------------------

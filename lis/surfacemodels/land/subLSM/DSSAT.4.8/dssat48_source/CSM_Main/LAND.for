@@ -132,7 +132,7 @@ C     ModuleDefs.for.
       TYPE (SwitchType)  ISWITCH
 
       CALL PUT(CONTROL) !PL: Put the current CRONTROL to the memory for GET in modules
-
+      CALL PUT(ISWITCH)
 C     Transfer values from constructed data types into local variables.
       CROP    = CONTROL % CROP
       DYNAMIC = CONTROL % DYNAMIC

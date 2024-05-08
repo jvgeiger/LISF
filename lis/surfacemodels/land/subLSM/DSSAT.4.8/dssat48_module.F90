@@ -423,7 +423,7 @@ module dssat48_module
                   INTEGER NPRIOR(20), TSELC(20), JPEND, NDVST, NVALPH(20), NVEG1
                  !----- In PHENOL.for -> RSTAGES.for
                     INTEGER NR0, NR3
-                    REAL VegTime
+                    REAL VegTime, PROG(20), PHTEM
                  !----- In PHENOL.for -> VSTAGES.for
                     REAL VSTGED, VSTAGP
            !-----------------------------------------------------------------------
@@ -555,6 +555,7 @@ module dssat48_module
                  CHARACTER*12 OUTG, OUTPN, OUTPC
                  INTEGER N_LYR 
                  REAL CUMSENSURF, CUMSENSOIL, CUMSENSURFN, CUMSENSOILN, SWF_AV, TUR_AV, NST_AV, EXW_AV, PS1_AV, PS2_AV, KST_AV
+                 LOGICAL FIRST_OPGROW
            !-----------------------------------------------------------------------
            ! PLANT - MZ_CERES
            ! Pang 2024.01.24

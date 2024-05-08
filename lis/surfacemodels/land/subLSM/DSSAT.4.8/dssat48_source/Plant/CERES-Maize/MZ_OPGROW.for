@@ -16,7 +16,7 @@ C----------------------------------------------------------------------
 C  Called by: MAIZE, SG_CERES, ML_CERES
 C  Calls:     None
 !======================================================================
-      SUBROUTINE MZ_OPGROW(CONTROL, ISWITCH, 
+      SUBROUTINE MZ_OPGROW(CONTROL, ISWITCH, nest, t, !Pang 2024.05.07
      &  CANHT, CANWH, DTT, HI, HIP, KSTRES, MDATE, NLAYR, NSTRES, 
      &  PCNL, PLTPOP, PODNO, PODWT, PSTRES1, PSTRES2, RLV, RSTAGE, 
      &  RTDEP, RTWT, SATFAC, SDWT, SEEDNO, SENESCE, SHELPC, SLA, 
@@ -35,7 +35,7 @@ C  Calls:     None
 
       CHARACTER*1  RNMODE
       CHARACTER*12 OUTG
-
+      INTEGER nest, t
       INTEGER TIMDIF, COUNT
       INTEGER DAP, DAS, DOY, I, N_LYR, RSTAGE, RUN
       INTEGER MDATE, YEAR, YRDOY, YRPLT, YRSIM, VWAD

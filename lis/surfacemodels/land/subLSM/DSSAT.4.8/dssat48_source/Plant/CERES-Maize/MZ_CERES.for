@@ -512,7 +512,7 @@ C----------------------------------------------------------------------
      %        SHF,STGDOY,SW,SWFAC,YRDOY,                          !I
      %        RTDEP,RLV)            
 
-          CALL MZ_OPGROW(CONTROL, ISWITCH,  
+          CALL MZ_OPGROW(CONTROL, ISWITCH, nest, t, !Pang 2024.05.07 
      &    CANHT, CANWH, DTT, HI, HIP, KSTRES, MDATE, NLAYR, NSTRES, 
      &    PCNL, PLTPOP, PODNO, PODWT, PSTRES1, PSTRES2, RLV, RSTAGE, 
      &    RTDEP, RTWT, SATFAC, SDWT, SEEDNO, SENESCE, SHELPC, SLA, 
@@ -661,7 +661,7 @@ C-----------------------------------------------------------------------
      %        SHF,STGDOY,SW,SWFAC,YRDOY,                          !I
      %        RTDEP,RLV)            
 
-          CALL MZ_OPGROW(CONTROL, ISWITCH,  
+          CALL MZ_OPGROW(CONTROL, ISWITCH,  nest, t, !Pang 2024.05.07
      &    CANHT, CANWH, DTT, HI, HIP, KSTRES, MDATE, NLAYR, NSTRES, 
      &    PCNL, PLTPOP, PODNO, PODWT, PSTRES1, PSTRES2, RLV, RSTAGE, 
      &    RTDEP, RTWT, SATFAC, SDWT, SEEDNO, SENESCE, SHELPC, SLA, 
@@ -921,7 +921,7 @@ C----------------------------------------------------------------------
           END SELECT
         ENDIF   
 
-      CALL MZ_OPGROW(CONTROL, ISWITCH,  
+      CALL MZ_OPGROW(CONTROL, ISWITCH, nest, t, !Pang 2024.05.07 
      &    CANHT, CANWH, DTT, HI, HIP, KSTRES, MDATE, NLAYR, NSTRES, 
      &    PCNL, PLTPOP, PODNO, PODWT, PSTRES1, PSTRES2, RLV, RSTAGE, 
      &    RTDEP, RTWT, SATFAC, SDWT, SEEDNO, SENESCE, SHELPC, SLA, 
@@ -1028,7 +1028,7 @@ C----------------------------------------------------------------------
      &      WTNVEG, XGNP, XHLAI, XLAI, XN, YIELD)             !Output
           END SELECT
 
-        CALL MZ_OPGROW(CONTROL, ISWITCH,  
+        CALL MZ_OPGROW(CONTROL, ISWITCH, nest, t, !Pang 2024.05.07 
      &    CANHT, CANWH, DTT, HI, HIP, KSTRES, MDATE, NLAYR, NSTRES, 
      &    PCNL, PLTPOP, PODNO, PODWT, PSTRES1, PSTRES2, RLV, RSTAGE, 
      &    RTDEP, RTWT, SATFAC, SDWT, SEEDNO, SENESCE, SHELPC, SLA, 

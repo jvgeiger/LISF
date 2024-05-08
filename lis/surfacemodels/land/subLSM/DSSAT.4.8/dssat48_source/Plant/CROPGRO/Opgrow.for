@@ -118,7 +118,7 @@ C  Calls:     None
        PS1_AV = dssat48_struc(nest)%dssat48(t)%PS1_AV
        PS2_AV = dssat48_struc(nest)%dssat48(t)%PS2_AV
        KST_AV = dssat48_struc(nest)%dssat48(t)%KST_AV
-
+       FIRST = dssat48_struc(nest)%dssat48(t)%FIRST_OPGROW
 !***********************************************************************
 !***********************************************************************
 !     Run initialization - run once per simulation
@@ -270,7 +270,6 @@ C-----------------------------------------------------------------------
 C   CHECK FOR OUTPUT FREQUENCY
 C-----------------------------------------------------------------------
         IF (YRDOY .LT. YRPLT .OR. YRPLT .LT. 0) RETURN
-
 !       Compute average stress factors since last printout
         SWF_AV = SWF_AV + (1.0 - SWFAC)
         TUR_AV = TUR_AV + (1.0 - TURFAC)
@@ -540,7 +539,7 @@ C-----------------------------------------------------------------------
        dssat48_struc(nest)%dssat48(t)%PS1_AV = PS1_AV
        dssat48_struc(nest)%dssat48(t)%PS2_AV = PS2_AV
        dssat48_struc(nest)%dssat48(t)%KST_AV = KST_AV
-
+       dssat48_struc(nest)%dssat48(t)%FIRST_OPGROW = FIRST
       RETURN
       END ! SUBROUTINE OPGROW
 !=======================================================================

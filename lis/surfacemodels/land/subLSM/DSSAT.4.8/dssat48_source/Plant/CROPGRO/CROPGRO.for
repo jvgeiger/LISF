@@ -1000,6 +1000,7 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 !     Write headings to output file GROWTH.OUT
 !-----------------------------------------------------------------------
+
       CALL OPGROW(CONTROL, ISWITCH, SoilProp, nest, t, !Pang 2024.05.06  
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
      &    GRWRES, KSTRES, MAINR, MDATE, NFIXN, NLAYR, NSTRES, 
@@ -1598,7 +1599,6 @@ C-----------------------------------------------------------------------
      &  WTNSDO, WTNSH, WTNSHA, WTNSHO, WTNSO, WTNST,      !Output
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob)                        !Output
-
 
       IF ((WTLF+STMWT).GT. 0.0001) THEN
         PCNVEG = (WTNLF+WTNST)/(WTLF+STMWT)*100.

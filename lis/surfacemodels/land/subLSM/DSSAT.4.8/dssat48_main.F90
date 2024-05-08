@@ -102,7 +102,7 @@ subroutine dssat48_main(n)
     if (alarmCheck) Then
 
         do t = 1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-        !do t=61, 61 !PL for testing code     
+        !do t=1, 2 !PL for testing code     
             dt = LIS_rc%ts
             row = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%row
             col = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%col
