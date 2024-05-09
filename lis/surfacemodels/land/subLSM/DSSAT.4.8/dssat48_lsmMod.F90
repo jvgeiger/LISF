@@ -246,9 +246,10 @@ contains
               if ( LIS_masterproc ) then  !JG Create INP folder in outputpath
                   call LIS_create_output_directory('INP')
               endif
-              #if (defined SPMD)    !JG Fix processor order issue
+#if (defined SPMD)
+                   !JG Fix processor order issue
                    call mpi_barrier(LIS_mpi_comm, ierr)
-              #endif
+#endif
      
               tmp_year   = LIS_rc%yr
               tmp_month  = LIS_rc%mo

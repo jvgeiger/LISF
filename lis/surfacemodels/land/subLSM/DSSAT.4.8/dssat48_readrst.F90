@@ -65,15 +65,15 @@ subroutine dssat48_readrst()
    write(LIS_logunit,*) '[INFO] Call to the DSSAT48 Read restart routine ...'
 
    do n=1, LIS_rc%nnest
-      wformat = trim(dssat48_struc(n)%rformat)
+      wformat = dssat48_struc(n)%rformat
 
       ! Coldstart
-      if (trim(dssat48_struc(n)%dssatstartcode) == "coldstart" ) then
+      if (dssat48_struc(n)%dssatstartcode == "coldstart" ) then
       !if(LIS_rc%startcode .eq. "coldstart") then
          call dssat48_coldstart(LIS_rc%lsm_index)
       ! Restart
       !elseif(LIS_rc%startcode .eq. "restart") then
-      elseif (trim(dssat48_struc(n)%dssatstartcode) == "restart" ) then
+      elseif (dssat48_struc(n)%dssatstartcode == "restart" ) then
          ! Check if MicroMet option is set to "SnwoModel";
          !  If so, alert user that this option currently
          !  is not supported with reading in LIS restart files:

@@ -59,7 +59,7 @@ subroutine dssat48_readcrd()
        do n=1,LIS_rc%nnest
             call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%dssatstartcode, rc=rc)
             call LIS_verify(rc, "DSSAT48 start mode: not defined")
-            if (trim(dssat48_struc(n)%dssatstartcode) == "restart" ) then
+            if (dssat48_struc(n)%dssatstartcode == "restart" ) then
                 call ESMF_ConfigFindLabel(LIS_config,"DSSAT48 restart file:",rc=rc)
                 call ESMF_ConfigGetAttribute(LIS_config,dssat48_struc(n)%rfile,rc=rc)
                 call LIS_verify(rc,'DSSAT48 restart file: not defined')
