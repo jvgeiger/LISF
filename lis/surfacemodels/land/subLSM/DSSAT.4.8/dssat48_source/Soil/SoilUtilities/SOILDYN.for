@@ -224,6 +224,8 @@ C-----------------------------------------------------------------------
       ISWWAT = ISWITCH % ISWWAT !Pang 2024.02.13
       ISWTIL = ISWITCH % ISWTIL
       NTIL = TILLVALS % NTIL
+!------- Pang 2024.06.10 ---------------------------------------------
+      SomLit_init = dssat48_struc(nest)%dssat48(t)%SomLit_init  
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -1025,8 +1027,9 @@ C     Initialize curve number (according to J.T. Ritchie) 1-JUL-97 BDB
 
       NMSG = 2
       DO L = 1, NLayr
+        !PRINT*, 'SLNO: ', dssat48_struc(n)%dssat48(t)%SLNO
 !       Brooks & Corey parameters
-	  call calBrokCryPara(TEXTURE(L), SAT(L), LL(L),    !Input
+	  call calBrokCryPara(TEXTURE(L), SAT(L), LL(L), nest, t,    !Input
      &     DUL(L),                                        !Input
      +     wcr_temp, Hb(L), lambda(L))                 !output
 
@@ -1068,6 +1071,7 @@ C     Initialize curve number (according to J.T. Ritchie) 1-JUL-97 BDB
         CALL INFO(NMSG, ERRKEY, MSG)
       ENDIF
 
+      VG_OK  = .TRUE. !Pang to refresh VG_OK for other pixels (2024.05.14)
 !     Write RETC info to info.out
       MSG(1) = "Soil RETC parameters: "
       MSG(2) = 
@@ -1327,7 +1331,10 @@ C  tillage and rainfall kinetic energy
 
         !Pang 20230918, these two lines here are only done once
         dssat48_struc(nest)%dssat48(t)%SOM_PCT_init = SOM_PCT_init
-        dssat48_struc(nest)%dssat48(t)% BD_calc_init= BD_calc_init 
+        dssat48_struc(nest)%dssat48(t)% BD_calc_init= BD_calc_init
+
+        !Pang 20240610. Added
+        dssat48_struc(nest)%dssat48(t)%SomLit_init = SomLit_init 
 
 !       Print initial values
         Print_today = .TRUE.
@@ -1434,7 +1441,13 @@ C  tillage and rainfall kinetic energy
               dDUL_SOM = 0.002208 * dOC - 0.1434 * dBD_SOM 
             ENDIF
             DUL_SOM(L) = DUL_INIT(L) + dDUL_SOM
-
+            !IF (DUL_SOM(1).LE.0) THEN !Pang: For code check.
+            !    PRINT*, 'DUL_SOM(L): ', DUL_SOM(L), 'at L= ', L
+            !    PRINT*, 'DUL_INIT(L): ', DUL_INIT(L), dOC, dBD_SOM
+            !    PRINT*, 'OC_INIT(L): ', OC_INIT
+            !    PRINT*, dssat48_struc(nest)%dssat48(t)%SLNO
+            !ENDIF
+               
 !           Lower limit
             dLL_SOM = 0.002228 * dOC + 0.02671 * dBD_SOM
             LL_SOM(L)  = LL_INIT(L) + dLL_SOM

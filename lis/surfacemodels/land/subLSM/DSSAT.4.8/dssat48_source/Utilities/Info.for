@@ -33,6 +33,8 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
 !     Suppress INFO.OUT if IDETL = '0' (zero) or 'N' 
+
+      RETURN !Pang: TURN OFF INFO 2024.05.14
       CALL GET(ISWITCH)
       IF (INDEX('0N',ISWITCH % IDETL) > 0) RETURN
 

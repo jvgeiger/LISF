@@ -955,9 +955,9 @@
 !  Called by: 
 !  Calls    : 
 !=======================================================================
-	SUBROUTINE calBrokCryPara(TEXTURE, wcs, wcpwp, wcfc,  !Input
+	SUBROUTINE calBrokCryPara(TEXTURE, wcs, wcpwp, nest, t, wcfc,  !Input
      +   wcr, hb, lambda)  !output                         
-
+      INTEGER nest, t
       CHARACTER*12 TEXTURE
 !	CHARACTER*70 errmsg
 	Real wcs, wcpwp, wcfc, wcr,temp
@@ -1009,7 +1009,12 @@
       else
         temp = 3.8166 ! ln(1500/33)
       end if
+         !PRINT*,'BF CAL In RETC_VG, nest, t: ', nest, t
+         !PRINT*, 'wcfc , wcr, wcpwp, wcr, temp'
+         !PRINT*, wcfc , wcr, wcpwp, wcr, temp
 	lambda = ALOG((wcfc -wcr)/(wcpwp-wcr) )/temp
+         !PRINT*,'AF CAL In RETC_VG, nest, t: ', nest, t
+         !PRINT*, 'lambda: ', lambda
       hb = 1500d0 * ((wcpwp -wcr)/(wcs-wcr))**(1. / lambda)  !kPa?
 	RETURN      
       END SUBROUTINE calBrokCryPara

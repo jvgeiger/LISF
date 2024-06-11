@@ -1133,10 +1133,10 @@ C=======================================================================
          CALL ERROR (ERRKEY,2,FILEX,LINEXP)
       ENDIF
       !----- Replace SLNO from LDT Mukey Value
-      PRINT*, 'Inside IPFLD'
-      PRINT*, 'Before replace SLNO: ', SLNO
+      !PRINT*, 'Inside IPFLD'
+      !PRINT*, 'Before replace SLNO: ', SLNO
       SLNO = dssat48_struc(nest)%dssat48(t)%SLNO
-      PRINT*, 'After replace SLNO: ', SLNO
+      !PRINT*, 'After replace SLNO: ', SLNO 
       IF (LN .NE. LNFLD) GO TO 50
       DO I = 1, 4
         WSTA(I:I)  = UPCASE(WSTA(I:I))

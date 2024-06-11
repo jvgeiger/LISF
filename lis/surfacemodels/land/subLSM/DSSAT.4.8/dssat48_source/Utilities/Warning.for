@@ -37,9 +37,10 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
 !     Suppress Warning.OUT if IDETL = '0' (zero)
+      RETURN !Pang: TURN OFF WARNING 2024.05.13
+
       CALL GET(ISWITCH)
 !     IF (ISWITCH % IDETL == '0') RETURN
-
       CALL GET(CONTROL)
       FILEIO = CONTROL % FILEIO
       RUN    = CONTROL % RUN

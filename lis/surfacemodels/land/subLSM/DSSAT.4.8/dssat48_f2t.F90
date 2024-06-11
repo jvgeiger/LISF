@@ -185,7 +185,7 @@ subroutine dssat48_f2t(n)
 
   do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
 
-     write(LIS_logunit,*) "At tile ",t
+     ! write(LIS_logunit,*) "At tile ",t
      ! Transform tile to the patch
      tid = LIS_surface(n, LIS_rc%lsm_index)%tile(t)%tile_id
 
@@ -205,7 +205,7 @@ subroutine dssat48_f2t(n)
         dssat48_struc(n)%dssat48(t)%tmax = tmp(tid)
         dssat48_struc(n)%dssat48(t)%tmin = tmp(tid)
      else
-        write(LIS_logunit,*) "Loop ",dssat48_struc(n)%forc_count
+        !write(LIS_logunit,*) "Loop ",dssat48_struc(n)%forc_count
         if (tmp(tid).gt.dssat48_struc(n)%dssat48(t)%tmax) then
            !write(LIS_logunit,*) "Maximum temperature replaced ",tmp(tid)
            dssat48_struc(n)%dssat48(t)%tmax=tmp(tid) !Replace maximum temperature

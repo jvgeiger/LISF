@@ -286,7 +286,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Initialize summary.out information
 C-----------------------------------------------------------------------
-      CALL OPSUM (CONTROL, ISWITCH, YRPLT)
+      !CALL OPSUM (CONTROL, ISWITCH, YRPLT) !Pang 2024.05.17: turn off to reduce I/O
 
 C*********************************************************************** 
 C*********************************************************************** 
@@ -371,7 +371,7 @@ C     Initialize summary output file - possible output from
 C     various modules.
 C-----------------------------------------------------------------------
       IF (IDETS .EQ. 'Y' .OR. IDETS .EQ. 'A') THEN
-        CALL OPSUM (CONTROL, ISWITCH, YRPLT)
+       ! CALL OPSUM (CONTROL, ISWITCH, YRPLT) !Pang 2024.05.17: turn off to reduce I/O
       ENDIF
 C***********************************************************************
 C***********************************************************************
@@ -599,7 +599,7 @@ C-----------------------------------------------------------------------
 C     Seasonal Output
 C     Call end of season and summary output subroutines
 C-----------------------------------------------------------------------
-      CALL OPSUM (CONTROL, ISWITCH, YRPLT)
+      !CALL OPSUM (CONTROL, ISWITCH, YRPLT) !Pang 2024.05.17: turn off to reduce I/O
 
 !!     Temporary timer function
 !      CALL DATE_AND_TIME (VALUES=DATE_TIME)

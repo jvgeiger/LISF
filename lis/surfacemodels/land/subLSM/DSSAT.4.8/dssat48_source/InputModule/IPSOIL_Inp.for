@@ -558,6 +558,9 @@ C** WDB End Changes
                 ENDIF !Pang 2024.02.13
               ENDIF
               IF (DUL(J) .LT. 1.E-3) THEN
+                 PRINT*, 'Am I here?' ! Testing 2024.05.14
+                 PRINT*, 'J, DUL(J): ', J, DUL(J)
+                 PRINT*, 'SLNO: ', SLNO
                  CALL ERROR (ERRKEY,13,FILES,LINSOL_1+J-1)
               ENDIF
               IF (ABS(SAT(J) - DUL(J)) .LT. 1.E-2) THEN

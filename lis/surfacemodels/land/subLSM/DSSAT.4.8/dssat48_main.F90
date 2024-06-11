@@ -119,41 +119,41 @@ subroutine dssat48_main(n)
             !!------ This Block Is Where We Obtain Weather Forcing ------------------------------!!
             ! retrieve forcing data from DSSAT48_struc(n)%dssat(t) and assign to local variables
 
-            write(LIS_logunit,*) 'Weather forcing for tile: ',t
+            ! write(LIS_logunit,*) 'Weather forcing for tile: ',t
 
             ! Daily average surface pressure (Pa)
             tmp_pres      = dssat48_struc(n)%dssat48(t)%psurf / dssat48_struc(n)%forc_count
-            write(LIS_logunit,*) 'p: ',tmp_pres
+            !write(LIS_logunit,*) 'p: ',tmp_pres
             dssat48_struc(n)%dssat48(t)%forc_pres = tmp_pres
  
             ! Total daily precipitation (rain+snow) (mm)
             tmp_precip    = (dssat48_struc(n)%dssat48(t)%totprc / dssat48_struc(n)%forc_count) * 3600. * 24. !Convert from kg/ms2 to mm
-            write(LIS_logunit,*) 'Precip: ',tmp_precip
+            ! write(LIS_logunit,*) 'Precip: ',tmp_precip
             dssat48_struc(n)%dssat48(t)%forc_precip = tmp_precip
 
             ! Tmax: maximum daily air temperature (C)
             tmp_tmax      = dssat48_struc(n)%dssat48(t)%tmax - 273.15 !Convert from K to C
-            write(LIS_logunit,*) 'Tmax: ',tmp_tmax
+            ! write(LIS_logunit,*) 'Tmax: ',tmp_tmax
             dssat48_struc(n)%dssat48(t)%forc_tmax = tmp_tmax
 
             ! Tmin: minimum daily air temperature (C)
             tmp_tmin      = dssat48_struc(n)%dssat48(t)%tmin - 273.15 !Convert from K to C 
-            write(LIS_logunit,*) 'Tmin: ',tmp_tmin
+            ! write(LIS_logunit,*) 'Tmin: ',tmp_tmin
             dssat48_struc(n)%dssat48(t)%forc_tmin = tmp_tmin
 
             ! Tdew: average daily dewpoint temperature (C)
             tmp_tdew      = (dssat48_struc(n)%dssat48(t)%tdew / dssat48_struc(n)%forc_count) - 273.15 !Convert from K to C
-            write(LIS_logunit,*) 'Tdew: ',tmp_tdew
+            ! write(LIS_logunit,*) 'Tdew: ',tmp_tdew
             dssat48_struc(n)%dssat48(t)%forc_tdew = tmp_tdew
 
             ! SW_RAD: daily total incoming solar radiation (MJ/(m2d))
             tmp_swrad     = (dssat48_struc(n)%dssat48(t)%swdown / dssat48_struc(n)%forc_count) * 0.0864 !Convert from W/m2 to MJ/(m2d)
-            write(LIS_logunit,*) 'Swrad: ',tmp_swrad
+            ! write(LIS_logunit,*) 'Swrad: ',tmp_swrad
             dssat48_struc(n)%dssat48(t)%forc_swrad = tmp_swrad
 
             ! Wind: daily average wind speed (km/d)
             tmp_wind      = (dssat48_struc(n)%dssat48(t)%wndspd / dssat48_struc(n)%forc_count) * 86.0 !Convert from m/s to km/d
-            write(LIS_logunit,*) 'Wind: ',tmp_wind
+            ! write(LIS_logunit,*) 'Wind: ',tmp_wind
             dssat48_struc(n)%dssat48(t)%forc_wind = tmp_wind
 
             !!---- Here Will Check Validity of Forcings ------------------!!
@@ -245,7 +245,7 @@ subroutine dssat48_main(n)
             IF (dssat48_struc(n)%sm_coupling.eq.1) THEN
                do l=0, LIS_sfmodel_struc(n)%nsm_layers
                   tmp_sm = (dssat48_struc(n)%dssat48(t)%LIS_sm(l) / dssat48_struc(n)%forc_count)
-                  write(LIS_logunit,*) 'Soil Moisture Layer: ',l,tmp_sm
+                  ! write(LIS_logunit,*) 'Soil Moisture Layer: ',l,tmp_sm
                   dssat48_struc(n)%dssat48(t)%LIS_sm(l) = tmp_sm
                   !dssat48_struc(n)%dssat48(t)%LIS_sm(l) = NOAHMP401_struc(n)%noahmp401(t)%smc(l)
                end do
@@ -275,7 +275,7 @@ subroutine dssat48_main(n)
             !PRINT*, 'SM2: ', dssat48_struc(n)%dssat48(t)%SW(2)
             !PRINT*, 'SM3: ', dssat48_struc(n)%dssat48(t)%SW(3)
             !PRINT*, 'SM4: ', dssat48_struc(n)%dssat48(t)%SW(4)
-            write(unit=fproc,fmt='(i4.4)') LIS_localPet !Processor number
+             write(unit=fproc,fmt='(i4.4)') LIS_localPet !Processor number
             !------ CSM INITIALIZATION -----------------------------------------------
             IF (.NOT.DONE) THEN
                 !PRINT*, 'Im in INIT'
@@ -373,7 +373,7 @@ subroutine dssat48_main(n)
 
             !----- SEASONAL INITIALIZATION -------------------------------------------
             IF (dssat48_struc(n)%dssat48(t)%doseasinit) THEN
-                PRINT*, 'In SEAS INIT'
+                !PRINT*, 'In SEAS INIT'
                 !PRINT*, 't, tmp_LAT, tmp_LON', t, tmp_LAT, tmp_LON
                   !Input Module Reads Experimental File (.SQX) and Write to Temporary IO File (.INP) 
                 !PRINT*, 'SEAS YRDOY: ', YRDOY, dssat48_struc(n)%CONTROL(t)%YRDOY
