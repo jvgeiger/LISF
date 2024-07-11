@@ -26,6 +26,7 @@ C  Calls:     None
 !----------------------------------------------------------------------
       USE ModuleDefs 
       USE ModuleData
+      USE dssat48_lsmMod
       USE CsvOutput   ! VSH
       IMPLICIT NONE
       SAVE
@@ -74,6 +75,18 @@ C  Calls:     None
       
       FMOPT   = ISWITCH % FMOPT   ! VSH
 
+!----------------------------------------------------------------------
+!----- Pang 2024.07.09 ------------------------------------------------
+        CUMSENSURF = dssat48_struc(nest)%dssat48(t)%CUMSENSURF
+        CUMSENSOIL = dssat48_struc(nest)%dssat48(t)%CUMSENSOIL
+        SWF_AV = dssat48_struc(nest)%dssat48(t)%SWF_AV
+        TUR_AV = dssat48_struc(nest)%dssat48(t)%TUR_AV
+        NST_AV = dssat48_struc(nest)%dssat48(t)%NST_AV
+        EXW_AV = dssat48_struc(nest)%dssat48(t)%EXW_AV
+        PS1_AV = dssat48_struc(nest)%dssat48(t)%PS1_AV
+        PS2_AV = dssat48_struc(nest)%dssat48(t)%PS2_AV
+        KST_AV = dssat48_struc(nest)%dssat48(t)%KST_AV
+        FIRST = dssat48_struc(nest)%dssat48(t)%FIRST_OPGROW
 !-----------------------------------------------------------------------
 !                                 DYNAMIC = RUNINIT
 !-----------------------------------------------------------------------
@@ -264,6 +277,18 @@ C-------------------------------------------------------------------
       ENDIF
 
 !***********************************************************************
+!----------------------------------------------------------------------
+!----- Pang 2024.07.09 ------------------------------------------------
+        dssat48_struc(nest)%dssat48(t)%CUMSENSURF = CUMSENSURF
+        dssat48_struc(nest)%dssat48(t)%CUMSENSOIL = CUMSENSOIL
+        dssat48_struc(nest)%dssat48(t)%SWF_AV = SWF_AV
+        dssat48_struc(nest)%dssat48(t)%TUR_AV = TUR_AV
+        dssat48_struc(nest)%dssat48(t)%NST_AV = NST_AV
+        dssat48_struc(nest)%dssat48(t)%EXW_AV = EXW_AV
+        dssat48_struc(nest)%dssat48(t)%PS1_AV = PS1_AV
+        dssat48_struc(nest)%dssat48(t)%PS2_AV = PS2_AV
+        dssat48_struc(nest)%dssat48(t)%KST_AV = KST_AV
+        FIRST = dssat48_struc(nest)%dssat48(t)%FIRST_OPGROW
       RETURN
       END SUBROUTINE MZ_OPGROW
 !=======================================================================

@@ -259,7 +259,7 @@ contains
               day_end = LIS_rc%eda
 
             do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
-            !do t=1,2 !PL for testing code
+            !do t=121,121 !PL for testing code
                  !Start CSM
                  !FILEX = 'NASA2019.SQX' !This can be obtained from lis.config
                  FILEX = dssat48_struc(n)%expfile

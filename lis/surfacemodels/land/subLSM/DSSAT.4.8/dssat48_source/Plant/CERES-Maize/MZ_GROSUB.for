@@ -368,15 +368,15 @@
 
 
 !----Pang 2024.01.30------------------------------
-       CMAT = dssat48_struc(nest)%dssat48(t)%CMAT
-       EMAT = dssat48_struc(nest)%dssat48(t)%EMAT
-       ICOLD = dssat48_struc(nest)%dssat48(t)%ICOLD
-       ICSDUR = dssat48_struc(nest)%dssat48(t)%ICSDUR
-       ISWNIT = dssat48_struc(nest)%dssat48(t)%ISWNIT
-       ISWPOT = dssat48_struc(nest)%dssat48(t)%ISWPOT
-       ISWPHO = dssat48_struc(nest)%dssat48(t)%ISWPHO
-       ISWWAT = dssat48_struc(nest)%dssat48(t)%ISWWAT
-       IDETO = dssat48_struc(nest)%dssat48(t)%IDETO
+       CMAT = dssat48_struc(nest)%dssat48(t)%CMAT !
+       EMAT = dssat48_struc(nest)%dssat48(t)%EMAT !
+       ICOLD = dssat48_struc(nest)%dssat48(t)%ICOLD !
+       ICSDUR = dssat48_struc(nest)%dssat48(t)%ICSDUR !
+       ISWNIT = dssat48_struc(nest)%dssat48(t)%ISWNIT !
+       ISWPOT = dssat48_struc(nest)%dssat48(t)%ISWPOT !
+       ISWPHO = dssat48_struc(nest)%dssat48(t)%ISWPHO !
+       ISWWAT = dssat48_struc(nest)%dssat48(t)%ISWWAT !
+       IDETO = dssat48_struc(nest)%dssat48(t)%IDETO !
        FILECC = dssat48_struc(nest)%dssat48(t)%FILECC
        P1 = dssat48_struc(nest)%dssat48(t)%P1
        P2 = dssat48_struc(nest)%dssat48(t)%P2
@@ -420,7 +420,7 @@
        CumLeafSenesY = dssat48_struc(nest)%dssat48(t)%CumLeafSenesY
        CumLfNSenes = dssat48_struc(nest)%dssat48(t)%CumLfNSenes
        CUMPH = dssat48_struc(nest)%dssat48(t)%CUMPH
-       DUMMY = dssat48_struc(nest)%dssat48(t)%DUMMY
+       !DUMMY = dssat48_struc(nest)%dssat48(t)%DUMMY
        EARWT = dssat48_struc(nest)%dssat48(t)%EARWT
        EP1 = dssat48_struc(nest)%dssat48(t)%EP1
        GRAINN = dssat48_struc(nest)%dssat48(t)%GRAINN
@@ -430,7 +430,7 @@
        GROGRN = dssat48_struc(nest)%dssat48(t)%GROGRN
        GROLF = dssat48_struc(nest)%dssat48(t)%GROLF
        GROSTM = dssat48_struc(nest)%dssat48(t)%GROSTM
-       PAR = dssat48_struc(nest)%dssat48(t)%PAR
+       IPAR = dssat48_struc(nest)%dssat48(t)%IPAR
        LAI= dssat48_struc(nest)%dssat48(t)%LAI
        LAIDOT = dssat48_struc(nest)%dssat48(t)%LAIDOT
        LFWT = dssat48_struc(nest)%dssat48(t)%LFWT
@@ -2252,7 +2252,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
        dssat48_struc(nest)%dssat48(t)%CumLeafSenesY = CumLeafSenesY
        dssat48_struc(nest)%dssat48(t)%CumLfNSenes = CumLfNSenes
        dssat48_struc(nest)%dssat48(t)%CUMPH = CUMPH
-       dssat48_struc(nest)%dssat48(t)%DUMMY = DUMMY
+       !dssat48_struc(nest)%dssat48(t)%DUMMY = DUMMY
        dssat48_struc(nest)%dssat48(t)%EARWT = EARWT
        dssat48_struc(nest)%dssat48(t)%EP1 = EP1
        dssat48_struc(nest)%dssat48(t)%GRAINN = GRAINN
@@ -2262,7 +2262,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
        dssat48_struc(nest)%dssat48(t)%GROGRN = GROGRN
        dssat48_struc(nest)%dssat48(t)%GROLF = GROLF
        dssat48_struc(nest)%dssat48(t)%GROSTM = GROSTM
-       dssat48_struc(nest)%dssat48(t)%PAR = PAR
+       dssat48_struc(nest)%dssat48(t)%IPAR = IPAR
        dssat48_struc(nest)%dssat48(t)%LAI = LAI
        dssat48_struc(nest)%dssat48(t)%LAIDOT = LAIDOT
        dssat48_struc(nest)%dssat48(t)%LFWT = LFWT

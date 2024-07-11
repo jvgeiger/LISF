@@ -164,7 +164,7 @@
       REAL SeedFrac, VegFrac
 !----------------------------------------------------------------------
 !----- Pang 2024.01.26 ------------------------------------------------
-      PATHL = dssat48_struc(nest)%dssat48(t)%PATHL
+      !PATHL = dssat48_struc(nest)%dssat48(t)%PATHL
       NDAS = dssat48_struc(nest)%dssat48(t)%NDAS
       L0 = dssat48_struc(nest)%dssat48(t)%L0
       L = dssat48_struc(nest)%dssat48(t)%L
@@ -206,7 +206,11 @@
       C1 = dssat48_struc(nest)%dssat48(t)%C1
       ACOEF = dssat48_struc(nest)%dssat48(t)%ACOEF
       DOPT = dssat48_struc(nest)%dssat48(t)%DOPT
- 
+!---- Add 07/10/204 ---------------------------------------------------
+      IDURP = dssat48_struc(nest)%dssat48(t)%IDURP !Duration days for stage 4
+                                                   ! which is initialized at stage 3 
+      SIND = dssat48_struc(nest)%dssat48(t)%SIND
+      SUMDTT_2 = dssat48_struc(nest)%dssat48(t)%SUMDTT_2
 !----------------------------------------------------------------------
 !         DYNAMIC = RUNINIT OR DYNAMIC = SEASINIT
 ! ---------------------------------------------------------------------
@@ -575,6 +579,9 @@
               NDAS           = 0.0
               ISTAGE = 8
               SUMDTT = 0.0
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
+
               IF (ISWWAT .EQ. 'N') RETURN
 
               !---------------------------------------------------------
@@ -587,7 +594,8 @@
               END DO
   100         CONTINUE                                ! Sun Fix
               L0 = L               !L0 is layer that seed is in.
-
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%L0 = L0
               RETURN
 
 
@@ -600,7 +608,9 @@
                       SWSD = (SW(L0)-LL(L0))*0.65 + 
      &                    (SW(L0+1)-LL(L0+1))*0.35
                       NDAS = NDAS + 1
-
+                      !----- Pang Added 07/10/2024 ---------------------
+                      dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
+                      dssat48_struc(nest)%dssat48(t)%SWSD = SWSD
                       IF (NDAS .GE. DSGT) THEN
                           ISTAGE = 6
                           PLTPOP = 0.00
@@ -613,10 +623,11 @@
                               WRITE (NOUTDO,3500)
                           ENDIF
                           MDATE  = YRDOY
+                          !----- Pang Added 07/10/2024 ---------------------
+                          dssat48_struc(nest)%dssat48(t)%PLTPOP = PLTPOP
                           RETURN
                       ENDIF
                  !Germinate when soil water > 0.02 cm3/cm3
-
                   IF (SWSD .LT. SWCG) RETURN  
                   ENDIF
               ENDIF
@@ -629,6 +640,8 @@
               SUMDTT =  0.0
 
               P9    = 45.0 +  GDDE*SDEPTH
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%P9 = P9
               RETURN
 
 
@@ -639,6 +652,9 @@
               NDAS = NDAS + 1
               ! Emerge when P9 GDD's have been accumulated
 !              IF (SUMDTT .LT. P9) RETURN 
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
+
               IF (YREMRG .LE. 0) THEN
 	          IF (SUMDTT .LT. P9) RETURN
 	        ELSE
@@ -659,6 +675,8 @@
                       WRITE (NOUTDO,1399)
                   ENDIF
                   MDATE = YRDOY
+                  !----- Pang Added 07/10/2024 ---------------------
+                  dssat48_struc(nest)%dssat48(t)%PLTPOP = PLTPOP
                   RETURN
               ENDIF
 
@@ -703,7 +721,8 @@
 ! 5/30/2007 CHP Estimate of total time is way off for EAAMOD runs,
 !     try using 25* instead of 20*
               VegFrac = SUMDTT / (P1 + 25. * (DOPT - TBASE))
-
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
               IF (SUMDTT .LT. P1) RETURN      
 
               !---------------------------------------------------------
@@ -757,6 +776,11 @@
               ENDIF
               PDTT   = 1.0   
               SIND = SIND + RATEIN*PDTT
+
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
+              dssat48_struc(nest)%dssat48(t)%DUMMY = DUMMY
+              dssat48_struc(nest)%dssat48(t)%SIND = SIND
               !Return if panicle initiation has not been reached
               IF (SIND .LT. 1.0) RETURN           
 
@@ -801,7 +825,8 @@
 !     CHP 5/25/2007 Move inflection point back to end of stage 3
 !             VegFrac = (SUMDTT + SUMDTT_2) / (SUMDTT_2 + P3 + DSGFT)
               VegFrac = MAX(VegFrac,(SUMDTT + SUMDTT_2) / (SUMDTT_2+P3))
-
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
               IF (SUMDTT .LT. P3) RETURN
 
               !---------------------------------------------------------
@@ -834,6 +859,10 @@
 !     CHP 5/25/2007 Move inflection point back to end of stage 3
               SeedFrac = SUMDTT / P5
 
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
+              dssat48_struc(nest)%dssat48(t)%IDURP = IDURP ! Duration days for stage 4
+                                                   ! which is initialized at stage 3               
               IF (SUMDTT .LT. DSGFT) RETURN
 
               !---------------------------------------------------------
@@ -849,7 +878,6 @@
               GPP   = AMIN1 (GPP, G2)
               GPP   = AMAX1 (GPP,0.0)
               EARS  = PLTPOP
-
               !Determine barrenness for maize
               GPP = AMAX1 (GPP,51.0)
              !
@@ -902,7 +930,8 @@
 !             CHP 5/25/2007 Move inflection point back to end of stage 3
 !             SeedFrac = (SUMDTT - DSGFT) / (P5 - DSGFT)
               SeedFrac = SUMDTT / P5
-          
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
               IF (SUMDTT .LT. P5*0.95) RETURN  !End of EFP assumed to be 95%
               !-------------------------------------------------------------
               !   New Growth Stage Occurred Today. Initialize Some Variables
@@ -923,7 +952,8 @@
 !     CHP 5/25/2007 Move inflection point back to end of stage 3
 !             SeedFrac = (SUMDTT - DSGFT) / (P5 - DSGFT)
               SeedFrac = SUMDTT / P5
-
+              !----- Pang Added 07/10/2024 ---------------------
+              dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
               IF (SUMDTT .LT. P5)  RETURN
               !---------------------------------------------------------
               !   New Growth Stage Occurred Today. Initialize Some Varia
@@ -950,7 +980,7 @@
       ENDIF  ! End DYNAMIC STRUCTURE
 !----------------------------------------------------------------------
 !----- Pang 2024.01.26 ------------------------------------------------
-      dssat48_struc(nest)%dssat48(t)%PATHL = PATHL
+      !dssat48_struc(nest)%dssat48(t)%PATHL = PATHL
       dssat48_struc(nest)%dssat48(t)%NDAS = NDAS
       dssat48_struc(nest)%dssat48(t)%L0 = L0
       dssat48_struc(nest)%dssat48(t)%L = L
@@ -992,6 +1022,12 @@
       dssat48_struc(nest)%dssat48(t)%C1 = C1
       dssat48_struc(nest)%dssat48(t)%ACOEF = ACOEF
       dssat48_struc(nest)%dssat48(t)%DOPT = DOPT
+!---- Add 07/10/204 ---------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%IDURP = IDURP ! Duration days for stage 4
+                                                   ! which is initialized at stage 3 
+      dssat48_struc(nest)%dssat48(t)%SIND = SIND
+      dssat48_struc(nest)%dssat48(t)%SUMDTT_2 = SUMDTT_2
+
       RETURN
 
 !-----------------------------------------------------------------------
