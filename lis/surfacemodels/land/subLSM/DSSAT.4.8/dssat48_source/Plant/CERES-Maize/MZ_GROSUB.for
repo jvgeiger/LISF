@@ -368,15 +368,15 @@
 
 
 !----Pang 2024.01.30------------------------------
-       CMAT = dssat48_struc(nest)%dssat48(t)%CMAT !
-       EMAT = dssat48_struc(nest)%dssat48(t)%EMAT !
-       ICOLD = dssat48_struc(nest)%dssat48(t)%ICOLD !
-       ICSDUR = dssat48_struc(nest)%dssat48(t)%ICSDUR !
-       ISWNIT = dssat48_struc(nest)%dssat48(t)%ISWNIT !
-       ISWPOT = dssat48_struc(nest)%dssat48(t)%ISWPOT !
-       ISWPHO = dssat48_struc(nest)%dssat48(t)%ISWPHO !
-       ISWWAT = dssat48_struc(nest)%dssat48(t)%ISWWAT !
-       IDETO = dssat48_struc(nest)%dssat48(t)%IDETO !
+       CMAT = dssat48_struc(nest)%dssat48(t)%CMAT
+       EMAT = dssat48_struc(nest)%dssat48(t)%EMAT
+       ICOLD = dssat48_struc(nest)%dssat48(t)%ICOLD
+       ICSDUR = dssat48_struc(nest)%dssat48(t)%ICSDUR
+       ISWNIT = dssat48_struc(nest)%dssat48(t)%ISWNIT
+       ISWPOT = dssat48_struc(nest)%dssat48(t)%ISWPOT
+       ISWPHO = dssat48_struc(nest)%dssat48(t)%ISWPHO
+       ISWWAT = dssat48_struc(nest)%dssat48(t)%ISWWAT
+       IDETO = dssat48_struc(nest)%dssat48(t)%IDETO
        FILECC = dssat48_struc(nest)%dssat48(t)%FILECC
        P1 = dssat48_struc(nest)%dssat48(t)%P1
        P2 = dssat48_struc(nest)%dssat48(t)%P2

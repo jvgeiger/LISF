@@ -663,9 +663,6 @@ module dssat48_module
              REAL RTDEP
               !----- In MZ_ROOTS.for
                   REAL ESW(20),RLDF(20),RNLF,RNFAC,RLNEW
-           !-----------------------------------------------------------------------
-           ! PLANT - MZ_CERES - MZ_OPGROW.for
-           !  REAL SWF_AV, TUR_AV, NST_AV, EXW_AV, PS1_AV, PS2_AV, KST_AV, CUMSENSURF, CUMSENSOIL
              INTEGER COUNT
         !------------------------------------------------------------------------
         ! JE Tight Coupling Variables
