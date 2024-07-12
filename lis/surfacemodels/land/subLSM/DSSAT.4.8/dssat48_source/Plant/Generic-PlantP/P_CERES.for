@@ -105,6 +105,12 @@
       PSeed_kg = dssat48_struc(nest)%dssat48(t)%PSeed_kg
 !----- P_Plant --------------------------------------------------------
       PRoot_kg = dssat48_struc(nest)%dssat48(t)%PRoot_kg
+!----- Add 7/8/2024 ---------------------------------------------------
+      Leaf_kg = dssat48_struc(nest)%dssat48(t)%Leaf_kg
+      Stem_kg = dssat48_struc(nest)%dssat48(t)%Stem_kg
+      Root_kg = dssat48_struc(nest)%dssat48(t)%Root_kg
+      Shel_kg = dssat48_struc(nest)%dssat48(t)%Shel_kg
+      Seed_kg = dssat48_struc(nest)%dssat48(t)%Seed_kg
 !***********************************************************************
 !***********************************************************************
       IF (DYNAMIC == SEASINIT) THEN
@@ -242,6 +248,12 @@
       dssat48_struc(nest)%dssat48(t)%PShel_kg = PShel_kg
       dssat48_struc(nest)%dssat48(t)%PSeed_kg = PSeed_kg
       dssat48_struc(nest)%dssat48(t)%PRoot_kg = PRoot_kg
+!---- Add 7/8/2024 -----------------------------------------------------
+      dssat48_struc(nest)%dssat48(t)%Leaf_kg = Leaf_kg
+      dssat48_struc(nest)%dssat48(t)%Stem_kg = Stem_kg
+      dssat48_struc(nest)%dssat48(t)%Root_kg = Root_kg
+      dssat48_struc(nest)%dssat48(t)%Shel_kg = Shel_kg
+      dssat48_struc(nest)%dssat48(t)%Seed_kg = Seed_kg
       RETURN
       END SUBROUTINE P_Ceres
 C=======================================================================

@@ -572,7 +572,8 @@ module dssat48_module
                 REAL PLTPOP,SDEPTH,P1,P2,P5,G2, G3, PHINT, DSGT, DGET, SWCG, TBASE, TOPT,ROPT,P2O,DJTI,GDDE,DSGFT, &
                      DUMMY,TNSOIL,TMSOIL,TH,TEMPCX,TEMPCR,TDSOIL,SWSD,SNUP,SNDN,S1,RATEIN,PSKER,PDTT, &
                      P9, DLV, DEC, C1, ACOEF, DOPT
-
+                INTEGER IDURP !07/10/2024
+                REAL SIND, SUMDTT_2 !07/10/2024
            !-----------------------------------------------------------------------
            ! PLANT - MZ_CERES - MZ_GROSUB & MZ_IX_GROSUB & SW_GROSUB
            ! Pang 2024.01.30
@@ -591,7 +592,7 @@ module dssat48_module
                        SDSZ, RSGR, RSGRT, CARBOT, STMWTE, RTWTE, LFWTE, SEEDRVE, LEAFNOE, PLAE, TMNC, &
                        TANCE, RCNP, RANCE, CTCNP1, CTCNP2, PLIGLF, PLIGRT, ASGDD, BSGDD, &
                        BIOMAS, CANHT_POT, CUMDTTEG, CumLeafSenes, CumLeafSenesY, CumLfNSenes, CUMPH, &
-                       EARWT, EP1, GRAINN, GRF, GNP, GROEAR, GROGRN, GROLF, GROSTM, PAR, LAI, &
+                       EARWT, EP1, GRAINN, GRF, GNP, GROEAR, GROGRN, GROLF, GROSTM, IPAR, LAI, &
                        LAIDOT, LFWT, LIFAC, MAXLAI, NPOOL, NPOOL1, NPOOL2, NSDR, NSINK,PCO2,PCNSD,PDWI, &
                        PLA, PLAG, PLAS, PRFT, RANC, RMNC, RNLAB, SEEDRV, SENLA, SLAN, SLFC, SLFN, SLFP, & 
                        SLFT, SLFW, SI2(6), SI4(6), SI5(6), SI6(6), Stem2Ear, STMWT, SUMRL, SUMEX, SWEXF, &
@@ -662,6 +663,7 @@ module dssat48_module
              REAL RTDEP
               !----- In MZ_ROOTS.for
                   REAL ESW(20),RLDF(20),RNLF,RNFAC,RLNEW
+             INTEGER COUNT
         !------------------------------------------------------------------------
         ! JE Tight Coupling Variables
           REAL, DIMENSION(20):: LIS_sm            !Dimensioned the same as SW

@@ -378,7 +378,7 @@ C      REAL            PRLF
        DISLA = dssat48_struc(nest)%dssat48(t)%DISLA
        NPLTD = dssat48_struc(nest)%dssat48(t)%NPLTD
        SDDES = dssat48_struc(nest)%dssat48(t)%SDDES
-       SDWT= dssat48_struc(nest)%dssat48(t)%SDWT
+       !SDWT= dssat48_struc(nest)%dssat48(t)%SDWT
        ASMDOT = dssat48_struc(nest)%dssat48(t)%ASMDOT
        PPLTD = dssat48_struc(nest)%dssat48(t)%PPLTD
        SWIDOT = dssat48_struc(nest)%dssat48(t)%SWIDOT
@@ -1159,7 +1159,7 @@ C----------------------------------------------------------------------
        dssat48_struc(nest)%dssat48(t)%DISLA = DISLA
        dssat48_struc(nest)%dssat48(t)%NPLTD = NPLTD
        dssat48_struc(nest)%dssat48(t)%SDDES = SDDES
-       dssat48_struc(nest)%dssat48(t)%SDWT = SDWT
+       !dssat48_struc(nest)%dssat48(t)%SDWT = SDWT
        dssat48_struc(nest)%dssat48(t)%ASMDOT = ASMDOT
        dssat48_struc(nest)%dssat48(t)%PPLTD = PPLTD
        dssat48_struc(nest)%dssat48(t)%SWIDOT = SWIDOT
