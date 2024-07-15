@@ -102,6 +102,22 @@ subroutine dssat48_readcrd()
         else
          write(LIS_logunit,*) "LIS - DSSAT Soil Moisture Coupling OFF"
         endif
+    enddo
+
+    call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 LAI coupling:", rc = rc)
+    do n=1,LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%lai_coupling, rc = rc)
+        call LIS_verify(rc,"DSSAT48 LAI coupling: not defined")
+        if ((dssat48_struc(n)%lai_coupling.ne.0).AND.(dssat48_struc(n)%lai_coupling.ne.1)) then
+           write(LIS_logunit,*) "[ERR] Valid options for DSSAT LAI coupling are 0=No or 1=Yes"
+           call LIS_endrun()
+        endif
+        write(LIS_logunit,*) "LAI Coupling Flag ", dssat48_struc(n)%lai_coupling
+        if (dssat48_struc(n)%lai_coupling .eq. 1) then
+          write(LIS_logunit,*) "LIS - DSSAT LAI Coupling ON"
+        else
+         write(LIS_logunit,*) "LIS - DSSAT LAI Coupling OFF"
+        endif
     enddo 
 
     !---------------------------!
