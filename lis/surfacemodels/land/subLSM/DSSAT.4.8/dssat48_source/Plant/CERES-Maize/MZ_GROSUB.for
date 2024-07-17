@@ -332,7 +332,8 @@
       REAL        XSTAGE           
       REAL        YIELD       
       REAL        YIELDB      
-      INTEGER     YR, YRDOY    
+      INTEGER     YR, YRDOY
+      REAL        ELAI !JE 06.24.2024
 
 !     Added to send messages to WARNING.OUT
       CHARACTER*78 MESSAGE(10)
@@ -931,6 +932,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
           XNTI   = 0.0
           YIELD  = 0.0
           YIELDB = 0.0
+          ELAI   = 0.0 !JE 06.24.2024
 
           IF (ISWNIT .NE. 'N') THEN
              CALL MZ_NFACTO(DYNAMIC,TANC,TCNP,TMNC,
@@ -1861,6 +1863,14 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
              EARS = EARS - EARS*PPLTD/100
              LAI = LAI - LAI*(PPLTD/100)
            ENDIF
+
+      !JE Tight Coupling LAI exchange 06.24.2024
+      IF (dssat48_struc(nest)%lai_coupling.EQ.1) THEN
+         IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GT.0) THEN
+            ELAI = dssat48_struc(nest)%dssat48(t)%LIS_lai
+         ENDIF
+         LAI = ELAI
+      ENDIF
 
           !------------------------------------------------------------
           !               COMPUTE NITROGEN UPTAKE

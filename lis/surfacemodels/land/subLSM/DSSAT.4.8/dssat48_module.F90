@@ -668,6 +668,7 @@ module dssat48_module
         ! JE Tight Coupling Variables
           REAL, DIMENSION(20):: LIS_sm            !Dimensioned the same as SW
           REAL, DIMENSION(20):: LIS_sm_start
+          REAL LIS_lai
         !---- ADDITIONAL CONTROL ------------------------------------------------
         !---- Pang 2023.09.19 ---------------------------------------------------
         !------------------------------------------------------------------------

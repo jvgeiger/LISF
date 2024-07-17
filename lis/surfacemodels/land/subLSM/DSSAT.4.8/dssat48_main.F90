@@ -54,7 +54,8 @@ subroutine dssat48_main(n)
     integer              :: tmp_year, tmp_month, tmp_day, tmp_hour, tmp_minute
     integer              :: year_end, month_end, day_end
     real                 :: tmp_pres, tmp_precip, tmp_tmax, tmp_tmin, tmp_tdew   ! Weather Forcing
-    real                 :: tmp_swrad, tmp_wind, tmp_sm                          ! Weather Forcing
+    real                 :: tmp_swrad, tmp_wind                                  ! Weather Forcing
+    real                 :: tmp_lai, tmp_sm                                      ! Coupling Variables
     character*3          :: fnest ! MN Bug in toolkit (added to this code)
 ! CONTRO
     INTEGER             :: RUN, REPNO, EXPNO, TRTALL, NREPS
@@ -249,6 +250,12 @@ subroutine dssat48_main(n)
                   dssat48_struc(n)%dssat48(t)%LIS_sm(l) = tmp_sm
                   !dssat48_struc(n)%dssat48(t)%LIS_sm(l) = NOAHMP401_struc(n)%noahmp401(t)%smc(l)
                end do
+            ENDIF
+
+            !JE Add in LAI coupling option (06.24.2024)
+            IF (dssat48_struc(n)%lai_coupling.eq.1) THEN
+               tmp_lai = (dssat48_struc(n)%dssat48(t)%LIS_lai / dssat48_struc(n)%forc_count)
+               dssat48_struc(n)%dssat48(t)%LIS_lai = tmp_lai
             ENDIF
 
 !-------------------------------------------------------------------------------------
@@ -687,6 +694,10 @@ subroutine dssat48_main(n)
             dssat48_struc(n)%dssat48(t)%snowf = 0.0
             dssat48_struc(n)%dssat48(t)%totprc = 0.0
             dssat48_struc(n)%dssat48(t)%tdew = 0.0
+
+            if (dssat48_struc(n)%lai_coupling.eq.1.) then
+               dssat48_struc(n)%dssat48(t)%LIS_lai = 0.0
+            end if
 
             if (dssat48_struc(n)%sm_coupling.eq.1) then
                do l=0, LIS_sfmodel_struc(n)%nsm_layers

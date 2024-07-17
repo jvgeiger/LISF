@@ -196,6 +196,12 @@ subroutine dssat48_f2t(n)
      &        + NOAHMP401_struc(n)%noahmp401(t)%smc(l)
          end do
      endif
+    
+     ! LAI
+     if (dssat48_struc(n)%lai_coupling.eq.1) then
+        dssat48_struc(n)%dssat48(t)%LIS_lai = dssat48_struc(n)%dssat48(t)%LIS_lai &
+           + NOAHMP401_struc(n)%noahmp401(t)%lai
+     endif
 
      ! Air temperature (DSSAT requires daily maximum and minimum)
      dssat48_struc(n)%dssat48(t)%tair=dssat48_struc(n)%dssat48(t)%tair + tmp(tid)

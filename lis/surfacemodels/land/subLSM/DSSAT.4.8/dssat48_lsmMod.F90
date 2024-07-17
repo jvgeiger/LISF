@@ -72,7 +72,7 @@ module dssat48_lsmMod
      !-------------------------------------------------------------------------
      character(len=LIS_CONST_PATH_LEN) :: rfile
      character*256      :: rformat
-     integer :: sm_coupling
+     integer :: sm_coupling, lai_coupling
      character*12 :: expfile
      character*12 :: dssatstartcode
      !-------------------------------------------------------------------------
@@ -234,6 +234,11 @@ contains
                 dssat48_struc(n)%dssat48(t)%psurf = 0.0
                 dssat48_struc(n)%dssat48(t)%totprc = 0.0
                 dssat48_struc(n)%dssat48(t)%tdew = 0.0
+
+                if (dssat48_struc(n)%lai_coupling.eq.1) then
+                   dssat48_struc(n)%dssat48(t)%LIS_lai = 0.0
+                endif
+
                 if (dssat48_struc(n)%sm_coupling.eq.1) then
                    do l=0, LIS_sfmodel_struc(n)%nsm_layers
                       dssat48_struc(n)%dssat48(t)%LIS_sm(l) = 0.0
