@@ -112,11 +112,11 @@ subroutine dssat48_readcrd()
            write(LIS_logunit,*) "[ERR] Valid options for DSSAT LAI coupling are 0=No or 1=Yes"
            call LIS_endrun()
         endif
-        write(LIS_logunit,*) "LAI Coupling Flag ", dssat48_struc(n)%lai_coupling
+        write(LIS_logunit,*) "[INFO] LAI Coupling Flag ", dssat48_struc(n)%lai_coupling
         if (dssat48_struc(n)%lai_coupling .eq. 1) then
-          write(LIS_logunit,*) "LIS - DSSAT LAI Coupling ON"
+          write(LIS_logunit,*) "[INFO] LIS - DSSAT LAI Coupling ON"
         else
-         write(LIS_logunit,*) "LIS - DSSAT LAI Coupling OFF"
+         write(LIS_logunit,*) "[INFO] LIS - DSSAT LAI Coupling OFF"
         endif
     enddo 
 

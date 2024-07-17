@@ -332,8 +332,8 @@
       REAL        XSTAGE           
       REAL        YIELD       
       REAL        YIELDB      
-      INTEGER     YR, YRDOY 
-      REAL        ELAI !JE 06.24.2024   
+      INTEGER     YR, YRDOY
+      REAL        ELAI !JE 06.24.2024
 
 !     Added to send messages to WARNING.OUT
       CHARACTER*78 MESSAGE(10)
@@ -1870,7 +1870,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
             ELAI = dssat48_struc(nest)%dssat48(t)%LIS_lai
          ENDIF
          LAI = ELAI
-      ENDIF 
+      ENDIF
 
           !------------------------------------------------------------
           !               COMPUTE NITROGEN UPTAKE

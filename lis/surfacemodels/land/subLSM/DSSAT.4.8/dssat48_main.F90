@@ -256,7 +256,7 @@ subroutine dssat48_main(n)
             IF (dssat48_struc(n)%lai_coupling.eq.1) THEN
                tmp_lai = (dssat48_struc(n)%dssat48(t)%LIS_lai / dssat48_struc(n)%forc_count)
                dssat48_struc(n)%dssat48(t)%LIS_lai = tmp_lai
-            ENDIF 
+            ENDIF
 
 !-------------------------------------------------------------------------------------
 ! call model physics
