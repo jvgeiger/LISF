@@ -72,7 +72,7 @@ module dssat48_lsmMod
      !-------------------------------------------------------------------------
      character(len=LIS_CONST_PATH_LEN) :: rfile
      character*256      :: rformat
-     integer :: sm_coupling, lai_coupling
+     integer :: sm_coupling, lai_coupling, send_lai
      character*12 :: expfile
      character*12 :: dssatstartcode
      !-------------------------------------------------------------------------
@@ -343,6 +343,7 @@ contains
                   NREPS = 1 !Always 1
                   YRSIM = tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year) +1
                   !PL: YRSIM +1 Due to 1 day shift between DSSAT INIT and Actual Simulation
+                  ! JE Shift fixed remove +1
                   YRDOY_END = year_end*1000 + JULIAN (day_end,MonthTxt(month_end),year_end)
                   !IF (RUN.EQ.1) THEN
                   !    YRDOY = YRSIM !YRDOY is initialized as same as YRSIM

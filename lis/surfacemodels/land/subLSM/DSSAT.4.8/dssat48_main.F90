@@ -55,7 +55,7 @@ subroutine dssat48_main(n)
     integer              :: year_end, month_end, day_end
     real                 :: tmp_pres, tmp_precip, tmp_tmax, tmp_tmin, tmp_tdew   ! Weather Forcing
     real                 :: tmp_swrad, tmp_wind                                  ! Weather Forcing
-    real                 :: tmp_lai, tmp_sm                                      ! Coupling Variables
+    real                 :: tmp_lai, tmp_sm, lfmass                              ! Coupling Variables
     character*3          :: fnest ! MN Bug in toolkit (added to this code)
 ! CONTRO
     INTEGER             :: RUN, REPNO, EXPNO, TRTALL, NREPS
@@ -331,7 +331,7 @@ subroutine dssat48_main(n)
                   TRTALL = 999 !Always 9999
                   NYRS = 1 !Always 1 for Q mode
                   NREPS = 1 !Always 1
-                  YRSIM = tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year) +1
+                  YRSIM = tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year) + 1
                   !PL: YRSIM +1 Due to 1 day shift between LIS and DSSAT
                   !PRINT*, 'YRSIM: ', YRSIM
                   !YRDOY_END = (INT(YRSIM/1000)+NYRS-1)*1000 + YRSIM-INT(YRSIM/1000.0)*1000 - 1 !Can we obtain this from config. 
@@ -476,7 +476,21 @@ subroutine dssat48_main(n)
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
+                !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
+                ! Send DSSAT LAI to LIS JE 2024.08.14
+                IF (dssat48_struc(n)%send_lai.eq.1) THEN
+                   !write(LIS_logunit,*) "Sending LAI back to DSSAT"
+                   NOAHMP401_struc(n)%noahmp401(t)%lai=dssat48_struc(n)%dssat48(t)%XLAI
+                   !Update Leaf Mass
+                   IF (NOAHMP401_struc(n)%noahmp401(t)%param%sla.gt.0) THEN
+                      lfmass = dssat48_struc(n)%dssat48(t)%XLAI * &
+                         1000.0/(NOAHMP401_struc(n)%noahmp401(t)%param%sla)
+                      NOAHMP401_struc(n)%noahmp401(t)%lfmass = lfmass
+                   ENDIF !Keep as-is otherwise
+                ENDIF
+
                 dssat48_struc(n)%dssat48(t)%doseasinit = .FALSE. !Pnng 2023.09.19
+
              ENDIF   
                 !PRINT*, 'YREND in seas: ', YREND, YRDOY
                 !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
@@ -576,6 +590,21 @@ subroutine dssat48_main(n)
                   vlevel=1,unit="kg/ha",direction="-",&
                   surface_type=LIS_rc%lsm_index)
 
+                !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
+                ! Send DSSAT LAI to LIS JE 2024.08.14
+                IF (dssat48_struc(n)%send_lai.eq.1) THEN
+                   write(LIS_logunit,*) "Sending LAI back to DSSAT (Daily Rate)"
+                   NOAHMP401_struc(n)%noahmp401(t)%lai=dssat48_struc(n)%dssat48(t)%XLAI
+                   !Update Leaf Mass
+                   write(LIS_logunit,*) "SLA ", NOAHMP401_struc(n)%noahmp401(t)%param%sla
+                   write(LIS_logunit,*) "DSSAT LAI ", dssat48_struc(n)%dssat48(t)%XLAI
+                   IF (NOAHMP401_struc(n)%noahmp401(t)%param%sla.gt.0) THEN
+                      lfmass = dssat48_struc(n)%dssat48(t)%XLAI * &
+                         1000.0/(NOAHMP401_struc(n)%noahmp401(t)%param%sla)
+                      NOAHMP401_struc(n)%noahmp401(t)%lfmass = lfmass
+                   ENDIF !Otherwise, keep it the same as Noah-MP                   
+                   write(LIS_logunit,*) "lfmass ", lfmass
+                ENDIF
                !-----------------------------------------------------------------------
 
                 IF (YRDOY.EQ.YREND) THEN
@@ -640,6 +669,20 @@ subroutine dssat48_main(n)
                     value=dssat48_struc(n)%dssat48(t)%SDWT*10.0,&
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
+
+                ! Send DSSAT LAI to LIS JE 2024.08.14
+                !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
+                ! Send DSSAT LAI to LIS JE 2024.08.14
+                IF (dssat48_struc(n)%send_lai.eq.1) THEN
+                   !write(LIS_logunit,*) "Sending LAI back to DSSAT"
+                   NOAHMP401_struc(n)%noahmp401(t)%lai=dssat48_struc(n)%dssat48(t)%XLAI
+                   !Update Leaf Mass
+                   IF (NOAHMP401_struc(n)%noahmp401(t)%param%sla.gt.0) THEN
+                      lfmass = dssat48_struc(n)%dssat48(t)%XLAI * &
+                         1000.0/(NOAHMP401_struc(n)%noahmp401(t)%param%sla)
+                      NOAHMP401_struc(n)%noahmp401(t)%lfmass = lfmass
+                   ENDIF !Keep as-is otherwise
+                ENDIF
               
                  dssat48_struc(n)%dssat48(t)%DONE = .FALSE. !Return back to INIT
                 !dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
