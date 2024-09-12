@@ -1866,7 +1866,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
 
       !JE Tight Coupling LAI exchange 06.24.2024
       IF (dssat48_struc(nest)%lai_coupling.EQ.1) THEN
-         IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GT.0) THEN
+         IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GE.0) THEN
             ELAI = dssat48_struc(nest)%dssat48(t)%LIS_lai
          ENDIF
          LAI = ELAI

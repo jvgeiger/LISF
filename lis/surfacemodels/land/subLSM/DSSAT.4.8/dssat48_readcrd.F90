@@ -120,6 +120,22 @@ subroutine dssat48_readcrd()
         endif
     enddo 
 
+    call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 Overwrite LIS LAI:", rc = rc)
+    do n=1,LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%send_lai, rc = rc)
+        call LIS_verify(rc,"DSSAT48 Overwrite LIS LAI: not defined")
+        if ((dssat48_struc(n)%send_lai.ne.0).AND.(dssat48_struc(n)%send_lai.ne.1)) then
+           write(LIS_logunit,*) "[ERR] Valid options for DSSAT Overwrite LIS LAI are 0=No or 1=Yes"
+           call LIS_endrun()
+        endif
+        write(LIS_logunit,*) "[INFO] Overwrite LIS LAI ", dssat48_struc(n)%send_lai
+        if (dssat48_struc(n)%send_lai .eq. 1) then
+          write(LIS_logunit,*) "[INFO] Sending DSSAT LAI to LIS"
+        else
+         write(LIS_logunit,*) "[INFO] NOT Sending DSSAT LAI to LIS"
+        endif
+    enddo
+
     !---------------------------!
     ! Constant Parameters       !
     !---------------------------!

@@ -1124,7 +1124,7 @@ C-----------------------------------------------------------------------
 
       !JE Tight coupling 06.24.2024
       IF (dssat48_struc(nest)%lai_coupling.EQ.1) THEN
-         IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GT.0) THEN
+         IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GE.0) THEN
             XLAI = dssat48_struc(nest)%dssat48(t)%LIS_lai
             XHLAI = XLAI
          ENDIF
