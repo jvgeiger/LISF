@@ -479,7 +479,7 @@ subroutine dssat48_main(n)
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 IF (dssat48_struc(n)%send_lai.eq.1) THEN
-                   !write(LIS_logunit,*) "Sending LAI back to DSSAT"
+                   !write(LIS_logunit,*) "Sending LAI back to LIS"
                    NOAHMP401_struc(n)%noahmp401(t)%lai=dssat48_struc(n)%dssat48(t)%XLAI
                    !Update Leaf Mass
                    IF (NOAHMP401_struc(n)%noahmp401(t)%param%sla.gt.0) THEN
@@ -593,7 +593,7 @@ subroutine dssat48_main(n)
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 IF (dssat48_struc(n)%send_lai.eq.1) THEN
-                   write(LIS_logunit,*) "Sending LAI back to DSSAT (Daily Rate)"
+                   write(LIS_logunit,*) "Sending LAI back to LIS (Daily Rate)"
                    NOAHMP401_struc(n)%noahmp401(t)%lai=dssat48_struc(n)%dssat48(t)%XLAI
                    !Update Leaf Mass
                    write(LIS_logunit,*) "SLA ", NOAHMP401_struc(n)%noahmp401(t)%param%sla
@@ -674,7 +674,7 @@ subroutine dssat48_main(n)
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 IF (dssat48_struc(n)%send_lai.eq.1) THEN
-                   !write(LIS_logunit,*) "Sending LAI back to DSSAT"
+                   !write(LIS_logunit,*) "Sending LAI back to LIS"
                    NOAHMP401_struc(n)%noahmp401(t)%lai=dssat48_struc(n)%dssat48(t)%XLAI
                    !Update Leaf Mass
                    IF (NOAHMP401_struc(n)%noahmp401(t)%param%sla.gt.0) THEN
