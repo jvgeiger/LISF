@@ -142,6 +142,20 @@ subroutine dssat48_main(n)
             ! write(LIS_logunit,*) 'Tmin: ',tmp_tmin
             dssat48_struc(n)%dssat48(t)%forc_tmin = tmp_tmin
 
+            !
+            ! JE 04.11.2025 Check for freezing temps (Delete after debugging)
+            !
+ 
+            !if (dssat48_struc(n)%dssat48(t)%forc_tmax.le.0.0) then 
+            !   dssat48_struc(n)%dssat48(t)%forc_tmax = 1.0 
+            !end if 
+
+            !if (dssat48_struc(n)%dssat48(t)%forc_tmin.le.0.0) then
+            !   dssat48_struc(n)%dssat48(t)%forc_tmin = 1.0
+            !end if 
+
+            ! End temperature debugging 
+
             ! Tdew: average daily dewpoint temperature (C)
             tmp_tdew      = (dssat48_struc(n)%dssat48(t)%tdew / dssat48_struc(n)%forc_count) - 273.15 !Convert from K to C
             ! write(LIS_logunit,*) 'Tdew: ',tmp_tdew
@@ -476,6 +490,31 @@ subroutine dssat48_main(n)
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
+                    value=dssat48_struc(n)%dssat48(t)%RSTAGE,&
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_LFMASS, &
+                    value=dssat48_struc(n)%dssat48(t)%LFWT,&
+                    vlevel=1,unit="g/plant",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_BIOMASS, &
+                    value=dssat48_struc(n)%dssat48(t)%BIOMAS,&
+                    vlevel=1,unit="g m-2",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_CUMDTT, &
+                    value=dssat48_struc(n)%dssat48(t)%CUMDTT,&
+                    vlevel=1,unit="C",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SUMDTT, &
+                    value=dssat48_struc(n)%dssat48(t)%SUMDTT,&
+                    vlevel=1,unit="C",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 IF (dssat48_struc(n)%send_lai.eq.1) THEN
@@ -590,6 +629,31 @@ subroutine dssat48_main(n)
                   vlevel=1,unit="kg/ha",direction="-",&
                   surface_type=LIS_rc%lsm_index)
 
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
+                  value=dssat48_struc(n)%dssat48(t)%RSTAGE,&
+                  vlevel=1,unit="-",direction="-",&
+                  surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_LFMASS, &
+                    value=dssat48_struc(n)%dssat48(t)%LFWT,&
+                    vlevel=1,unit="g/plant",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_BIOMASS, &
+                    value=dssat48_struc(n)%dssat48(t)%BIOMAS,&
+                    vlevel=1,unit="g m-2",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_CUMDTT, &
+                    value=dssat48_struc(n)%dssat48(t)%CUMDTT,&
+                    vlevel=1,unit="C",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SUMDTT, &
+                    value=dssat48_struc(n)%dssat48(t)%SUMDTT,&
+                    vlevel=1,unit="C",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 IF (dssat48_struc(n)%send_lai.eq.1) THEN
@@ -670,6 +734,31 @@ subroutine dssat48_main(n)
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
+                    value=dssat48_struc(n)%dssat48(t)%RSTAGE,&
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_LFMASS, &
+                    value=dssat48_struc(n)%dssat48(t)%LFWT,&
+                    vlevel=1,unit="g/plant",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_BIOMASS, &
+                    value=dssat48_struc(n)%dssat48(t)%BIOMAS,&
+                    vlevel=1,unit="g m-2",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_CUMDTT, &
+                    value=dssat48_struc(n)%dssat48(t)%CUMDTT,&
+                    vlevel=1,unit="C",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SUMDTT, &
+                    value=dssat48_struc(n)%dssat48(t)%SUMDTT,&
+                    vlevel=1,unit="C",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+               
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14

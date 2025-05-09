@@ -30,7 +30,7 @@ C             ROOTDM
 C             SEEDDM
 C             VEGDM
 C=======================================================================
-      SUBROUTINE PEST(CONTROL, ISWITCH,nest, t,       !Pang 2024.01.31 
+      SUBROUTINE PEST(CONTROL, ISWITCH, nest, t,       !Pang 2024.01.31 
      &    AREALF, CLW, CSW, LAGSD, LNGPEG, NR2, PGAVL,    !Input
      &    PHTIM, PLTPOP, RTWT, SLA, SLDOT, SOILPROP,      !Input
      &    SSDOT, STMWT, TOPWT, WLFDOT, WTLF, YRPLT,       !Input
@@ -308,7 +308,7 @@ C-----------------------------------------------------------------------
      &    TSHWTL, TSHWTM, TSHWTS,                         !Output
      &    SEASINIT,WSDD,PSDD,SDWT)                             !Control
 
-      CALL VEGDM(SEASINIT,nest,t,               !Pang 2024.02.01
+      CALL VEGDM(SEASINIT, nest, t,               !Pang 2024.02.01
      &    AREALF, CLW, CSW, PCLMT, PCSTMD, PDLA, PLFAD,   !Input
      &    PLFMD, PSTMD, PVSTGD, SLA, SLDOT, SSDOT,        !Input
      &    STMWT, TDLA, TLAI,VSTGD, WLFDOT, WSTMD, WTLF,        !Input

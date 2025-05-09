@@ -390,6 +390,9 @@ contains
                  !  DO SEAS INIT ANYWAY IN lsmMod YO INITIALIZE ALL VARS AND PPRMS --------------------------
                   REPNO = dssat48_struc(n)%CONTROL(t)%repno !May not really needed for Q mode
 
+                ! Intitialize phenology to missing
+                dssat48_struc(n)%dssat48(t)%RSTAGE = -9999
+
                  !!CONDITIONS
                  !!PRINT*, 'NYRS, ENDYRS, MULTI bf: ', NYRS, ENDYRS, MULTI
                  IF (NYRS .GT. 1) THEN

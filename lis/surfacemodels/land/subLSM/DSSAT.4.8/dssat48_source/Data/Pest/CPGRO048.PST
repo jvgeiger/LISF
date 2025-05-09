@@ -30,4 +30,4 @@
 19 PPDN  % All Pod Dest.      3 PPDN  1.00000000     0.0000    %/day        estimated
 20 PRTM  % Root mass dest.    3 RMD   1.00000000     0.0000    %/day        estimated
 23 MOW   Top weight left.     3 TOPWT 1.00000000     0.0000    kg/ha top weight left
-
+24 LAIDA MODIS LAI DA         1 LAD   1.00000000     0.0000    m2/m2/day    MCD15A3H.061

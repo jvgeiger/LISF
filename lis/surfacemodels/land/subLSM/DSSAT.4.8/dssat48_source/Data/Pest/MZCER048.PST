@@ -16,4 +16,4 @@
 11 NWPD  #. plants dest.      1 WPDM  1.00000000     0.0000    #/m2/day
 12 PWPD  % plants dest.       3 PPLD  1.00000000     0.0000    %/day
 13 PASM  Assim. reduct.       3 ASM   1.00000000     0.0000    %/day
-
+24 LAIDA MODIS LAI DA         1 LAD   1.00000000     0.0000    m2/m2/day    MCD15A3H.061

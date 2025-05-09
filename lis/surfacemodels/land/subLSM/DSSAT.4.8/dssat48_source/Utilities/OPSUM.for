@@ -30,6 +30,7 @@ C=======================================================================
 
       MODULE SumModule
       USE ModuleDefs
+      use LIS_logMod, only: LIS_logunit !JE 03.10.2025
 !     This module defines variables which are printed to SUMMARY.OUT file.
 
 !     Data construct for summary.out data. Used only by SUMVAL and OPSUM.
@@ -1030,7 +1031,9 @@ C=======================================================================
         CASE ('ADAT'); SUMDAT % ADAT   = NINT(VALUE(I))
         CASE ('MDAT'); SUMDAT % MDAT   = NINT(VALUE(I))
         CASE ('DWAP'); SUMDAT % DWAP   = NINT(VALUE(I))
-        CASE ('CWAM'); SUMDAT % CWAM   = NINT(VALUE(I))
+        CASE ('CWAM')
+             write(LIS_logunit,*) "OPSUM: ", VALUE(I) !JE 03.10.25
+             SUMDAT % CWAM   = NINT(VALUE(I)) !JE 03.10.25
         CASE ('HWAM'); SUMDAT % HWAM   = NINT(VALUE(I))
         CASE ('HWAH'); SUMDAT % HWAH   = VALUE(I) !Float
         CASE ('BWAH'); SUMDAT % BWAH   = VALUE(I) !Float
