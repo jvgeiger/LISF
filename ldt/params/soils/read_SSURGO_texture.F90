@@ -135,6 +135,7 @@ subroutine read_SSURGO_texture( n, num_bins, fgrd, texture_layers )
    CALL gdalapplygeotransform(gt, 0.5_c_double, 0.5_c_double, x2, y1)
    
    dres = 0.01
+
    x1 = (xsize-1)*dres + x2
    y2 = y1 - (ysize-1)*dres
  !  x1 = (xsize-2)*dres + x2

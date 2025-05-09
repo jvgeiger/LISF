@@ -68,6 +68,8 @@ module LDT_pluginIndices
 !-------------------------------------------------------------------------
    character*50, public,  parameter :: LDT_LISlsmSMobsId              &
         = "LIS LSM soil moisture"
+   character*50, public,  parameter :: LDT_LISdssatSMobsId              &
+        = "LIS DSSAT soil moisture"
    character*50, public,  parameter :: LDT_LISlsmTEFFobsId            &
         = "LIS LSM effective soil temperature"                               !Y.Kwon
    character*50, public,  parameter :: LDT_syntheticSMobsId           &
@@ -324,6 +326,10 @@ module LDT_pluginIndices
    character*50, public,  parameter :: LDT_irriggwratioId  = "USGS_Native"
 
    character*50, public,  parameter :: LDT_userinputirrigId = "UserDerived"
+!-------------------------------------------------------------------------
+! Planting Day sources
+!-------------------------------------------------------------------------
+   character*50, public,  parameter :: LDT_plantingdaycreateId = "CREATE" !P.-W. Liu Feb 26, 2025
 
 !-------------------------------------------------------------------------
 ! Albedo data sources

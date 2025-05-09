@@ -288,7 +288,7 @@ C-------------------------------------------------------------------
         dssat48_struc(nest)%dssat48(t)%PS1_AV = PS1_AV
         dssat48_struc(nest)%dssat48(t)%PS2_AV = PS2_AV
         dssat48_struc(nest)%dssat48(t)%KST_AV = KST_AV
-        FIRST = dssat48_struc(nest)%dssat48(t)%FIRST_OPGROW
+        dssat48_struc(nest)%dssat48(t)%FIRST_OPGROW = FIRST !Fix Pang 2024.07.29
       RETURN
       END SUBROUTINE MZ_OPGROW
 !=======================================================================

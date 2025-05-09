@@ -54,8 +54,9 @@ subroutine dssat48_setup()
 !  double precision  :: ymn_part  ! center y of local LL starting point
 !  integer, allocatable :: global_kstn(:,:,:)
 !  integer, allocatable :: level_data(:, :)
-  integer, allocatable :: placeholder(:,:)
+  integer, allocatable :: placeholder(:,:), placeholder_PLD(:,:)
   CHARACTER*10   :: mukey
+  integer*2 :: plantingday
 ! _______________________________________________________________
 
   mtype = LIS_rc%lsm_index
@@ -71,12 +72,26 @@ subroutine dssat48_setup()
      ! Read MUKEY from Input File
         write(LIS_logunit,*) "DSSAT48: reading MUKEY from ", trim(LIS_rc%paramfile(n))
         call LIS_read_param(n, 'MUKEY', placeholder)
+
         do t = 1, LIS_rc%npatch(n, mtype)
             col = LIS_surface(n, mtype)%tile(t)%col
             row = LIS_surface(n, mtype)%tile(t)%row
             WRITE( mukey, '(I10)') placeholder(col, row) !Turn mukey number to a string
             dssat48_struc(n)%dssat48(t)%SLNO = 'LC'//repeat('0',8-len(trim(adjustl(mukey))))//adjustl(mukey)
         enddo
+
+     if (dssat48_struc(n)%pldmap_switch.EQ.1) THEN
+         allocate(placeholder_PLD(LIS_rc%lnc(n), LIS_rc%lnr(n)))
+         !Read planting day map
+         write(LIS_logunit,*) "DSSAT48: reading planting day from ", trim(LIS_rc%paramfile(n))
+         call LIS_read_param(n, 'PLANTINGDAY', placeholder_PLD)
+         do t = 1, LIS_rc%npatch(n, mtype)
+            col = LIS_surface(n, mtype)%tile(t)%col
+            row = LIS_surface(n, mtype)%tile(t)%row
+            dssat48_struc(n)%dssat48(t)%plantingday = placeholder_PLD(col, row)
+         enddo
+     endif
+
 
      !! Get Cropyears
      !  ! open NetCDF parameter file
@@ -90,9 +105,6 @@ subroutine dssat48_setup()
      !   ! inquire the ID of north-south dimension
      !   ios = nf90_inq_dimid(nid, 'north_south', nr_ID)
      !   call LIS_verify(ios, 'Error in nf90_inq_dimid in DSSAT48_read_MULTILEVEL_param')
-
-
-
         !write(LIS_logunit,*) "DSSAT48: reading CROPTYPE from ", trim(LIS_rc%paramfile(n))
         !do k = 1, 12 %1 to how many years
         !   call DSSAT48_read_MULTILEVEL_param(n, 'CROPTYPE', k, placeholder)
@@ -236,7 +248,6 @@ end subroutine dssat48_setup
         placeholder(:, :) = &
              level_data(LIS_ews_halo_ind(n, LIS_localPet+1):LIS_ewe_halo_ind(n, LIS_localPet+1), &
                         LIS_nss_halo_ind(n, LIS_localPet+1):LIS_nse_halo_ind(n, LIS_localPet+1), level)
-
         ! free memory 
         deallocate(level_data)
 

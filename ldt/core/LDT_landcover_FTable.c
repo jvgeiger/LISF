@@ -52,6 +52,16 @@ struct croplcnode
 
 struct croplcnode* croplc_table = NULL;
 
+struct plantingdaynode //P.-W. Liu 26 Feb 2025
+{
+  char *name;
+//  void (*func)(int*, float*);
+  void (*func)(int*, int*, float*);
+
+  struct plantingdaynode* next;
+} ;
+
+struct plantingdaynode* plantingday_table = NULL;
 
 struct drootnode
 {
@@ -228,6 +238,88 @@ void FTN(readcroptype)(char *j,int *n,int *nct,float *array, int len)
     }
   }
   current->func(n,nct,array);
+}
+
+//BOP
+// !ROUTINE: registerreadplantingday //P.-W. Liu 26 Feb 2025
+// \label{registerreadplantingday}
+// 
+// !INTERFACE:
+void FTN(registerreadplantingday)(char *j, void (*func)(int*, int*, float*),int len)
+//  
+// !DESCRIPTION:
+//  Creates an entry in the registry for the routine to 
+//  read the planting day data
+// 
+//  The arguments are: 
+//  \begin{description}
+//  \item[j]
+//   index of the crop type source
+//  \end{description}
+  //EOP
+{
+  int len1;
+  struct plantingdaynode* current;
+  struct plantingdaynode* pnode;
+  // create node
+
+  len1 = len + 1; // ensure that there is space for terminating null
+  pnode=(struct plantingdaynode*) malloc(sizeof(struct plantingdaynode));
+  pnode->name=(char*) calloc(len1,sizeof(char));
+  strncpy(pnode->name,j,len);
+  pnode->func = func;
+  pnode->next = NULL;
+
+  if(plantingday_table == NULL){
+    plantingday_table = pnode;
+  }
+  else{
+    current = plantingday_table;
+    while(current->next!=NULL){
+      current = current->next;
+    }
+    current->next = pnode;
+  }
+
+}
+
+
+//BOP
+// !ROUTINE: readplantingday
+// \label{readplantingday}
+// 
+// !INTERFACE:
+void FTN(readplantingday)(char *j,int *n,int *nt,float *array, int len)
+//  
+// !DESCRIPTION: 
+//  Invokes the routine from the registry to read the
+//  planting day
+// 
+//  The arguments are: 
+//  \begin{description}
+//  \item[n]
+//   index of the nest
+//  \item[j]
+//   index of the planting day source
+//  \item[array]
+//   pointer to the planting day map
+//  \end{description}
+//EOP
+{
+  struct plantingdaynode* current;
+
+  current = plantingday_table;
+  while(strcmp(current->name,j)!=0){
+    current = current->next;
+    if(current==NULL) {
+      printf("**************** Error ****************************\n");
+      printf("Planting day map reading routine for source %s is not defined\n",j);
+      printf("Please refer to configs/ldt.config_master or LDT User's Guide for options.\n");
+      printf("Program will seg fault.....\n");
+      printf("**************** Error ****************************\n");
+    }
+  }
+  current->func(n,nt,array);
 }
 
 //BOP

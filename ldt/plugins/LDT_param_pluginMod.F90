@@ -27,6 +27,7 @@ module LDT_param_pluginMod
 !  12 Apr 2021:  Wanshu Nie   - groundwater irrigation ratio added
 !  28 Jun 2022:  Eric Kemp    - Added NAFPA background precipitation
 !  10 Apr 2023:  J. Erlingis  - Added Cropland Data Layer
+!  26 Feb 2025:  P.-W. Liu    - Added Planting day map
 !EOP
 
   use LDT_pluginIndices
@@ -413,6 +414,7 @@ contains
     external read_ALMIPII_droot
 !    external read_UMDCROPMAP_rootdepth
 
+    external read_PlantingDay !P.-W. Liu 26 Feb 2025
 ! _______________________________________
 
 ! - Landcover sources:
@@ -476,6 +478,9 @@ contains
     call registerreadcroptype(trim(LDT_umdcropmapId)//char(0), read_UMDCROPMAP_croptype)
     call registerreadcroptype(trim(LDT_monfredacropId)//char(0), read_Monfredaetal08_croptype)
     call registerreadcroptype(trim(LDT_cdlID)//char(0), read_CDL)
+
+! - Planting day sources: !P.-W. Liu 26 Feb 2025
+    call registerreadplantingday(trim(LDT_plantingdaycreateId)//char(0), read_PlantingDay)
 
 ! - Root depth:
     call registerreadrootdepth(trim(LDT_ALMIPIIlcId)//char(0),read_ALMIPII_droot)

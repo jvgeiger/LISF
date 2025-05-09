@@ -219,7 +219,7 @@ C-----------------------------------------------------------------------
 !  MESOL = '3' User specified soil layer distribution. Calls LYRSET3.
 !     Skip soils field and soils input for sequence mode
       IF (INDEX('FQ',RNMODE) .LE. 0 .OR. RUN == 1) THEN !Pang: only do once.
-        CALL IPSOIL_Inp (RNMODE,FILES,PATHSL,NSENS,ISWITCH)
+        CALL IPSOIL_Inp (nest, RNMODE,FILES,PATHSL,NSENS,ISWITCH) !Pang 2025.02.12
       ENDIF
 C-----------------------------------------------------------------------
 C     Call IPVAR 
@@ -277,7 +277,7 @@ C-----------------------------------------------------------------------
          ENDIF
          IF (NSENS .EQ. 1) THEN
             INITIAL = (ISWWAT .EQ.'N')
-            CALL SENS (NSENS,VARNO,VARTY,VRNAME,FTYPEN,LNIC,LNSA,
+            CALL SENS (nest, NSENS,VARNO,VARTY,VRNAME,FTYPEN,LNIC,LNSA, !Pang 2025.02.12
      &        WRESR,WRESND,ISIM,NYRS,IPLT,WMODI,ECONO,ECONAM,ECOTYP,
      &        PRCROP,SWINIT,INO3,INH4,RUN,FROP,YRIC,EFINOC,EFNFIX,
      &        CROP,IVRGRP,ISENS,MODEL, RNMODE, FILEX,FILEX_P, 
@@ -285,7 +285,8 @@ C-----------------------------------------------------------------------
             IF (INITIAL) THEN
                IF ((ISWNIT .EQ. 'Y') .OR. (ISWWAT .NE.'N')) THEN
                   NSENS = 0
-                  CALL IPSOIL_Inp(RNMODE,FILES,PATHSL,NSENS,ISWITCH)
+                  CALL IPSOIL_Inp(nest,RNMODE,FILES,PATHSL,
+     &                 NSENS,ISWITCH) !Pang 2025.02.12
                   CALL IPSLIN (FILEX,FILEX_P,LNIC,NLAYR,DUL,YRIC,
      &                 PRCROP,WRESR,WRESND,EFINOC,EFNFIX,PEDON,SLNO,DS,
      &                 SWINIT,INH4,INO3,ISWITCH,

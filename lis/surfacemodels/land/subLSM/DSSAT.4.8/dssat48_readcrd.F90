@@ -24,6 +24,7 @@ subroutine dssat48_readcrd()
     use LIS_logMod, only     : LIS_logunit , LIS_verify, LIS_endrun
     use dssat48_lsmMod, only       : dssat48_struc
 
+    use SMscaling_Mod!, only :SMscaling_setup
 !
 ! !DESCRIPTION:
 !
@@ -66,14 +67,6 @@ subroutine dssat48_readcrd()
             endif
        enddo
 
-   
-    !if (trim(dssat48_struc(n)%dssatstartcode) == "restart" ) then
-    !    call ESMF_ConfigFindLabel(LIS_config,"DSSAT48 restart file:",rc=rc)
-    !   do n=1,LIS_rc%nnest
-    !      call ESMF_ConfigGetAttribute(LIS_config,dssat48_struc(n)%rfile,rc=rc)
-    !      call LIS_verify(rc,'DSSAT48 restart file: not defined')
-    !  enddo
-    !endif
 
     Call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 restart file format:", rc=rc)
         do n=1,LIS_rc%nnest
@@ -85,6 +78,13 @@ subroutine dssat48_readcrd()
         do n=1,LIS_rc%nnest
             call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%expfile, rc=rc)
             call LIS_verify(rc, "DSSAT48 experiment file: not defined")
+        enddo
+
+    !PL soil data fill
+    call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 filled soil data:", rc = rc)
+        do n=1,LIS_rc%nnest
+            call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%filledSLNO, rc=rc)
+            call LIS_verify(rc, "DSSAT48 filled soil data: not defined")
         enddo
 
     !JE Coupling Options 
@@ -135,6 +135,44 @@ subroutine dssat48_readcrd()
          write(LIS_logunit,*) "[INFO] NOT Sending DSSAT LAI to LIS"
         endif
     enddo
+
+    !PL Bias Correction 2024.10.08-------------------------------------------------------------------
+    !----- Intra model bias correction is only conducted when the SM coupling is on.
+     call ESMF_ConfigFindLabel(LIS_config,"Soil moisture bias correction flag:",rc=rc)
+     do n=1,LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%bcflag, rc = rc)
+        call LIS_verify(rc,"Soil moisture bias correction flag: not defined") 
+        if ((dssat48_struc(n)%bcflag.ne.0).AND.(dssat48_struc(n)%bcflag.ne.1).AND.(dssat48_struc(n)%sm_coupling.eq.1)) then
+           write(LIS_logunit,*) "[ERR] Valid options for soil moisture BC are 0=No or 1=Yes"
+           call LIS_endrun()
+        endif
+        write(LIS_logunit,*) "[INFO] DSSAT SM BC Flag ", dssat48_struc(n)%bcflag
+        if ((dssat48_struc(n)%bcflag.eq.1).AND.(dssat48_struc(n)%sm_coupling.eq.1)) then
+          write(LIS_logunit,*) "[INFO] DSSAT SM BC ON"
+           Call SMscaling_setup
+        else
+         write(LIS_logunit,*) "[INFO] DSSAT SM BC OFF"
+        endif
+
+     enddo
+
+    !PL Planting Day Map 2025.03.05 -----------------------------------------------------
+    call ESMF_ConfigFindLabel(LIS_config, "DSSAT48 planting day map using:", rc = rc)
+    do n=1,LIS_rc%nnest
+        call ESMF_ConfigGetAttribute(LIS_config, dssat48_struc(n)%pldmap_switch, rc = rc)
+        call LIS_verify(rc,"DSSAT48 planting day map using: not defined")
+        if ((dssat48_struc(n)%pldmap_switch.ne.0).AND.(dssat48_struc(n)%pldmap_switch.ne.1)) then
+           write(LIS_logunit,*) "[ERR] Valid options for DSSAT planting day map using are 0=No or 1=Yes"
+           call LIS_endrun()
+        endif
+        write(LIS_logunit,*) "Planting day map using ", dssat48_struc(n)%pldmap_switch
+        if (dssat48_struc(n)%pldmap_switch .eq. 1) then
+          write(LIS_logunit,*) "LIS - DSSAT uses planting day map"
+        else
+         write(LIS_logunit,*) "LIS - DSSAT uses planting day from experiment file"
+        endif
+    enddo
+
 
     !---------------------------!
     ! Constant Parameters       !

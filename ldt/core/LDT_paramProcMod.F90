@@ -43,7 +43,8 @@ module LDT_paramProcMod
   use LDT_climateParmsMod
   use LDT_irrigationMod
   use LDT_LSMCropModifier_Mod
-
+  use LDT_plantingdayMod !P-W. Liu Feb 28 2025
+  
 !  use LDT_metforcingParmsMod
 
   use LDT_logMod
@@ -292,7 +293,7 @@ contains
     call LDT_routingParams_init
     call LDT_irrigation_init
     call LDT_LSMCropMod_init
-
+    call LDT_plantingday_init !P.W. Liu Feb 28 2025
   end subroutine ParamProcInit_LIS
 
 !BOP
@@ -349,7 +350,7 @@ contains
     call LDT_routingParams_init
     call LDT_irrigation_init
     call LDT_LSMCropMod_init
-    
+    call LDT_plantingday_init !P.W. Liu Feb 28 2025 
 
   end subroutine paramProcInit_LISHydro
 
@@ -663,7 +664,7 @@ contains
     call LDT_vegdata_readParamSpecs()
     call LDT_glacier_readParamSpecs()
     call LDT_glacierfrac_readParamSpecs()
-
+    call LDT_plantingday_readParamSpecs() !P.W. Liu Feb 28 2025
   end subroutine ReadParamSpecs_LIS
   
 
@@ -903,7 +904,7 @@ contains
     call LDT_vegdata_readParamSpecs()
     call LDT_glacier_readParamSpecs()
     call LDT_glacierfrac_readParamSpecs()
-
+    call LDT_plantingday_readParamSpecs() !P.W. Liu Feb 28 2025
   end subroutine readParamSpecs_LISHydro
 
 !BOP
@@ -2223,8 +2224,7 @@ contains
     call LDT_irrigation_writeHeader(n,ftn,dimID)
     call LDT_climateParms_writeHeader(n,ftn,dimID,met_dimID,monthID)
     call LDT_glacierfrac_writeHeader(n,ftn,dimID)
-
-
+    call LDT_plantingday_writeHeader(n,ftn,dimID) !P.W. Liu Feb 28 2025
 
 
 ! - Forcing-specific parameter headers
@@ -2275,6 +2275,7 @@ contains
     call LDT_irrigation_writeHeader(n,ftn,dimID)
     call LDT_climateParms_writeHeader(n,ftn,dimID,met_dimID,monthID)
     call LDT_glacierfrac_writeHeader(n,ftn,dimID)
+    call LDT_plantingday_writeHeader(n,ftn,dimID)
 
 ! - Forcing-specific parameter headers
     call LDT_forcingParms_writeHeader(n,ftn,dimID,met_dimID)
@@ -2316,6 +2317,7 @@ contains
     call LDT_irrigation_writeData(n,ftn)
     call LDT_climateParms_writeData(n,ftn)
     call LDT_glacierfrac_writeData(n,ftn)
+    call LDT_plantingday_writeData(n,ftn) !P.-W. Liu Feb 28 2025
 
 ! - Forcing-specific data
     call LDT_forcingParms_writeData(n,ftn)
@@ -2366,7 +2368,7 @@ contains
     call LDT_irrigation_writeData(n,ftn)
     call LDT_climateParms_writeData(n,ftn)
     call LDT_glacierfrac_writeData(n,ftn)
-
+    call LDT_plantingday_writeData(n,ftn) !P.-W. Liu Feb 28 2025
 
 ! - Forcing-specific data
     call LDT_forcingParms_writeData(n,ftn)

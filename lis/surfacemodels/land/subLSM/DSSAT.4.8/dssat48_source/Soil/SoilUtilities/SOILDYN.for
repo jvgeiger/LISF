@@ -1030,7 +1030,7 @@ C     Initialize curve number (according to J.T. Ritchie) 1-JUL-97 BDB
         !PRINT*, 'SLNO: ', dssat48_struc(n)%dssat48(t)%SLNO
 !       Brooks & Corey parameters
 	  call calBrokCryPara(TEXTURE(L), SAT(L), LL(L), nest, t,    !Input
-     &     DUL(L),                                        !Input
+     &     DUL(L),           !Input
      +     wcr_temp, Hb(L), lambda(L))                 !output
 
         IF (WCR(L) < -1.E-6) THEN

@@ -46,6 +46,7 @@ module dssat48_module
         !-------------------------------------------------------------------------
         !real               :: CDL
         CHARACTER*10 SLNO   !SOIL ID Pang 2024.02.07
+        integer             :: plantingday
         real                :: lat, lon, elev
         !-------------------------------------------------------------------------
         ! multilevel spatial parameter
@@ -673,6 +674,11 @@ module dssat48_module
         !---- Pang 2023.09.19 ---------------------------------------------------
         !------------------------------------------------------------------------
           LOGICAL :: doseasinit
+        !------------------------------------------------------------------------
+        !---- PWL Bias Correction -----------------------------------------------
+        !  INTEGER bcflag, bclayer, cdfbin
+        !  CHARACTER*20 bcmethod
+        !  CHARACTER*50 dssatcdffiles(4),lsmcdffiles(4)
     end type dssat48dec
           !INTEGER, PARAMETER :: &
           !Dynamic variable values

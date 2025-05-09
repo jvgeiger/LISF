@@ -99,6 +99,8 @@ subroutine dssat48_main(n)
     write(LIS_logunit,*) '[INFO] Call to the DSSAT48 Check Main routine ...'  
     write(fnest,'(i3.3)') n
 
+    !PRINT*, 'size(LIS_domain(n)%gindex): ', size(LIS_domain(n)%gindex) !Pang: Add to check
+
     alarmCheck = LIS_isAlarmRinging(LIS_rc, "DSSAT48 model alarm "// trim(fnest)) !MN  Bug in the toolkit 
     if (alarmCheck) Then
 
@@ -110,7 +112,9 @@ subroutine dssat48_main(n)
             lat = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lat
             lon = LIS_domain(n)%grid(LIS_domain(n)%gindex(col, row))%lon
             elev = LIS_domain(n)%tile(t)%elev
-
+            !PRINT*,'fproc, t: ', fproc, t
+            !PRINT*, 'col row: ', col, row
+            !PRINT*, 'LIS_domain(n)%gindex(col, row)', LIS_domain(n)%gindex(col, row)
             ! Spatial Information
             !PRINT*, "lat, lon, elev: ", lat, lon, elev
             dssat48_struc(n)%dssat48(t)%lat = lat
@@ -244,12 +248,22 @@ subroutine dssat48_main(n)
             ! instead of instantaneous 
             !JE Temporarily turn off to check timing (03.26.2024)
             IF (dssat48_struc(n)%sm_coupling.eq.1) THEN
-               do l=0, LIS_sfmodel_struc(n)%nsm_layers
-                  tmp_sm = (dssat48_struc(n)%dssat48(t)%LIS_sm(l) / dssat48_struc(n)%forc_count)
-                  ! write(LIS_logunit,*) 'Soil Moisture Layer: ',l,tmp_sm
+                  !PRINT*, 't, col, row: ', t, col, row
+                  !PRINT*, 'LIS_domain(n)%gindex(col, row): ', LIS_domain(n)%gindex(col, row)
+               do l=1, LIS_sfmodel_struc(n)%nsm_layers
+                  !if (dssat48_struc(n)%sensflag.eq.1.and.dssat48_struc(n)%smref.gt.0) then
+                  !    tmp_sm = dssat48_struc(n)%smref %Sensitivity Test
+                  !else
+                      tmp_sm = (dssat48_struc(n)%dssat48(t)%LIS_sm(l) / dssat48_struc(n)%forc_count) 
+                  !endif
                   dssat48_struc(n)%dssat48(t)%LIS_sm(l) = tmp_sm
                   !dssat48_struc(n)%dssat48(t)%LIS_sm(l) = NOAHMP401_struc(n)%noahmp401(t)%smc(l)
                end do
+                  !PW: Added Bias correction (10.18.2024)
+                  ! Intra model bias correction is conducted only when SM coupling is on.
+                  if (dssat48_struc(n)%bcflag.eq.1) then
+                      CALL SMscaling(n, LIS_domain(n)%gindex(col, row), dssat48_struc(n)%dssat48(t)%LIS_sm)
+                  endif
             ENDIF
 
             !JE Add in LAI coupling option (06.24.2024)
@@ -263,7 +277,6 @@ subroutine dssat48_main(n)
             YREND = dssat48_struc(n)%dssat48(t)%yrend
             MDATE = dssat48_struc(n)%dssat48(t)%mdate
             YRPLT = dssat48_struc(n)%dssat48(t)%yrplt
-
             RNMODE = dssat48_struc(n)%CONTROL(t)%rnmode
             YRDOY= tmp_year*1000 + JULIAN (tmp_day,MonthTxt(tmp_month),tmp_year)
             DONE = dssat48_struc(n)%dssat48(t)%DONE
@@ -374,6 +387,7 @@ subroutine dssat48_main(n)
                  dssat48_struc(n)%dssat48(t)%yrend = YREND
                  dssat48_struc(n)%dssat48(t)%mdate = MDATE
                  dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
+
                  dssat48_struc(n)%dssat48(t)%doseasinit = .TRUE.
                  dssat48_struc(n)%dssat48(t)%DONE = .TRUE.
             ENDIF
@@ -424,7 +438,13 @@ subroutine dssat48_main(n)
                  DAS = dssat48_struc(n)%CONTROL(t) % DAS
                  CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                     YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-
+                    if (dssat48_struc(n)%pldmap_switch.EQ.1) THEN !PL: assign planting day from data
+                       IF (dssat48_struc(n)%dssat48(t)%plantingday>0.AND.dssat48_struc(n)%dssat48(t)%plantingday<=366) Then
+                           YRPLT = (YRPLT/1000)*1000 + dssat48_struc(n)%dssat48(t)%plantingday !New planting day from map
+                       ELSE 
+                           YRPLT = (YRPLT/1000)*1000+0
+                       ENDIF
+                    endif
                  !JE Write variables to LIS_HIST file
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD1, &
                     value=dssat48_struc(n)%dssat48(t)%SW(1),&
@@ -476,6 +496,21 @@ subroutine dssat48_main(n)
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWFAC, & !Pang: 2025.01.14 for water stress
+                    value=dssat48_struc(n)%dssat48(t)%SWFAC,&             !0 - 1; 1 is no stress
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_TURFAC, & !Pang: 2025.01.14 for water stress
+                    value=dssat48_struc(n)%dssat48(t)%TURFAC,&             !0 - 1; 1 is no stress
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
+                    value=REAL(dssat48_struc(n)%dssat48(t)%RSTAGE),&
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+ 
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 IF (dssat48_struc(n)%send_lai.eq.1) THEN
@@ -524,7 +559,6 @@ subroutine dssat48_main(n)
                CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                    YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
                 !PRINT*, 'YRDOY, YRPLT, MDATE, YREND: ', YRDOY, YRPLT, MDATE, YREND
-
                !*********************************************************************** 
                !     OUTPUT
                !*********************************************************************** 
@@ -538,7 +572,6 @@ subroutine dssat48_main(n)
                ! PRINT*, 'SM2: ', dssat48_struc(n)%dssat48(t)%SW(2)
                ! PRINT*, 'SM3: ', dssat48_struc(n)%dssat48(t)%SW(3)
                ! PRINT*, 'SM4: ', dssat48_struc(n)%dssat48(t)%SW(4)
-
                !JE Write variables to LIS_HIST file
                call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD1, &
                   value=dssat48_struc(n)%dssat48(t)%SW(1),&
@@ -589,6 +622,21 @@ subroutine dssat48_main(n)
                   value=dssat48_struc(n)%dssat48(t)%SDWT*10.0,&
                   vlevel=1,unit="kg/ha",direction="-",&
                   surface_type=LIS_rc%lsm_index)
+              
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWFAC, & !Pang: 2025.01.14 for water stress
+                    value=dssat48_struc(n)%dssat48(t)%SWFAC,&           !0 - 1; 1 is no stress
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_TURFAC, & !Pang: 2025.01.14 for water stress
+                    value=dssat48_struc(n)%dssat48(t)%TURFAC,&           !0 - 1; 1 is no stress
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+               call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
+                    value=REAL(dssat48_struc(n)%dssat48(t)%RSTAGE),&
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
 
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
@@ -618,7 +666,6 @@ subroutine dssat48_main(n)
 
                  CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                     YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
-
                  !JE Write variables to LIS_HIST file
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SMD1, &
                     value=dssat48_struc(n)%dssat48(t)%SW(1),&
@@ -670,6 +717,22 @@ subroutine dssat48_main(n)
                     vlevel=1,unit="kg/ha",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_SWFAC, & !Pang: 2025.01.14 for water stress
+                    value=dssat48_struc(n)%dssat48(t)%SWFAC,&             !0 - 1; 1 is no stress
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_TURFAC, & !Pang: 2025.01.14 for water stress
+                    value=dssat48_struc(n)%dssat48(t)%TURFAC,&             !0 - 1; 1 is no stress
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
+                 call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
+                    value=REAL(dssat48_struc(n)%dssat48(t)%RSTAGE),&
+                    vlevel=1,unit="-",direction="-",&
+                    surface_type=LIS_rc%lsm_index)
+
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
@@ -709,7 +772,6 @@ subroutine dssat48_main(n)
             dssat48_struc(n)%dssat48(t)%yrend = YREND
             dssat48_struc(n)%dssat48(t)%mdate = MDATE
             dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
- 
             ! save state variables from local variables to global variables
             !CROCUS81_struc(n)%crocus81(t)%SNOWSWE(:)    = tmp_SNOWSWE(:)   
     
@@ -743,7 +805,7 @@ subroutine dssat48_main(n)
             end if
 
             if (dssat48_struc(n)%sm_coupling.eq.1) then
-               do l=0, LIS_sfmodel_struc(n)%nsm_layers
+               do l=1, LIS_sfmodel_struc(n)%nsm_layers
                   dssat48_struc(n)%dssat48(t)%LIS_sm(l) = 0.0
                 end do
            endif
