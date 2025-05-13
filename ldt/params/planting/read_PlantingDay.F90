@@ -209,8 +209,8 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
    endif
 
    allocate( gi(mi), li(mi) )
-   gi = float(water_class)
-   li = .false.
+   gi = 0.0
+   li = .true.
    lo1 = .false.;  lo2 = .false.
 
    ! Assign 2-D array to 1-D for grid transformation routines:
@@ -218,9 +218,6 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
    do r = 1, subpnr
       do c = 1, subpnc;  i = i + 1
          gi(i) = read_inputparm(c,r)
-         if( gi(i) .ne. 255 ) then !Why 255?
-           li(i) = .true.
-         endif
       enddo
    enddo
    deallocate(read_inputparm)
