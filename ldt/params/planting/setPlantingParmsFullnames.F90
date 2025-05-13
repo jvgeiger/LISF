@@ -19,14 +19,14 @@
 subroutine setPlantingParmsFullnames(n,datatype,source)
 
 ! !USES:
-  use LDT_plantingdayMod
-  use LDT_logMod
-  use LDT_paramDataMod
+   use LDT_plantingdayMod
+   use LDT_logMod
+   use LDT_paramDataMod
 
-  implicit none
-  integer,         intent(in) :: n
-  character(len=*),intent(in) :: datatype
-  character(len=*),intent(in) :: source
+   implicit none
+   integer,         intent(in) :: n
+   character(len=*),intent(in) :: datatype
+   character(len=*),intent(in) :: source
 
 ! !ARGUMENTS:
 
@@ -45,18 +45,21 @@ subroutine setPlantingParmsFullnames(n,datatype,source)
 !
 
    select case( datatype )
-
-    case( "Planting Day" )
-    select case( source )
-        case( "CREATE" )
-          LDT_plantingday_struc(n)%plantingday%standard_name =&
-             "Planting day by create"
+   case( "Planting Day" )
+      select case( source )
+      case( "CREATE" )
+         LDT_plantingday_struc(n)%plantingday%standard_name =&
+            "Planting day by create"
+      case default
+         write(LDT_logunit,*) "[ERR] Planting day source not recognized: ",trim(source)
+         write(LDT_logunit,*) " Program stopping ..."
+         call LDT_endrun
       end select
 
-    case default
-      write(LDT_logunit,*) "[ERR] Planting day type not recognized: ",trim(source)
+   case default
+      write(LDT_logunit,*) "[ERR] Planting day type not recognized: ",trim(datatype)
       write(LDT_logunit,*) " Program stopping ..."
-      stop
+      call LDT_endrun
    end select
 
 end subroutine setPlantingParmsFullnames
