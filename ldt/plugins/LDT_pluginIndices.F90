@@ -26,6 +26,7 @@ module LDT_pluginIndices
 !  17 Jul 2012: KR Arsenault -- Updated entries with capitalization rules
 !  01 Mar 2020: Yeosang Yoon -- Added MERIT DEM
 !  28 Jun 2022: Eric Kemp -- Added NAFPA background precipitation
+!  26 Feb 2025: Pang-Wei Liu -- Added planting day map
 !
 !EOP
   PRIVATE
@@ -329,7 +330,7 @@ module LDT_pluginIndices
 !-------------------------------------------------------------------------
 ! Planting Day sources
 !-------------------------------------------------------------------------
-   character*50, public,  parameter :: LDT_plantingdaycreateId = "CREATE" !P.-W. Liu Feb 26, 2025
+   character*50, public,  parameter :: LDT_plantingdaycreateId = "CREATE"
 
 !-------------------------------------------------------------------------
 ! Albedo data sources

@@ -7,14 +7,14 @@
 ! Administrator of the National Aeronautics and Space Administration.
 ! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
-#include "LDT_misc.h"
 !BOP
 !
 ! !ROUTINE: set_plantingday_attribs
 !  \label{set_plantingday_attribs}
 !
 ! !REVISION HISTORY:
-!  31 Jul 2017: Sujay Kumar; Initial Specification!
+!  28 Feb 2025: Pang-Wei Liu; Initial Specification!
+!
 ! !INTERFACE:
 subroutine set_plantingday_attribs()
 
@@ -24,19 +24,12 @@ subroutine set_plantingday_attribs()
 
   implicit none
 
-! !ARGUMENTS: 
+! !ARGUMENTS:
 
 ! !DESCRIPTION:
-!
-!  The arguments are:
-!  \begin{description}
-!  \end{description}
-!EOP      
+!  Set planting day attributes.
+!EOP
 !
   LDT_plantingday_struc(:)%plantingday%num_bins = 1
   LDT_plantingday_struc(:)%plantingday%vlevels = 1
-
-!  LDT_soils_struc(:)%texture_nlyrs%num_bins = 1
-!  LDT_soils_struc(:)%texture_nlyrs%vlevels = 1
-
 end subroutine set_plantingday_attribs

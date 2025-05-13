@@ -7,7 +7,6 @@
 ! Administrator of the National Aeronautics and Space Administration.
 ! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
-#include "LDT_misc.h"
 !BOP
 !
 ! !ROUTINE: setPlantingParmsFullnames
@@ -29,7 +28,7 @@ subroutine setPlantingParmsFullnames(n,datatype,source)
   character(len=*),intent(in) :: datatype
   character(len=*),intent(in) :: source
 
-! !ARGUMENTS: 
+! !ARGUMENTS:
 
 ! !DESCRIPTION:
 !
@@ -38,11 +37,11 @@ subroutine setPlantingParmsFullnames(n,datatype,source)
 !   \item[n]
 !     index of nest
 !   \item[datatype]
-!     Irrig data type
+!     Planting day map data type
 !   \item[source]
-!     Irrig dataset source
+!     Planting day map dataset source
 !   \end{description}
-!EOP      
+!EOP
 !
 
    select case( datatype )

@@ -15,10 +15,10 @@ module LDT_plantingdayMod
 !
 ! !DESCRIPTION:
 !  The code in this file implements routines to read planting day map
-!  for DSSAT model. 
+!  for DSSAT model.
 !  \subsubsection{Overview}
-!  This routines in this module provides routines to read the 
-!  planting day. 
+!  This routines in this module provides routines to read the
+!  planting day.
 !
 ! !REVISION HISTORY:
 !
@@ -65,11 +65,11 @@ module LDT_plantingdayMod
 contains
 
   subroutine LDT_plantingday_readParamSpecs
-    
+
     character*100     :: source
     integer           :: rc
     integer           :: n
-    
+
     allocate(LDT_plantingday_struc(LDT_rc%nnest))
 
     call ESMF_ConfigFindLabel(LDT_config,"Planting day data source:",rc=rc)
@@ -84,10 +84,10 @@ contains
 
 
 !BOP
-! 
+!
 ! !ROUTINE: LDT_plantingday_init
 ! \label{LDT_plantingday_init}
-! 
+!
 ! !INTERFACE:
   subroutine LDT_plantingday_init
 ! !USES:
@@ -97,13 +97,13 @@ contains
 
 ! !DESCRIPTION:
 !
-! Allocates memory for data structures for reading 
-! the planting day datasets 
-! 
-!  The routines invoked are: 
+! Allocates memory for data structures for reading
+! the planting day datasets
+!
+!  The routines invoked are:
 !  \begin{description}
 !   \item[plantingdaysetup](\ref{plantingdaysetup}) \newline
-!    calls the registry to invoke the drainage tile setup methods. 
+!    calls the registry to invoke the drainage tile setup methods.
 !  \end{description}
 !
 !EOP
@@ -124,21 +124,21 @@ contains
         plantingday_select = .true.
       endif
    enddo
-   
+
    if(plantingday_select) then
      write(LDT_logunit,*)" - - - - - - - - - - Planting Day - - - - - - - - - - - - -"
    endif
 
    do n=1,LDT_rc%nnest
-   
-      if( plantingday_select ) then 
+
+      if( plantingday_select ) then
 
          call set_plantingday_attribs( n, LDT_plantingday_struc(n)%plantingday%source )
 
          LDT_plantingday_struc(n)%plantingday%vlevels = LDT_plantingday_struc(n)%plantingday%num_bins
          allocate(LDT_plantingday_struc(n)%plantingday%value(&
               LDT_rc%lnc(n),LDT_rc%lnr(n),&
-              LDT_plantingday_struc(n)%plantingday%vlevels))       
+              LDT_plantingday_struc(n)%plantingday%vlevels))
       endif
 
    enddo
@@ -161,9 +161,9 @@ contains
           call LDT_verify(rc,'Planting day spatial transform: option not specified in the config file')
        enddo
 
-     ! Set units and full names: (Pang: Not sure what is this for 08/17/2022)
+     ! Set units and full names:
        do n=1,LDT_rc%nnest
-          LDT_plantingday_struc(n)%plantingday%units="DOY"    !"-"
+          LDT_plantingday_struc(n)%plantingday%units="DOY"
           call setPlantingParmsFullnames( n, "Planting Day", &
                   LDT_plantingday_struc(n)%plantingday%source )
        enddo
@@ -185,7 +185,7 @@ contains
     end if
 
 !-- Read Planting day maps:
-    do n = 1,LDT_rc%nnest 
+    do n = 1,LDT_rc%nnest
     !- Planting day:
        if( LDT_plantingday_struc(n)%plantingday%selectOpt == 1 ) then
           write(LDT_logunit,*) "Reading planting day map: "//&
@@ -227,7 +227,7 @@ contains
 
   subroutine LDT_plantingday_writeData(n,ftn)
 
-    integer     :: n 
+    integer     :: n
     integer     :: ftn
 
     if( LDT_plantingday_struc(n)%plantingday%selectOpt.gt.0 ) then

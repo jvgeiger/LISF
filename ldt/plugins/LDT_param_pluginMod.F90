@@ -414,7 +414,7 @@ contains
     external read_ALMIPII_droot
 !    external read_UMDCROPMAP_rootdepth
 
-    external read_PlantingDay !P.-W. Liu 26 Feb 2025
+    external read_PlantingDay
 ! _______________________________________
 
 ! - Landcover sources:
@@ -479,7 +479,7 @@ contains
     call registerreadcroptype(trim(LDT_monfredacropId)//char(0), read_Monfredaetal08_croptype)
     call registerreadcroptype(trim(LDT_cdlID)//char(0), read_CDL)
 
-! - Planting day sources: !P.-W. Liu 26 Feb 2025
+! - Planting day sources:
     call registerreadplantingday(trim(LDT_plantingdaycreateId)//char(0), read_PlantingDay)
 
 ! - Root depth:

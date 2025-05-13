@@ -52,10 +52,9 @@ struct croplcnode
 
 struct croplcnode* croplc_table = NULL;
 
-struct plantingdaynode //P.-W. Liu 26 Feb 2025
+struct plantingdaynode
 {
   char *name;
-//  void (*func)(int*, float*);
   void (*func)(int*, int*, float*);
 
   struct plantingdaynode* next;
@@ -241,20 +240,20 @@ void FTN(readcroptype)(char *j,int *n,int *nct,float *array, int len)
 }
 
 //BOP
-// !ROUTINE: registerreadplantingday //P.-W. Liu 26 Feb 2025
+// !ROUTINE: registerreadplantingday
 // \label{registerreadplantingday}
-// 
+//
 // !INTERFACE:
 void FTN(registerreadplantingday)(char *j, void (*func)(int*, int*, float*),int len)
-//  
+//
 // !DESCRIPTION:
-//  Creates an entry in the registry for the routine to 
+//  Creates an entry in the registry for the routine to
 //  read the planting day data
-// 
-//  The arguments are: 
+//
+//  The arguments are:
 //  \begin{description}
 //  \item[j]
-//   index of the crop type source
+//   index of the planting day source
 //  \end{description}
   //EOP
 {
@@ -287,20 +286,22 @@ void FTN(registerreadplantingday)(char *j, void (*func)(int*, int*, float*),int 
 //BOP
 // !ROUTINE: readplantingday
 // \label{readplantingday}
-// 
+//
 // !INTERFACE:
 void FTN(readplantingday)(char *j,int *n,int *nt,float *array, int len)
-//  
-// !DESCRIPTION: 
+//
+// !DESCRIPTION:
 //  Invokes the routine from the registry to read the
 //  planting day
-// 
-//  The arguments are: 
+//
+//  The arguments are:
 //  \begin{description}
 //  \item[n]
 //   index of the nest
 //  \item[j]
 //   index of the planting day source
+//  \item[nt]
+//   number of bins
 //  \item[array]
 //   pointer to the planting day map
 //  \end{description}

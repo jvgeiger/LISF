@@ -16,7 +16,7 @@
 ! !REVISION HISTORY:
 !  03 Sept 2004: Sujay Kumar; Initial Specification
 !  21 Feb 2025: P.-W. Liu: Modify the reader for planting day
-!  
+!
 ! !INTERFACE:
 subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
 
@@ -25,7 +25,7 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
   use LDT_coreMod,     only : LDT_config, LDT_rc
   use LDT_logMod,      only : LDT_logunit, LDT_getNextUnitNumber, &
        LDT_releaseUnitNumber, LDT_verify, LDT_endrun
-  use LDT_gridmappingMod    
+  use LDT_gridmappingMod
   use LDT_fileIOMod
   use LDT_paramTileInputMod, only: param_index_fgrdcalc
   use LDT_plantingdayMod
@@ -38,14 +38,14 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
 
   implicit none
 
-! !ARGUMENTS: 
+! !ARGUMENTS:
   integer, intent(in) :: n
   integer, intent(in) :: num_bins
   real, intent(inout) :: fgrd(LDT_rc%lnc(n),LDT_rc%lnr(n),num_bins)
 
 !
 ! !DESCRIPTION:
-!  This subroutine reads the planting day map into the input file.  
+!  This subroutine reads the planting day map into the input file.
 !
 !  The arguments are:
 !  \begin{description}
@@ -54,13 +54,13 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
 !   \item[fgrd]
 !     output field with the planting day
 !   \end{description}
-!EOP      
+!EOP
    integer :: water_class
    integer :: ftn
    real    :: temp(LDT_rc%lnc(n),LDT_rc%lnr(n))
    real    :: gridcnt(LDT_rc%lnc(n),LDT_rc%lnr(n),num_bins)
    logical :: file_exists
-  
+
    logical :: file_read_status
 
    integer :: i, t, c, r, line
@@ -136,8 +136,8 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
    param_gridDesc(1)  = 0.        ! Latlon
    param_gridDesc(2)  = xsize
    param_gridDesc(3)  = ysize
-   param_gridDesc(4)  = y2        ! LL lat 
-   param_gridDesc(5)  = x2        ! LL lon 
+   param_gridDesc(4)  = y2        ! LL lat
+   param_gridDesc(5)  = x2        ! LL lon
    param_gridDesc(6)  = 128
    param_gridDesc(7)  = y1        !UR lat
    param_gridDesc(8)  = x1        !UR lon
@@ -172,7 +172,7 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
    enddo
    deallocate(zval)
 
-!- Map Parameter Grid Info to LIS Target Grid/Projection Info -- 
+!- Map Parameter Grid Info to LIS Target Grid/Projection Info --
    subparam_gridDesc = 0.
    call LDT_RunDomainPts( n, LDT_plantingday_struc(n)%plantingday_proj, param_gridDesc, &
                      glpnc, glpnr, subpnc, subpnr,  &
@@ -206,7 +206,7 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
       write(LDT_logunit,*) "  option (e.g., mode, neighbor, tile, etc.)."
       write(LDT_logunit,*) "Program stopping ..."
       call LDT_endrun
-   endif !Do we need this? Pang
+   endif
 
    allocate( gi(mi), li(mi) )
    gi = float(water_class)
@@ -226,7 +226,7 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
    deallocate(read_inputparm)
 
 ! Apply the spatial transform option:
-   select case( LDT_plantingday_struc(n)%plantingday_gridtransform) 
+   select case( LDT_plantingday_struc(n)%plantingday_gridtransform)
 
    ! (1) Single-layer selection:
       case("none", "mode", "neighbor" )
@@ -237,7 +237,7 @@ subroutine read_PlantingDay(n, num_bins, fgrd) !PlantingDay Layer
 
 !
 !    !- Aggregate:
-!  
+!
       !- Convert 1D dominant planting day to 2D grid arrays:
           i = 0
           do r = 1, LDT_rc%lnr(n)
