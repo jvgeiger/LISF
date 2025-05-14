@@ -22,7 +22,7 @@ module LDT_plantingdayMod
 !
 ! !REVISION HISTORY:
 !
-!  24 Feb 2025: Pang-Wei Liu; Create for palnting day data
+!  24 Feb 2025: Pang-Wei Liu; Create for planting day data
 !
   use ESMF
   use LDT_coreMod
