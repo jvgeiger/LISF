@@ -16,20 +16,30 @@
 !  28 Feb 2025: Pang-Wei Liu; Initial Specification!
 !
 ! !INTERFACE:
-subroutine set_plantingday_attribs()
+subroutine set_plantingday_attribs(n, source)
 
 ! !USES:
-  use LDT_paramDataMod
   use LDT_plantingdayMod
 
   implicit none
 
 ! !ARGUMENTS:
+  integer,          intent(in) :: n
+  character(len=*), intent(in) :: source
+
 
 ! !DESCRIPTION:
 !  Set planting day attributes.
+
+!  The arguments are:
+!  \begin{description}
+!   \item[n]
+!     index of nest
+!   \item[source]
+!     Planting day map source
+!   \end{description}
 !EOP
 !
-  LDT_plantingday_struc(:)%plantingday%num_bins = 1
-  LDT_plantingday_struc(:)%plantingday%vlevels = 1
+  LDT_plantingday_struc(n)%plantingday%num_bins = 1
+  LDT_plantingday_struc(n)%plantingday%vlevels = 1
 end subroutine set_plantingday_attribs
