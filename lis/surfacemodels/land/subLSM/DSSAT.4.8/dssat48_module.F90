@@ -675,10 +675,6 @@ module dssat48_module
         !------------------------------------------------------------------------
           LOGICAL :: doseasinit
         !------------------------------------------------------------------------
-        !---- PWL Bias Correction -----------------------------------------------
-        !  INTEGER bcflag, bclayer, cdfbin
-        !  CHARACTER*20 bcmethod
-        !  CHARACTER*50 dssatcdffiles(4),lsmcdffiles(4)
     end type dssat48dec
           !INTEGER, PARAMETER :: &
           !Dynamic variable values

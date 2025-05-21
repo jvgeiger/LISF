@@ -7,7 +7,6 @@
 ! Administrator of the National Aeronautics and Space Administration.
 ! All Rights Reserved.
 !-------------------------END NOTICE -- DO NOT EDIT-----------------------
-#include "LIS_misc.h"
 !BOP
 !
 ! !ROUTINE: dssat48_setup
@@ -56,7 +55,6 @@ subroutine dssat48_setup()
 !  integer, allocatable :: level_data(:, :)
   integer, allocatable :: placeholder(:,:), placeholder_PLD(:,:)
   CHARACTER*10   :: mukey
-  integer*2 :: plantingday
 ! _______________________________________________________________
 
   mtype = LIS_rc%lsm_index
