@@ -1149,12 +1149,14 @@ subroutine read_NASASMAP_E_data(n, k, pass, fname, smobs_ip)
      do c=1,NASASMAPsm_struc(n)%nc        
         sm_data(t) = sm_field(c,r)
 
+        ! FOR LIS-DSSAT.  DO NOT MERGE INTO MASTER.
         if(vwc_field(c,r).gt. 10 ) then !MN Aply QC : if VWC > 5 kg/m2
                                         !PL Apply QC : if VWC > 10 kg/m2
            sm_data(t) = LIS_rc%udef
         else
 
            if(sm_data(t).ne.-9999.0) then 
+              ! FOR LIS-DSSAT.  DO NOT MERGE INTO MASTER.
               !if(ibits(sm_qa(c,r),0,1).eq.0) then !PL: Turn off sm_qa
                  sm_data_b(t) = .true.
               !else
