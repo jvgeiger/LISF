@@ -955,7 +955,7 @@
 !  Called by: 
 !  Calls    : 
 !=======================================================================
-	SUBROUTINE calBrokCryPara(TEXTURE, wcs, wcpwp, nest, t, wcfc, !Input
+	SUBROUTINE calBrokCryPara(TEXTURE, wcs, wcpwp, nest, t, wcfc,  !Input
      +   wcr, hb, lambda)  !output                         
       INTEGER nest, t
       CHARACTER*12 TEXTURE

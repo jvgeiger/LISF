@@ -1039,7 +1039,7 @@ module LIS_histDataMod
     integer :: LIS_MOC_SWDELTXD4 = -9999
     integer :: LIS_MOC_SWFAC = -9999
     integer :: LIS_MOC_TURFAC = -9999
-    integer :: LIS_MOC_PHENOL    = -9999
+    integer :: LIS_MOC_PHENOL = -9999
 ! .......
 
 
