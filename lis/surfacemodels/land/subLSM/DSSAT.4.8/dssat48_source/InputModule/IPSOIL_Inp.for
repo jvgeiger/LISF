@@ -32,13 +32,14 @@ C
 C  HDLAY  :
 C=======================================================================
 
-      SUBROUTINE IPSOIL_Inp (RNMODE,FILES,PATHSL,NSENS,ISWITCH)
+      SUBROUTINE IPSOIL_Inp (nest,RNMODE,FILES,PATHSL,NSENS,ISWITCH) !Pang 2025.02.12
 
       USE ModuleDefs
+      use dssat48_lsmMod, only : dssat48_struc
       IMPLICIT NONE
 
       INCLUDE 'COMSOI.blk'
-
+      INTEGER nest
       CHARACTER*1   LINE(80),RNMODE,BLANK,ANS,UPCASE
       CHARACTER*5   MH(NL)
       CHARACTER*6   ERRKEY
@@ -299,7 +300,8 @@ C
 !            ELSE
              !----- Go around the missing soil Pang 2024.02.09 ------------
               OPEN (LUNSL, FILE = FILESS,STATUS = 'OLD',IOSTAT=ERR)
-              SLNO = 'LC00401983' !Pang Randomly select a soil type to replace.
+              !SLNO = 'LC00401983' !Pang Randomly select a soil type to replace.
+              SLNO = dssat48_struc(nest)%filledSLNO !Pang use filled soil to replace
               LINSOL = 0          !Pang
               GO TO 5023          !Pang
               !------------------------------------------------------------
@@ -558,9 +560,6 @@ C** WDB End Changes
                 ENDIF !Pang 2024.02.13
               ENDIF
               IF (DUL(J) .LT. 1.E-3) THEN
-                 PRINT*, 'Am I here?' ! Testing 2024.05.14
-                 PRINT*, 'J, DUL(J): ', J, DUL(J)
-                 PRINT*, 'SLNO: ', SLNO
                  CALL ERROR (ERRKEY,13,FILES,LINSOL_1+J-1)
               ENDIF
               IF (ABS(SAT(J) - DUL(J)) .LT. 1.E-2) THEN

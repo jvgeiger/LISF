@@ -46,6 +46,7 @@ contains
 !EOP
 
     use LISlsmSM_obsMod,           only : LISlsmSM_obsInit
+    use LISdssatSM_obsMod,         only : LISdssatSM_obsInit    !P-W. Liu
     use LISlsmTEFF_obsMod,         only : LISlsmTEFF_obsInit  !Y.Kwon
     use syntheticsm_obsMod,        only : syntheticsm_obsinit
     use NASA_AMSREsm_obsMod,       only : NASA_AMSREsm_obsInit
@@ -78,6 +79,7 @@ contains
     use SMAPEOPLSMobsMod,          only : SMAPEOPLSMobsinit       !Y.Kwon
 
     external readLISlsmSMObs
+    external readLISdssatSMObs      !P-W. Liu
     external readLISlsmTEFFObs    !Y.Kwon
     external readsyntheticsmobs
     external readNASA_AMSREsmObs
@@ -111,6 +113,10 @@ contains
 
     call registerdaobssetup(trim(LDT_LISlsmSMobsId)//char(0), LISlsmSM_obsInit)
     call registerdaobsread(trim(LDT_LISlsmSMobsId)//char(0), readLISlsmSMObs)
+
+    !P-W. Liu
+    call registerdaobssetup(trim(LDT_LISdssatSMobsId)//char(0), LISdssatSM_obsInit)
+    call registerdaobsread(trim(LDT_LISdssatSMobsId)//char(0), readLISdssatSMObs)
 
     !Y.Kwon
     call registerdaobssetup(trim(LDT_LISlsmTEFFobsId)//char(0), LISlsmTEFF_obsInit)

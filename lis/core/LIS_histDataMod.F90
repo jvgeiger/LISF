@@ -532,6 +532,10 @@ module LIS_histDataMod
   public :: LIS_MOC_SWDELTXD2
   public :: LIS_MOC_SWDELTXD3
   public :: LIS_MOC_SWDELTXD4
+  public :: LIS_MOC_SWFAC
+  public :: LIS_MOC_TURFAC
+  public :: LIS_MOC_PHENOL
+
   ! AWRAL
   public :: LIS_MOC_SR
   public :: LIS_MOC_SG
@@ -1033,6 +1037,9 @@ module LIS_histDataMod
     integer :: LIS_MOC_SWDELTXD2 = -9999
     integer :: LIS_MOC_SWDELTXD3 = -9999
     integer :: LIS_MOC_SWDELTXD4 = -9999
+    integer :: LIS_MOC_SWFAC = -9999
+    integer :: LIS_MOC_TURFAC = -9999
+    integer :: LIS_MOC_PHENOL = -9999
 ! .......
 
 
@@ -5626,6 +5633,48 @@ contains
        call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SWDELTXD4,&
             LIS_histData(n)%head_lsm_list,&
             n,1,ntiles,(/"m3/m3"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+!integer :: LIS_MOC_SWFAC = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SWFAC:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SWFAC",&
+         "dssat_swfac",&
+         "DSSAT water tress photosynthesis; 0-1, 0 is no stress",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SWFAC,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"-"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+!integer :: LIS_MOC_TURFAC = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_TURFAC:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_TURFAC",&
+         "dssat_turfac",&
+         "DSSAT water tress expansion; 0-1, 0 is no stress",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_TURFAC,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"-"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+!integer :: LIS_MOC_PHENOL = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_PHENOL:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_PHENOL",&
+         "dssat_phenol",&
+         "DSSAT phenology stage",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_PHENOL,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"-"/),&
             1,(/"-"/),1,1,1,&
             model_patch=.true.)
     endif

@@ -26,6 +26,7 @@ module LDT_pluginIndices
 !  17 Jul 2012: KR Arsenault -- Updated entries with capitalization rules
 !  01 Mar 2020: Yeosang Yoon -- Added MERIT DEM
 !  28 Jun 2022: Eric Kemp -- Added NAFPA background precipitation
+!  26 Feb 2025: Pang-Wei Liu -- Added planting day map
 !
 !EOP
   PRIVATE
@@ -68,6 +69,8 @@ module LDT_pluginIndices
 !-------------------------------------------------------------------------
    character*50, public,  parameter :: LDT_LISlsmSMobsId              &
         = "LIS LSM soil moisture"
+   character*50, public,  parameter :: LDT_LISdssatSMobsId              &
+        = "LIS DSSAT soil moisture"
    character*50, public,  parameter :: LDT_LISlsmTEFFobsId            &
         = "LIS LSM effective soil temperature"                               !Y.Kwon
    character*50, public,  parameter :: LDT_syntheticSMobsId           &
@@ -324,6 +327,10 @@ module LDT_pluginIndices
    character*50, public,  parameter :: LDT_irriggwratioId  = "USGS_Native"
 
    character*50, public,  parameter :: LDT_userinputirrigId = "UserDerived"
+!-------------------------------------------------------------------------
+! Planting Day sources
+!-------------------------------------------------------------------------
+   character*50, public,  parameter :: LDT_plantingdaycreateId = "CREATE"
 
 !-------------------------------------------------------------------------
 ! Albedo data sources

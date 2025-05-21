@@ -220,7 +220,7 @@ C=====================================================================
       dssat48_struc(nest)%dssat48(t)%IMM = IMM 
       dssat48_struc(nest)%dssat48(t)%LITC = LITC
       dssat48_struc(nest)%dssat48(t)%MNR = MNR
-      dssat48_struc(nest)%dssat48(t)%newCO2 =  newCO2
+      dssat48_struc(nest)%dssat48(t)%newCO2 = newCO2
       dssat48_struc(nest)%dssat48(t)%DRAIN = DRAIN
       dssat48_struc(nest)%dssat48(t)%DRN = DRN
 !-----------------------------------------------------------------------

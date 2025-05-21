@@ -72,9 +72,16 @@ module dssat48_lsmMod
      !-------------------------------------------------------------------------
      character(len=LIS_CONST_PATH_LEN) :: rfile
      character*256      :: rformat
-     integer :: sm_coupling, lai_coupling, send_lai
+     integer :: sm_coupling, lai_coupling, send_lai, pldmap_switch
      character*12 :: expfile
      character*12 :: dssatstartcode
+     character*10 :: filledSLNO
+     !-------------------------------------------------------------------------
+     ! Bias Correction Seting
+     !-------------------------------------------------------------------------
+     INTEGER :: bcflag
+     !INTEGER :: sensflag
+     !REAL    :: smref
      !-------------------------------------------------------------------------
      !  DSSAT I/O
      !-------------------------------------------------------------------------
@@ -185,7 +192,6 @@ contains
     
     ! read configuation information from lis.config file
     call dssat48_readcrd()
-    !PRINT*,'Im in dssat48_init'
     
         do n=1, LIS_rc%nnest
             !Get  Dssat version # which is used to read dssat prms files
@@ -266,7 +272,6 @@ contains
             do t=1, LIS_rc%npatch(n, LIS_rc%lsm_index)
             !do t=121,121 !PL for testing code
                  !Start CSM
-                 !FILEX = 'NASA2019.SQX' !This can be obtained from lis.config
                  FILEX = dssat48_struc(n)%expfile
                   INQUIRE (FILE = FILEX, EXIST = FEXIST)
                    IF (.NOT. FEXIST) THEN
@@ -327,7 +332,6 @@ contains
                           FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       &         !Input
                           RNMODE , ROTNUM, RUN, TRTNUM,                   &         !Input
                           dssat48_struc(n)%ISWITCH(t), dssat48_struc(n)%CONTROL(t)) !Output
-                          !PRINT*, 'What is the mukey now: ', dssat48_struc(n)%dssat48(t)%SLNO
                   !Check to see if the temporary file exists
                   !Needed when we still use .INP file
                    INQUIRE (FILE = FILEIO,EXIST = FEXIST)
@@ -377,7 +381,7 @@ contains
                   dssat48_struc(n)%dssat48(t)%trtall= TRTALL
                   dssat48_struc(n)%dssat48(t)%nreps = NREPS
                   dssat48_struc(n)%dssat48(t)%yrdoy_end = YRDOY_END
-
+   
                   !-------------------- LAND INITIALIZATION ---------------------------------------------------
                   CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                   YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
@@ -385,7 +389,6 @@ contains
                   dssat48_struc(n)%dssat48(t)%mdate = MDATE
                   dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
                   dssat48_struc(n)%dssat48(t)%DONE = .TRUE. !Skip CSM INIT when going to dssat48_main
-
                  !------  SEAS INITIALIZATION ----------------------------------------------------------------
                  !  DO SEAS INIT ANYWAY IN lsmMod YO INITIALIZE ALL VARS AND PPRMS --------------------------
                   REPNO = dssat48_struc(n)%CONTROL(t)%repno !May not really needed for Q mode
@@ -414,8 +417,18 @@ contains
                  dssat48_struc(n)%CONTROL(t) % ENDYRS  = ENDYRS
                  dssat48_struc(n)%CONTROL(t) % REPNO   = REPNO
                  DAS = dssat48_struc(n)%CONTROL(t) % DAS
+
                  CALL LAND(dssat48_struc(n)%CONTROL(t), dssat48_struc(n)%ISWITCH(t), &
                     YRPLT, MDATE, YREND, n, t) !Pang: add n, t for ensembles and tiles
+
+                 if (dssat48_struc(n)%pldmap_switch.EQ.1) THEN !PL: assign planting day from data
+                    IF (dssat48_struc(n)%dssat48(t)%plantingday>0.AND.dssat48_struc(n)%dssat48(t)%plantingday<=366) Then                      
+                       YRPLT = (YRPLT/1000)*1000 + dssat48_struc(n)%dssat48(t)%plantingday !New planting day from map
+                    ELSE
+                       YRPLT = (YRPLT/1000)*1000+0
+                    ENDIF
+                 endif
+ 
                  dssat48_struc(n)%dssat48(t)%yrend = YREND
                  dssat48_struc(n)%dssat48(t)%mdate = MDATE
                  dssat48_struc(n)%dssat48(t)%yrplt = YRPLT
@@ -459,5 +472,9 @@ contains
            ! call LIS_verify(status,&
            !      'ESMF_StateAdd failed for SM in dssat48_init')
         enddo
+        !JG Greate space for INP
+        if ( LIS_masterproc ) then
+           call LIS_create_output_directory('INP')
+        endif
     end subroutine dssat48_init
 end module dssat48_lsmMod

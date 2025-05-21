@@ -215,6 +215,8 @@
       EXTFAC = dssat48_struc(nest)%dssat48(t)%EXTFAC
       WATFAC = dssat48_struc(nest)%dssat48(t)%WATFAC
       CNRAT = dssat48_struc(nest)%dssat48(t)%CNRAT
+
+      LITE = dssat48_struc(nest)%dssat48(t)%LITE
 !***********************************************************************
 !***********************************************************************
 !     Run Initialization - Called once per simulation
@@ -977,6 +979,7 @@ C***********************************************************************
       dssat48_struc(nest)%dssat48(t)%WATFAC = WATFAC
       dssat48_struc(nest)%dssat48(t)%CNRAT = CNRAT
 
+      dssat48_struc(nest)%dssat48(t)%LITE = LITE
 C-----------------------------------------------------------------------
       RETURN
       END SUBROUTINE SoilOrg
