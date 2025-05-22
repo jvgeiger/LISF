@@ -577,8 +577,7 @@ module dssat48_module
            !-----------------------------------------------------------------------
            ! PLANT - MZ_CERES - MZ_GROSUB & MZ_IX_GROSUB & SW_GROSUB
            ! Pang 2024.01.30
-             INTEGER LEAFNO
-             REAL  RSTAGE !JE 03.21.2025
+             INTEGER LEAFNO, RSTAGE
              REAL APTNUP, AREALF, CANNAA, CANWAA, CANWH, CARBO, GNUP, GPSM, GRNWT, GRORT, HI, HIP, &
                   PCNGRN, PCNL, PCNRT, PCNST, PCNVEG, PODNO, PConc_Root, PConc_Seed, &
                   PConc_Shel, PConc_Shut, PODWT, PSTRES2, PTF, RLWR, ROOTN, RTWT, &
