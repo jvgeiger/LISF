@@ -1830,7 +1830,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
 
       ! Absolute daily leaf damage
           IF (dssat48_struc(nest)%lai_coupling.EQ.1) THEN
-             IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GT.0.0.AND. 
+             IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GT.0.0.AND.
      &          WTLF.GT.0.0) THEN
                    SLA = LAI*10000./WTLF  !JE Specific leaf area (cm2/g)
                    write(LIS_logunit,*) "Tile: ", t
@@ -1839,7 +1839,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
                    LAIDOT = LAI-ELAI !JE (m2/m2)
                    write(LIS_logunit,*) "DSSAT LAI (LAI): ", LAI
                    write(LIS_logunit,*) "LIS LAI: ", ELAI
-                   LAIDOT = LAIDOT * 10000. !JE Convert to cm2/m2 
+                   LAIDOT = LAIDOT * 10000. !JE Convert to cm2/m2
                    IF (SLA.GT.0.0) THEN
                       WLIDOT = LAIDOT/SLA !JE g/m2/day (assuming SLA is cm2/g as in the comments)
                    ENDIF

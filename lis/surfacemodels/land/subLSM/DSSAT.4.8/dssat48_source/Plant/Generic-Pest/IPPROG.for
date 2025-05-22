@@ -27,7 +27,6 @@ C for the experiment being simulated.
 C----------------------------------------------------------------------
       USE MODULEDEFS
       IMPLICIT NONE
-
 C-----------------------------------------------------------------------
       
       CHARACTER*6 ERRKEY

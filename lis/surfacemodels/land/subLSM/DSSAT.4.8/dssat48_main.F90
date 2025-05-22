@@ -145,16 +145,16 @@ subroutine dssat48_main(n)
             !
             ! JE 04.11.2025 Check for freezing temps (Delete after debugging)
             !
- 
-            !if (dssat48_struc(n)%dssat48(t)%forc_tmax.le.0.0) then 
-            !   dssat48_struc(n)%dssat48(t)%forc_tmax = 1.0 
-            !end if 
+
+            !if (dssat48_struc(n)%dssat48(t)%forc_tmax.le.0.0) then
+            !   dssat48_struc(n)%dssat48(t)%forc_tmax = 1.0
+            !end if
 
             !if (dssat48_struc(n)%dssat48(t)%forc_tmin.le.0.0) then
             !   dssat48_struc(n)%dssat48(t)%forc_tmin = 1.0
-            !end if 
+            !end if
 
-            ! End temperature debugging 
+            ! End temperature debugging
 
             ! Tdew: average daily dewpoint temperature (C)
             tmp_tdew      = (dssat48_struc(n)%dssat48(t)%tdew / dssat48_struc(n)%forc_count) - 273.15 !Convert from K to C
@@ -758,7 +758,7 @@ subroutine dssat48_main(n)
                     value=dssat48_struc(n)%dssat48(t)%SUMDTT,&
                     vlevel=1,unit="C",direction="-",&
                     surface_type=LIS_rc%lsm_index)
-               
+
                 ! Send DSSAT LAI to LIS JE 2024.08.14
                 !write(LIS_logunit,*) "DSSAT transfer flag: ", dssat48_struc(n)%send_lai
                 ! Send DSSAT LAI to LIS JE 2024.08.14
