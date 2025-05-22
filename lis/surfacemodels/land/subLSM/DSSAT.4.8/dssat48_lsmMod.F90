@@ -391,7 +391,7 @@ contains
                   REPNO = dssat48_struc(n)%CONTROL(t)%repno !May not really needed for Q mode
 
                 ! Intitialize phenology to missing
-                dssat48_struc(n)%dssat48(t)%RSTAGE = -9999
+                dssat48_struc(n)%dssat48(t)%RSTAGE = LIS_rc%udef
 
                  !!CONDITIONS
                  !!PRINT*, 'NYRS, ENDYRS, MULTI bf: ', NYRS, ENDYRS, MULTI
