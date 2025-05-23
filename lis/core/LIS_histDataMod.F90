@@ -532,6 +532,12 @@ module LIS_histDataMod
   public :: LIS_MOC_SWDELTXD2
   public :: LIS_MOC_SWDELTXD3
   public :: LIS_MOC_SWDELTXD4
+  public :: LIS_MOC_PHENOL
+  public :: LIS_MOC_LFMASS
+  public :: LIS_MOC_BIOMASS
+  public :: LIS_MOC_CUMDTT
+  public :: LIS_MOC_SUMDTT
+
   ! AWRAL
   public :: LIS_MOC_SR
   public :: LIS_MOC_SG
@@ -1033,6 +1039,11 @@ module LIS_histDataMod
     integer :: LIS_MOC_SWDELTXD2 = -9999
     integer :: LIS_MOC_SWDELTXD3 = -9999
     integer :: LIS_MOC_SWDELTXD4 = -9999
+    integer :: LIS_MOC_PHENOL    = -9999
+    integer :: LIS_MOC_LFMASS    = -9999
+    integer :: LIS_MOC_BIOMASS    = -9999
+    integer :: LIS_MOC_CUMDTT     = -9999
+    integer :: LIS_MOC_SUMDTT     = -9999
 ! .......
 
 
@@ -5630,6 +5641,75 @@ contains
             model_patch=.true.)
     endif
 
+    !integer :: LIS_MOC_PHENOL = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_PHENOL:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_PHENOL",&
+         "dssat_phenol",&
+         "DSSAT phenology stage",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_PHENOL,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"-"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+    !integer :: LIS_MOC_LFMASS = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_LFMASS:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_LFMASS",&
+         "dssat_lfmass",&
+         "DSSAT leaf weight",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_LFMASS,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"g/plant"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+    !integer :: LIS_MOC_BIOMASS = -9999
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_BIOMASS:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_BIOMASS",&
+         "dssat_biomass",&
+         "DSSAT above ground biomass",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_BIOMASS,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"g/m2"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+    !integer :: LIS_MOC_CUMDTT = -9999 
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_CUMDTT:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_CUMDTT",& 
+         "dssat_cumdtt",& 
+         "DSSAT cumulative growing degree days",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_CUMDTT,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"C"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
+
+    !integer :: LIS_MOC_SUMDTT = -9999 
+    call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SUMDTT:",rc=rc)
+    call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
+         "DSSAT_SUMDTT",& 
+         "dssat_sumdtt",& 
+         "DSSAT sum of GDD for a given stage",rc)
+    if ( rc == 1 ) then
+       call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SUMDTT,&
+            LIS_histData(n)%head_lsm_list,&
+            n,1,ntiles,(/"C"/),&
+            1,(/"-"/),1,1,1,&
+            model_patch=.true.)
+    endif
 ! End DSSAT Outputs
 
 
