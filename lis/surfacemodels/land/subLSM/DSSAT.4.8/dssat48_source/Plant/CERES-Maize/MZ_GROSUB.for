@@ -63,6 +63,7 @@
       USE ModuleDefs
       USE Interface_SenLig_Ceres
       USE dssat48_lsmMod
+      use LIS_logMod, only: LIS_logunit !JE 02.03.2025
       IMPLICIT  NONE
       SAVE
 !----------------------------------------------------------------------
@@ -1820,10 +1821,36 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
 !  APPLY PEST DAMAGE
 !--------------------------------------------------------------
 
+      ! Move LAIDOT Initialization here JE
+          LAIDOT = 0.0
+
+
+      ! JE 02.03.2025
+      ! Use Pest Damage Logic to Implement LAI Assimilation
+
+      ! Absolute daily leaf damage
+          IF (dssat48_struc(nest)%lai_coupling.EQ.1) THEN
+             IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GT.0.0.AND.
+     &          WTLF.GT.0.0) THEN
+                   SLA = LAI*10000./WTLF  !JE Specific leaf area (cm2/g)
+                   write(LIS_logunit,*) "Tile: ", t
+                   write(LIS_logunit,*) "SLA (cm2/g): ", SLA
+                   ELAI = dssat48_struc(nest)%dssat48(t)%LIS_lai !JE LAI from LIS (m2/m2)
+                   LAIDOT = LAI-ELAI !JE (m2/m2)
+                   write(LIS_logunit,*) "DSSAT LAI (LAI): ", LAI
+                   write(LIS_logunit,*) "LIS LAI: ", ELAI
+                   LAIDOT = LAIDOT * 10000. !JE Convert to cm2/m2
+                   IF (SLA.GT.0.0) THEN
+                      WLIDOT = LAIDOT/SLA !JE g/m2/day (assuming SLA is cm2/g as in the comments)
+                   ENDIF
+             ENDIF
+          ENDIF
+
       ! Leaf Damage
       ! TF 07/22/2020 Adjusted units for LAIDOT and setting LAIDOT 
       !               initial value to zero 
-          LAIDOT = 0
+      !JE    LAIDOT = 0
+
           IF((LFWT+STMWT).GT.0.0)
      $      STOVN=STOVN - STOVN*(WLIDOT/PLTPOP)/(LFWT+STMWT)
           IF (PLTPOP.GT.0.0.AND.LFWT.GT.0.0)
@@ -1832,7 +1859,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
      &      LFWT = LFWT - WLIDOT/PLTPOP
            
           PLA = PLA - (LAIDOT/PLTPOP)
-          LAI = LAI - LAIDOT/10000
+          LAI = LAI - LAIDOT/10000.
 
       ! Stem Damage
           IF(PLTPOP.GT.0.0)
@@ -1865,12 +1892,12 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
            ENDIF
 
       !JE Tight Coupling LAI exchange 06.24.2024
-      IF (dssat48_struc(nest)%lai_coupling.EQ.1) THEN
-         IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GE.0) THEN
-            ELAI = dssat48_struc(nest)%dssat48(t)%LIS_lai
-         ENDIF
-         LAI = ELAI
-      ENDIF
+      !IF (dssat48_struc(nest)%lai_coupling.EQ.1) THEN
+      !   IF (dssat48_struc(nest)%dssat48(t)%LIS_lai.GE.0) THEN
+      !      ELAI = dssat48_struc(nest)%dssat48(t)%LIS_lai
+      !   ENDIF
+      !   LAI = ELAI
+      !ENDIF
 
           !------------------------------------------------------------
           !               COMPUTE NITROGEN UPTAKE
@@ -1931,7 +1958,7 @@ C-GH 60     FORMAT(25X,F5.2,13X,F5.2,7X,F5.2)
               RSTAGE = 0
           ENDIF
 
-          TOPWT = BIOMAS            !Total above ground biomass, g/m2
+          TOPWT = MAX(0.0,BIOMAS)   !JE add max !Total above ground biomass, g/m2
           WTLF = LFWT*PLTPOP        !Leaf weight, g/m2
           XLAI = LAI                !Leaf area index, m2/m2
           XHLAI = LAI               !Used in WATBAL
