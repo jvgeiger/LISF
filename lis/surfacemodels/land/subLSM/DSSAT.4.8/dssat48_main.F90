@@ -491,7 +491,7 @@ subroutine dssat48_main(n)
                     surface_type=LIS_rc%lsm_index)
 
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
-                    value=dssat48_struc(n)%dssat48(t)%RSTAGE,&
+                    value=real(dssat48_struc(n)%dssat48(t)%RSTAGE),&
                     vlevel=1,unit="-",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
@@ -630,7 +630,7 @@ subroutine dssat48_main(n)
                   surface_type=LIS_rc%lsm_index)
 
                call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
-                  value=dssat48_struc(n)%dssat48(t)%RSTAGE,&
+                  value=real(dssat48_struc(n)%dssat48(t)%RSTAGE),&
                   vlevel=1,unit="-",direction="-",&
                   surface_type=LIS_rc%lsm_index)
 
@@ -735,7 +735,7 @@ subroutine dssat48_main(n)
                     surface_type=LIS_rc%lsm_index)
 
                  call LIS_diagnoseSurfaceOutputVar(n, t, LIS_MOC_PHENOL, &
-                    value=dssat48_struc(n)%dssat48(t)%RSTAGE,&
+                    value=real(dssat48_struc(n)%dssat48(t)%RSTAGE),&
                     vlevel=1,unit="-",direction="-",&
                     surface_type=LIS_rc%lsm_index)
 
