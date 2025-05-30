@@ -5683,11 +5683,11 @@ contains
             model_patch=.true.)
     endif
 
-    !integer :: LIS_MOC_CUMDTT = -9999 
+    !integer :: LIS_MOC_CUMDTT = -9999
     call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_CUMDTT:",rc=rc)
     call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
-         "DSSAT_CUMDTT",& 
-         "dssat_cumdtt",& 
+         "DSSAT_CUMDTT",&
+         "dssat_cumdtt",&
          "DSSAT cumulative growing degree days",rc)
     if ( rc == 1 ) then
        call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_CUMDTT,&
@@ -5697,11 +5697,11 @@ contains
             model_patch=.true.)
     endif
 
-    !integer :: LIS_MOC_SUMDTT = -9999 
+    !integer :: LIS_MOC_SUMDTT = -9999
     call ESMF_ConfigFindLabel(modelSpecConfig,"DSSAT_SUMDTT:",rc=rc)
     call get_moc_attributes(modelSpecConfig, LIS_histData(n)%head_lsm_list, &
-         "DSSAT_SUMDTT",& 
-         "dssat_sumdtt",& 
+         "DSSAT_SUMDTT",&
+         "dssat_sumdtt",&
          "DSSAT sum of GDD for a given stage",rc)
     if ( rc == 1 ) then
        call register_dataEntry(LIS_MOC_LSM_COUNT,LIS_MOC_SUMDTT,&
